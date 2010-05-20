@@ -25,37 +25,31 @@ public class SipService extends Service implements ISipService {
 		this.notifPresEventhandler = new CopyOnWriteArrayList<INotifPresEventhandler>();
 	}
 
-	@Override
 	public boolean start() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public boolean stop() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public boolean addRegistrationEventHandler(IRegistrationEventHandler handler) 
 	{
 		return EventHandler.addEventHandler(this.registrationEventHandlers,handler);
 	}
 
-	@Override
 	public boolean removeRegistrationEventHandler(IRegistrationEventHandler handler) 
 	{
 		return EventHandler.removeEventHandler(this.registrationEventHandlers, handler);
 	}
 
-	@Override
 	public boolean addNotifPresEventhandler(INotifPresEventhandler handler) 
 	{
 		return EventHandler.addEventHandler(this.notifPresEventhandler, handler);
 	}
 
-	@Override
 	public boolean removeNotifPresEventhandler(INotifPresEventhandler handler) 
 	{
 		return EventHandler.removeEventHandler(this.notifPresEventhandler, handler);
