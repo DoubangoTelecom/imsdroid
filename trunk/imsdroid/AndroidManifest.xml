@@ -12,8 +12,9 @@
             </intent-filter>
         </activity>
 
-    <activity android:name=".Screens.HomeScreen"></activity>
+    <activity android:name=".Screens.ScreenHome"></activity>
 
+<activity android:name=".Screens.ScreenAbout"></activity>
 </application>
     <uses-sdk android:minSdkVersion="3" />
 

@@ -13,5 +13,4 @@ public class ConfigurationService  extends Service implements IConfigurationServ
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }
