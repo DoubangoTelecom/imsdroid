@@ -7,8 +7,8 @@
  */
 package org.doubango.imsdroid;
 
-import org.doubango.imsdroid.Screens.HomeScreen;
 import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.events.INotifPresEventhandler;
@@ -17,22 +17,28 @@ import org.doubango.imsdroid.events.NotifPresEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
 
 import android.app.ActivityGroup;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TableLayout;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 public class Main extends ActivityGroup
 implements IRegistrationEventHandler,
 INotifPresEventhandler
 {
     private final ISipService SipService;
+    private final IScreenService ScreenService;
     
-    private Button btnRegister;
-    private Button btnSubscribe;
-    private TableLayout tlayout;
+    private ImageButton ibHome;
+    private TextView tvProgressInfo;
+    private Spinner spPresenceStatus;
+    private ImageView ivConnState;
+    private ImageView ivHourGlass;
+    private ImageView ivCallState;
     
     public Main()
     {
@@ -40,6 +46,10 @@ INotifPresEventhandler
     	
     	// Gets services to avoid calling ServiceManager.get*() each time we want one
     	this.SipService = ServiceManager.getSipService();
+    	this.ScreenService = ServiceManager.getScreenService();
+    	
+    	// Sets main activity
+    	this.ScreenService.setMainActivity(this);
     }
     
     /* ===================== Activity ========================*/
@@ -49,50 +59,28 @@ INotifPresEventhandler
         setContentView(R.layout.main);
         
         // Gets controls
-        this.tlayout = (TableLayout)this.findViewById(R.id.tlayout);
-        //this.tlayout.setColumnShrinkable(0, true);
+        this.ibHome = (ImageButton)this.findViewById(R.id.main_imageButton_home);
+        this.tvProgressInfo = (TextView)this.findViewById(R.id.main_textView_progressinfo);
+        this.spPresenceStatus = (Spinner)this.findViewById(R.id.main_spinner_status);
+        this.ivConnState = (ImageView)this.findViewById(R.id.main_imageView_connstate);
+        this.ivHourGlass = (ImageView)this.findViewById(R.id.main_imageView_hourclass);
+        this.ivCallState = (ImageView)this.findViewById(R.id.main_imageView_callstate);
         
-        /*this.btnRegister = (Button)this.findViewById(R.id.btnRegister);
-        this.btnSubscribe = (Button)this.findViewById(R.id.btnSubscribe);
-        
-        // Sets Controls events
-        this.btnRegister.setOnClickListener(new OnClickListener(){
-			public void onClick(View v) {
-				Main.this.btnRegister_Click(v);
-			}
-        });
-        this.btnSubscribe.setOnClickListener(new OnClickListener(){
-			public void onClick(View v) {
-				Main.this.btnSubscribe_Click(v);
-			}
-        });*/
+        // Sets controls listners
+        this.ibHome_setOnClickListener();
         
         // Starts services
-        if(!ServiceManager.start())
-        {
+        if(!ServiceManager.start()){
         	Log.e(this.getClass().getName(), "Failed to start services");
-        	return;
+        	return; // Should exit
         }
-        
-        ServiceManager.getScreenService().setMainActivity(this);
         
         // add event handlers
         this.SipService.addRegistrationEventHandler(this);
         this.SipService.addNotifPresEventhandler(this);
         
         /* shows the home screen */
-        ServiceManager.getScreenService().show(Screen.SCREEN_ID_HOME);
-        
-//        Intent i = new Intent(this, Toto.class);
-//    	//i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//    	//i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-//        try{
-//        	startActivity(i);
-//        }
-//        catch (Exception e)
-//        {
-//        }
-    	
+        this.ScreenService.show(Screen.SCREEN_ID_HOME);
     }
     
 	protected void onDestroy() {
@@ -109,31 +97,17 @@ INotifPresEventhandler
         super.onDestroy();
 	}
 
-	/* ===================== Controls Events ========================*/
-    private void btnRegister_Click(View v)
-    {
-    	this.SipService.onTestRegistrationChanged();
-    	
-    	Intent i = new Intent(this, HomeScreen.class);
-    	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    	this.startActivity(i);
-    }
+	/* ===================== UI Events ======================== */
+	private void ibHome_setOnClickListener(){
+		this.ibHome.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Main.this.ScreenService.show(Screen.SCREEN_ID_HOME);
+			}
+		});
+	}
+	
     
-    private void btnSubscribe_Click(View v)
-    {
-    	this.SipService.onTestNotifPresChanged();
-    	
-    	
-    	HomeScreen s = new HomeScreen();
-    	//@SuppressWarnings("unused")
-		//boolean success = ServiceManager.getScreenService().show(SCREEN_TYPE.HOME);
-    	Intent i = new Intent(this, s.getClass());
-    	//i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    	i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-    	startActivity(i);
-    }
-    
-    /* ===================== Application Events ========================*/
+    /* ===================== Sip Events ========================*/
     
 	public boolean onRegistrationEvent(Object sender, RegistrationEventArgs e) {
 		Log.i(this.getClass().getName(), "onRegistrationEvent");

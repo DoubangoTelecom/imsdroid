@@ -7,22 +7,17 @@ package org.doubango.imsdroid.Sevices.Impl;
 import java.util.HashMap;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Screens.HomeScreen;
 import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Screens.ScreenAbout;
+import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_TYPE;
 import org.doubango.imsdroid.Services.IScreenService;
 
-import android.app.Activity;
 import android.app.ActivityGroup;
-import android.app.LocalActivityManager;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 
 public class ScreenService extends Service implements IScreenService {
 
@@ -32,6 +27,7 @@ public class ScreenService extends Service implements IScreenService {
 
 	static {
 		WELL_KNOWN_SCREENS = new HashMap<String, Screen.SCREEN_TYPE>();
+		WELL_KNOWN_SCREENS.put(Screen.SCREEN_ID_ABOUT, SCREEN_TYPE.ABOUT);
 		WELL_KNOWN_SCREENS.put(Screen.SCREEN_ID_HOME, SCREEN_TYPE.HOME);
 	}
 
@@ -58,41 +54,13 @@ public class ScreenService extends Service implements IScreenService {
 			Log.e(this.getClass().getCanonicalName(), "Null Screen");
 			return false;
 		}
-
-		// Intent i = new Intent(this.mainActivity, screen.getClass());
-		// this.mainActivity.startActivity(i);
-		TableRow tlayoutBody = (TableRow) this.mainActivity
-				.findViewById(R.id.tlayoutBody);
-
+		
 		Intent intent = new Intent(this.mainActivity, screen.getClass());
 		View view = this.mainActivity.getLocalActivityManager().startActivity(screen.getId(), intent).getDecorView();
-		// window.setContentView(tlayoutBody, new
-		// ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-		// ViewGroup.LayoutParams.FILL_PARENT));
-		//int w = view.getWidth();
-
-		tlayoutBody.removeAllViews();
-		tlayoutBody.addView(view);
-
-		//		
-		// int width = tlayoutBody.getWidth();
-		//		
-		// tlayoutBody.removeAllViews();
-		// View v = window.getDecorView();
-		//		
-		// //tlayoutBody.setLayoutParams(new
-		// TableRow.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
-		// LinearLayout.LayoutParams.WRAP_CONTENT));
-		// //width = tlayoutBody.getWidth();
-		// //tlayoutBody.bringToFront();
-		// //tlayoutBody.setMinimumWidth(200);
-		// //width = tlayoutBody.getWidth();
-		//		
-		// //v.setMinimumHeight(50);
-		// //v.setLayoutParams(new
-		// TableRow.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
-		// LinearLayout.LayoutParams.FILL_PARENT));
-		// tlayoutBody.addView(v);
+		
+		LinearLayout layout = (LinearLayout) this.mainActivity.findViewById(R.id.main_linearLayout_principal);
+		layout.removeAllViews();
+		layout.addView(view);
 
 		return true;
 	}
@@ -108,6 +76,7 @@ public class ScreenService extends Service implements IScreenService {
 						.get(id);
 				switch (type) {
 				case ABOUT:
+					screen = new ScreenAbout();
 					break;
 
 				case EAB:
@@ -117,7 +86,7 @@ public class ScreenService extends Service implements IScreenService {
 					break;
 
 				case HOME:
-					screen = new HomeScreen();
+					screen = new ScreenHome();
 					break;
 				}
 				/* adds the newly created well-know screen */
