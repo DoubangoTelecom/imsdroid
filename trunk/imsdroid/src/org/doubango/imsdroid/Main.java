@@ -8,7 +8,7 @@
 package org.doubango.imsdroid;
 
 import org.doubango.imsdroid.Screens.HomeScreen;
-import org.doubango.imsdroid.Screens.Screen.SCREEN_TYPE;
+import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.events.INotifPresEventhandler;
@@ -16,15 +16,15 @@ import org.doubango.imsdroid.events.IRegistrationEventHandler;
 import org.doubango.imsdroid.events.NotifPresEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
 
-import android.app.Activity;
+import android.app.ActivityGroup;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TableLayout;
 
-public class Main extends Activity
+public class Main extends ActivityGroup
 implements IRegistrationEventHandler,
 INotifPresEventhandler
 {
@@ -32,6 +32,7 @@ INotifPresEventhandler
     
     private Button btnRegister;
     private Button btnSubscribe;
+    private TableLayout tlayout;
     
     public Main()
     {
@@ -48,6 +49,9 @@ INotifPresEventhandler
         setContentView(R.layout.main);
         
         // Gets controls
+        this.tlayout = (TableLayout)this.findViewById(R.id.tlayout);
+        //this.tlayout.setColumnShrinkable(0, true);
+        
         /*this.btnRegister = (Button)this.findViewById(R.id.btnRegister);
         this.btnSubscribe = (Button)this.findViewById(R.id.btnSubscribe);
         
@@ -76,11 +80,19 @@ INotifPresEventhandler
         this.SipService.addRegistrationEventHandler(this);
         this.SipService.addNotifPresEventhandler(this);
         
+        /* shows the home screen */
+        ServiceManager.getScreenService().show(Screen.SCREEN_ID_HOME);
         
-        Intent i = new Intent(this, HomeScreen.class);
-    	//i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    	i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-    	startActivity(i);
+//        Intent i = new Intent(this, Toto.class);
+//    	//i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//    	//i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//        try{
+//        	startActivity(i);
+//        }
+//        catch (Exception e)
+//        {
+//        }
+    	
     }
     
 	protected void onDestroy() {

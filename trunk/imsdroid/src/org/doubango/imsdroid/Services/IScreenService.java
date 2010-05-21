@@ -2,13 +2,12 @@ package org.doubango.imsdroid.Services;
 
 import org.doubango.imsdroid.Screens.Screen;
 
-import android.app.Activity;
+import android.app.ActivityGroup;
 
 public interface IScreenService  extends IService{
 
-	void setMainActivity(Activity main);
+	void setMainActivity(ActivityGroup main);
 	
 	boolean show(Screen screen);
-	boolean show(Screen.SCREEN_TYPE type);
-	Screen getScreen(Screen.SCREEN_TYPE type);
+	boolean show(String id);
 }
