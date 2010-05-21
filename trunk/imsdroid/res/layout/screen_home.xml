@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
-<TextView android:text="@+id/TextView01" android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-<EditText android:text="@+id/EditText01" android:id="@+id/EditText01" android:layout_width="wrap_content" android:layout_height="wrap_content"></EditText><Button android:text="@+id/Button01" android:id="@+id/Button01" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 
-</LinearLayout>
+<GridView xmlns:android="http://schemas.android.com/apk/res/android" android:padding="10dp" android:verticalSpacing="10dp" android:horizontalSpacing="10dp" android:id="@+id/screen_home_gridview" android:layout_width="fill_parent" android:background="@drawable/about" android:layout_height="fill_parent" android:numColumns="auto_fit" android:isScrollContainer="true" android:scrollbars="vertical" android:columnWidth="60dp" android:stretchMode="columnWidth" android:gravity="center">
+</GridView>

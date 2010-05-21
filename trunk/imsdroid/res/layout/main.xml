@@ -1,26 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TableLayout android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/tlayout">
+<TableLayout android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/tlayout" android:stretchColumns="1">
 
-<TableRow android:layout_width="fill_parent" android:id="@+id/tlayoutHeader" android:layout_height="200px" android:layout_weight="0">
+<TableRow android:layout_width="fill_parent" android:id="@+id/tlayoutHeader" android:layout_weight="0" android:minHeight="20px" android:layout_height="20px" android:gravity="center_horizontal">
 	
-<LinearLayout android:id="@+id/LinearLayout02" android:layout_width="wrap_content" android:layout_height="wrap_content"></LinearLayout>
-<ImageView android:id="@+id/ImageView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon"></ImageView>
+<Button android:text="@+id/Button01" android:id="@+id/Button01" android:layout_height="fill_parent" android:layout_width="fill_parent"></Button>
 </TableRow>
 
-<TableRow android:id="@+id/tlayoutBody" android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_weight="1">
-	<Button android:text="@+id/Button02" android:id="@+id/Button02" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="@+id/Button03" android:id="@+id/Button03" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="@+id/Button04" android:id="@+id/Button04" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="@+id/Button05" android:id="@+id/Button05" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="@+id/Button06" android:id="@+id/Button06" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+<TableRow android:id="@+id/tlayoutBody" android:background="@drawable/icon" android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="horizontal" android:layout_gravity="fill_vertical|center">
 </TableRow>
 
-<TableRow android:id="@+id/tlayoutFooter" android:layout_height="200px" android:layout_width="fill_parent" android:layout_weight="0">
-
-<Button android:text="@+id/Button08" android:id="@+id/Button08" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-
-<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content"></LinearLayout>
+<TableRow android:id="@+id/tlayoutFooter" android:layout_width="fill_parent" android:layout_weight="0" android:layout_height="20px" android:minHeight="20px" android:gravity="center_horizontal">
+	<Button android:text="@+id/Button02" android:id="@+id/Button02" android:layout_width="fill_parent" android:layout_height="fill_parent"></Button>
 </TableRow>
 
 </TableLayout>
