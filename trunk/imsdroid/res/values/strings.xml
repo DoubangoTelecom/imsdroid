@@ -2,17 +2,21 @@
 <resources>
     <string name="hello">Hello World, Main!</string>
     <string name="app_name">imsdroid (SIP/IMS Client)</string>
-<string name="Version">1.0.0</string>
+	<string name="Version">1.0.0</string>
+	<string name="spinner_ipversion">Select IP version</string>
+	<string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>
+	<string name="spinner_transport">Select Network Transport</string>
+	
+	<string-array name="presence_statues">
+	<item>Online</item>
+	<item>Away</item>
+	<item>Busy</item>
+	<item>Be Right Back</item>
+	<item>On The Phone</item>
+	<item>Out To Lunch</item>
+	<item>Offline</item>
+	</string-array>
+	
+	<string name="copyright">Copyright © 2009-2010 Mamadou Diop</string>
 
-<string-array name="presence_statues">
-<item>Online</item>
-<item>Away</item>
-<item>Busy</item>
-<item>Be Right Back</item>
-<item>On The Phone</item>
-<item>Out To Lunch</item>
-<item>Offline</item>
-</string-array>
-
-<string name="copyright">Copyright © 2009-2010 Mamadou Diop</string>
 </resources>

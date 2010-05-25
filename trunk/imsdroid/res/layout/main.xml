@@ -8,19 +8,20 @@
 
 <LinearLayout android:layout_height="wrap_content" android:id="@+id/main_linearLayout_top" android:layout_width="fill_parent" android:minHeight="20px">
 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="20px" android:id="@+id/main_linearLayout_top_left">
-<Spinner android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_spinner_status" android:entries="@array/presence_statues" ></Spinner>
+<TextView android:textStyle="bold" android:layout_weight="1" android:gravity="fill_horizontal" android:layout_width="wrap_content" android:text="Home" android:id="@+id/main_textView_title" android:textSize="16px" android:layout_height="fill_parent"></TextView>
 </LinearLayout>
 
 
-<LinearLayout android:layout_height="wrap_content" android:gravity="right" android:layout_width="fill_parent" android:id="@+id/main_linearLayout_top_right">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_callstate" android:src="@drawable/phone_speaker"></ImageView><ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_hourclass" android:src="@drawable/hourglass"></ImageView><ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_connstate" android:src="@drawable/bullet_ball_glass_red"></ImageView>
+<LinearLayout android:gravity="right" android:layout_width="fill_parent" android:id="@+id/main_linearLayout_top_right" android:layout_height="20px">
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_hourclass"></ImageView><ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_connstate" android:layout_gravity="center_vertical" android:src="@drawable/bullet_ball_glass_red_16"></ImageView>
+
 
 
 </LinearLayout>
 
 </LinearLayout>
 
-<LinearLayout android:minHeight="20px" android:gravity="fill_vertical|fill_horizontal" android:id="@+id/main_linearLayout_principal" android:layout_below="@+id/main_linearLayout_top" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="32px">
+<LinearLayout android:minHeight="20px" android:gravity="fill_vertical|fill_horizontal" android:id="@+id/main_linearLayout_principal" android:layout_below="@+id/main_linearLayout_top" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="16px">
 
 </LinearLayout>
 
@@ -28,7 +29,8 @@
 
 
 
-<ImageButton android:maxHeight="16px" android:maxWidth="16px" android:layout_height="32px" android:layout_width="32px" android:layout_gravity="center_vertical|center_horizontal" android:background="@drawable/bullet_ball_glass_green" android:id="@+id/main_imageButton_home"></ImageButton><TextView android:layout_width="fill_parent" android:text="Trying to register..." android:id="@+id/main_textView_progressinfo" android:layout_height="fill_parent" android:gravity="right|center_vertical"></TextView>
+<TextView android:layout_width="fill_parent" android:id="@+id/main_textView_progressinfo" android:gravity="right|center_vertical" android:layout_height="wrap_content"></TextView>
+
 
 
 </LinearLayout>

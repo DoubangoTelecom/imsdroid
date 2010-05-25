@@ -6,7 +6,8 @@ import org.doubango.imsdroid.events.IRegistrationEventDispatcher;
 public interface ISipService  extends IService, 
 IRegistrationEventDispatcher, INotifPresEventDispatcher{
 
-	// For tests only
-	void onTestRegistrationChanged();
-	void onTestNotifPresChanged();
+	boolean register();
+	boolean unregister();
+	
+	boolean isRegistered();
 }

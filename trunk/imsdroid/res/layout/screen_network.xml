@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+<RelativeLayout
+  android:orientation="vertical" android:scrollbars="vertical" android:isScrollContainer="true" android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+<TextView android:layout_height="wrap_content" android:text="IP Version" android:id="@+id/screen_network_textView_ipversion" android:layout_width="fill_parent"></TextView>
+<Spinner android:layout_height="wrap_content" android:id="@+id/screen_network_spinner_ipversion" android:layout_below="@+id/screen_network_textView_ipversion" android:layout_width="fill_parent" android:prompt="@string/spinner_ipversion"></Spinner>
+<TextView android:layout_height="wrap_content" android:text="Proxy-CSCF Host" android:layout_width="fill_parent" android:layout_below="@+id/screen_network_spinner_ipversion" android:id="@+id/screen_network_textView_pcscf_host"></TextView>
+<EditText android:layout_height="wrap_content" android:text="127.0.0.1" android:id="@+id/screen_network_editText_pcscf_host" android:layout_width="fill_parent" android:layout_below="@+id/screen_network_textView_pcscf_host"></EditText>
+
+<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_network_editText_pcscf_host" android:id="@+id/screen_network_textView_pcscf_port" android:text="Proxy-CSCF Port" android:layout_width="fill_parent"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_below="@+id/screen_network_textView_pcscf_port" android:id="@+id/screen_network_editText_pcscf_port" android:layout_width="fill_parent" android:inputType="number" android:text="5060"></EditText>
+<TextView android:layout_height="wrap_content" android:id="@+id/screen_network_textView_transport" android:text="Transport" android:layout_width="fill_parent" android:layout_below="@+id/screen_network_editText_pcscf_port"></TextView>
+<Spinner android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_below="@+id/screen_network_textView_transport" android:id="@+id/screen_network_spinner_transport" android:prompt="@string/spinner_transport"></Spinner>
+
+
+
+
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_network_textView_pcscf_dicovery" android:text="Proxy-CSCF Discovery" android:layout_below="@+id/screen_network_spinner_transport"></TextView>
+
+
+<Spinner android:layout_height="wrap_content" android:layout_below="@+id/screen_network_textView_pcscf_dicovery" android:layout_width="fill_parent" android:id="@+id/screen_network_spinner_pcscf_discovery" android:prompt="@string/spinner_pcscf_discovery"></Spinner>
+<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_network_checkBox_sigcomp" android:text="Enable SigComp" android:layout_width="fill_parent" android:layout_below="@+id/screen_network_spinner_pcscf_discovery"></CheckBox>
+<Button android:layout_height="wrap_content" android:layout_below="@+id/screen_network_checkBox_sigcomp" android:id="@+id/screen_network_button_advanced" android:text="Advanced" android:layout_width="fill_parent"></Button>
+</RelativeLayout>
+
+
+
+</ScrollView>

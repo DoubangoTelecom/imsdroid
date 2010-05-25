@@ -1,7 +1,3 @@
-// Application Fundamentals: http://developer.android.com/guide/topics/fundamentals.html#acttask
-// Android Activity Launch Modes: http://www.justinlee.sg/2010/03/13/android-activity-launch-modes/
-// Hellow Views: http://developer.android.com/guide/tutorials/views/index.html
-
 package org.doubango.imsdroid.Sevices.Impl;
 
 import java.util.HashMap;
@@ -9,8 +5,14 @@ import java.util.HashMap;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAbout;
+import org.doubango.imsdroid.Screens.ScreenGeneral;
 import org.doubango.imsdroid.Screens.ScreenHome;
-import org.doubango.imsdroid.Screens.Screen.SCREEN_TYPE;
+import org.doubango.imsdroid.Screens.ScreenIdentity;
+import org.doubango.imsdroid.Screens.ScreenNetwork;
+import org.doubango.imsdroid.Screens.ScreenOptions;
+import org.doubango.imsdroid.Screens.ScreenOptionsContacts;
+import org.doubango.imsdroid.Screens.ScreenPresence;
+import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
 
 import android.app.ActivityGroup;
@@ -18,50 +20,88 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class ScreenService extends Service implements IScreenService {
 
-	private ActivityGroup mainActivity;
+	private Screen currentScreen;
 	private final HashMap<String, Screen> screens;
-	private static final HashMap<String, Screen.SCREEN_TYPE> WELL_KNOWN_SCREENS;
-
-	static {
-		WELL_KNOWN_SCREENS = new HashMap<String, Screen.SCREEN_TYPE>();
-		WELL_KNOWN_SCREENS.put(Screen.SCREEN_ID_ABOUT, SCREEN_TYPE.ABOUT);
-		WELL_KNOWN_SCREENS.put(Screen.SCREEN_ID_HOME, SCREEN_TYPE.HOME);
-	}
+	private int lastScreensIndex = -1; // ring cursor
+	private final Screen[] lastScreens =  new Screen[]{ // ring
+    		null,
+    		null,
+    		null
+	};
 
 	public ScreenService() {
 		this.screens = new HashMap<String, Screen>();
 	}
 
 	public boolean start() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	public boolean stop() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+		return true;
+	}	
 
-	public void setMainActivity(ActivityGroup main) {
-		this.mainActivity = main;
+	public boolean back(){
+		Screen screen;
+		
+		// no screen in the stack
+		if(this.lastScreensIndex < 0){
+			return true;
+		}
+		
+		// zero is special case
+		if(this.lastScreensIndex == 0){
+			if((screen = this.lastScreens[this.lastScreens.length-1]) == null){
+				// goto home
+				return this.show(Screen.SCREEN_ID.HOME_I);
+			}
+			else{
+				return this.show(screen);
+			}
+		}
+		// all other cases
+		screen = this.lastScreens[this.lastScreensIndex-1];
+		this.lastScreens[this.lastScreensIndex-1] = null;
+		this.lastScreensIndex--;
+		if(screen == null){
+			return this.show(SCREEN_ID.HOME_I);
+		}
+		else{
+			return this.show(screen);
+		}
 	}
-
+	
 	public boolean show(Screen screen) {
 		if (screen == null) {
 			Log.e(this.getClass().getCanonicalName(), "Null Screen");
 			return false;
 		}
+
+		ActivityGroup mainActivity = ServiceManager.getMainActivity();
 		
-		Intent intent = new Intent(this.mainActivity, screen.getClass());
-		View view = this.mainActivity.getLocalActivityManager().startActivity(screen.getId(), intent).getDecorView();
+		Intent intent = new Intent(mainActivity, screen.getClass());
+		View view = mainActivity.getLocalActivityManager().startActivity(
+				screen.getId().toString(), intent).getDecorView();
 		
-		LinearLayout layout = (LinearLayout) this.mainActivity.findViewById(R.id.main_linearLayout_principal);
+		LinearLayout layout = (LinearLayout) mainActivity
+				.findViewById(R.id.main_linearLayout_principal);
 		layout.removeAllViews();
 		layout.addView(view);
-
+		
+		// title
+		((TextView)mainActivity.findViewById(R.id.main_textView_title)).setText(screen.getScreenTitle());
+		
+		// add to stack
+		this.lastScreens[(++this.lastScreensIndex % this.lastScreens.length)] = screen;
+		this.lastScreensIndex %= this.lastScreens.length;
+		
+		// update current screen
+		this.currentScreen = screen;
+		
 		return true;
 	}
 
@@ -71,28 +111,50 @@ public class ScreenService extends Service implements IScreenService {
 		/* already exist? */
 		if ((screen = this.screens.get(id)) == null) {
 			/* does not exist: is it a well-known screen? */
-			if (ScreenService.WELL_KNOWN_SCREENS.containsKey(id)) {
-				Screen.SCREEN_TYPE type = ScreenService.WELL_KNOWN_SCREENS
-						.get(id);
-				switch (type) {
-				case ABOUT:
+			Screen.SCREEN_ID type;
+			try {
+				type = Screen.SCREEN_ID.valueOf(id);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				return false;
+			}
+			catch(NullPointerException e){
+				e.printStackTrace();
+				return false;
+			}
+
+			switch (type) {
+				case ABOUT_I:
 					screen = new ScreenAbout();
 					break;
-
-				case EAB:
+				case CONTACTS_OPTIONS_I:
+					screen = new ScreenOptionsContacts();
 					break;
-
-				case HISTORY:
+				case GENERAL_I:
+					screen = new ScreenGeneral();
 					break;
-
-				case HOME:
+				case HISTORY_I:
+					break;
+				case HOME_I:
 					screen = new ScreenHome();
 					break;
-				}
-				/* adds the newly created well-know screen */
-				if (screen != null) {
-					this.screens.put(screen.getId(), screen);
-				}
+				case IDENTITY_I:
+					screen = new ScreenIdentity();
+					break;
+				case NETWORK_I:
+					screen = new ScreenNetwork();
+					break;
+				case OPTIONS_I:
+					screen = new ScreenOptions();
+					break;
+				case PRESENCE_I:
+					screen = new ScreenPresence();
+					break;
+			}
+
+			/* adds the newly created well-know screen */
+			if (screen != null) {
+				this.screens.put(screen.getId().toString(), screen);
 			}
 		}
 
@@ -105,39 +167,17 @@ public class ScreenService extends Service implements IScreenService {
 		}
 	}
 
-	// public boolean show(Screen screen) {
-	// if (screen instanceof Activity && this.mainActivity != null) {
-	// Intent intent = new Intent(this.mainActivity, screen.getClass());
-	// intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-	// screen.startActivity(intent);
-	// return true;
-	// }
-	// return false;
-	// }
-	//
-	// public boolean show(SCREEN_TYPE type) {
-	// Screen screen = this.getScreen(type);
-	// if (screen != null) {
-	// return this.show(screen);
-	// } else {
-	// return false;
-	// }
-	// }
-	//	
-	// public Screen getScreen(SCREEN_TYPE type) {
-	// switch (type) {
-	// case ABOUT:
-	// break;
-	// case EAB:
-	// break;
-	// case HISTORY:
-	// break;
-	// case HOME:
-	// if (this.homeScreen == null) {
-	// this.homeScreen = new HomeScreen();
-	// }
-	// return this.homeScreen;
-	// }
-	// return null;
-	// }
+	public boolean show(Screen.SCREEN_ID id) {
+		return this.show(id.toString());
+	}
+	
+	public void setProgressInfoText(String text)
+	{
+		ActivityGroup mainActivity = ServiceManager.getMainActivity();
+		((TextView)mainActivity.findViewById(R.id.main_textView_progressinfo)).setText(text);
+	}
+	
+	public Screen getCurrentScreen(){
+		return this.currentScreen;
+	}
 }
