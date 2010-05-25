@@ -2,10 +2,13 @@ package org.doubango.imsdroid.Sevices.Impl;
 
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
+import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Services.IStorageService;
 import org.doubango.imsdroid.Services.IXcapService;
+
+import android.app.ActivityGroup;
 
 /**
  * Screen Manager. Entry point to retrieve all services (Singletons).
@@ -17,10 +20,13 @@ public class ServiceManager {
 	/* Singletons */
 	private static final ConfigurationService configurationService = new ConfigurationService();
 	private static final ContactService contactService = new ContactService();
+	private static final NetworkService networkService = new NetworkService();
 	private static final ScreenService screenService = new ScreenService();
 	private static final SipService sipService = new SipService();
 	private static final StorageService storageService = new StorageService();
 	private static final XcapService xcapService = new XcapService();
+	
+	private static ActivityGroup mainActivity;
 
 	/**
 	 * Starts all services
@@ -32,6 +38,7 @@ public class ServiceManager {
 
 		success &= ServiceManager.configurationService.start();
 		success &= ServiceManager.contactService.start();
+		success &= ServiceManager.networkService.start();
 		success &= ServiceManager.screenService.start();
 		success &= ServiceManager.sipService.start();
 		success &= ServiceManager.storageService.start();
@@ -51,6 +58,7 @@ public class ServiceManager {
 
 		success &= ServiceManager.configurationService.stop();
 		success &= ServiceManager.contactService.stop();
+		success &= ServiceManager.networkService.stop();
 		success &= ServiceManager.screenService.stop();
 		success &= ServiceManager.sipService.stop();
 		success &= ServiceManager.storageService.stop();
@@ -59,6 +67,14 @@ public class ServiceManager {
 		return success;
 	}
 
+	public static void setMainActivity(ActivityGroup mainActivity){
+		ServiceManager.mainActivity = mainActivity;
+	}
+	
+	public static ActivityGroup getMainActivity(){
+		return ServiceManager.mainActivity;
+	}
+	
 	/**
 	 * Gets the Configuration Service.
 	 * 
@@ -75,6 +91,15 @@ public class ServiceManager {
 	 */
 	public static IContactService getContactService() {
 		return (IContactService) ServiceManager.contactService;
+	}
+	
+	/**
+	 * Gets the Network Service.
+	 * 
+	 * @return
+	 */
+	public static INetworkService getNetworkService() {
+		return (INetworkService) ServiceManager.networkService;
 	}
 
 	/**
