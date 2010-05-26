@@ -18,7 +18,6 @@ import android.graphics.Paint;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
-import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -26,10 +25,13 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class ScreenPresence  extends Screen {
 
@@ -41,24 +43,25 @@ public class ScreenPresence  extends Screen {
 	private ImageButton btCamera;
 	private ImageButton btChooseFile;
 	private FrameLayout flPreview;
+	private RelativeLayout rlPresence;
 	
-	private static final String TAG = "CameraDemo";
+	private static final String TAG = "Camera";
 	private Camera camera;
 	private Preview preview;
 	
-	private final IConfigurationService ConfigurationService;
+	private final IConfigurationService configurationService;
 	
 	public ScreenPresence() {
 		super(SCREEN_TYPE.PRESENCE_T);
 		
-		this.ConfigurationService = ServiceManager.getConfigurationService();
+		this.configurationService = ServiceManager.getConfigurationService();
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_presence);
         
-     // get controls
+        // get controls
         this.cbEnablePresence = (CheckBox)this.findViewById(R.id.screen_presence_checkBox_enable_presence);
         this.cbEnableRLS = (CheckBox)this.findViewById(R.id.screen_presence_checkBox_rls);
         this.cbEnablePartialPub = (CheckBox)this.findViewById(R.id.screen_presence_checkBox_partial_pub);
@@ -67,15 +70,20 @@ public class ScreenPresence  extends Screen {
         this.btCamera = (ImageButton)this.findViewById(R.id.screen_presence_imageButton_cam);
         this.btChooseFile = (ImageButton)this.findViewById(R.id.screen_presence_imageButton_file);
         this.flPreview = (FrameLayout)this.findViewById(R.id.screen_presence_frameLayout_preview);
+        this.rlPresence = (RelativeLayout)this.findViewById(R.id.screen_presence_relativeLayout_presence);
         
         // load values from configuration file (do it before adding UI listeners)
-        this.cbEnablePresence.setChecked(this.ConfigurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE, Configuration.DEFAULT_RCS_PRESENCE));
-        this.cbEnableRLS.setChecked(this.ConfigurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.RLS, Configuration.DEFAULT_RCS_RLS));
-        this.cbEnablePartialPub.setChecked(this.ConfigurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PARTIAL_PUB, Configuration.DEFAULT_RCS_PARTIAL_PUB));
-        this.etFreeText.setText(this.ConfigurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT));
+        this.cbEnablePresence.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE, Configuration.DEFAULT_RCS_PRESENCE));
+        this.cbEnableRLS.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.RLS, Configuration.DEFAULT_RCS_RLS));
+        this.cbEnablePartialPub.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PARTIAL_PUB, Configuration.DEFAULT_RCS_PARTIAL_PUB));
+        this.etFreeText.setText(this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT));
+        this.rlPresence.setVisibility(this.cbEnablePresence.isChecked()? View.VISIBLE : View.INVISIBLE);
+        
+        // add local listeners
+        this.cbEnablePresence.setOnCheckedChangeListener(this.cbEnablePresence_OnCheckedChangeListener);
         
         // add listeners (for the configuration)
-        this.addConfigurationListener(this.cbEnablePresence);
+        /* this.addConfigurationListener(this.cbEnablePresence); */
         this.addConfigurationListener(this.cbEnableRLS);
         this.addConfigurationListener(this.cbEnablePartialPub);
         this.addConfigurationListener(this.etFreeText);
@@ -90,14 +98,14 @@ public class ScreenPresence  extends Screen {
 	
 	protected void onPause() {
 		if(this.computeConfiguration){
-			this.ConfigurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE, this.cbEnablePresence.isChecked());
-			this.ConfigurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.RLS, this.cbEnableRLS.isChecked());
-			this.ConfigurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PARTIAL_PUB, this.cbEnablePartialPub.isChecked());
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, 
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE, this.cbEnablePresence.isChecked());
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.RLS, this.cbEnableRLS.isChecked());
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PARTIAL_PUB, this.cbEnablePartialPub.isChecked());
+			this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, 
 					this.etFreeText.getText().toString());
 			
 			// Compute
-			if(!this.ConfigurationService.compute()){
+			if(!this.configurationService.compute()){
 				Log.e(this.getClass().getCanonicalName(), "Failed to Compute() configuration");
 			}
 			
@@ -111,6 +119,13 @@ public class ScreenPresence  extends Screen {
 			
 			// ScreenPresence.this.preview.camera.takePicture(null, null, ScreenPresence.this.jpegCallback);
 			// ScreenPresence.this.computeConfiguration = true;
+		}
+	};
+	
+	private OnCheckedChangeListener cbEnablePresence_OnCheckedChangeListener = new OnCheckedChangeListener(){
+		public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
+			ScreenPresence.this.rlPresence.setVisibility(isChecked? View.VISIBLE : View.INVISIBLE);
+			ScreenPresence.this.computeConfiguration = true;
 		}
 	};
 	

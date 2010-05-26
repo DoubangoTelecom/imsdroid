@@ -13,6 +13,7 @@
 package org.doubango.imsdroid;
 
 import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -24,6 +25,8 @@ import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
 
 import android.app.ActivityGroup;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -150,13 +153,15 @@ INotifPresEventhandler
 		Log.i(this.getClass().getName(), "onRegistrationEvent");
 		
 		final RegistrationEventTypes type = e.getType();
+		final short code = e.getSipCode();
+		final String phrase = e.getPhrase();
 		
 		switch(type){
 			case REGISTRATION_OK:
 			this.handler.post(new Runnable() {
 				public void run() {
 					Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_green_16;
-					Main.this.progressInfoText = "";
+					Main.this.progressInfoText = phrase;
 					Main.this.ivConnState.setImageDrawable(getResources().getDrawable(Main.this.connStateDrawableId));
 					Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 				}});
@@ -166,7 +171,7 @@ INotifPresEventhandler
 				this.handler.post(new Runnable() {
 					public void run() {
 						Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_red_16;
-						Main.this.progressInfoText = "";
+						Main.this.progressInfoText = phrase;
 						Main.this.ivConnState.setImageDrawable(getResources().getDrawable(Main.this.connStateDrawableId));
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 					}});
@@ -187,7 +192,22 @@ INotifPresEventhandler
 			case UNREGISTRATION_NOK:
 			default:
 			{
-				Log.d(this.getClass().getName(), String.format("Registration/unregistration failed. code=%d and phrase=%s", e.getSipCode(), e.getPhrase()));
+				Log.d(this.getClass().getName(), String.format("Registration/unregistration failed. code=%d and phrase=%s", code, phrase));
+//				this.handler.post(new Runnable() {
+//					public void run() {
+//				AlertDialog.Builder builder = new AlertDialog.Builder(Main.this);
+//				builder.setMessage("Failed to " + ((type == RegistrationEventTypes.REGISTRATION_NOK) ? "Register" : "UnRegister") +
+//						"\ncode= " + code +
+//						"\nPhrase= " + phrase
+//						)
+//				       .setCancelable(false)
+//				       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//				           public void onClick(DialogInterface dialog, int id) {
+//				                ServiceManager.getMainActivity().finish();
+//				           }
+//				       });
+//						builder.create().show();
+//					}});
 				break;
 			}
 		}

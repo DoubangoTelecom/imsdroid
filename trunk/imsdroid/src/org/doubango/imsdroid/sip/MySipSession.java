@@ -54,7 +54,7 @@ public abstract class MySipSession {
 	
 	protected void init(){
 		// Sip Expires
-		this.getSession().setExpires(this.configurationService.getInt(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.SIP_SESSIONS_TIMEOUT, Configuration.DEFAULT_SIP_SESSIONS_TIMEOUT));
+		this.getSession().setExpires(this.configurationService.getInt(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.SIP_SESSIONS_TIMEOUT, Configuration.DEFAULT_QOS_SIP_SESSIONS_TIMEOUT));
 		
 		// Sip Headers (common to all sessions)
 		this.getSession().addCaps("+g.oma.sip-im");

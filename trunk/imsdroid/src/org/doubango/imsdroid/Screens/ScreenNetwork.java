@@ -16,7 +16,7 @@ import android.widget.Spinner;
 
 public class ScreenNetwork extends Screen {
 
-	private final IConfigurationService ConfigurationService;
+	private final IConfigurationService configurationService;
 	
 	private Spinner spIPversion;
 	private EditText etProxyHost;
@@ -25,14 +25,14 @@ public class ScreenNetwork extends Screen {
 	private Spinner spProxyDiscovery;
 	private CheckBox cbSigComp;
 	
-	private static String[] spinner_ipversion_items = new String[] {Configuration.DEFAULT_IP_VERSION, "IPv6"};
-	private static String[] spinner_transport_items = new String[] {Configuration.DEFAULT_TRANSPORT.toUpperCase(), "TCP", "TLS", "SCTP"};
-	private static String[] spinner_proxydiscovery_items = new String[] {Configuration.DEFAULT_PCSCF_DISCOVERY, "DNS NAPTR+SRV", "DHCPv4/v6", "Both"};
+	private final static String[] spinner_ipversion_items = new String[] {Configuration.DEFAULT_IP_VERSION, "IPv6"};
+	private final static String[] spinner_transport_items = new String[] {Configuration.DEFAULT_TRANSPORT.toUpperCase(), "TCP", "TLS", "SCTP"};
+	private final static String[] spinner_proxydiscovery_items = new String[] {Configuration.DEFAULT_PCSCF_DISCOVERY, "DNS NAPTR+SRV", "DHCPv4/v6", "Both"};
 	
 	public ScreenNetwork() {
 		super(SCREEN_TYPE.NETWORK_T);
 		
-		this.ConfigurationService = ServiceManager.getConfigurationService();
+		this.configurationService = ServiceManager.getConfigurationService();
 	}
 	
 	@Override
@@ -52,36 +52,36 @@ public class ScreenNetwork extends Screen {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_ipversion_items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         this.spIPversion.setAdapter(adapter);
-        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_transport_items);
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        this.spTransport.setAdapter(adapter2);
-        ArrayAdapter<String> adapter3 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_proxydiscovery_items);
-        adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        this.spProxyDiscovery.setAdapter(adapter3);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_transport_items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        this.spTransport.setAdapter(adapter);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_proxydiscovery_items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        this.spProxyDiscovery.setAdapter(adapter);
 
         
         // load values from configuration file (Do it before adding UI listeners)
 		this.spIPversion.setSelection(this.getSpinnerIndex(
-				this.ConfigurationService.getString(
+				this.configurationService.getString(
 						CONFIGURATION_SECTION.NETWORK,
 						CONFIGURATION_ENTRY.IP_VERSION,
 						ScreenNetwork.spinner_ipversion_items[0]),
 				ScreenNetwork.spinner_ipversion_items));
-        this.etProxyHost.setText(this.ConfigurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, Configuration.DEFAULT_PCSCF_HOST));
-        this.etProxyPort.setText(this.ConfigurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, Integer.toString(Configuration.DEFAULT_PCSCF_PORT)));
+        this.etProxyHost.setText(this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, Configuration.DEFAULT_PCSCF_HOST));
+        this.etProxyPort.setText(this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, Integer.toString(Configuration.DEFAULT_PCSCF_PORT)));
         this.spTransport.setSelection(this.getSpinnerIndex(
-				this.ConfigurationService.getString(
+				this.configurationService.getString(
 						CONFIGURATION_SECTION.NETWORK,
 						CONFIGURATION_ENTRY.TRANSPORT,
 						ScreenNetwork.spinner_transport_items[0]),
 				ScreenNetwork.spinner_transport_items));
         this.spProxyDiscovery.setSelection(this.getSpinnerIndex(
-				this.ConfigurationService.getString(
+				this.configurationService.getString(
 						CONFIGURATION_SECTION.NETWORK,
 						CONFIGURATION_ENTRY.PCSCF_DISCOVERY,
 						ScreenNetwork.spinner_proxydiscovery_items[0]),
 				ScreenNetwork.spinner_proxydiscovery_items));
-        this.cbSigComp.setChecked(this.ConfigurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, false));
+        this.cbSigComp.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, false));
         
         // add listeners (for the configuration)
         this.addConfigurationListener(this.spIPversion);
@@ -95,21 +95,21 @@ public class ScreenNetwork extends Screen {
 	protected void onPause() {
 		if(this.computeConfiguration){
 			
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
+			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
 					ScreenNetwork.spinner_ipversion_items[this.spIPversion.getSelectedItemPosition()]);
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, 
+			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, 
 					this.etProxyHost.getText().toString());
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, 
+			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, 
 					this.etProxyPort.getText().toString());
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.TRANSPORT, 
+			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.TRANSPORT, 
 					ScreenNetwork.spinner_transport_items[this.spTransport.getSelectedItemPosition()]);
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_DISCOVERY, 
+			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_DISCOVERY, 
 					ScreenNetwork.spinner_proxydiscovery_items[this.spProxyDiscovery.getSelectedItemPosition()]);
-			this.ConfigurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, 
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, 
 					this.cbSigComp.isChecked());
 			
 			// Compute
-			if(!this.ConfigurationService.compute()){
+			if(!this.configurationService.compute()){
 				Log.e(this.getClass().getCanonicalName(), "Failed to Compute() configuration");
 			}
 			
