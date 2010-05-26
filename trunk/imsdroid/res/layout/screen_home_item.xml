@@ -4,5 +4,5 @@
   android:layout_width="wrap_content"
   android:orientation="vertical" android:layout_height="wrap_content">
 <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" android:layout_gravity="center_horizontal" android:id="@+id/screen_home_item_icon"></ImageView>
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Unknown" android:gravity="center_horizontal" android:id="@+id/screen_home_item_text" android:layout_gravity="center_horizontal"></TextView>
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Unknown" android:gravity="center_horizontal" android:id="@+id/screen_home_item_text" android:layout_gravity="center_horizontal" android:textColor="#FFFFFF"></TextView>
 </LinearLayout>

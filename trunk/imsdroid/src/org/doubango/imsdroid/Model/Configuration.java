@@ -14,35 +14,52 @@ public class Configuration {
 	private List<ConfigurationSection> sections;
 
 	public static enum CONFIGURATION_SECTION {
-		IDENTITY, GENERAL, LTE, NETWORK, QOS, RCS, SECURITY, SESSIONS, MMTEL, XCAP
+		IDENTITY, GENERAL, LTE, NETWORK, QOS, RCS, SECURITY, SESSIONS, MMTEL, NATT, XCAP
 	}
 
 	// Default values
-	public static String DEFAULT_DISPLAY_NAME = "alice";
-	public static String DEFAULT_IMPI = "alice@open-ims.test";
-	public static String DEFAULT_IMPU = "sip:alice@open-ims.test";
+	public static final String DEFAULT_DISPLAY_NAME = "alice";
+	public static final String DEFAULT_IMPI = "alice@open-ims.test";
+	public static final String DEFAULT_IMPU = "sip:alice@open-ims.test";
 	
-	public static boolean DEFAULT_EARLY_IMS = false;
-	public static String DEFAULT_IP_VERSION = "ipv4";
-	public static String DEFAULT_PCSCF_DISCOVERY = "None";
-	public static String DEFAULT_PCSCF_HOST = "127.0.0.1";
-	public static int DEFAULT_PCSCF_PORT = 5060;
-	public static String DEFAULT_REALM = "sip:open-ims.test";
-	public static boolean DEFAULT_SIGCOMP = false;
-	public static String DEFAULT_TRANSPORT = "udp";
+	public static final boolean DEFAULT_EARLY_IMS = false;
+	public static final String DEFAULT_IP_VERSION = "ipv4";
+	public static final String DEFAULT_PCSCF_DISCOVERY = "None";
+	public static final String DEFAULT_PCSCF_HOST = "127.0.0.1";
+	public static final int DEFAULT_PCSCF_PORT = 5060;
+	public static final String DEFAULT_REALM = "sip:open-ims.test";
+	public static final boolean DEFAULT_SIGCOMP = false;
+	public static final String DEFAULT_TRANSPORT = "udp";
 	
-	public static int DEFAULT_SIP_SESSIONS_TIMEOUT = 36; // For debug. FIXME: change to 3600 in release versions
-	public static int DEFAULT_SIP_CALLS_TIMEOUT = 3600;
+	public static final String DEFAULT_RCS_AVATAR_PATH = "";
+	public static final String DEFAULT_RCS_CONF_FACT = "sip:Conference-Factory@open-ims.test";
+	public static final String DEFAULT_RCS_FREE_TEXT = "Hello world";
+	public static final boolean DEFAULT_RCS_MSRP_FAILURE = true;
+	public static final boolean DEFAULT_RCS_MSRP_SUCCESS = false;
+	public static final boolean DEFAULT_RCS_OMAFDR = false;
+	public static final boolean DEFAULT_RCS_PARTIAL_PUB = false;
+	public static final boolean DEFAULT_RCS_PRESENCE = true;
+	public static final boolean DEFAULT_RCS_RLS = true;
+	public static final String DEFAULT_RCS_SMSC = "sip:smsc@open-ims.test";
 	
-	public static boolean DEFAULT_XCAP_ENABLED = false;
-	public static String DEFAULT_XCAP_ROOT = "http://doubango.org:8080/services";
-	public static String DEFAULT_XUI = "sip:alice@open-ims.test";
+	public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "None";
+	public static final String DEFAULT_QOS_PRECOND_STRENGTH = "None";
+	public static final String DEFAULT_QOS_PRECOND_TYPE = "Segmented";
+	public static final String DEFAULT_QOS_REFRESHER = "None";
+	public static final int DEFAULT_QOS_SIP_SESSIONS_TIMEOUT = 36; // For debug. FIXME: change to 600000 in release versions
+	public static final int DEFAULT_QOS_SIP_CALLS_TIMEOUT = 3600;
+	public static final boolean DEFAULT_QOS_SESSION_TIMERS = false;
 	
-	public static boolean DEFAULT_RCS_PRESENCE = true;
-	public static boolean DEFAULT_RCS_RLS = true;
-	public static boolean DEFAULT_RCS_PARTIAL_PUB = false;
-	public static String DEFAULT_RCS_FREE_TEXT = "Hello world";
-	public static String DEFAULT_RCS_AVATAR_PATH = "";
+	public static final boolean DEFAULT_NATT_HACK_AOR = false;
+	public static final boolean DEFAULT_NATT_USE_STUN = false;
+	public static final boolean DEFAULT_NATT_USE_ICE = false;
+	public static final boolean DEFAULT_NATT_STUN_DISCO = false;
+	public static final String DEFAULT_NATT_STUN_SERVER = "numb.viagenie.ca";
+	public static final int DEFAULT_NATT_STUN_PORT = 3478;
+	
+	public static final boolean DEFAULT_XCAP_ENABLED = false;
+	public static final String DEFAULT_XCAP_ROOT = "http://doubango.org:8080/services";
+	public static final String DEFAULT_XUI = "sip:alice@open-ims.test";
 	
 	public static enum CONFIGURATION_ENTRY {
 		/* === IDENTITY === */
@@ -56,10 +73,10 @@ public class Configuration {
 		EARLY_IMS, IP_VERSION, PCSCF_DISCOVERY, PCSCF_HOST, PCSCF_PORT, REALM, SIGCOMP, TRANSPORT,
 
 		/* === QOS/QOE === */
-		SIP_CALLS_TIMEOUT, SIP_SESSIONS_TIMEOUT,
+		PRECOND_BANDWIDTH, PRECOND_STRENGTH, PRECOND_TYPE, REFRESHER, SIP_CALLS_TIMEOUT, SIP_SESSIONS_TIMEOUT, SESSION_TIMERS,
 
-		/* === RCS === */
-		PRESENCE, RLS, PARTIAL_PUB, FREE_TEXT, AVATAR_PATH,
+		/* === RCS (GSMA Rich Communication Suite) === */
+		AVATAR_PATH, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, 
 
 		/* === SECURITY === */
 
@@ -67,6 +84,9 @@ public class Configuration {
 
 		/* === MMTEL === */
 
+		/* === NATT === */
+		HACK_AOR, USE_STUN, USE_ICE, STUN_DISCO, STUN_SERVER, STUN_PORT, 
+		
 		/* === XCAP === */
 		/* PASSWORD */ ENABLED, XCAP_ROOT, USERNAME
 	}

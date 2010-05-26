@@ -50,9 +50,9 @@ public class ScreenOptions extends Screen {
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.eab_48), "Contacts", Screen.SCREEN_ID.CONTACTS_OPTIONS_I.toString()),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.people_48), "Presence", Screen.SCREEN_ID.PRESENCE_I.toString()),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.codecs_48), "Codecs", null),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.messaging_48), "Messaging", null),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.qos_qoe_48), "QoS/QoE", null),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.natt_48), "NATT", null),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.messaging_48), "Messaging", Screen.SCREEN_ID.MESSAGING_I.toString()),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.qos_qoe_48), "QoS/QoE", Screen.SCREEN_ID.QOS_I.toString()),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.natt_48), "NATT", Screen.SCREEN_ID.NATT_I.toString()),
         };
         
         // gridView

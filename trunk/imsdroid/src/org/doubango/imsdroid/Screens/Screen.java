@@ -19,11 +19,11 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
-		ABOUT_T, CONTACTS_T, CONTACTS_OPTIONS_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, NETWORK_T, OPTIONS_T, PRESENCE_T
+		ABOUT_T, CONTACTS_T, CONTACTS_OPTIONS_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T
 	}
 	
 	public static enum SCREEN_ID { 
-		ABOUT_I, CONTACTS_OPTIONS_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, NETWORK_I, OPTIONS_I, PRESENCE_I
+		ABOUT_I, CONTACTS_OPTIONS_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I
 	}
 
 	public static final String SCREEN_TITLE_ABOUT = "About";
@@ -32,8 +32,11 @@ public abstract class Screen extends Activity implements IScreen {
 	public static final String SCREEN_TITLE_HOME = "Home";
 	public static final String SCREEN_TITLE_IDENTITY = "Options-Identity";
 	public static final String SCREEN_TITLE_OPTIONS = "Options";
+	public static final String SCREEN_TITLE_MESSAGING = "Options-Messaging";
+	public static final String SCREEN_TITLE_NATT = "Options-Nat Traversal";
 	public static final String SCREEN_TITLE_NETWORK = "Options-Network";
 	public static final String SCREEN_TITLE_PRESENCE = "Options-Presence";
+	public static final String SCREEN_TITLE_QOS = "Options-QoS/QoE";
 	
 	protected final SCREEN_TYPE type;
 	protected boolean computeConfiguration;
@@ -64,9 +67,12 @@ public abstract class Screen extends Activity implements IScreen {
 		case HISTORY_T:
 		case HOME_T:
 		case IDENTITY_T:
+		case MESSAGING_T:
+		case NATT_T:
 		case NETWORK_T:
 		case OPTIONS_T:
 		case PRESENCE_T:
+		case QOS_T:
 			return true;
 		}
 		return false;
@@ -93,12 +99,18 @@ public abstract class Screen extends Activity implements IScreen {
 			return Screen.SCREEN_TITLE_HOME;
 		case IDENTITY_T:
 			return Screen.SCREEN_TITLE_IDENTITY;
+		case MESSAGING_T:
+			return Screen.SCREEN_TITLE_MESSAGING;
+		case NATT_T:
+			return Screen.SCREEN_TITLE_NATT;
 		case NETWORK_T:
 			return Screen.SCREEN_TITLE_NETWORK;
 		case OPTIONS_T:
 			return Screen.SCREEN_TITLE_OPTIONS;
 		case PRESENCE_T:
 			return Screen.SCREEN_TITLE_PRESENCE;
+		case QOS_T:
+			return Screen.SCREEN_TITLE_QOS;
 
 			// all others
 		default:
@@ -124,12 +136,18 @@ public abstract class Screen extends Activity implements IScreen {
 			return Screen.SCREEN_ID.HOME_I;
 		case IDENTITY_T:
 			return Screen.SCREEN_ID.IDENTITY_I;
+		case NATT_T:
+			return Screen.SCREEN_ID.NATT_I;
 		case NETWORK_T:
 			return Screen.SCREEN_ID.NETWORK_I;
+		case MESSAGING_T:
+			return Screen.SCREEN_ID.MESSAGING_I;
 		case OPTIONS_T:
 			return Screen.SCREEN_ID.OPTIONS_I;
 		case PRESENCE_T:
 			return Screen.SCREEN_ID.PRESENCE_I;
+		case QOS_T:
+			return Screen.SCREEN_ID.QOS_I;
 
 			// all others
 		default:

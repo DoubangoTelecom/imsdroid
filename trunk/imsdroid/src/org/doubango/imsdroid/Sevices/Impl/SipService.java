@@ -140,9 +140,9 @@ public class SipService extends Service implements ISipService {
 			this.regSession = new MyRegistrationSession(this.sipStack);
 		}
 		
-		// Set/update From and To URIs
+		// Set/update From URI. For Registration ToUri should be equals to realm (done by the stack)
 		this.regSession.setFromUri(impu);
-		this.regSession.setToUri(impu);
+		/* this.regSession.setToUri(impu); */
 		
 		if(!this.regSession.register()){
 			Log.e(this.getClass().getCanonicalName(), "Failed to send REGISTER request");

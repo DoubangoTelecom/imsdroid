@@ -8,10 +8,13 @@ import org.doubango.imsdroid.Screens.ScreenAbout;
 import org.doubango.imsdroid.Screens.ScreenGeneral;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenIdentity;
+import org.doubango.imsdroid.Screens.ScreenMessaging;
+import org.doubango.imsdroid.Screens.ScreenNatt;
 import org.doubango.imsdroid.Screens.ScreenNetwork;
 import org.doubango.imsdroid.Screens.ScreenOptions;
 import org.doubango.imsdroid.Screens.ScreenOptionsContacts;
 import org.doubango.imsdroid.Screens.ScreenPresence;
+import org.doubango.imsdroid.Screens.ScreenQoS;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
 
@@ -28,6 +31,7 @@ public class ScreenService extends Service implements IScreenService {
 	private final HashMap<String, Screen> screens;
 	private int lastScreensIndex = -1; // ring cursor
 	private final Screen[] lastScreens =  new Screen[]{ // ring
+    		null,
     		null,
     		null,
     		null
@@ -141,6 +145,12 @@ public class ScreenService extends Service implements IScreenService {
 				case IDENTITY_I:
 					screen = new ScreenIdentity();
 					break;
+				case MESSAGING_I:
+					screen = new ScreenMessaging();
+					break;
+				case NATT_I:
+					screen = new ScreenNatt();
+					break;
 				case NETWORK_I:
 					screen = new ScreenNetwork();
 					break;
@@ -149,6 +159,9 @@ public class ScreenService extends Service implements IScreenService {
 					break;
 				case PRESENCE_I:
 					screen = new ScreenPresence();
+					break;
+				case QOS_I:
+					screen = new ScreenQoS();
 					break;
 			}
 

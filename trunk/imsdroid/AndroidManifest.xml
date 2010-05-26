@@ -21,6 +21,9 @@
 
 <activity android:name=".Screens.ScreenOptionsContacts"></activity>
 <activity android:name=".Screens.ScreenPresence"></activity>
+<activity android:name=".Screens.ScreenMessaging"></activity>
+<activity android:name=".Screens.ScreenQoS"></activity>
+<activity android:name=".Screens.ScreenNatt"></activity>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />
