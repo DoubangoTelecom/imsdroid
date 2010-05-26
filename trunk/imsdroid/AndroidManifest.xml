@@ -24,6 +24,16 @@
 <activity android:name=".Screens.ScreenMessaging"></activity>
 <activity android:name=".Screens.ScreenQoS"></activity>
 <activity android:name=".Screens.ScreenNatt"></activity>
+<activity android:name=".Screens.ScreenSecurity">
+	<intent-filter>
+		<action android:name="android.intent.action.VIEW" />
+		<category android:name="android.intent.category.BROWSABLE" />
+		<category android:name="android.intent.category.OPENABLE" />
+		<category android:name="android.intent.category.DEFAULT" />
+		<data android:scheme="file" android:mimeType="*/*" />
+	</intent-filter>
+
+</activity>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />
