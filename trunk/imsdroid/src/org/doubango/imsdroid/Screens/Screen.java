@@ -19,11 +19,13 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
-		ABOUT_T, CONTACTS_T, CONTACTS_OPTIONS_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T
+		ABOUT_T, CONTACTS_T, CONTACTS_OPTIONS_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
+		SECURITY_T
 	}
 	
 	public static enum SCREEN_ID { 
-		ABOUT_I, CONTACTS_OPTIONS_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I
+		ABOUT_I, CONTACTS_OPTIONS_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I,
+		SECURITY_I
 	}
 
 	public static final String SCREEN_TITLE_ABOUT = "About";
@@ -37,6 +39,7 @@ public abstract class Screen extends Activity implements IScreen {
 	public static final String SCREEN_TITLE_NETWORK = "Options-Network";
 	public static final String SCREEN_TITLE_PRESENCE = "Options-Presence";
 	public static final String SCREEN_TITLE_QOS = "Options-QoS/QoE";
+	public static final String SCREEN_TITLE_SECURITY = "Options-Security";
 	
 	protected final SCREEN_TYPE type;
 	protected boolean computeConfiguration;
@@ -73,6 +76,7 @@ public abstract class Screen extends Activity implements IScreen {
 		case OPTIONS_T:
 		case PRESENCE_T:
 		case QOS_T:
+		case SECURITY_T:
 			return true;
 		}
 		return false;
@@ -111,6 +115,8 @@ public abstract class Screen extends Activity implements IScreen {
 			return Screen.SCREEN_TITLE_PRESENCE;
 		case QOS_T:
 			return Screen.SCREEN_TITLE_QOS;
+		case SECURITY_T:
+			return Screen.SCREEN_TITLE_SECURITY;
 
 			// all others
 		default:
@@ -148,6 +154,8 @@ public abstract class Screen extends Activity implements IScreen {
 			return Screen.SCREEN_ID.PRESENCE_I;
 		case QOS_T:
 			return Screen.SCREEN_ID.QOS_I;
+		case SECURITY_T:
+			return Screen.SCREEN_ID.SECURITY_I;
 
 			// all others
 		default:

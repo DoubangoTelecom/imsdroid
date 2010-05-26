@@ -15,6 +15,7 @@ import org.doubango.imsdroid.Screens.ScreenOptions;
 import org.doubango.imsdroid.Screens.ScreenOptionsContacts;
 import org.doubango.imsdroid.Screens.ScreenPresence;
 import org.doubango.imsdroid.Screens.ScreenQoS;
+import org.doubango.imsdroid.Screens.ScreenSecurity;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
 
@@ -162,6 +163,9 @@ public class ScreenService extends Service implements IScreenService {
 					break;
 				case QOS_I:
 					screen = new ScreenQoS();
+					break;
+				case SECURITY_I:
+					screen = new ScreenSecurity();
 					break;
 			}
 

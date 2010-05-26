@@ -50,6 +50,11 @@ public class Configuration {
 	public static final int DEFAULT_QOS_SIP_CALLS_TIMEOUT = 3600;
 	public static final boolean DEFAULT_QOS_SESSION_TIMERS = false;
 	
+	public static final String DEFAULT_TLS_CA_FILE = "";
+	public static final String DEFAULT_TLS_PRIV_KEY_FILE = "";
+	public static final String DEFAULT_TLS_PUB_KEY_FILE = "";
+	public static boolean DEFAULT_TLS_SEC_AGREE = false;
+	
 	public static final boolean DEFAULT_NATT_HACK_AOR = false;
 	public static final boolean DEFAULT_NATT_USE_STUN = false;
 	public static final boolean DEFAULT_NATT_USE_ICE = false;
@@ -79,6 +84,7 @@ public class Configuration {
 		AVATAR_PATH, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, 
 
 		/* === SECURITY === */
+		TLS_CA_FILE, TLS_PRIV_KEY_FILE, TLS_PUB_KEY_FILE, TLS_SEC_AGREE,
 
 		/* === SESSIONS === */
 
