@@ -55,6 +55,7 @@ public class Configuration {
 	public static final String DEFAULT_TLS_PUB_KEY_FILE = "";
 	public static boolean DEFAULT_TLS_SEC_AGREE = false;
 	
+	public static final int DEFAULT_NATT_HACK_AOR_TIMEOUT = 2000;
 	public static final boolean DEFAULT_NATT_HACK_AOR = false;
 	public static final boolean DEFAULT_NATT_USE_STUN = false;
 	public static final boolean DEFAULT_NATT_USE_ICE = false;
@@ -91,7 +92,7 @@ public class Configuration {
 		/* === MMTEL === */
 
 		/* === NATT === */
-		HACK_AOR, USE_STUN, USE_ICE, STUN_DISCO, STUN_SERVER, STUN_PORT, 
+		HACK_AOR, HACK_AOR_TIMEOUT, USE_STUN, USE_ICE, STUN_DISCO, STUN_SERVER, STUN_PORT, 
 		
 		/* === XCAP === */
 		/* PASSWORD */ ENABLED, XCAP_ROOT, USERNAME

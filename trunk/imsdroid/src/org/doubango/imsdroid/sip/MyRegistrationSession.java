@@ -6,6 +6,7 @@ import org.doubango.tinyWRAP.SipSession;
 public class MyRegistrationSession extends MySipSession{
 
 	private final RegistrationSession session;
+	
 	public MyRegistrationSession(MySipStack sipStack) {
 		super();
 		

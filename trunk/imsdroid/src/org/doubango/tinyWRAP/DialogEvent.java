@@ -8,15 +8,15 @@
 
 package org.doubango.tinyWRAP;
 
-public class SubscriptionEvent extends SipEvent {
+public class DialogEvent extends SipEvent {
   private long swigCPtr;
 
-  protected SubscriptionEvent(long cPtr, boolean cMemoryOwn) {
-    super(tinyWRAPJNI.SWIGSubscriptionEventUpcast(cPtr), cMemoryOwn);
+  protected DialogEvent(long cPtr, boolean cMemoryOwn) {
+    super(tinyWRAPJNI.SWIGDialogEventUpcast(cPtr), cMemoryOwn);
     swigCPtr = cPtr;
   }
 
-  protected static long getCPtr(SubscriptionEvent obj) {
+  protected static long getCPtr(DialogEvent obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
@@ -27,19 +27,10 @@ public class SubscriptionEvent extends SipEvent {
   public synchronized void delete() {
     if(swigCPtr != 0 && swigCMemOwn) {
       swigCMemOwn = false;
-      tinyWRAPJNI.delete_SubscriptionEvent(swigCPtr);
+      tinyWRAPJNI.delete_DialogEvent(swigCPtr);
     }
     swigCPtr = 0;
     super.delete();
-  }
-
-  public tsip_subscribe_event_type_t getType() {
-    return tsip_subscribe_event_type_t.swigToEnum(tinyWRAPJNI.SubscriptionEvent_getType(swigCPtr, this));
-  }
-
-  public SubscriptionSession getSession() {
-    long cPtr = tinyWRAPJNI.SubscriptionEvent_getSession(swigCPtr, this);
-    return (cPtr == 0) ? null : new SubscriptionSession(cPtr, false);
   }
 
 }

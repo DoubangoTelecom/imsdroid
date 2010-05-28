@@ -26,7 +26,8 @@ public class MySipStack extends SipStack {
 		}
 		
 		// Sip headers
-		this.addHeader("Privacy", "INVITE, ACK, CANCEL, BYE, MESSAGE, OPTIONS, NOTIFY, PRACK, UPDATE, REFER");
+		this.addHeader("Allow", "INVITE, ACK, CANCEL, BYE, MESSAGE, OPTIONS, NOTIFY, PRACK, UPDATE, REFER");
+		this.addHeader("Privacy", "header;id");
 		this.addHeader("P-Access-Network-Info", "ADSL;utran-cell-id-3gpp=00000000");
 		this.addHeader("User-Agent", "IM-client/OMA1.0 imsdroid/v1.0.0"); // Get version from ConfigurationService or strings res
 	}
