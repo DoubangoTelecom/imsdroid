@@ -1,7 +1,5 @@
 package org.doubango.imsdroid.Screens;
 
-import java.io.File;
-
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;

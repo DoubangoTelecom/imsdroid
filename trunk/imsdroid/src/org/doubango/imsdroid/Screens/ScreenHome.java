@@ -50,23 +50,35 @@ implements IRegistrationEventHandler
 		this.handler = new Handler();
 	}
 
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screen_home);
-
-		// default items
+		
 		this.items = new ArrayList<ScreenHomeItem>();
 
+		// always visible
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.sign_in_48), "Sign In", null));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.exit_48), "Exit/Quit", null));
+		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+				getResources(), R.drawable.options_48), "Options", Screen.SCREEN_ID.OPTIONS_I));
+		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+				getResources(), R.drawable.about_48), "About", Screen.SCREEN_ID.ABOUT_I));
 		
+		// visible only if connected
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.options_48), "Options", Screen.SCREEN_ID.OPTIONS_I.toString()));
+				getResources(), R.drawable.id_cards_48), "Registrations", Screen.SCREEN_ID.REGISTRATIONS_I));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.about_48), "About", Screen.SCREEN_ID.ABOUT_I.toString()));
-
+				getResources(), R.drawable.eab2_48), "Address Book", Screen.SCREEN_ID.CONTACTS_I));
+		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+				getResources(), R.drawable.history_48), "History", Screen.SCREEN_ID.HISTORY_I));
+		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+				getResources(), R.drawable.document_up_48), "File Transfer", Screen.SCREEN_ID.FILE_TRANSFER_QUEUE_I));
+		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+				getResources(), R.drawable.chat_48), "Chat", Screen.SCREEN_ID.CHAT_QUEUE_I));
+		
 		// gridView
 		this.adapter = new ScreenHomeAdapter(this.items);
 		this.gridView = (GridView) this.findViewById(R.id.screen_home_gridview);
@@ -77,27 +89,30 @@ implements IRegistrationEventHandler
         this.sipService.addRegistrationEventHandler(this);
 	}
 
+	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean("SignInOutEnabled", this.items.get(ScreenHome.itemSignInOutPosition).enabled);
+		//outState.putBoolean("SignInOutEnabled", this.items.get(ScreenHome.itemSignInOutPosition).enabled);
 		
 		super.onSaveInstanceState(outState);
 	}
 	
+	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		
-		if(this.sipService.isRegistered()){
-			this.adapter.updateItem(ScreenHome.itemSignInOutPosition, BitmapFactory.decodeResource(
-							getResources(), R.drawable.sign_out_48), "Sign Out", null);
-		}
-		else{
-			this.adapter.updateItem(ScreenHome.itemSignInOutPosition, BitmapFactory.decodeResource(
-					getResources(), R.drawable.sign_in_48), "Sign In", null);
-		}
-		this.adapter.setItemEnabled(ScreenHome.itemSignInOutPosition, savedInstanceState.getBoolean("SignInOutEnabled"));
+//		if(this.sipService.isRegistered()){
+//			this.adapter.updateItem(ScreenHome.itemSignInOutPosition, BitmapFactory.decodeResource(
+//							getResources(), R.drawable.sign_out_48), "Sign Out", null);
+//		}
+//		else{
+//			this.adapter.updateItem(ScreenHome.itemSignInOutPosition, BitmapFactory.decodeResource(
+//					getResources(), R.drawable.sign_in_48), "Sign In", null);
+//		}
+//		this.adapter.setItemEnabled(ScreenHome.itemSignInOutPosition, savedInstanceState.getBoolean("SignInOutEnabled"));
 	}
 	
 	
+	@Override
 	protected void onDestroy() { 
         // remove event handlers
         this.sipService.removeRegistrationEventHandler(this);
@@ -157,15 +172,7 @@ implements IRegistrationEventHandler
 			case UNREGISTRATION_OK:
 				this.handler.post(new Runnable() {
 					public void run() {
-						if(ScreenHome.this.sipService.isRegistered()){
-							ScreenHome.this.adapter.updateItem(ScreenHome.itemSignInOutPosition, BitmapFactory.decodeResource(
-											getResources(), R.drawable.sign_out_48), "Sign Out", null);
-						}
-						else{
-							ScreenHome.this.adapter.updateItem(ScreenHome.itemSignInOutPosition, BitmapFactory.decodeResource(
-									getResources(), R.drawable.sign_in_48), "Sign In", null);
-						}
-						ScreenHome.this.adapter.setItemEnabled(ScreenHome.itemSignInOutPosition, true);
+						ScreenHome.this.adapter.setRegistered(ScreenHome.this.sipService.isRegistered());
 					}});
 				break;
 				
@@ -173,7 +180,7 @@ implements IRegistrationEventHandler
 			case UNREGISTRATION_INPROGRESS:
 				this.handler.post(new Runnable() {
 					public void run() {
-						ScreenHome.this.adapter.setItemEnabled(ScreenHome.itemSignInOutPosition, false);
+						//ScreenHome.this.adapter.setItemEnabled(ScreenHome.itemSignInOutPosition, false);
 				}});
 				break;
 				
@@ -191,12 +198,11 @@ implements IRegistrationEventHandler
 	/* ===================== Adapter ======================== */
 
 	private class ScreenHomeItem {
-		private Bitmap icon;
-		private String text;
-		private String screenId;
-		private boolean enabled;
+		private final Bitmap icon;
+		private final String text;
+		private final SCREEN_ID screenId;
 
-		private ScreenHomeItem(Bitmap icon, String text, String screenId) {
+		private ScreenHomeItem(Bitmap icon, String text, SCREEN_ID screenId) {
 			this.icon = icon;
 			this.text = text;
 			this.screenId = screenId;
@@ -205,43 +211,19 @@ implements IRegistrationEventHandler
 
 	private class ScreenHomeAdapter extends BaseAdapter {
 		private ArrayList<ScreenHomeItem> items;
+		private boolean registered;
 
 		private ScreenHomeAdapter(ArrayList<ScreenHomeItem> items) {
 			this.items = items;
 		}
 
-		private boolean setItemEnabled(int location, boolean enabled) {
-			if(this.items.size()>location){
-				this.items.get(location).enabled = enabled;
-				this.notifyDataSetChanged();
-				return true;
-			}
-			return false;
-		}
-		
-		private boolean updateItem(int location, Bitmap icon, String text, String screenId) {
-			if(this.items.size()>location){
-				this.items.set(location, new ScreenHomeItem(icon, text, screenId));
-				this.notifyDataSetChanged();
-				return true;
-			}
-			return false;
-		}
-		
-		private boolean addItem(Bitmap icon, String text, String screenId) {
-			boolean ret = this.items.add(new ScreenHomeItem(icon, text, screenId));
+		private synchronized void setRegistered(boolean registered){
+			this.registered = registered;
 			this.notifyDataSetChanged();
-			return ret;
-		}
-
-		private boolean removeItem(ScreenHomeItem item) {
-			boolean ret = this.items.remove(item);
-			this.notifyDataSetChanged();
-			return ret;
 		}
 
 		public int getCount() {
-			return this.items.size();
+			return this.registered ? this.items.size() : 4/* SignIn/SignOut; Exit/Quit; Options; About */;
 		}
 
 		public Object getItem(int position) {
@@ -255,11 +237,10 @@ implements IRegistrationEventHandler
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
 			ScreenHomeItem item;
+			final boolean  registered = ScreenHome.this.sipService.isRegistered();
 
-			if (view == null) { // if it's not recycled, initialize some
-								// attributes
-				view = getLayoutInflater().inflate(R.layout.screen_home_item,
-						null);
+			if (view == null) { // if it's not recycled, initialize some attributes
+				view = getLayoutInflater().inflate(R.layout.screen_home_item, null);
 			}
 
 			if ((item = this.items.get(position)) == null) {
@@ -268,11 +249,22 @@ implements IRegistrationEventHandler
 
 			ImageView iv = (ImageView) view.findViewById(R.id.screen_home_item_icon);
 			// imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-			iv.setImageBitmap(item.icon);
 			TextView tv = (TextView) view.findViewById(R.id.screen_home_item_text);
-			tv.setText(item.text);
 			
-			view.setEnabled(item.enabled);
+			if(position == ScreenHome.itemSignInOutPosition){
+				if(registered){
+					tv.setText("Sign Out");
+					iv.setImageDrawable(getResources().getDrawable(R.drawable.sign_out_48));
+				}
+				else{
+					tv.setText("Sign In");
+					iv.setImageDrawable(getResources().getDrawable(R.drawable.sign_in_48));
+				}
+			}
+			else{				
+				tv.setText(item.text);
+				iv.setImageBitmap(item.icon);
+			}
 
 			return view;
 		}

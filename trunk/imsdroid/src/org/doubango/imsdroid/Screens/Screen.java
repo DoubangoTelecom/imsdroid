@@ -19,18 +19,22 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
-		ABOUT_T, CONTACTS_T, CONTACTS_OPTIONS_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
-		SECURITY_T
+		ABOUT_T, CHAT_QUEUE_T, CONTACTS_T, CONTACTS_OPTIONS_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
+		REGISTRATIONS_T, SECURITY_T
 	}
 	
 	public static enum SCREEN_ID { 
-		ABOUT_I, CONTACTS_OPTIONS_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I,
-		SECURITY_I
+		ABOUT_I, CHAT_QUEUE_I, CONTACTS_I, CONTACTS_OPTIONS_I, FILE_TRANSFER_QUEUE_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I,
+		REGISTRATIONS_I, SECURITY_I
 	}
 
 	public static final String SCREEN_TITLE_ABOUT = "About";
+	public static final String SCREEN_TITLE_CHAT_QUEUE = "Chat room";
+	public static final String SCREEN_TITLE_CONTACTS = "Address Book";
 	public static final String SCREEN_TITLE_CONTACTS_OPTIONS = "Options-Contacts";
+	public static final String SCREEN_TITLE_FILE_TRANSFER_QUEUE = "File Transfers...";
 	public static final String SCREEN_TITLE_GENERAL = "Options-General";
+	public static final String SCREEN_TITLE_HISTORY = "History";
 	public static final String SCREEN_TITLE_HOME = "Home";
 	public static final String SCREEN_TITLE_IDENTITY = "Options-Identity";
 	public static final String SCREEN_TITLE_OPTIONS = "Options";
@@ -39,6 +43,7 @@ public abstract class Screen extends Activity implements IScreen {
 	public static final String SCREEN_TITLE_NETWORK = "Options-Network";
 	public static final String SCREEN_TITLE_PRESENCE = "Options-Presence";
 	public static final String SCREEN_TITLE_QOS = "Options-QoS/QoE";
+	public static final String SCREEN_TITLE_REGISTRATIONS = "IMS Registrations";
 	public static final String SCREEN_TITLE_SECURITY = "Options-Security";
 	
 	protected final SCREEN_TYPE type;
@@ -64,8 +69,10 @@ public abstract class Screen extends Activity implements IScreen {
 		switch (type) {
 		// Well-know screens
 		case ABOUT_T:
+		case CHAT_QUEUE_T:
 		case CONTACTS_T:
 		case CONTACTS_OPTIONS_T:
+		case FILE_TRANSFER_QUEUE_T:
 		case GENERAL_T:
 		case HISTORY_T:
 		case HOME_T:
@@ -76,6 +83,7 @@ public abstract class Screen extends Activity implements IScreen {
 		case OPTIONS_T:
 		case PRESENCE_T:
 		case QOS_T:
+		case REGISTRATIONS_T:
 		case SECURITY_T:
 			return true;
 		}
@@ -91,14 +99,18 @@ public abstract class Screen extends Activity implements IScreen {
 		// Well-know screens
 		case ABOUT_T:
 			return Screen.SCREEN_TITLE_ABOUT;
+		case CHAT_QUEUE_T:
+			return Screen.SCREEN_TITLE_CHAT_QUEUE;
 		case CONTACTS_T:
-			break;
+			return Screen.SCREEN_TITLE_CONTACTS;
 		case CONTACTS_OPTIONS_T:
 			return Screen.SCREEN_TITLE_CONTACTS_OPTIONS;
+		case FILE_TRANSFER_QUEUE_T:
+			return Screen.SCREEN_TITLE_FILE_TRANSFER_QUEUE;
 		case GENERAL_T:
 			return Screen.SCREEN_TITLE_GENERAL;
 		case HISTORY_T:
-			break;
+			return Screen.SCREEN_TITLE_HISTORY;
 		case HOME_T:
 			return Screen.SCREEN_TITLE_HOME;
 		case IDENTITY_T:
@@ -113,6 +125,8 @@ public abstract class Screen extends Activity implements IScreen {
 			return Screen.SCREEN_TITLE_OPTIONS;
 		case PRESENCE_T:
 			return Screen.SCREEN_TITLE_PRESENCE;
+		case REGISTRATIONS_T:
+			return Screen.SCREEN_TITLE_REGISTRATIONS;
 		case QOS_T:
 			return Screen.SCREEN_TITLE_QOS;
 		case SECURITY_T:
@@ -122,7 +136,6 @@ public abstract class Screen extends Activity implements IScreen {
 		default:
 			return null;
 		}
-		return null;
 	}
 
 	public Screen.SCREEN_ID getId() {
@@ -130,14 +143,18 @@ public abstract class Screen extends Activity implements IScreen {
 		// Well-know screens
 		case ABOUT_T:
 			return Screen.SCREEN_ID.ABOUT_I;
+		case CHAT_QUEUE_T:
+			return Screen.SCREEN_ID.CHAT_QUEUE_I;
 		case CONTACTS_T:
-			break;
+			return Screen.SCREEN_ID.CONTACTS_I;
 		case CONTACTS_OPTIONS_T:
 			return Screen.SCREEN_ID.CONTACTS_OPTIONS_I;
+		case FILE_TRANSFER_QUEUE_T:
+			return Screen.SCREEN_ID.FILE_TRANSFER_QUEUE_I;
 		case GENERAL_T:
 			return Screen.SCREEN_ID.GENERAL_I;
 		case HISTORY_T:
-			break;
+			return Screen.SCREEN_ID.HISTORY_I;
 		case HOME_T:
 			return Screen.SCREEN_ID.HOME_I;
 		case IDENTITY_T:
@@ -152,6 +169,8 @@ public abstract class Screen extends Activity implements IScreen {
 			return Screen.SCREEN_ID.OPTIONS_I;
 		case PRESENCE_T:
 			return Screen.SCREEN_ID.PRESENCE_I;
+		case REGISTRATIONS_T:
+			return Screen.SCREEN_ID.REGISTRATIONS_I;
 		case QOS_T:
 			return Screen.SCREEN_ID.QOS_I;
 		case SECURITY_T:
@@ -161,7 +180,6 @@ public abstract class Screen extends Activity implements IScreen {
 		default:
 			return null;
 		}
-		return null;
 	}
 	
 	protected void addConfigurationListener(RadioButton radioButton){

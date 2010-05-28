@@ -25,12 +25,12 @@ public class ScreenOptionsContacts  extends Screen {
 	private EditText etPassword;
 	private RelativeLayout rlRemote;
 	
-	private final IConfigurationService ConfigurationService;
+	private final IConfigurationService configurationService;
 	
 	public ScreenOptionsContacts() {
 		super(SCREEN_TYPE.CONTACTS_OPTIONS_T);
 		
-		this.ConfigurationService = ServiceManager.getConfigurationService();
+		this.configurationService = ServiceManager.getConfigurationService();
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +46,11 @@ public class ScreenOptionsContacts  extends Screen {
         this.rlRemote = (RelativeLayout)this.findViewById(R.id.screen_options_contacts_relativeLayout_remote);
         
         // load values from configuration file (Do it before adding UI listeners)
-        this.rbRemote.setChecked(this.ConfigurationService.getBoolean(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED, Configuration.DEFAULT_XCAP_ENABLED));
+        this.rbRemote.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED, Configuration.DEFAULT_XCAP_ENABLED));
         //this.rbRemote.setChecked(!this.rbLocal.isChecked());
-        this.etXcapRoot.setText(this.ConfigurationService.getString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.XCAP_ROOT, Configuration.DEFAULT_XCAP_ROOT));
-        this.etXUI.setText(this.ConfigurationService.getString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.USERNAME, Configuration.DEFAULT_XUI));
-        this.etPassword.setText(this.ConfigurationService.getString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.PASSWORD, ""));
+        this.etXcapRoot.setText(this.configurationService.getString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.XCAP_ROOT, Configuration.DEFAULT_XCAP_ROOT));
+        this.etXUI.setText(this.configurationService.getString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.USERNAME, Configuration.DEFAULT_XUI));
+        this.etPassword.setText(this.configurationService.getString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.PASSWORD, ""));
         this.rlRemote.setVisibility(this.rbLocal.isChecked() ? View.INVISIBLE : View.VISIBLE);
         
         // add listeners (for the configuration)
@@ -71,16 +71,16 @@ public class ScreenOptionsContacts  extends Screen {
 	
 	protected void onPause() {
 		if(this.computeConfiguration){
-			this.ConfigurationService.setBoolean(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED, this.rbRemote.isChecked());
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.XCAP_ROOT, 
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED, this.rbRemote.isChecked());
+			this.configurationService.setString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.XCAP_ROOT, 
 				this.etXcapRoot.getText().toString());
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.USERNAME, 
+			this.configurationService.setString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.USERNAME, 
 				this.etXUI.getText().toString());
-			this.ConfigurationService.setString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.PASSWORD, 
+			this.configurationService.setString(CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.PASSWORD, 
 				this.etPassword.getText().toString());
 			
 			// Compute
-			if(!this.ConfigurationService.compute()){
+			if(!this.configurationService.compute()){
 				Log.e(this.getClass().getCanonicalName(), "Failed to Compute() configuration");
 			}
 			

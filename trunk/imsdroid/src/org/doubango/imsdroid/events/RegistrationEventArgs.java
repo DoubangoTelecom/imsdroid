@@ -3,15 +3,15 @@ package org.doubango.imsdroid.events;
 public class RegistrationEventArgs extends EventArgs {
 	
 	private final RegistrationEventTypes type;
-	private final short SipCode;
+	private final short sipCode;
 	private final String phrase;
 	
-	public RegistrationEventArgs(RegistrationEventTypes type, short SipCode, String phrase)
+	public RegistrationEventArgs(RegistrationEventTypes type, short sipCode, String phrase)
 	{
 		super();
 		
 		this.type = type;
-		this.SipCode = SipCode;
+		this.sipCode = sipCode;
 		this.phrase = phrase;
 	}
 	
@@ -22,7 +22,7 @@ public class RegistrationEventArgs extends EventArgs {
 	
 	public short getSipCode()
 	{
-		return this.SipCode;
+		return this.sipCode;
 	}
 	
 	public String getPhrase()
