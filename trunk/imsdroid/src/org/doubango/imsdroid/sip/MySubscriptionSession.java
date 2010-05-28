@@ -1,5 +1,6 @@
 package org.doubango.imsdroid.sip;
 
+import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.SubscriptionSession;
 
@@ -24,43 +25,51 @@ public class MySubscriptionSession extends MySipSession{
 		switch(eventPackage){
 			case CONFERENCE:
 				this.session.addHeader("Event", "conference");
-				this.session.addHeader("Accept", "application/conference-info+xml");
+				this.session.addHeader("Accept", ContentType.CONFERENCE_INFO);
 				break;
 			case DIALOG:
 				this.session.addHeader("Event", "dialog");
-				this.session.addHeader("Accept", "application/dialog-info+xml");
+				this.session.addHeader("Accept", ContentType.DIALOG_INFO);
 				break;
 			case MESSAGE_SUMMARY:
 				this.session.addHeader("Event", "message-summary");
-				this.session.addHeader("Accept", "application/simple-message-summary");
+				this.session.addHeader("Accept", ContentType.MESSAGE_SUMMARY);
 				break;
 			case PRESENCE:
 				this.session.addHeader("Event", "presence");
-				this.session.addHeader("Accept", "multipart/related, application/rlmi+xml, application/pidf+xml, application/rpid+xml, application/xcap-diff+xml, message/external-body");
+				this.session.addHeader("Accept", 
+						String.format("%s, %s, %s, %s, %s, %s", 
+								ContentType.MULTIPART_RELATED, 
+								ContentType.RLMI, 
+								ContentType.PIDF, 
+								ContentType.RPID, 
+								ContentType.XCAP_DIFF, 
+								ContentType.EXTERNAL_BODY));
 				break;
 			case REG:
 				this.session.addHeader("Event", "reg");
-				this.session.addHeader("Accept", "application/reginfo+xml");
+				this.session.addHeader("Accept", ContentType.REG_INFO);
 				break;
 			case SIP_PROFILE:
 				this.session.addHeader("Event", "sip-profile");
-				this.session.addHeader("Accept", "application/vnd.oma.im.deferred-list+xml");
+				this.session.addHeader("Accept", ContentType.OMA_DEFERRED_LIST);
 				break;
 			case UA_PROFILE:
 				this.session.addHeader("Event", "ua-profile");
-				this.session.addHeader("Accept", "application/xcap-diff+xml");
+				this.session.addHeader("Accept", ContentType.XCAP_DIFF);
 				break;
 			case WINFO:
 				this.session.addHeader("Event", "presence.winfo");
-				this.session.addHeader("Accept", "application/watcherinfo+xml");
+				this.session.addHeader("Accept", ContentType.WATCHER_INFO);
 				break;
 			case XCAP_DIFF:
 				this.session.addHeader("Event", "xcap-diff");
-				this.session.addHeader("Accept", "application/xcap-diff+xml");
+				this.session.addHeader("Accept", ContentType.XCAP_DIFF);
 				break;
 		}
 		
 		this.session.setToUri(toUri);
+		// common to all subscription sessions
 		this.session.addHeader("Allow-Events", "refer, presence, presence.winfo, xcap-diff, conference");
 	}
 	

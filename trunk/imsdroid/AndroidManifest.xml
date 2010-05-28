@@ -34,6 +34,11 @@
 	</intent-filter>
 
 </activity>
+<activity android:name=".Screens.ScreenContacts"></activity>
+<activity android:name=".Screens.ScreenFileTransferQueue"></activity>
+<activity android:name=".Screens.ScreenChatQueue"></activity>
+<activity android:name=".Screens.ScreenHistory"></activity>
+<activity android:name=".Screens.ScreenRegistrations"></activity>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />

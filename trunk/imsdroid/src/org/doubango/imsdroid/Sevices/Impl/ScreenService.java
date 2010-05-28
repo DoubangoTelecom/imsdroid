@@ -5,7 +5,11 @@ import java.util.HashMap;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAbout;
+import org.doubango.imsdroid.Screens.ScreenChatQueue;
+import org.doubango.imsdroid.Screens.ScreenContacts;
+import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenGeneral;
+import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenIdentity;
 import org.doubango.imsdroid.Screens.ScreenMessaging;
@@ -15,6 +19,7 @@ import org.doubango.imsdroid.Screens.ScreenOptions;
 import org.doubango.imsdroid.Screens.ScreenOptionsContacts;
 import org.doubango.imsdroid.Screens.ScreenPresence;
 import org.doubango.imsdroid.Screens.ScreenQoS;
+import org.doubango.imsdroid.Screens.ScreenRegistrations;
 import org.doubango.imsdroid.Screens.ScreenSecurity;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
@@ -132,13 +137,23 @@ public class ScreenService extends Service implements IScreenService {
 				case ABOUT_I:
 					screen = new ScreenAbout();
 					break;
+				case CHAT_QUEUE_I:
+					screen = new ScreenChatQueue();
+					break;
+				case CONTACTS_I:
+					screen = new ScreenContacts();
+					break;
 				case CONTACTS_OPTIONS_I:
 					screen = new ScreenOptionsContacts();
+					break;
+				case FILE_TRANSFER_QUEUE_I:
+					screen = new ScreenFileTransferQueue();
 					break;
 				case GENERAL_I:
 					screen = new ScreenGeneral();
 					break;
 				case HISTORY_I:
+					screen = new ScreenHistory();
 					break;
 				case HOME_I:
 					screen = new ScreenHome();
@@ -163,6 +178,9 @@ public class ScreenService extends Service implements IScreenService {
 					break;
 				case QOS_I:
 					screen = new ScreenQoS();
+					break;
+				case REGISTRATIONS_I:
+					screen = new ScreenRegistrations();
 					break;
 				case SECURITY_I:
 					screen = new ScreenSecurity();

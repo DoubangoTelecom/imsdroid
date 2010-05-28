@@ -17,9 +17,7 @@ import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
-import org.doubango.imsdroid.events.INotifPresEventhandler;
 import org.doubango.imsdroid.events.IRegistrationEventHandler;
-import org.doubango.imsdroid.events.NotifPresEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
 
@@ -32,8 +30,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class Main extends ActivityGroup
-implements IRegistrationEventHandler,
-INotifPresEventhandler
+implements IRegistrationEventHandler
 {
     private final ISipService sipService;
     private final IScreenService screenService;
@@ -83,7 +80,6 @@ INotifPresEventhandler
         
         // add event handlers
         this.sipService.addRegistrationEventHandler(this);
-        this.sipService.addNotifPresEventhandler(this);
         
         /* shows the home screen */
         this.screenService.show(Screen.SCREEN_ID.HOME_I);
@@ -130,7 +126,6 @@ INotifPresEventhandler
         
         // remove event handlers : do it after stop() to continue to receive Sip events
         this.sipService.removeRegistrationEventHandler(this);
-        this.sipService.removeNotifPresEventhandler(this);
         
         super.onDestroy();
 	}
@@ -145,7 +140,7 @@ INotifPresEventhandler
 	
 	
     /* ===================== Sip Events ========================*/
-    
+	
 	public boolean onRegistrationEvent(Object sender, RegistrationEventArgs e) {
 		Log.i(this.getClass().getName(), "onRegistrationEvent");
 		
@@ -209,11 +204,6 @@ INotifPresEventhandler
 			}
 		}
 		
-		return true;
-	}
-
-	public boolean onNotifPresEvent(Object sender, NotifPresEventArgs e) {
-		Log.i(this.getClass().getName(), "onNotifPresEvent");
 		return true;
 	}
 	
