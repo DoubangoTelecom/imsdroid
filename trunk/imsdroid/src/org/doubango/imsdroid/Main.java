@@ -13,7 +13,6 @@
 package org.doubango.imsdroid;
 
 import org.doubango.imsdroid.Screens.Screen;
-import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -25,8 +24,6 @@ import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
 
 import android.app.ActivityGroup;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;

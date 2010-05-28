@@ -16,36 +16,48 @@ import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
 import org.doubango.imsdroid.sip.MyRegistrationSession;
 import org.doubango.imsdroid.sip.MySipStack;
+import org.doubango.imsdroid.sip.MySubscriptionSession;
+import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.tinyWRAP.OptionsEvent;
+import org.doubango.tinyWRAP.OptionsSession;
 import org.doubango.tinyWRAP.RegistrationEvent;
 import org.doubango.tinyWRAP.SipCallback;
+import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SubscriptionEvent;
+import org.doubango.tinyWRAP.tsip_options_event_type_t;
 import org.doubango.tinyWRAP.tsip_register_event_type_t;
 
+import android.os.ConditionVariable;
 import android.util.Log;
 
 public class SipService extends Service implements ISipService {
 
+	private final static String TAG = SipService.class.getCanonicalName();
+
 	// Services
 	private final IConfigurationService configurationService;
 	private final INetworkService networkService;
-	
+
 	// Event Handlers
 	private final CopyOnWriteArrayList<IRegistrationEventHandler> registrationEventHandlers;
 	private final CopyOnWriteArrayList<INotifPresEventhandler> notifPresEventhandler;
-	
+
 	private MySipStack sipStack;
 	private MyRegistrationSession regSession;
+	private MySubscriptionSession subReg;
 	private final MySipCallback sipCallback;
+
+	private ConditionVariable condHack;
 
 	public SipService() {
 		super();
 
 		this.sipCallback = new MySipCallback(this);
-		
+
 		this.registrationEventHandlers = new CopyOnWriteArrayList<IRegistrationEventHandler>();
 		this.notifPresEventhandler = new CopyOnWriteArrayList<INotifPresEventhandler>();
-		
+
 		this.configurationService = ServiceManager.getConfigurationService();
 		this.networkService = ServiceManager.getNetworkService();
 	}
@@ -57,217 +69,274 @@ public class SipService extends Service implements ISipService {
 	public boolean stop() {
 		return true;
 	}
-	
-	public boolean isRegistered(){
-		if(this.regSession != null){
+
+	public boolean isRegistered() {
+		if (this.regSession != null) {
 			return this.regSession.isConnected();
 		}
 		return false;
 	}
 
 	/* ===================== SIP functions ======================== */
-		
-	public boolean register()
-	{
-		String realm = this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.REALM, Configuration.DEFAULT_REALM);
-		String impi = this.configurationService.getString(CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPI, Configuration.DEFAULT_IMPI);
-		String impu = this.configurationService.getString(CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPU, Configuration.DEFAULT_IMPU);
-		
-		Log.i(this.getClass().getCanonicalName(), String.format("realm=%s, impu=%s, impi=%s", realm, impu, impi));
-		
-		if(this.sipStack == null){
+
+	public boolean register() {
+		String realm = this.configurationService.getString(
+				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.REALM,
+				Configuration.DEFAULT_REALM);
+		String impi = this.configurationService.getString(
+				CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPI,
+				Configuration.DEFAULT_IMPI);
+		String impu = this.configurationService.getString(
+				CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPU,
+				Configuration.DEFAULT_IMPU);
+
+		Log.i(this.getClass().getCanonicalName(), String.format(
+				"realm=%s, impu=%s, impi=%s", realm, impu, impi));
+
+		if (this.sipStack == null) {
 			this.sipStack = new MySipStack(this.sipCallback, realm, impi, impu);
-		}
-		else {
-			if(!this.sipStack.setRealm(realm)){
-				Log.e(this.getClass().getCanonicalName(), "Failed to set realm");
+		} else {
+			if (!this.sipStack.setRealm(realm)) {
+				Log
+						.e(this.getClass().getCanonicalName(),
+								"Failed to set realm");
 				return false;
 			}
-			if(!this.sipStack.setIMPI(impi)){
+			if (!this.sipStack.setIMPI(impi)) {
 				Log.e(this.getClass().getCanonicalName(), "Failed to set IMPI");
 				return false;
 			}
-			if(!this.sipStack.setIMPU(impu)){
+			if (!this.sipStack.setIMPU(impu)) {
 				Log.e(this.getClass().getCanonicalName(), "Failed to set IMPU");
 				return false;
 			}
 		}
-		
+
 		// Check stack validity
-		if(!this.sipStack.isValid()){
-			Log.e(this.getClass().getCanonicalName(), "Trying to use invalid stack");
+		if (!this.sipStack.isValid()) {
+			Log.e(this.getClass().getCanonicalName(),
+					"Trying to use invalid stack");
 			return false;
 		}
-		
+
 		// Set Proxy-CSCF
-		String pcscf_host = this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, null); // null will trigger DNS NAPTR+SRV 
-		int pcscf_port = this.configurationService.getInt(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, Configuration.DEFAULT_PCSCF_PORT);
-		String transport = this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.TRANSPORT, Configuration.DEFAULT_TRANSPORT);
-		String ipversion = this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION, Configuration.DEFAULT_IP_VERSION);
-		
-		Log.i(this.getClass().getCanonicalName(), String.format("pcscf-host=%s, pcscf-port=%d, transport=%s, ipversion=%s", pcscf_host, pcscf_port, transport, ipversion));
-		
-		if(!this.sipStack.setProxyCSCF(pcscf_host, pcscf_port, transport, ipversion)){
-			Log.e(this.getClass().getCanonicalName(), "Failed to set Proxy-CSCF parameters");
+		String pcscf_host = this.configurationService.getString(
+				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST,
+				null); // null will trigger DNS NAPTR+SRV
+		int pcscf_port = this.configurationService.getInt(
+				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT,
+				Configuration.DEFAULT_PCSCF_PORT);
+		String transport = this.configurationService.getString(
+				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.TRANSPORT,
+				Configuration.DEFAULT_TRANSPORT);
+		String ipversion = this.configurationService.getString(
+				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
+				Configuration.DEFAULT_IP_VERSION);
+
+		Log.i(this.getClass().getCanonicalName(), String.format(
+				"pcscf-host=%s, pcscf-port=%d, transport=%s, ipversion=%s",
+				pcscf_host, pcscf_port, transport, ipversion));
+
+		if (!this.sipStack.setProxyCSCF(pcscf_host, pcscf_port, transport,
+				ipversion)) {
+			Log.e(this.getClass().getCanonicalName(),
+					"Failed to set Proxy-CSCF parameters");
 			return false;
 		}
-		
-		// Set local IP (If your reusing this code on non-Android platforms, let doubango retrieve the best IP address)
+
+		// Set local IP (If your reusing this code on non-Android platforms, let
+		// doubango retrieve the best IP address)
 		String localIP;
 		boolean ipv6 = StringUtils.equals(ipversion, "ipv6", true);
-		if((localIP = this.networkService.getLocalIP(ipv6)) == null){
+		if ((localIP = this.networkService.getLocalIP(ipv6)) == null) {
 			localIP = ipv6 ? "::" : "10.0.2.15"; /* Probably on the emulator */
 		}
-		if(!this.sipStack.setLocalIP(localIP)){
-			Log.e(this.getClass().getCanonicalName(), "Failed to set the local IP");
+		if (!this.sipStack.setLocalIP(localIP)) {
+			Log.e(this.getClass().getCanonicalName(),
+					"Failed to set the local IP");
 			return false;
 		}
-		
+
 		// enable/disable 3GPP early IMS
-		this.sipStack.setEarlyIMS(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.EARLY_IMS, Configuration.DEFAULT_EARLY_IMS));
-		
+		this.sipStack.setEarlyIMS(this.configurationService.getBoolean(
+				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.EARLY_IMS,
+				Configuration.DEFAULT_EARLY_IMS));
+
 		// Set stack-level headers
 		// Supported, Access-Network, Preferred-Identity, ...
-		
+
 		// Start the Stack
-		if(!this.sipStack.start()){
-			Log.e(this.getClass().getCanonicalName(), "Failed to start the SIP stack");
+		if (!this.sipStack.start()) {
+			Log.e(this.getClass().getCanonicalName(),
+					"Failed to start the SIP stack");
 			return false;
 		}
-		
+
 		// Create registration session
-		if(this.regSession == null){
+		if (this.regSession == null) {
 			this.regSession = new MyRegistrationSession(this.sipStack);
 		}
-		
-		// Set/update From URI. For Registration ToUri should be equals to realm (done by the stack)
+
+		// Set/update From URI. For Registration ToUri should be equals to realm
+		// (done by the stack)
 		this.regSession.setFromUri(impu);
 		/* this.regSession.setToUri(impu); */
-		
-		if(!this.regSession.register()){
-			Log.e(this.getClass().getCanonicalName(), "Failed to send REGISTER request");
+
+		/* Before registering, check if AoR hacking id enabled */
+		boolean hackAoR = this.configurationService.getBoolean(
+				CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.HACK_AOR,
+				Configuration.DEFAULT_NATT_HACK_AOR);
+		if (hackAoR) {
+			if (this.condHack == null) {
+				this.condHack = new ConditionVariable();
+			}
+			final OptionsSession optSession = new OptionsSession(this.sipStack);
+			optSession.setToUri(String.format("sip:{0}@{1}", "hacking_the_aor",
+					realm));
+			optSession.Send();
+			try {
+				synchronized (this.condHack) {
+					this.condHack.wait(this.configurationService.getInt(
+							CONFIGURATION_SECTION.NATT,
+							CONFIGURATION_ENTRY.HACK_AOR_TIMEOUT,
+							Configuration.DEFAULT_NATT_HACK_AOR_TIMEOUT));
+				}
+			} catch (InterruptedException e) {
+				Log.e(SipService.TAG, e.getMessage());
+			}
+			this.condHack = null;
+		}
+
+		if (!this.regSession.register()) {
+			Log.e(this.getClass().getCanonicalName(),
+					"Failed to send REGISTER request");
 			return false;
 		}
-		
+
 		return true;
 	}
-	
-	public boolean unregister()
-	{
-		if(this.isRegistered()){
+
+	public boolean unregister() {
+		if (this.isRegistered()) {
 			return this.sipStack.stop();
 		}
 		Log.d(this.getClass().getCanonicalName(), "Already unregistered");
 		return true;
 	}
-	
-	
+
 	/* ===================== Add/Remove handlers ======================== */
-	
-	public boolean addRegistrationEventHandler(IRegistrationEventHandler handler) 
-	{
-		return EventHandler.addEventHandler(this.registrationEventHandlers,handler);
+
+	public boolean addRegistrationEventHandler(IRegistrationEventHandler handler) {
+		return EventHandler.addEventHandler(this.registrationEventHandlers,
+				handler);
 	}
 
-	public boolean removeRegistrationEventHandler(IRegistrationEventHandler handler) 
-	{
-		return EventHandler.removeEventHandler(this.registrationEventHandlers, handler);
+	public boolean removeRegistrationEventHandler(
+			IRegistrationEventHandler handler) {
+		return EventHandler.removeEventHandler(this.registrationEventHandlers,
+				handler);
 	}
 
-	public boolean addNotifPresEventhandler(INotifPresEventhandler handler) 
-	{
-		return EventHandler.addEventHandler(this.notifPresEventhandler, handler);
+	public boolean addNotifPresEventhandler(INotifPresEventhandler handler) {
+		return EventHandler
+				.addEventHandler(this.notifPresEventhandler, handler);
 	}
 
-	public boolean removeNotifPresEventhandler(INotifPresEventhandler handler) 
-	{
-		return EventHandler.removeEventHandler(this.notifPresEventhandler, handler);
+	public boolean removeNotifPresEventhandler(INotifPresEventhandler handler) {
+		return EventHandler.removeEventHandler(this.notifPresEventhandler,
+				handler);
 	}
-	
+
 	/* ===================== Dispatch events ======================== */
-	
-	// should be private
-	private void onRegistrationChanged(RegistrationEventArgs eargs)
-	{
-		for(IRegistrationEventHandler handler : this.registrationEventHandlers){
-			if(!handler.onRegistrationEvent(this, eargs)){
+
+	private void onRegistrationChanged(RegistrationEventArgs eargs) {
+		for (IRegistrationEventHandler handler : this.registrationEventHandlers) {
+			if (!handler.onRegistrationEvent(this, eargs)) {
 				Log.w(handler.getClass().getName(), "onRegistrationEvent failed");
 			}
 		}
 	}
-	
+
 	// should be private
-	public void onTestNotifPresChanged()
-	{
+	public void onTestNotifPresChanged() {
 		NotifPresEventArgs e = new NotifPresEventArgs();
-		for(INotifPresEventhandler handler : this.notifPresEventhandler)
-		{
-			if(!handler.onNotifPresEvent(this, e))
-			{
+		for (INotifPresEventhandler handler : this.notifPresEventhandler) {
+			if (!handler.onNotifPresEvent(this, e)) {
 				Log.w(handler.getClass().getName(), "onNotifPresEvent failed");
 			}
 		}
 	}
-	
-	/* ===================== Private functions (Sip Events) ======================== */
-		
+
+	/*
+	 * ===================== Private functions (Sip Events)
+	 * ========================
+	 */
+
 	/* ===================== Sip Callback ======================== */
-	private class MySipCallback  extends SipCallback{
-		
+	private class MySipCallback extends SipCallback {
+
 		private final SipService sipService;
-		
-		private MySipCallback(SipService sipService){
-	        super();
-	        
-	        this.sipService = sipService;
-	    }
-		
-		private final boolean isSipCode(short code){
-			return (code >=100 && code <=699);
+
+		private MySipCallback(SipService sipService) {
+			super();
+
+			this.sipService = sipService;
 		}
-		
-		private final boolean is2xx(short code){
-			return (code >=200 && code <=299);
+
+		private final boolean isSipCode(short code) {
+			return (code >= 100 && code <= 699);
 		}
-		
-		private final boolean is1xx(short code){
-			return (code >=100 && code <=199);
+
+		private final boolean is2xx(short code) {
+			return (code >= 200 && code <= 299);
 		}
-		
+
+		private final boolean is1xx(short code) {
+			return (code >= 100 && code <= 199);
+		}
+
 		/**
 		 * Registration Events
 		 */
-		public int OnRegistrationChanged(RegistrationEvent e) {
+		public int OnRegistrationEvent(RegistrationEvent e) {
 			final short code = e.getCode();
 			final String phrase = e.getPhrase();
 			final tsip_register_event_type_t type = e.getType();
-			
-			if(!this.isSipCode(code) || this.is1xx(code)){
+
+			if (!this.isSipCode(code) || this.is1xx(code)) {
 				return 0;
 			}
-			
-			switch(type){
-				case tsip_ao_register:
-				case tsip_ao_unregister:
-				{
-					boolean registering = (type == tsip_register_event_type_t.tsip_ao_register);
-					if(this.is2xx(code)){ /* Success */
-						// Update sip service state
-						this.sipService.regSession.setConnected(registering ? true : false);
-						// raise event
-						RegistrationEventArgs eargs = new RegistrationEventArgs(registering ? RegistrationEventTypes.REGISTRATION_OK : RegistrationEventTypes.UNREGISTRATION_OK, 
-								code, phrase);
-						this.sipService.onRegistrationChanged(eargs);
-					}
-					else{ /* Failure */
-						RegistrationEventArgs eargs = new RegistrationEventArgs(registering ? RegistrationEventTypes.REGISTRATION_NOK : RegistrationEventTypes.UNREGISTRATION_NOK, code, phrase);
-						this.sipService.onRegistrationChanged(eargs);
-					}
-					break;
+
+			switch (type) {
+			case tsip_ao_register:
+			case tsip_ao_unregister: {
+				boolean registering = (type == tsip_register_event_type_t.tsip_ao_register);
+				if (this.is2xx(code)) { /* Success */
+					// Update sip service state
+					this.sipService.regSession.setConnected(registering ? true : false);
+					// raise event
+					RegistrationEventArgs eargs = new RegistrationEventArgs(registering ? RegistrationEventTypes.REGISTRATION_OK
+									: RegistrationEventTypes.UNREGISTRATION_OK, code, phrase);
+					this.sipService.onRegistrationChanged(eargs);
+					
+					
+					String impu = this.sipService.configurationService.getString(
+							CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPU,
+							Configuration.DEFAULT_IMPU);
+					this.sipService.subReg = new MySubscriptionSession(this.sipService.sipStack, impu, EVENT_PACKAGE_TYPE.REG);
+					this.sipService.subReg.subscribe();
+					
+					
+				} else { /* Failure */
+					RegistrationEventArgs eargs = new RegistrationEventArgs(registering ? RegistrationEventTypes.REGISTRATION_NOK
+									: RegistrationEventTypes.UNREGISTRATION_NOK, code, phrase);
+					this.sipService.onRegistrationChanged(eargs);
 				}
-				
-				default:
-					break;
+				break;
+			}
+
+			default:
+				break;
 			}
 			return 0;
 		}
@@ -275,14 +344,45 @@ public class SipService extends Service implements ISipService {
 		/**
 		 * Subscription Events
 		 */
-		public int OnSubscriptionChanged(SubscriptionEvent e) {
+		public int OnSubscriptionEvent(SubscriptionEvent e) {
+			return 0;
+		}
+
+		public int OnOptionsEvent(OptionsEvent e) {
+			short code = e.getCode();
+			tsip_options_event_type_t type = e.getType();
+			OptionsSession session = e.getSession();
+			SipMessage message = e.getSipMessage();
+
+			if (message == null) {
+				return 0;
+			}
+
+			switch (type) {
+			case tsip_ao_options:
+				String rport = message.getSipHeaderParamValue("v", "rport");
+				String received = message.getSipHeaderParamValue("v","received");
+				if (rport == null || rport.equals("0")) { // FIXME: change tsip_header_Via_get_special_param_value() to return "tsk_null" instead of "0"
+					rport = message.getSipHeaderParamValue("v",
+							"received_port_ext");
+				}
+				if (SipService.this.condHack != null) {
+					SipService.this.sipStack.setAoR(received, Integer
+							.parseInt(rport));
+					SipService.this.condHack.open();
+				}
+				break;
+			case tsip_i_options:
+			default:
+				break;
+			}
+
 			return 0;
 		}
 	}
-	
+
 	/* ===================== Sip Session Preferences ======================== */
-	private class SipPrefrences
-	{
+	private class SipPrefrences {
 		private boolean rcs;
 		private boolean xcapdiff;
 		private boolean remoteStorage;
@@ -290,9 +390,9 @@ public class SipService extends Service implements ISipService {
 		private boolean deferredMsg;
 		private boolean presence;
 		private boolean messageSummary;
-		
-		private SipPrefrences(){
-			
+
+		private SipPrefrences() {
+
 		}
 	}
 }

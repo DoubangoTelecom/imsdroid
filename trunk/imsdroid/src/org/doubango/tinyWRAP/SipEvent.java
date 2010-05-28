@@ -33,10 +33,6 @@ public class SipEvent {
     swigCPtr = 0;
   }
 
-  public SipEvent() {
-    this(tinyWRAPJNI.new_SipEvent(), true);
-  }
-
   public short getCode() {
     return tinyWRAPJNI.SipEvent_getCode(swigCPtr, this);
   }
@@ -48,6 +44,11 @@ public class SipEvent {
   public SipSession getBaseSession() {
     long cPtr = tinyWRAPJNI.SipEvent_getBaseSession(swigCPtr, this);
     return (cPtr == 0) ? null : new SipSession(cPtr, false);
+  }
+
+  public SipMessage getSipMessage() {
+    long cPtr = tinyWRAPJNI.SipEvent_getSipMessage(swigCPtr, this);
+    return (cPtr == 0) ? null : new SipMessage(cPtr, false);
   }
 
 }
