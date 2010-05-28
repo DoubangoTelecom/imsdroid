@@ -1,0 +1,1 @@
+xjc ../schemas/reginfo.xsd
