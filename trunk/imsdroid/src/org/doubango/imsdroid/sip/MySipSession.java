@@ -24,6 +24,10 @@ public abstract class MySipSession {
 		/* this.init(); */
 	}
 	
+	public long getId(){
+		return this.getSession().getId();
+	}
+	
 	public boolean isConnected(){
 		return this.connected;
 	}

@@ -6,12 +6,12 @@ public class XcapService  extends Service implements IXcapService{
 
 	public boolean start() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	public boolean stop() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 }

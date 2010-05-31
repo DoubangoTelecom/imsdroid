@@ -49,6 +49,8 @@ public class MySubscriptionSession extends MySipSession{
 			case REG:
 				this.session.addHeader("Event", "reg");
 				this.session.addHeader("Accept", ContentType.REG_INFO);
+				// 3GPP TS 24.229 5.1.1.6 User-initiated deregistration
+				this.session.setSilentHangup(true);
 				break;
 			case SIP_PROFILE:
 				this.session.addHeader("Event", "sip-profile");

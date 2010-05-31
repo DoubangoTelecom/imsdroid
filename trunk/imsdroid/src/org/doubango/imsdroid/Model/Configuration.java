@@ -18,9 +18,9 @@ public class Configuration {
 	}
 
 	// Default values
-	public static final String DEFAULT_DISPLAY_NAME = "alice";
-	public static final String DEFAULT_IMPI = "alice@open-ims.test";
-	public static final String DEFAULT_IMPU = "sip:alice@open-ims.test";
+	public static final String DEFAULT_DISPLAY_NAME = "johndoe";
+	public static final String DEFAULT_IMPI = "johndoe@open-ims.test";
+	public static final String DEFAULT_IMPU = "johndoe@open-ims.test";
 	
 	public static final boolean DEFAULT_EARLY_IMS = false;
 	public static final String DEFAULT_IP_VERSION = "ipv4";
@@ -65,7 +65,7 @@ public class Configuration {
 	
 	public static final boolean DEFAULT_XCAP_ENABLED = false;
 	public static final String DEFAULT_XCAP_ROOT = "http://doubango.org:8080/services";
-	public static final String DEFAULT_XUI = "sip:alice@open-ims.test";
+	public static final String DEFAULT_XUI = "sip:johndoe@open-ims.test";
 	
 	public static enum CONFIGURATION_ENTRY {
 		/* === IDENTITY === */

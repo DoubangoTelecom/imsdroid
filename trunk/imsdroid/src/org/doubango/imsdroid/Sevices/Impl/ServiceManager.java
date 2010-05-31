@@ -1,5 +1,7 @@
 package org.doubango.imsdroid.Sevices.Impl;
 
+import org.doubango.imsdroid.Main;
+import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.INetworkService;
@@ -8,7 +10,14 @@ import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Services.IStorageService;
 import org.doubango.imsdroid.Services.IXcapService;
 
-import android.app.ActivityGroup;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
 
 /**
  * Screen Manager. Entry point to retrieve all services (Singletons).
@@ -16,7 +25,7 @@ import android.app.ActivityGroup;
  * @author root
  * 
  */
-public class ServiceManager {
+public class ServiceManager  extends Service {
 	/* Singletons */
 	private static final ConfigurationService configurationService = new ConfigurationService();
 	private static final ContactService contactService = new ContactService();
@@ -26,14 +35,89 @@ public class ServiceManager {
 	private static final StorageService storageService = new StorageService();
 	private static final XcapService xcapService = new XcapService();
 	
-	private static ActivityGroup mainActivity;
+	private static final String TAG = ServiceManager.class.getCanonicalName();
+	
+	private static boolean started;
+	private static Main mainActivity;
+	private NotificationManager notifManager;
+	private static final int NOTIFICATION_ID = 19833891;
+	
+	private static ServiceManager instance;
 
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
+	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+
+		this.notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		// Display a notification about us starting.  We put an icon in the status bar.
+        this.showNotification();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+
+		// Cancel the persistent notification.
+		this.notifManager.cancel(NOTIFICATION_ID);
+
+        // Tell the user we stopped.
+        Toast.makeText(this, R.string.Version, Toast.LENGTH_SHORT).show();
+	}
+	
+	/**
+     * Show a notification while this service is running.
+     */
+    private void showNotification() {
+        // In this sample, we'll use the same text for the ticker and the expanded notification
+        CharSequence text = getText(R.string.copyright);
+
+        // Set the icon, scrolling text and timestamp
+        Notification notification = new Notification(R.drawable.bullet_ball_glass_red_16, text,
+                System.currentTimeMillis());
+
+        // The PendingIntent to launch our activity if the user selects this notification
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, Main.class), 0);
+
+        // Set the info for the views that show in the notification panel.
+        notification.setLatestEventInfo(this, getText(R.string.hello), text, contentIntent);
+
+        // Send the notification.
+        // We use a layout id because it is a unique number.  We use it later to cancel.
+        this.notifManager.notify(NOTIFICATION_ID, notification);
+    }
+    
+    public static ServiceManager getInstance(){
+    	return ServiceManager.instance;
+    }
+    
+	public static void setMainActivity(Main mainActivity){
+		ServiceManager.mainActivity = mainActivity;
+	}
+	
+	public static Main getMainActivity(){
+		return ServiceManager.mainActivity;
+	}
+	
 	/**
 	 * Starts all services
 	 * 
 	 * @return true if succeed and false otherwise
 	 */
 	public static boolean start() {
+		if(ServiceManager.started){
+			return true;
+		}
+		
+		// starts android service
+		ServiceManager.getMainActivity().startService(
+				new Intent(getMainActivity(), ServiceManager.class));
+		
 		boolean success = true;
 
 		success &= ServiceManager.configurationService.start();
@@ -44,8 +128,12 @@ public class ServiceManager {
 		success &= ServiceManager.storageService.start();
 		success &= ServiceManager.xcapService.start();
 
+		if(!success){
+			Log.e(ServiceManager.TAG, "Failed to start services");
+		}
+		
+		ServiceManager.started = true;
 		return true;
-		/*return success; */
 	}
 
 	/**
@@ -54,6 +142,14 @@ public class ServiceManager {
 	 * @return true if succeed and false otherwise
 	 */
 	public static boolean stop() {
+		if(!ServiceManager.started){
+			return true;
+		}
+		
+		// stops android service
+		ServiceManager.getMainActivity().stopService(
+				new Intent(ServiceManager.getMainActivity(), ServiceManager.class));
+		
 		boolean success = true;
 
 		success &= ServiceManager.configurationService.stop();
@@ -64,15 +160,11 @@ public class ServiceManager {
 		success &= ServiceManager.storageService.stop();
 		success &= ServiceManager.xcapService.stop();
 
+		if(!success){
+			Log.e(ServiceManager.TAG, "Failed to stop services");
+		}
+		
 		return success;
-	}
-
-	public static void setMainActivity(ActivityGroup mainActivity){
-		ServiceManager.mainActivity = mainActivity;
-	}
-	
-	public static ActivityGroup getMainActivity(){
-		return ServiceManager.mainActivity;
 	}
 	
 	/**

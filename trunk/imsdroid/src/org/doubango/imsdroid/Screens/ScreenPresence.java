@@ -104,6 +104,9 @@ public class ScreenPresence  extends Screen {
 			this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, 
 					this.etFreeText.getText().toString());
 			
+			// update main activity info
+			ServiceManager.getMainActivity().setFreeText(this.etFreeText.getText().toString());
+			
 			// Compute
 			if(!this.configurationService.compute()){
 				Log.e(this.getClass().getCanonicalName(), "Failed to Compute() configuration");

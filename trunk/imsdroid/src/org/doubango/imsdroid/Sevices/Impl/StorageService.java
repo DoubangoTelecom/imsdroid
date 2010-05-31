@@ -13,12 +13,12 @@ public class StorageService  extends Service implements IStorageService{
 	
 	public boolean start() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 	public boolean stop() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 	public String getCurrentDir(){

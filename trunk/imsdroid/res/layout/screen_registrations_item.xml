@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="wrap_content" android:layout_width="fill_parent">
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/bullet_ball_glass_green_16" android:id="@+id/screen_registrations_item_imageView_regstate"></ImageView>
+<TextView android:layout_height="wrap_content" android:layout_toRightOf="@+id/screen_registrations_item_imageView_regstate" android:id="@+id/screen_registrations_item_textView_regaor" android:text="sip:+331000000@open-ims.test;user=phone" android:layout_width="fill_parent"></TextView>
+<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_registrations_item_textView_regaor" android:layout_toRightOf="@+id/screen_registrations_item_imageView_regstate" android:text="sip:alice@192.168.0.13:52896;transport=tcp" android:id="@+id/screen_registrations_item_textView_contacturi" android:layout_width="fill_parent"></TextView>
+<TextView android:layout_height="wrap_content" android:layout_toRightOf="@+id/screen_registrations_item_imageView_regstate" android:text="State: active" android:id="@+id/screen_registrations_item_textView_contactstate" android:layout_below="@+id/screen_registrations_item_textView_contacturi" android:layout_width="fill_parent"></TextView>
+<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_registrations_item_textView_contactstate" android:layout_toRightOf="@+id/screen_registrations_item_imageView_regstate" android:text="Event: registered" android:id="@+id/screen_registrations_item_textView_contacteven" android:layout_width="fill_parent"></TextView>
+</RelativeLayout>

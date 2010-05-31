@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
@@ -17,7 +18,7 @@ public class Contact {
     protected String uri;
     @Element(name = "display-name", required = false)
     protected Contact.DisplayName displayName;
-    @Element(name = "unknown-param", required = false)
+    @ElementList(entry="unknown-param", inline=true, required=false)
     protected List<Contact.UnknownParam> unknownParam;
     @Attribute(required = true)
     protected String state;
@@ -57,15 +58,27 @@ public class Contact {
     public String getState() {
         return state;
     }
+    
+    public void setState(String state) {
+        this.state = state;
+    }
    
     public String getEvent() {
         return event;
+    }
+    
+    public void setEvent(String event) {
+        this.event = event;
     }
     
     public BigInteger getDurationRegistered() {
         return durationRegistered;
     }
 
+    public void setExpires(BigInteger expires) {
+        this.expires = expires;
+    }
+    
     public BigInteger getExpires() {
         return expires;
     }
@@ -95,9 +108,9 @@ public class Contact {
     
     public static class DisplayName {
 
-        @Text
+        @Text(required=true)
         protected String value;
-        @Attribute
+        @Attribute(required=true)
         @Namespace(reference="http://www.w3.org/XML/1998/namespace")
         protected String lang;
         
@@ -114,7 +127,7 @@ public class Contact {
     
     public static class UnknownParam {
 
-    	@Text
+    	@Text(required=false)
         protected String value;
         @Attribute(required = true)
         protected String name;

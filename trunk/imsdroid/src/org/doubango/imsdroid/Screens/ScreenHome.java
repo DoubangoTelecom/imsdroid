@@ -109,6 +109,8 @@ implements IRegistrationEventHandler
 //					getResources(), R.drawable.sign_in_48), "Sign In", null);
 //		}
 //		this.adapter.setItemEnabled(ScreenHome.itemSignInOutPosition, savedInstanceState.getBoolean("SignInOutEnabled"));
+		
+		this.adapter.setRegistered(this.sipService.isRegistered());
 	}
 	
 	
@@ -144,7 +146,7 @@ implements IRegistrationEventHandler
 						       .setCancelable(false)
 						       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 						           public void onClick(DialogInterface dialog, int id) {
-						                ServiceManager.getMainActivity().finish();
+						                ServiceManager.getMainActivity().exit();
 						           }
 						       })
 						       .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -180,12 +182,13 @@ implements IRegistrationEventHandler
 			case UNREGISTRATION_INPROGRESS:
 				this.handler.post(new Runnable() {
 					public void run() {
-						//ScreenHome.this.adapter.setItemEnabled(ScreenHome.itemSignInOutPosition, false);
+						ScreenHome.this.adapter.setInprogress(true);
 				}});
 				break;
 				
 			case REGISTRATION_NOK:
 			case UNREGISTRATION_NOK:
+				ScreenHome.this.adapter.setRegistered(ScreenHome.this.sipService.isRegistered());
 			default:
 				break;
 			
@@ -212,13 +215,20 @@ implements IRegistrationEventHandler
 	private class ScreenHomeAdapter extends BaseAdapter {
 		private ArrayList<ScreenHomeItem> items;
 		private boolean registered;
-
+		private boolean inprogress;
+		
 		private ScreenHomeAdapter(ArrayList<ScreenHomeItem> items) {
 			this.items = items;
 		}
 
 		private synchronized void setRegistered(boolean registered){
 			this.registered = registered;
+			this.notifyDataSetChanged();
+			this.inprogress = false;
+		}
+		
+		private synchronized void setInprogress(boolean inprogress){
+			this.inprogress = inprogress;
 			this.notifyDataSetChanged();
 		}
 
@@ -239,10 +249,9 @@ implements IRegistrationEventHandler
 			ScreenHomeItem item;
 			final boolean  registered = ScreenHome.this.sipService.isRegistered();
 
-			if (view == null) { // if it's not recycled, initialize some attributes
+			if (view == null) {
 				view = getLayoutInflater().inflate(R.layout.screen_home_item, null);
 			}
-
 			if ((item = this.items.get(position)) == null) {
 				return view;
 			}

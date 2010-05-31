@@ -3,7 +3,7 @@ package org.doubango.imsdroid.sip;
 import org.doubango.tinyWRAP.RegistrationSession;
 import org.doubango.tinyWRAP.SipSession;
 
-public class MyRegistrationSession extends MySipSession{
+public class MyRegistrationSession extends MySipSession {
 
 	private final RegistrationSession session;
 	
