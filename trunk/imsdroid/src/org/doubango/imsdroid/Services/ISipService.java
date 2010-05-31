@@ -7,7 +7,10 @@ public interface ISipService  extends IService,
 IRegistrationEventDispatcher, 
 ISubscriptionEventDispatcher
 {
-
+	
+	byte[] getReginfo();
+	byte[] getWinfo();
+	
 	boolean register();
 	boolean unregister();
 	

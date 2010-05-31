@@ -15,18 +15,23 @@ import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
 import org.doubango.imsdroid.events.SubscriptionEventArgs;
 import org.doubango.imsdroid.events.SubscriptionEventTypes;
+import org.doubango.imsdroid.sip.MyPublicationSession;
 import org.doubango.imsdroid.sip.MyRegistrationSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MySubscriptionSession;
 import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
+import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.tinyWRAP.DialogEvent;
 import org.doubango.tinyWRAP.OptionsEvent;
 import org.doubango.tinyWRAP.OptionsSession;
 import org.doubango.tinyWRAP.RegistrationEvent;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipMessage;
+import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.SubscriptionEvent;
 import org.doubango.tinyWRAP.SubscriptionSession;
+import org.doubango.tinyWRAP.tinyWRAPConstants;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
 import org.doubango.tinyWRAP.tsip_register_event_type_t;
 import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
@@ -34,7 +39,8 @@ import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
 import android.os.ConditionVariable;
 import android.util.Log;
 
-public class SipService extends Service implements ISipService {
+public class SipService extends Service 
+implements ISipService, tinyWRAPConstants {
 
 	private final static String TAG = SipService.class.getCanonicalName();
 
@@ -45,14 +51,19 @@ public class SipService extends Service implements ISipService {
 	// Event Handlers
 	private final CopyOnWriteArrayList<IRegistrationEventHandler> registrationEventHandlers;
 	private final CopyOnWriteArrayList<ISubscriptionEventHandler> subscriptionEventHandlers;
-	
 
+	private byte[] reginfo;
+	private byte[] winfo;
+	
 	private MySipStack sipStack;
+	private final MySipCallback sipCallback;
+	
 	private MyRegistrationSession regSession;
 	private MySubscriptionSession subReg;
 	private MySubscriptionSession subWinfo;
 	private MySubscriptionSession subMwi;
-	private final MySipCallback sipCallback;
+	private MySubscriptionSession subDebug;
+	private MyPublicationSession pubPres;
 	
 	private final SipPrefrences preferences;
 
@@ -88,6 +99,14 @@ public class SipService extends Service implements ISipService {
 		return false;
 	}
 
+	public byte[] getReginfo(){
+		return this.reginfo;
+	}
+	
+	public byte[] getWinfo(){
+		return this.winfo;
+	}
+	
 	/* ===================== SIP functions ======================== */
 
 	public boolean register() {
@@ -184,6 +203,9 @@ public class SipService extends Service implements ISipService {
 		this.preferences.xcap_enabled = this.configurationService.getBoolean(
 				CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED,
 				Configuration.DEFAULT_XCAP_ENABLED);
+		this.preferences.presence_enabled = this.configurationService.getBoolean(
+				CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE,
+				Configuration.DEFAULT_RCS_PRESENCE);
 
 		// Create registration session
 		if (this.regSession == null) {
@@ -293,9 +315,17 @@ public class SipService extends Service implements ISipService {
 		
 		Log.d(SipService.TAG, "Doing post registration operations");
 		
-		// Subscribe to "reg" event package
+		/*
+		 * 3GPP TS 24.229 5.1.1.3 Subscription to registration-state event package
+		 * Upon receipt of a 2xx response to the initial registration, the UE shall subscribe to the reg event package for the public
+		 * user identity registered at the user's registrar (S-CSCF) as described in RFC 3680 [43].
+		 */
 		if(this.subReg == null){
 			this.subReg = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.REG);
+		}
+		else{
+			this.subReg.setToUri(this.preferences.impu);
+			this.subReg.setFromUri(this.preferences.impu);
 		}
 		this.subReg.subscribe();
 		
@@ -303,18 +333,44 @@ public class SipService extends Service implements ISipService {
 		if(this.subMwi == null){
 			this.subMwi = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.MESSAGE_SUMMARY); 
 		}
+		else{
+			this.subMwi.setToUri(this.preferences.impu);
+			this.subMwi.setFromUri(this.preferences.impu);
+		}
 		this.subMwi.subscribe();
 		
-		// Subscribe to "watcher-info" and "presence"
-		if(this.preferences.xcap_enabled){
-			if(this.subWinfo == null){
-				this.subWinfo = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.WINFO); 
+		// Presence
+		if(this.preferences.presence_enabled){
+			// Subscribe to "watcher-info" and "presence"
+			if(this.preferences.xcap_enabled){
+				// "watcher-info"
+				if(this.subWinfo == null){
+					this.subWinfo = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.WINFO); 
+				}
+				else{
+					this.subWinfo.setToUri(this.preferences.impu);
+					this.subWinfo.setFromUri(this.preferences.impu);
+				}
+				this.subWinfo.subscribe();
+				// "eventlist"
 			}
-			this.subWinfo.subscribe();
-		}
-		else{
+			else{
+				
+			}
 			
+			// Publish presence
+			if(this.pubPres == null){
+				this.pubPres = new MyPublicationSession(this.sipStack, this.preferences.impu);
+			}
+			else{
+				this.pubPres.setFromUri(this.preferences.impu);
+				this.pubPres.setToUri(this.preferences.impu);
+			}
+			this.pubPres.publish("open", "busy", this.configurationService.getString(
+					CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT,
+					Configuration.DEFAULT_RCS_FREE_TEXT));
 		}
+		
 	}
 	
 
@@ -329,6 +385,7 @@ public class SipService extends Service implements ISipService {
 			this.sipService = sipService;
 		}
 
+		@SuppressWarnings("unused")
 		private final boolean isSipCode(short code) {
 			return (code >= 100 && code <= 699);
 		}
@@ -347,42 +404,25 @@ public class SipService extends Service implements ISipService {
 			final String phrase = e.getPhrase();
 			final tsip_register_event_type_t type = e.getType();
 
-			if (!this.isSipCode(code) || this.is1xx(code)) {
+			Log.d(SipService.TAG, String.format("OnRegistrationEvent (%s)", phrase));
+			
+			if (this.is1xx(code)) {
 				return 0;
 			}
 
 			switch (type) {
 			case tsip_ao_register:
 				if (this.is2xx(code)) { /* Success */
-					if(!this.sipService.isRegistered()){ /* only if state change */
-						// Update sip service state
-						this.sipService.regSession.setConnected(true);
-						
-						// Do post connection operations
-						this.sipService.doPostRegistrationOp();
-						
-						// raise event
-						RegistrationEventArgs eargs = new RegistrationEventArgs( RegistrationEventTypes.REGISTRATION_OK, code, phrase);
-						this.sipService.onRegistrationEvent(eargs);
-					}
+					// see OnDialogEvent()
 				} else { /* Failure */
-					RegistrationEventArgs eargs = new RegistrationEventArgs(RegistrationEventTypes.REGISTRATION_NOK, code, phrase);
-					this.sipService.onRegistrationEvent(eargs);
+					// see OnDialogEvent()
 				}
 				break;
 			case tsip_ao_unregister:
 				if (this.is2xx(code)) { /* Success */
-					if(this.sipService.isRegistered()){ /* only if state change */
-						// Update sip service state
-						this.sipService.regSession.setConnected(false);
-						
-						// raise event
-						RegistrationEventArgs eargs = new RegistrationEventArgs(RegistrationEventTypes.UNREGISTRATION_OK, code, phrase);
-						this.sipService.onRegistrationEvent(eargs);
-					}
+					// see OnDialogEvent()
 				} else { /* Failure */
-					RegistrationEventArgs eargs = new RegistrationEventArgs(RegistrationEventTypes.UNREGISTRATION_NOK, code, phrase);
-					this.sipService.onRegistrationEvent(eargs);
+					// see OnDialogEvent()
 				}
 				break;
 
@@ -417,15 +457,97 @@ public class SipService extends Service implements ISipService {
 					}
 					String contentType = message.getSipHeaderValue("c");
 					byte[] content = message.getSipContent();
-					SubscriptionEventArgs eargs = new SubscriptionEventArgs(SubscriptionEventTypes.INCOMING_NOTIFY,
-							code, phrase, content, contentType);
-					this.sipService.onSubscriptionEvent(eargs);
+					
+					if(content != null){
+						if(StringUtils.equals(contentType, ContentType.REG_INFO, true)){
+							this.sipService.reginfo = content;
+						}
+						else if(StringUtils.equals(contentType, ContentType.WATCHER_INFO, true)){
+							this.sipService.winfo = content;
+						}
+						
+						SubscriptionEventArgs eargs = new SubscriptionEventArgs(SubscriptionEventTypes.INCOMING_NOTIFY, 
+								code, phrase, content, contentType);
+						this.sipService.onSubscriptionEvent(eargs);
+					}
 					break;
 				}
 			
 			return 0;
 		}
 
+		@Override
+		public int OnDialogEvent(DialogEvent e){
+			final String phrase = e.getPhrase();
+			final short code = e.getCode();
+			SipSession session = e.getBaseSession();
+			
+			if(session == null){
+				return 0;
+			}
+			
+			Log.d(SipService.TAG, String.format("OnDialogEvent (%s)", phrase));
+			
+			switch(code){
+				case tsip_event_code_dialog_connecting:
+					// Registration
+					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){							
+						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
+									RegistrationEventTypes.REGISTRATION_INPROGRESS, code, phrase));
+					}
+					// Subscription
+					// Publication
+					// ...
+					break;
+					
+				case tsip_event_code_dialog_connected:
+					// Registration
+					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){
+						this.sipService.regSession.setConnected(true);
+						this.sipService.doPostRegistrationOp();
+						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
+									RegistrationEventTypes.REGISTRATION_OK, code, phrase));
+					}
+					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							
+						this.sipService.pubPres.setConnected(true);
+					}
+					// Subscription
+					// Publication
+					// ...
+					break;
+					
+				case tsip_event_code_dialog_terminating:
+					// Registration
+					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){						
+						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
+									RegistrationEventTypes.UNREGISTRATION_INPROGRESS, code, phrase));
+					}
+					// Subscription
+					// Publication
+					// ...
+					break;
+				
+				case tsip_event_code_dialog_terminated:
+					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){
+						this.sipService.regSession.setConnected(false);
+						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
+									RegistrationEventTypes.UNREGISTRATION_OK, code, phrase));
+					}
+					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							
+						this.sipService.pubPres.setConnected(false);
+					}
+					// Subscription
+					// Publication
+					// ...
+					break;
+					
+				default:
+					break;
+			}
+			
+			return 0;
+		}
+		
 		@Override
 		public int OnOptionsEvent(OptionsEvent e) {
 			//short code = e.getCode();
@@ -465,7 +587,7 @@ public class SipService extends Service implements ISipService {
 		private boolean xcap_enabled;
 		private boolean preslist;
 		private boolean deferredMsg;
-		private boolean presence;
+		private boolean presence_enabled;
 		private boolean messageSummary;
 		private String impi;
 		private String impu;

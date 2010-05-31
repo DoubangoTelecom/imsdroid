@@ -2,6 +2,7 @@ package org.doubango.imsdroid.Sevices.Impl;
 
 import java.util.HashMap;
 
+import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAbout;
@@ -91,7 +92,7 @@ public class ScreenService extends Service implements IScreenService {
 			return false;
 		}
 
-		ActivityGroup mainActivity = ServiceManager.getMainActivity();
+		Main mainActivity = ServiceManager.getMainActivity();
 		
 		Intent intent = new Intent(mainActivity, screen.getClass());
 		View view = mainActivity.getLocalActivityManager().startActivity(
@@ -103,7 +104,7 @@ public class ScreenService extends Service implements IScreenService {
 		layout.addView(view);
 		
 		// title
-		((TextView)mainActivity.findViewById(R.id.main_textView_title)).setText(screen.getScreenTitle());
+		mainActivity.setScreenTitle(screen.getScreenTitle());
 		
 		// add to stack
 		this.lastScreens[(++this.lastScreensIndex % this.lastScreens.length)] = screen;
@@ -208,8 +209,7 @@ public class ScreenService extends Service implements IScreenService {
 	
 	public void setProgressInfoText(String text)
 	{
-		ActivityGroup mainActivity = ServiceManager.getMainActivity();
-		((TextView)mainActivity.findViewById(R.id.main_textView_progressinfo)).setText(text);
+		ServiceManager.getMainActivity().setProgressInfo(text);
 	}
 	
 	public Screen getCurrentScreen(){

@@ -30,6 +30,35 @@ public class TestReginfo {
 	         "</registration>"+
 	       "</reginfo>";
 	
+	private static final String TEST3 = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+
+							"<reginfo xmlns=\"urn:ietf:params:xml:ns:reginfo\" state=\"full\" version=\"1\">"+
+							"<registration aor=\"sip:alice@ericsson.com\" id=\"4cb248c59d1629b1a735d95bc3a248c4\" state=\"terminated\">"+
+							"<contact event=\"unregistered\" id=\"3\" q=\"0.5\" state=\"terminated\">"+
+							"<uri>sip:alice@192.168.0.12:49890;transport=tcp</uri>"+
+							"<unknown-param name=\"+g.oma.sip-im\"/>"+
+							"<unknown-param name=\"+g.3gpp.smsip\"/>"+
+							"<unknown-param name=\"+g.oma.sip-im.large-message\"/>"+
+							"<unknown-param name=\"+g.3gpp.cs-voice\"/>"+
+							"<unknown-param name=\"audio\"/>"+
+							"<unknown-param name=\"+g.3gpp.icsi-ref\">\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"</unknown-param>"+
+							"<unknown-param name=\"language\">\"en,fr\"</unknown-param>"+
+							"</contact>"+
+							"</registration>"+
+							"<registration aor=\"sip:+15145550001@ericsson.com;user=phone\" id=\"8ea16a2c236fda75d4cea7fe40197155\" state=\"terminated\">"+
+							"<contact event=\"unregistered\" id=\"4\" q=\"0.5\" state=\"terminated\">"+
+							"<uri>sip:alice@192.168.0.12:49890;transport=tcp</uri>"+
+							"<unknown-param name=\"+g.oma.sip-im\"/>"+
+							"<unknown-param name=\"+g.3gpp.smsip\"/>"+
+							"<unknown-param name=\"+g.oma.sip-im.large-message\"/>"+
+							"<unknown-param name=\"+g.3gpp.cs-voice\"/>"+
+							"<unknown-param name=\"audio\"/>"+
+							"<unknown-param name=\"+g.3gpp.icsi-ref\">\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"</unknown-param>"+
+							"<unknown-param name=\"language\">\"en,fr\"</unknown-param>"+
+							"</contact>"+
+							"</registration>"+
+							"</reginfo>";
+	
+	
 	public static boolean run(){
 		
 		final Serializer serializer = new Persister();
@@ -51,9 +80,20 @@ public class TestReginfo {
 		try {
 			@SuppressWarnings("unused")
 			Reginfo reginfo = serializer.read(Reginfo.class, TestReginfo.TEST2);
-			Log.d(TestReginfo.TAG, "NNNN-test1: success");
+			Log.d(TestReginfo.TAG, "NNNN-test2: success");
 		} catch (Exception e) {
-			Log.e(TestReginfo.TAG, "YYYY-test1: failed");
+			Log.e(TestReginfo.TAG, "YYYY-test2: failed");
+			e.printStackTrace();
+			success = false;
+		}
+		
+		Log.d(TestReginfo.TAG, "running test3...");
+		try {
+			@SuppressWarnings("unused")
+			Reginfo reginfo = serializer.read(Reginfo.class, TestReginfo.TEST3);
+			Log.d(TestReginfo.TAG, "NNNN-test3: success");
+		} catch (Exception e) {
+			Log.e(TestReginfo.TAG, "YYYY-test3: failed");
 			e.printStackTrace();
 			success = false;
 		}

@@ -6,22 +6,23 @@
 <RelativeLayout android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/main_relativeLayout">
 
 
-<LinearLayout android:layout_height="wrap_content" android:id="@+id/main_linearLayout_top" android:layout_width="fill_parent" android:minHeight="20px">
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="20px" android:id="@+id/main_linearLayout_top_left">
-<TextView android:textStyle="bold" android:layout_weight="1" android:gravity="fill_horizontal" android:layout_width="wrap_content" android:text="Home" android:id="@+id/main_textView_title" android:textSize="16px" android:layout_height="fill_parent"></TextView>
-</LinearLayout>
+<RelativeLayout android:layout_height="wrap_content" android:id="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content">
+<ImageView android:layout_height="wrap_content" android:src="@drawable/user_32" android:id="@+id/main_imageView_avatar" android:layout_width="wrap_content"></ImageView>
+
+<TextView android:layout_height="wrap_content" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_displayname" android:text="John Doe" android:layout_width="wrap_content"></TextView>
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/main_textView_displayname" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_freetext" android:text="Hello world"></TextView>
 
 
-<LinearLayout android:gravity="right" android:layout_width="fill_parent" android:id="@+id/main_linearLayout_top_right" android:layout_height="20px">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_hourclass"></ImageView><ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_connstate" android:layout_gravity="center_vertical" android:src="@drawable/bullet_ball_glass_red_16"></ImageView>
+</RelativeLayout>
+
+<RelativeLayout android:layout_toRightOf="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content" android:id="@+id/main_relativeLayout_topright" android:layout_alignParentRight="true" android:layout_height="wrap_content">
+<ImageView android:layout_toRightOf="@+id/main_textView_displayname" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_connstate" android:src="@drawable/bullet_ball_glass_red_16" android:layout_alignParentRight="true"></ImageView>
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/user_16" android:layout_below="@+id/main_imageView_connstate" android:layout_alignParentRight="true" android:id="@+id/main_imageView_status"></ImageView>
+</RelativeLayout>
+
+<LinearLayout android:minHeight="20px" android:gravity="fill_vertical|fill_horizontal" android:id="@+id/main_linearLayout_principal" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="16px" android:layout_below="@+id/main_relativeLayout_top_left">
 
 
-
-</LinearLayout>
-
-</LinearLayout>
-
-<LinearLayout android:minHeight="20px" android:gravity="fill_vertical|fill_horizontal" android:id="@+id/main_linearLayout_principal" android:layout_below="@+id/main_linearLayout_top" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="16px">
 
 </LinearLayout>
 
@@ -29,7 +30,8 @@
 
 
 
-<TextView android:layout_width="fill_parent" android:id="@+id/main_textView_progressinfo" android:gravity="right|center_vertical" android:layout_height="wrap_content"></TextView>
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_textView_title" android:text="Home"></TextView><TextView android:layout_width="fill_parent" android:id="@+id/main_textView_progressinfo" android:gravity="right|center_vertical" android:layout_height="wrap_content"></TextView>
+
 
 
 

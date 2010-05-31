@@ -78,6 +78,9 @@ public class ScreenIdentity  extends Screen {
 			this.ConfigurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.EARLY_IMS, 
 					this.cbEarlyIMS.isChecked());
 			
+			// update main activity info
+			ServiceManager.getMainActivity().setDisplayName(this.etDisplayName.getText().toString());
+			
 			// Compute
 			if(!this.ConfigurationService.compute()){
 				Log.e(this.getClass().getCanonicalName(), "Failed to Compute() configuration");

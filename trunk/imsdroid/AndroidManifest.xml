@@ -39,6 +39,8 @@
 <activity android:name=".Screens.ScreenChatQueue"></activity>
 <activity android:name=".Screens.ScreenHistory"></activity>
 <activity android:name=".Screens.ScreenRegistrations"></activity>
+
+<service android:name=".Sevices.Impl.ServiceManager"></service>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />
@@ -47,6 +49,8 @@
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
 	<uses-permission android:name="android.permission.CAMERA"></uses-permission>
+	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
+	
 	
 	
 	

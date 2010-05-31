@@ -3,12 +3,17 @@ package org.doubango.imsdroid.Sevices.Impl;
 import org.doubango.imsdroid.Services.INetworkService;
 
 import android.content.Context;
+import android.net.NetworkInfo.DetailedState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 
 public class NetworkService  extends Service implements INetworkService {
 
+	private static final String TAG = NetworkService.class.getCanonicalName();
+	
 	private WifiManager wifiManager;
+	private WifiLock wifiLock;
 	
 	public static enum DNS_TYPE {
 		DNS_1, DNS_2, DNS_3, DNS_4
@@ -19,11 +24,38 @@ public class NetworkService  extends Service implements INetworkService {
 	}
 	
 	public boolean start() {
-		this.wifiManager = (WifiManager) ServiceManager.getMainActivity().getSystemService(Context.WIFI_SERVICE);
+		if(this.started){
+			return true;
+		}
+		
+		/* wifi */
+		if((this.wifiManager = (WifiManager) ServiceManager.getMainActivity().getSystemService(Context.WIFI_SERVICE)) != null){
+			this.wifiLock = this.wifiManager.createWifiLock(NetworkService.TAG);
+			final WifiInfo wifiInfo = this.wifiManager.getConnectionInfo();
+			if(wifiInfo != null){
+				final DetailedState detailedState = WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState());
+				if(detailedState == DetailedState.CONNECTED 
+						|| detailedState == DetailedState.CONNECTING || detailedState == DetailedState.OBTAINING_IPADDR){
+					this.wifiLock.acquire();
+				}
+			}
+		}
+		
+		this.started = true;
 		return true;
 	}
 
 	public boolean stop() {
+		if(!this.started){
+			return true;
+		}
+		
+		/* wifi */
+		if(this.wifiLock != null && this.wifiLock.isHeld()){
+			this.wifiLock.release();
+		}
+		
+		this.started = false;
 		return true;
 	}
 	

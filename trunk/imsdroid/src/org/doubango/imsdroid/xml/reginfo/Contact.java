@@ -1,30 +1,3 @@
-/*	Mozilla Public License Version 1.1
- * 
- * Copyright (C) 2010 Mamadou Diop.
- * 
- * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
-
- * Software distributed under the License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- * License for the specific language governing rights and limitations
- * under the License.
-
- * The Original Code is imsdroid v1.0.0.
-
- * The Initial Developers of the Original Code is Mamadou Diop <diopmamadou (at) doubango.org>
-
- * Portions created by ., ., . and .; 
-
- * All Rights Reserved.
-
- * Contributor(s): 
- * Mamadou Diop <diopmamadou (at) doubango.org>
- * ... add your name and email here
- */
-
 package org.doubango.imsdroid.xml.reginfo;
 
 import java.math.BigInteger;
@@ -33,6 +6,7 @@ import java.util.List;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
@@ -44,7 +18,7 @@ public class Contact {
     protected String uri;
     @Element(name = "display-name", required = false)
     protected Contact.DisplayName displayName;
-    @Element(name = "unknown-param", required = false)
+    @ElementList(entry="unknown-param", inline=true, required=false)
     protected List<Contact.UnknownParam> unknownParam;
     @Attribute(required = true)
     protected String state;
@@ -84,15 +58,27 @@ public class Contact {
     public String getState() {
         return state;
     }
+    
+    public void setState(String state) {
+        this.state = state;
+    }
    
     public String getEvent() {
         return event;
+    }
+    
+    public void setEvent(String event) {
+        this.event = event;
     }
     
     public BigInteger getDurationRegistered() {
         return durationRegistered;
     }
 
+    public void setExpires(BigInteger expires) {
+        this.expires = expires;
+    }
+    
     public BigInteger getExpires() {
         return expires;
     }
@@ -122,9 +108,9 @@ public class Contact {
     
     public static class DisplayName {
 
-        @Text
+        @Text(required=true)
         protected String value;
-        @Attribute
+        @Attribute(required=true)
         @Namespace(reference="http://www.w3.org/XML/1998/namespace")
         protected String lang;
         
@@ -141,7 +127,7 @@ public class Contact {
     
     public static class UnknownParam {
 
-    	@Text
+    	@Text(required=false)
         protected String value;
         @Attribute(required = true)
         protected String name;
