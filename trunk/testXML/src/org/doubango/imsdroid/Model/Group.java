@@ -41,6 +41,7 @@ public class Group implements Comparable<Group> {
 		return this.displayName;
 	}
 	
+	@Override
 	public int compareTo(Group another) {
 		return 0;
 	}

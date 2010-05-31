@@ -25,6 +25,7 @@ import org.doubango.imsdroid.utils.StringUtils;
 import org.doubango.tinyWRAP.DialogEvent;
 import org.doubango.tinyWRAP.OptionsEvent;
 import org.doubango.tinyWRAP.OptionsSession;
+import org.doubango.tinyWRAP.PublicationEvent;
 import org.doubango.tinyWRAP.RegistrationEvent;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipMessage;
@@ -33,6 +34,7 @@ import org.doubango.tinyWRAP.SubscriptionEvent;
 import org.doubango.tinyWRAP.SubscriptionSession;
 import org.doubango.tinyWRAP.tinyWRAPConstants;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
+import org.doubango.tinyWRAP.tsip_publish_event_type_t;
 import org.doubango.tinyWRAP.tsip_register_event_type_t;
 import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
 
@@ -472,6 +474,26 @@ implements ISipService, tinyWRAPConstants {
 					}
 					break;
 				}
+			
+			return 0;
+		}
+		
+		@Override
+		public int OnPublicationEvent(PublicationEvent e) {
+			@SuppressWarnings("unused")
+			short code = e.getCode();
+			tsip_publish_event_type_t type = e.getType();
+			
+			switch(type){
+				case tsip_i_publish:
+					break;
+				case tsip_ao_publish:
+					break;
+				case tsip_i_unpublish:
+					break;
+				case tsip_ao_unpublish:
+					break;
+			}
 			
 			return 0;
 		}

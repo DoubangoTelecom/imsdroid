@@ -11,8 +11,8 @@
 
 
 
-<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_presence_checkBox_partial_pub" android:id="@+id/screen_presence_textView_freetext" android:text="Free Text (Note)" android:layout_width="fill_parent"></TextView>
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_below="@+id/screen_presence_textView_freetext" android:id="@+id/screen_presence_editText_freetext" android:text="Hello world"></EditText>
+<Spinner android:layout_below="@+id/screen_presence_checkBox_partial_pub" android:layout_height="wrap_content" android:id="@+id/screen_presence_spinner_status" android:layout_width="fill_parent" android:layout_marginRight="5px"></Spinner><TextView android:layout_height="wrap_content" android:id="@+id/screen_presence_textView_freetext" android:text="Free Text (Note)" android:layout_width="fill_parent" android:layout_below="@+id/screen_presence_spinner_status"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_below="@+id/screen_presence_textView_freetext" android:id="@+id/screen_presence_editText_freetext" android:text="Hello world" android:layout_marginRight="5px" android:layout_width="fill_parent"></EditText>
 
 <TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_presence_editText_freetext" android:id="@+id/screen_presence_textView_avatar" android:text="Avatar" android:layout_width="fill_parent"></TextView>
 <ImageView android:id="@+id/screen_presence_imageView" android:src="@drawable/identity_48" android:layout_below="@+id/screen_presence_textView_avatar" android:layout_height="60px" android:layout_width="40px"></ImageView>
@@ -27,6 +27,8 @@
 </RelativeLayout>
 
 <FrameLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/identity_48" android:id="@+id/screen_presence_frameLayout_preview" android:layout_below="@+id/screen_presence_imageView"></FrameLayout>
+
+
 </RelativeLayout>
 </RelativeLayout>
 

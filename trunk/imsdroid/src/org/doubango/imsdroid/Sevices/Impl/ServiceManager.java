@@ -36,10 +36,11 @@ public class ServiceManager  extends Service {
 	private static final XcapService xcapService = new XcapService();
 	
 	private static final String TAG = ServiceManager.class.getCanonicalName();
+	private static final String CONTENT_TITLE = "imsdroid";
 	
 	private static boolean started;
 	private static Main mainActivity;
-	private NotificationManager notifManager;
+	private static NotificationManager notifManager;
 	private static final int NOTIFICATION_ID = 19833891;
 	
 	private static ServiceManager instance;
@@ -53,9 +54,12 @@ public class ServiceManager  extends Service {
 	public void onCreate() {
 		super.onCreate();
 
-		this.notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		// Display a notification about us starting.  We put an icon in the status bar.
-        this.showNotification();
+		if(ServiceManager.notifManager == null){
+			ServiceManager.notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			// Display a notification about us starting.  We put an icon in the status bar.
+			ServiceManager.showNotification(R.drawable.bullet_ball_glass_red_16, "You are not connected");
+		}
+		ServiceManager.instance = this;
 	}
 
 	@Override
@@ -63,33 +67,26 @@ public class ServiceManager  extends Service {
 		super.onDestroy();
 
 		// Cancel the persistent notification.
-		this.notifManager.cancel(NOTIFICATION_ID);
+		ServiceManager.notifManager.cancel(ServiceManager.NOTIFICATION_ID);
 
         // Tell the user we stopped.
-        Toast.makeText(this, R.string.Version, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "imsdroid shutting down...", Toast.LENGTH_SHORT).show();
 	}
 	
-	/**
-     * Show a notification while this service is running.
-     */
-    private void showNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.copyright);
-
+    public static void showNotification(int drawableId, String tickerText) {
         // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.bullet_ball_glass_red_16, text,
-                System.currentTimeMillis());
+        Notification notification = new Notification(drawableId, tickerText, System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, Main.class), 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(ServiceManager.getMainActivity(), 0,
+                new Intent(ServiceManager.getMainActivity(), Main.class), 0);
 
         // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.hello), text, contentIntent);
+        notification.setLatestEventInfo(ServiceManager.getMainActivity(), ServiceManager.CONTENT_TITLE, tickerText, contentIntent);
 
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
-        this.notifManager.notify(NOTIFICATION_ID, notification);
+        ServiceManager.notifManager.notify(NOTIFICATION_ID, notification);
     }
     
     public static ServiceManager getInstance(){

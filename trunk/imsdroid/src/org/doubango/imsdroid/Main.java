@@ -53,7 +53,6 @@ implements IRegistrationEventHandler
     private TextView tvDisplayName;
     private TextView tvFreeText;
     private TextView tvProgressInfo;
-    private ImageView ivConnState;
     private ImageView ivStatus;
     private ImageView ivAvatar;
    
@@ -75,11 +74,9 @@ implements IRegistrationEventHandler
     }
     
     private ServiceConnection connection = new ServiceConnection() {
-		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			// TODO Auto-generated method stub
 		}
-		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			// TODO Auto-generated method stub
 		}
@@ -96,7 +93,6 @@ implements IRegistrationEventHandler
         this.tvDisplayName = (TextView)this.findViewById(R.id.main_textView_displayname);
         this.tvFreeText = (TextView)this.findViewById(R.id.main_textView_freetext);
         this.tvProgressInfo = (TextView)this.findViewById(R.id.main_textView_progressinfo);
-        this.ivConnState = (ImageView)this.findViewById(R.id.main_imageView_connstate);
         this.ivStatus = (ImageView)this.findViewById(R.id.main_imageView_status);
         this.ivAvatar = (ImageView)this.findViewById(R.id.main_imageView_avatar);
         
@@ -141,7 +137,6 @@ implements IRegistrationEventHandler
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString("SCREEN_ID", this.screenService.getCurrentScreen().getId().toString());
 		outState.putString("progressInfoText", this.progressInfoText);
-		outState.putInt("connStateDrawableId", this.connStateDrawableId);
 		
 		super.onSaveInstanceState(outState);
 	}
@@ -152,9 +147,7 @@ implements IRegistrationEventHandler
 		if(ID != null){
 			this.screenService.show(ID);
 		}
-		if((this.connStateDrawableId = savedInstanceState.getInt("connStateDrawableId")) != -1){
-			Main.this.ivConnState.setImageDrawable(getResources().getDrawable(Main.this.connStateDrawableId));
-		}
+		
 		this.progressInfoText = savedInstanceState.getString("progressInfoText");
 		this.screenService.setProgressInfoText(this.progressInfoText);
 	}
@@ -218,8 +211,8 @@ implements IRegistrationEventHandler
 				public void run() {
 					Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_green_16;
 					Main.this.progressInfoText = String.format("Registration: %s", phrase);
-					Main.this.ivConnState.setImageDrawable(getResources().getDrawable(Main.this.connStateDrawableId));
 					Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
+					ServiceManager.showNotification(R.drawable.bullet_ball_glass_green_16, "You are connected");
 				}});
 				break;
 			
@@ -228,8 +221,8 @@ implements IRegistrationEventHandler
 					public void run() {
 						Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_red_16;
 						Main.this.progressInfoText = String.format("Unregistration: %s", phrase);
-						Main.this.ivConnState.setImageDrawable(getResources().getDrawable(Main.this.connStateDrawableId));
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
+						ServiceManager.showNotification(R.drawable.bullet_ball_glass_red_16, "You are disconnected");
 					}});
 				break;
 				
@@ -239,8 +232,8 @@ implements IRegistrationEventHandler
 					public void run() {
 						Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_grey_16;
 						Main.this.progressInfoText = String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "register" : "unregister");
-						Main.this.ivConnState.setImageDrawable(getResources().getDrawable(Main.this.connStateDrawableId));
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
+						ServiceManager.showNotification(R.drawable.bullet_ball_glass_grey_16, String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "connect" : "disconnect"));
 					}});
 				break;
 				
