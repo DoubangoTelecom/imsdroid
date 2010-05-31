@@ -1,6 +1,6 @@
 package org.doubango.xml.test;
 
-import org.doubango.imsdroid.xml.reginfo.TestReginfo;
+import org.doubango.imsdroid.Model.TestContacts;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -14,6 +14,9 @@ public class Main extends Activity {
         
         
         /* reginfo */
-        TestReginfo.run();
+        //TestReginfo.run();
+        
+        /* contacts */
+        TestContacts.run();
     }
 }

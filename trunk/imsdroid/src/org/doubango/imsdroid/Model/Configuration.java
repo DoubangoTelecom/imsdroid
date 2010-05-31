@@ -20,7 +20,7 @@ public class Configuration {
 	// Default values
 	public static final String DEFAULT_DISPLAY_NAME = "johndoe";
 	public static final String DEFAULT_IMPI = "johndoe@open-ims.test";
-	public static final String DEFAULT_IMPU = "johndoe@open-ims.test";
+	public static final String DEFAULT_IMPU = "sip:johndoe@open-ims.test";
 	
 	public static final boolean DEFAULT_EARLY_IMS = false;
 	public static final String DEFAULT_IP_VERSION = "ipv4";
@@ -41,6 +41,7 @@ public class Configuration {
 	public static final boolean DEFAULT_RCS_PRESENCE = true;
 	public static final boolean DEFAULT_RCS_RLS = true;
 	public static final String DEFAULT_RCS_SMSC = "sip:smsc@open-ims.test";
+	public static final String DEFAULT_RCS_STATUS = "Online";
 	
 	public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "None";
 	public static final String DEFAULT_QOS_PRECOND_STRENGTH = "None";
@@ -82,7 +83,7 @@ public class Configuration {
 		PRECOND_BANDWIDTH, PRECOND_STRENGTH, PRECOND_TYPE, REFRESHER, SIP_CALLS_TIMEOUT, SIP_SESSIONS_TIMEOUT, SESSION_TIMERS,
 
 		/* === RCS (GSMA Rich Communication Suite) === */
-		AVATAR_PATH, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, 
+		AVATAR_PATH, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, STATUS,
 
 		/* === SECURITY === */
 		TLS_CA_FILE, TLS_PRIV_KEY_FILE, TLS_PUB_KEY_FILE, TLS_SEC_AGREE,

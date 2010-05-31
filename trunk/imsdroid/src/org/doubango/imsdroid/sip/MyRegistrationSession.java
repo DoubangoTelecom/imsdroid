@@ -21,11 +21,12 @@ public class MyRegistrationSession extends MySipSession {
 		/* support for OMA Large message (as per OMA SIMPLE IM v1) */
 		this.session.addCaps("+g.oma.sip-im.large-message");
 		
-		/* GSMA RCS phase 2 - 3.2 Registration */
+		/* GSMA RCS phase 3 - 3.2 Registration */
 		this.session.addCaps("audio");
 		this.session.addCaps("+g.3gpp.icsi-ref", "\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
-		//Note: RCS Release 2 Broadband Access clients shall register the +g.3gpp.cs-voice feature 
-		// tag in order to provide good content sharing interoperability to mobile clients.
+		this.session.addCaps("+g.3gpp.icsi-ref", "\"urn%3Aurn-7%3A3gpp-application.ims.iari.gsma-vs\"");
+		// In addition, in RCS Release 3 the BA Client when used as a primary device will indicate the capability to receive SMS 
+		// messages over IMS by registering the SMS over IP feature tag in accordance with [24.341]:
 		this.session.addCaps("+g.3gpp.cs-voice");
 	}
 	

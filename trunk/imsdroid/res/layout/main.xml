@@ -16,8 +16,8 @@
 </RelativeLayout>
 
 <RelativeLayout android:layout_toRightOf="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content" android:id="@+id/main_relativeLayout_topright" android:layout_alignParentRight="true" android:layout_height="wrap_content">
-<ImageView android:layout_toRightOf="@+id/main_textView_displayname" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_imageView_connstate" android:src="@drawable/bullet_ball_glass_red_16" android:layout_alignParentRight="true"></ImageView>
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/user_16" android:layout_below="@+id/main_imageView_connstate" android:layout_alignParentRight="true" android:id="@+id/main_imageView_status"></ImageView>
+
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/main_imageView_connstate" android:layout_alignParentRight="true" android:id="@+id/main_imageView_status" android:src="@drawable/user_online_24" android:clickable="true"></ImageView>
 </RelativeLayout>
 
 <LinearLayout android:minHeight="20px" android:gravity="fill_vertical|fill_horizontal" android:id="@+id/main_linearLayout_principal" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="16px" android:layout_below="@+id/main_relativeLayout_top_left">

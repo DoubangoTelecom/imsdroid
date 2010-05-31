@@ -10,8 +10,10 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.utils.StringUtils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -23,7 +25,10 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -31,6 +36,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class ScreenPresence  extends Screen {
@@ -44,10 +51,21 @@ public class ScreenPresence  extends Screen {
 	private ImageButton btChooseFile;
 	private FrameLayout flPreview;
 	private RelativeLayout rlPresence;
+	private Spinner spStatus;
 	
 	private static final String TAG = "Camera";
 	private Camera camera;
 	private Preview preview;
+	
+	private final StatusItem[] spinner_status_items = new StatusItem[] {
+		new StatusItem(R.drawable.user_online_24, Configuration.DEFAULT_RCS_STATUS),
+		new StatusItem(R.drawable.user_busy_24, "Busy"),
+		new StatusItem(R.drawable.user_back_24, "Be Right Back"),
+		new StatusItem(R.drawable.user_time_24, "Away"),
+		new StatusItem(R.drawable.user_onthephone_24, "On the phone"),
+		new StatusItem(R.drawable.user_hyper_avail_24, "HyperAvailable"),
+		new StatusItem(R.drawable.user_offline_24, "Offline"),
+	};
 	
 	private final IConfigurationService configurationService;
 	
@@ -71,6 +89,10 @@ public class ScreenPresence  extends Screen {
         this.btChooseFile = (ImageButton)this.findViewById(R.id.screen_presence_imageButton_file);
         this.flPreview = (FrameLayout)this.findViewById(R.id.screen_presence_frameLayout_preview);
         this.rlPresence = (RelativeLayout)this.findViewById(R.id.screen_presence_relativeLayout_presence);
+        this.spStatus = (Spinner)this.findViewById(R.id.screen_presence_spinner_status);
+        
+        // load spinner values
+        this.spStatus.setAdapter(new ScreenOptionsAdapter(this.spinner_status_items));
         
         // load values from configuration file (do it before adding UI listeners)
         this.cbEnablePresence.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE, Configuration.DEFAULT_RCS_PRESENCE));
@@ -78,6 +100,11 @@ public class ScreenPresence  extends Screen {
         this.cbEnablePartialPub.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PARTIAL_PUB, Configuration.DEFAULT_RCS_PARTIAL_PUB));
         this.etFreeText.setText(this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT));
         this.rlPresence.setVisibility(this.cbEnablePresence.isChecked()? View.VISIBLE : View.INVISIBLE);
+        this.spStatus.setSelection(this.getSpinnerIndex(
+				this.configurationService.getString(
+						CONFIGURATION_SECTION.RCS,
+						CONFIGURATION_ENTRY.STATUS,
+						this.spinner_status_items[0].text)));
         
         // add local listeners
         this.cbEnablePresence.setOnCheckedChangeListener(this.cbEnablePresence_OnCheckedChangeListener);
@@ -103,6 +130,8 @@ public class ScreenPresence  extends Screen {
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PARTIAL_PUB, this.cbEnablePartialPub.isChecked());
 			this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, 
 					this.etFreeText.getText().toString());
+			this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.STATUS, 
+					this.spinner_status_items[this.spStatus.getSelectedItemPosition()].text);
 			
 			// update main activity info
 			ServiceManager.getMainActivity().setFreeText(this.etFreeText.getText().toString());
@@ -162,6 +191,70 @@ public class ScreenPresence  extends Screen {
 			ScreenPresence.this.computeConfiguration = true;
 		}
 	};
+	
+	
+	private int getSpinnerIndex(String value){
+		int i;
+		for(i = 0; i< this.spinner_status_items.length; i++){
+			if(StringUtils.equals(value, this.spinner_status_items[i].text, true)){
+				return i;
+			}
+		}
+		return 0;
+	}
+	
+	/* ===================== Adapter ======================== */
+
+	private class StatusItem {
+		private int drawableId;
+		private String text;
+
+		private StatusItem(int drawableId, String text) {
+			this.drawableId = drawableId;
+			this.text = text;
+		}
+	}
+	
+	private class ScreenOptionsAdapter extends BaseAdapter {
+
+		private StatusItem[] items;
+		private ScreenOptionsAdapter(StatusItem[] items){
+			this.items = items;
+		}
+		
+		public int getCount() {
+			return this.items.length;
+		}
+
+		public Object getItem(int position) {
+			return null;
+		}
+
+		public long getItemId(int position) {
+			return 0;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = convertView;
+			StatusItem item;
+
+			if (view == null) {
+				view = getLayoutInflater().inflate(R.layout.screen_presence_status_item, null);
+			}
+
+			if ((this.items.length <= position) || ((item = this.items[position]) == null)) {
+				return view;
+			}
+
+			ImageView iv = (ImageView) view .findViewById(R.id.screen_presence_status_item_imageView);
+			iv.setImageResource(item.drawableId);
+			TextView tv = (TextView) view.findViewById(R.id.screen_presence_status_item_textView);
+			tv.setText(item.text);
+
+			return view;
+		}
+	}
+	
 	
 	
 	/* ===================== Preview ======================== 

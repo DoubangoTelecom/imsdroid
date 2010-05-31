@@ -80,7 +80,6 @@ implements ISubscriptionEventHandler
 	}
 	
 	private OnItemClickListener gridView_OnItemClickListener = new OnItemClickListener() {
-		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		}
 	};
@@ -95,7 +94,6 @@ implements ISubscriptionEventHandler
 				if(content != null && StringUtils.equals(contentType, ContentType.REG_INFO, true)){
 					if(this.reginfo == null){
 						this.handler.post(new Runnable(){
-							@Override
 							public void run() {
 								ScreenRegistrations.this.progressDialog = ProgressDialog.show(ScreenRegistrations.this, "Please wait...", "Loading registrations", true, true);
 								ScreenRegistrations.this.progressDialog.setCanceledOnTouchOutside(true);
@@ -114,7 +112,6 @@ implements ISubscriptionEventHandler
 	}
 	
 	private Runnable displayReginfo = new Runnable(){
-		@Override
 		public void run() {
 			ScreenRegistrations.this.adapter.update(ScreenRegistrations.this.reginfo);
 			ScreenRegistrations.this.progressDialog.dismiss();
@@ -139,7 +136,6 @@ implements ISubscriptionEventHandler
 			return null;
 		}
 		
-		@Override
 		public void run() {
 			final Serializer serializer = new Persister();
 			final Reginfo newReginfo;

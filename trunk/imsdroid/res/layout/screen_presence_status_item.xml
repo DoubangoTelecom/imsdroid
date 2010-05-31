@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_presence_status_item_imageView" android:src="@drawable/user_online_24"></ImageView>
+<TextView android:text="@+id/TextView01" android:layout_height="wrap_content" android:layout_toRightOf="@+id/screen_presence_status_item_imageView" android:layout_width="fill_parent" android:id="@+id/screen_presence_status_item_textView" android:textSize="20px" android:layout_marginLeft="2px"></TextView>
+</RelativeLayout>
