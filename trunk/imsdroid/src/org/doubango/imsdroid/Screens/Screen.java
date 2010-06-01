@@ -19,16 +19,17 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
-		ABOUT_T, CHAT_QUEUE_T, CONTACTS_T, CONTACTS_OPTIONS_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
+		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CONTACTS_T, CONTACTS_OPTIONS_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
 		REGISTRATIONS_T, SECURITY_T
 	}
 	
 	public static enum SCREEN_ID { 
-		ABOUT_I, CHAT_QUEUE_I, CONTACTS_I, CONTACTS_OPTIONS_I, FILE_TRANSFER_QUEUE_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I,
+		ABOUT_I, AUTHORIZATIONS_I, CHAT_QUEUE_I, CONTACTS_I, CONTACTS_OPTIONS_I, FILE_TRANSFER_QUEUE_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I,
 		REGISTRATIONS_I, SECURITY_I
 	}
 
 	public static final String SCREEN_TITLE_ABOUT = "About";
+	public static final String SCREEN_TITLE_AUTHORIZATIONS = "Authorizations";
 	public static final String SCREEN_TITLE_CHAT_QUEUE = "Chat room";
 	public static final String SCREEN_TITLE_CONTACTS = "Address Book";
 	public static final String SCREEN_TITLE_CONTACTS_OPTIONS = "Options-Contacts";
@@ -69,6 +70,7 @@ public abstract class Screen extends Activity implements IScreen {
 		switch (type) {
 		// Well-know screens
 		case ABOUT_T:
+		case AUTHORIZATIONS_T:
 		case CHAT_QUEUE_T:
 		case CONTACTS_T:
 		case CONTACTS_OPTIONS_T:
@@ -99,6 +101,8 @@ public abstract class Screen extends Activity implements IScreen {
 		// Well-know screens
 		case ABOUT_T:
 			return Screen.SCREEN_TITLE_ABOUT;
+		case AUTHORIZATIONS_T:
+			return Screen.SCREEN_TITLE_AUTHORIZATIONS;
 		case CHAT_QUEUE_T:
 			return Screen.SCREEN_TITLE_CHAT_QUEUE;
 		case CONTACTS_T:
@@ -143,6 +147,8 @@ public abstract class Screen extends Activity implements IScreen {
 		// Well-know screens
 		case ABOUT_T:
 			return Screen.SCREEN_ID.ABOUT_I;
+		case AUTHORIZATIONS_T:
+			return Screen.SCREEN_ID.AUTHORIZATIONS_I;
 		case CHAT_QUEUE_T:
 			return Screen.SCREEN_ID.CHAT_QUEUE_I;
 		case CONTACTS_T:

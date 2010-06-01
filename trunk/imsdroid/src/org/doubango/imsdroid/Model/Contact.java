@@ -14,6 +14,8 @@ public class Contact implements Comparable<Contact> {
 	private String uri;
 	@Element(name = "group", required = false)
 	private String group;
+	@Element(name = "displayName", required = false)
+	private String displayName;
 	@Element(name = "firstName", required = false)
 	private String firstName;
 	@Element(name = "lastName", required = false)
@@ -36,6 +38,14 @@ public class Contact implements Comparable<Contact> {
 	
 	public void setUri(String  uri){
 		this.uri = uri;
+	}
+	
+	public String getDisplayName(){
+		return this.displayName;
+	}
+	
+	public void setDisplayName(String displayName){
+		this.displayName = displayName;
 	}
 	
 	public String getGroup(){

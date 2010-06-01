@@ -35,10 +35,11 @@ implements IRegistrationEventHandler
 	private ArrayList<ScreenHomeItem> items;
 	private static int itemSignInOutPosition = 0;
 	private static int itemExitPosition = 1;
+	private ScreenHomeAdapter adapter;
+	
 	private final IScreenService screenService;
 	private final ISipService sipService;
 	private final Handler handler;
-	private ScreenHomeAdapter adapter;
 
 	public ScreenHome() {
 		super(SCREEN_TYPE.HOME_T);
@@ -70,6 +71,8 @@ implements IRegistrationEventHandler
 		// visible only if connected
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.id_cards_48), "Registrations", Screen.SCREEN_ID.REGISTRATIONS_I));
+		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+				getResources(), R.drawable.lock_edit_48), "Authorizations", Screen.SCREEN_ID.AUTHORIZATIONS_I));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.eab2_48), "Address Book", Screen.SCREEN_ID.CONTACTS_I));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
@@ -233,7 +236,8 @@ implements IRegistrationEventHandler
 		}
 
 		public int getCount() {
-			return this.registered ? this.items.size() : 4/* SignIn/SignOut; Exit/Quit; Options; About */;
+			//return this.registered ? this.items.size() : 4/* SignIn/SignOut; Exit/Quit; Options; About */;
+			return this.items.size();
 		}
 
 		public Object getItem(int position) {

@@ -6,6 +6,7 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAbout;
+import org.doubango.imsdroid.Screens.ScreenAuthorizations;
 import org.doubango.imsdroid.Screens.ScreenChatQueue;
 import org.doubango.imsdroid.Screens.ScreenContacts;
 import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
@@ -25,12 +26,10 @@ import org.doubango.imsdroid.Screens.ScreenSecurity;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IScreenService;
 
-import android.app.ActivityGroup;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 public class ScreenService extends Service implements IScreenService {
 
@@ -137,6 +136,8 @@ public class ScreenService extends Service implements IScreenService {
 			switch (type) {
 				case ABOUT_I:
 					screen = new ScreenAbout();
+				case AUTHORIZATIONS_I:
+					screen = new ScreenAuthorizations();
 					break;
 				case CHAT_QUEUE_I:
 					screen = new ScreenChatQueue();

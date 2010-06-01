@@ -22,6 +22,7 @@ import org.doubango.imsdroid.sip.MySubscriptionSession;
 import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.tinyWRAP.DDebugCallback;
 import org.doubango.tinyWRAP.DialogEvent;
 import org.doubango.tinyWRAP.OptionsEvent;
 import org.doubango.tinyWRAP.OptionsSession;
@@ -68,6 +69,7 @@ implements ISipService, tinyWRAPConstants {
 	private MyPublicationSession pubPres;
 	
 	private final SipPrefrences preferences;
+	private final DDebugCallback debugCallback;
 
 	private ConditionVariable condHack;
 
@@ -75,6 +77,8 @@ implements ISipService, tinyWRAPConstants {
 		super();
 
 		this.sipCallback = new MySipCallback(this);
+		// FIXME: to be set to null in the release version
+		this.debugCallback = new DDebugCallback();
 
 		this.registrationEventHandlers = new CopyOnWriteArrayList<IRegistrationEventHandler>();
 		this.subscriptionEventHandlers = new CopyOnWriteArrayList<ISubscriptionEventHandler>();
@@ -127,6 +131,7 @@ implements ISipService, tinyWRAPConstants {
 
 		if (this.sipStack == null) {
 			this.sipStack = new MySipStack(this.sipCallback, this.preferences.realm, this.preferences.impi, this.preferences.impu);
+			this.sipStack.setDebugCallback(this.debugCallback);
 		} else {
 			if (!this.sipStack.setRealm(this.preferences.realm)) {
 				Log.e(this.getClass().getCanonicalName(), "Failed to set realm");
@@ -228,7 +233,7 @@ implements ISipService, tinyWRAPConstants {
 				this.condHack = new ConditionVariable();
 			}
 			final OptionsSession optSession = new OptionsSession(this.sipStack);
-			optSession.setToUri(String.format("sip:{0}@{1}", "hacking_the_aor", this.preferences.realm));
+			// optSession.setToUri(String.format("sip:%s@%s", "hacking_the_aor", this.preferences.realm));
 			optSession.Send();
 			try {
 				synchronized (this.condHack) {
@@ -368,9 +373,9 @@ implements ISipService, tinyWRAPConstants {
 				this.pubPres.setFromUri(this.preferences.impu);
 				this.pubPres.setToUri(this.preferences.impu);
 			}
-			this.pubPres.publish("open", "busy", this.configurationService.getString(
-					CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT,
-					Configuration.DEFAULT_RCS_FREE_TEXT));
+			//this.pubPres.publish("open", "busy", this.configurationService.getString(
+			//		CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT,
+			//		Configuration.DEFAULT_RCS_FREE_TEXT));
 		}
 		
 	}
