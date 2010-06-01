@@ -1,5 +1,10 @@
 package org.doubango.imsdroid.Services;
 
-public interface IContactService  extends IService{
+import java.util.List;
 
+import org.doubango.imsdroid.Model.Contact;
+
+public interface IContactService  extends IService{
+	
+	List<Contact> getContacts();
 }

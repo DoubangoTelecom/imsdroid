@@ -41,6 +41,7 @@
 <activity android:name=".Screens.ScreenRegistrations"></activity>
 
 <service android:name=".Sevices.Impl.ServiceManager"></service>
+<activity android:name=".Screens.ScreenAuthorizations"></activity>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />

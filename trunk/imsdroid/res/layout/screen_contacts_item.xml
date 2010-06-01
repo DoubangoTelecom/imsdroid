@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="wrap_content" android:layout_width="fill_parent">
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/android_48" android:id="@+id/screen_contacts_item_imageView_avatar"></ImageView>
+<ImageView android:layout_toRightOf="@+id/screen_contacts_item_imageView_avatar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/user_online_24" android:id="@+id/screen_contacts_item_imageView_status"></ImageView>
+<TextView android:layout_toRightOf="@+id/screen_contacts_item_imageView_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_contacts_item_textView_displayname" android:text="John Doe" android:layout_marginLeft="5px" android:layout_marginRight="2px"></TextView><ImageView android:layout_toRightOf="@+id/screen_contacts_item_textView_displayname" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/document_ok_16" android:id="@+id/screen_contacts_item_imageView_filetransfer"></ImageView><ImageView android:layout_toRightOf="@+id/screen_contacts_item_imageView_filetransfer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/phone_call_16" android:id="@+id/screen_contacts_item_imageView_phonecall"></ImageView><ImageView android:layout_toRightOf="@+id/screen_contacts_item_imageView_phonecall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/message_ok_16" android:id="@+id/screen_contacts_item_imageView_message"></ImageView><TextView android:layout_toRightOf="@+id/screen_contacts_item_imageView_avatar" android:layout_below="@+id/screen_contacts_item_imageView_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_contacts_item_textView_freetext" android:text="Hello world!"></TextView>
+
+
+
+
+</RelativeLayout>

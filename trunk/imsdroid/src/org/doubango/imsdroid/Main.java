@@ -7,7 +7,7 @@
  * Hello Views: http://developer.android.com/guide/tutorials/views/index.html
  * Dialogs: http://developer.android.com/guide/topics/ui/dialogs.html#AlertDialog
  * Hard Keys: http://android-developers.blogspot.com/2009/12/back-and-other-hard-keys-three-stories.html
- * 
+ * Menus: http://developer.android.com/guide/topics/ui/menus.html
  * 
  * SMS Manager: http://www.damonkohler.com/2009/02/android-recipes.html
  */
@@ -36,6 +36,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -86,6 +89,8 @@ implements IRegistrationEventHandler
     
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // remove title bar
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         
         // Gets controls
@@ -106,14 +111,13 @@ implements IRegistrationEventHandler
         this.bindService(new Intent(this, ServiceManager.class),
                 this.connection, Context.BIND_AUTO_CREATE);
         
-        // set values
+        // set values     
 		this.tvDisplayName.setText(this.configurationService.getString(
-				CONFIGURATION_SECTION.IDENTITY,
-				CONFIGURATION_ENTRY.DISPLAY_NAME, 
-				this.configurationService.getString(CONFIGURATION_SECTION.IDENTITY,
-								CONFIGURATION_ENTRY.IMPU,
-								Configuration.DEFAULT_IMPU)));
+				CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.DISPLAY_NAME, Configuration.DEFAULT_DISPLAY_NAME));
         this.tvFreeText.setText(this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT));
+        
+        // set event listeners
+        this.ivStatus.setOnClickListener(this.ivStatus_OnClickListener);
         
         // add event handlers
         this.sipService.addRegistrationEventHandler(this);
@@ -188,12 +192,11 @@ implements IRegistrationEventHandler
 	}
 	
 	/* ===================== UI Events ======================== */	
-	/*private OnClickListener ibBack_OnClickListener = new OnClickListener() {
+	private OnClickListener ivStatus_OnClickListener = new OnClickListener() {
 		public void onClick(View v) {
-			Main.this.screenService.back();
-			Main.this.screenService.setProgressInfoText(new Random().toString());
+			Main.this.screenService.show(Screen.SCREEN_ID.PRESENCE_I);
 		}
-	};*/
+	};
 	
 	
     /* ===================== Sip Events ========================*/
