@@ -6,5 +6,6 @@ public enum PresenceStatus {
 	Away,
 	BeRightBack,
 	OnThePhone,
-	Offline
+	Offline,
+	HyperAvail,
 }

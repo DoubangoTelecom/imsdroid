@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+  
+<RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_contact_view_relativeLayout_top" android:gravity="center_vertical|center_horizontal">
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_contact_view_button_contacts" android:text="&lt;&lt; Back To Contacts" android:focusable="false"></Button>
+<Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="false" android:id="@+id/screen_contact_view_button_edit" android:text="Edit" android:layout_marginLeft="10px" android:layout_toRightOf="@+id/screen_contact_view_button_contacts" android:focusable="false"></Button>
+</RelativeLayout>
+
+
+<ImageView android:layout_width="wrap_content" android:layout_below="@+id/screen_contact_view_relativeLayout_top" android:layout_height="wrap_content" android:id="@+id/screen_contact_view_imageView_avatar" android:src="@drawable/android_48"></ImageView>
+<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_contact_view_imageView_avatar" android:layout_marginTop="10px" android:id="@+id/screen_contact_view_textView_first_name" android:text="First Name" android:layout_width="fill_parent" android:textColor="@color/black" android:background="@color/white" android:textStyle="bold"></TextView><TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_contact_view_textView_first_name" android:text="John" android:layout_width="fill_parent" android:id="@+id/screen_contact_view_textView_first_name_value" android:layout_marginLeft="15px" android:textSize="16px"></TextView><TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_contact_view_textView_first_name_value" android:text="Last Name" android:layout_width="fill_parent" android:id="@+id/screen_contact_view_textView_last_name" android:background="@color/white" android:textColor="@color/black" android:layout_marginTop="5px" android:textStyle="bold"></TextView><TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_contact_view_textView_last_name" android:layout_width="fill_parent" android:id="@+id/screen_contact_view_textView_last_name_value" android:text="Doe" android:textSize="16px" android:layout_marginLeft="15px"></TextView><TextView android:layout_toRightOf="@+id/screen_contact_view_imageView_avatar" android:layout_height="wrap_content" android:layout_below="@+id/screen_contact_view_relativeLayout_top" android:id="@+id/screen_contact_view_textView_displayname" android:text="John Doe" android:layout_width="fill_parent" android:textStyle="bold" android:textSize="19px"></TextView>
+<TextView android:layout_toRightOf="@+id/screen_contact_view_imageView_avatar" android:layout_height="wrap_content" android:layout_below="@+id/screen_contact_view_textView_displayname" android:text="sip:johndoe@open-ims.test" android:id="@+id/screen_contact_view_textView_uri" android:layout_width="fill_parent"></TextView>
+
+
+
+
+
+
+
+
+</RelativeLayout>

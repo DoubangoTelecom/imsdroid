@@ -5,7 +5,7 @@
 
 <RelativeLayout android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/main_relativeLayout">
 
-<RelativeLayout android:id="@+id/main_relativeLayout_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@color/main_relativeLayout_top_color">
+<RelativeLayout android:id="@+id/main_relativeLayout_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@color/main_relativeLayout_top_color" android:gravity="top">
 
 <RelativeLayout android:layout_height="wrap_content" android:id="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content">
 	<ImageView android:layout_height="wrap_content" android:src="@drawable/user_32" android:id="@+id/main_imageView_avatar" android:layout_width="wrap_content"></ImageView>
@@ -21,7 +21,7 @@
 
 </RelativeLayout>
 
-<LinearLayout android:minHeight="20px" android:gravity="fill_vertical|fill_horizontal" android:id="@+id/main_linearLayout_principal" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="16px" android:layout_below="@+id/main_relativeLayout_top">
+<LinearLayout android:minHeight="20px" android:id="@+id/main_linearLayout_principal" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="16px" android:layout_below="@+id/main_relativeLayout_top" android:gravity="top|fill_vertical|fill_horizontal">
 
 
 </LinearLayout>

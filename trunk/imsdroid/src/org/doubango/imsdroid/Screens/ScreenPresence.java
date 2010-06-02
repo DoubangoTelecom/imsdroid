@@ -9,11 +9,11 @@ import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IConfigurationService;
+import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
-import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.imsdroid.sip.PresenceStatus;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -27,7 +27,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -38,10 +38,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class ScreenPresence  extends Screen {
-
+	
 	private CheckBox cbEnablePresence;
 	private CheckBox cbEnableRLS;
 	private CheckBox cbEnablePartialPub;
@@ -57,22 +59,24 @@ public class ScreenPresence  extends Screen {
 	private Camera camera;
 	private Preview preview;
 	
-	private final StatusItem[] spinner_status_items = new StatusItem[] {
-		new StatusItem(R.drawable.user_online_24, Configuration.DEFAULT_RCS_STATUS),
-		new StatusItem(R.drawable.user_busy_24, "Busy"),
-		new StatusItem(R.drawable.user_back_24, "Be Right Back"),
-		new StatusItem(R.drawable.user_time_24, "Away"),
-		new StatusItem(R.drawable.user_onthephone_24, "On the phone"),
-		new StatusItem(R.drawable.user_hyper_avail_24, "HyperAvailable"),
-		new StatusItem(R.drawable.user_offline_24, "Offline"),
+	private final static StatusItem[] spinner_status_items = new StatusItem[] {
+		new StatusItem(R.drawable.user_online_24, PresenceStatus.Online, PresenceStatus.Online.toString()),
+		new StatusItem(R.drawable.user_busy_24, PresenceStatus.Busy, "Busy"),
+		new StatusItem(R.drawable.user_back_24, PresenceStatus.BeRightBack, "Be Right Back"),
+		new StatusItem(R.drawable.user_time_24, PresenceStatus.Away, "Away"),
+		new StatusItem(R.drawable.user_onthephone_24, PresenceStatus.OnThePhone, "On the phone"),
+		new StatusItem(R.drawable.user_hyper_avail_24, PresenceStatus.HyperAvail, "HyperAvailable"),
+		new StatusItem(R.drawable.user_offline_24, PresenceStatus.Offline, "Offline"),
 	};
 	
 	private final IConfigurationService configurationService;
+	private final ISipService sipService;
 	
 	public ScreenPresence() {
 		super(SCREEN_TYPE.PRESENCE_T);
 		
 		this.configurationService = ServiceManager.getConfigurationService();
+		this.sipService = ServiceManager.getSipService();
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +96,7 @@ public class ScreenPresence  extends Screen {
         this.spStatus = (Spinner)this.findViewById(R.id.screen_presence_spinner_status);
         
         // load spinner values
-        this.spStatus.setAdapter(new ScreenOptionsAdapter(this.spinner_status_items));
+        this.spStatus.setAdapter(new ScreenOptionsAdapter(ScreenPresence.spinner_status_items));
         
         // load values from configuration file (do it before adding UI listeners)
         this.cbEnablePresence.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE, Configuration.DEFAULT_RCS_PRESENCE));
@@ -101,12 +105,13 @@ public class ScreenPresence  extends Screen {
         this.etFreeText.setText(this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT));
         this.rlPresence.setVisibility(this.cbEnablePresence.isChecked()? View.VISIBLE : View.INVISIBLE);
         this.spStatus.setSelection(this.getSpinnerIndex(
-				this.configurationService.getString(
+				Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
 						CONFIGURATION_SECTION.RCS,
 						CONFIGURATION_ENTRY.STATUS,
-						this.spinner_status_items[0].text)));
+						Configuration.DEFAULT_RCS_STATUS.toString()))));
         
         // add local listeners
+        this.spStatus.setOnItemSelectedListener(this.spStatus_OnItemSelectedListener);
         this.cbEnablePresence.setOnCheckedChangeListener(this.cbEnablePresence_OnCheckedChangeListener);
         
         // add listeners (for the configuration)
@@ -114,6 +119,7 @@ public class ScreenPresence  extends Screen {
         this.addConfigurationListener(this.cbEnableRLS);
         this.addConfigurationListener(this.cbEnablePartialPub);
         this.addConfigurationListener(this.etFreeText);
+        /* this.addConfigurationListener(this.spStatus); */
         
         // Camera
         this.preview = new Preview(ServiceManager.getMainActivity());
@@ -125,16 +131,25 @@ public class ScreenPresence  extends Screen {
 	
 	protected void onPause() {
 		if(this.computeConfiguration){
+			String oldFreeText = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT);
+			
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE, this.cbEnablePresence.isChecked());
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.RLS, this.cbEnableRLS.isChecked());
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PARTIAL_PUB, this.cbEnablePartialPub.isChecked());
 			this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, 
 					this.etFreeText.getText().toString());
-			this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.STATUS, 
-					this.spinner_status_items[this.spStatus.getSelectedItemPosition()].text);
+			//this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.STATUS, 
+			//		this.spinner_status_items[this.spStatus.getSelectedItemPosition()].status.toString());
 			
-			// update main activity info
+			// update main activity info (status is done below)
 			ServiceManager.getMainActivity().setFreeText(this.etFreeText.getText().toString());
+			
+			// publish if needed (Status is done below)
+			if(!oldFreeText.equals(this.etFreeText.getText())){
+				if(this.sipService.isRegistered()){
+					this.sipService.publish();
+				}
+			}
 			
 			// Compute
 			if(!this.configurationService.compute()){
@@ -158,6 +173,20 @@ public class ScreenPresence  extends Screen {
 		public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
 			ScreenPresence.this.rlPresence.setVisibility(isChecked? View.VISIBLE : View.INVISIBLE);
 			ScreenPresence.this.computeConfiguration = true;
+		}
+	};
+	
+	private OnItemSelectedListener spStatus_OnItemSelectedListener = new OnItemSelectedListener(){
+		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+			
+			ScreenPresence.this.configurationService.setString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.STATUS, 
+					ScreenPresence.spinner_status_items[position].status.toString());
+			ServiceManager.getMainActivity().setStatus(ScreenPresence.spinner_status_items[position].drawableId);
+			if(ScreenPresence.this.sipService.isRegistered()){
+				ScreenPresence.this.sipService.publish();
+			}
+		}
+		public void onNothingSelected(AdapterView<?> arg0) {
 		}
 	};
 	
@@ -192,11 +221,20 @@ public class ScreenPresence  extends Screen {
 		}
 	};
 	
-	
-	private int getSpinnerIndex(String value){
+	public static int getStatusDrawableId(PresenceStatus status){
 		int i;
-		for(i = 0; i< this.spinner_status_items.length; i++){
-			if(StringUtils.equals(value, this.spinner_status_items[i].text, true)){
+		for(i = 0; i< ScreenPresence.spinner_status_items.length; i++){
+			if(ScreenPresence.spinner_status_items[i].status == status){
+				return ScreenPresence.spinner_status_items[i].drawableId;
+			}
+		}
+		return ScreenPresence.spinner_status_items[0].drawableId;
+	}
+	
+	private int getSpinnerIndex(PresenceStatus status){
+		int i;
+		for(i = 0; i< ScreenPresence.spinner_status_items.length; i++){
+			if(ScreenPresence.spinner_status_items[i].status == status){
 				return i;
 			}
 		}
@@ -205,12 +243,14 @@ public class ScreenPresence  extends Screen {
 	
 	/* ===================== Adapter ======================== */
 
-	private class StatusItem {
-		private int drawableId;
-		private String text;
+	private static class StatusItem {
+		private final int drawableId;
+		private final PresenceStatus status;
+		private final String text;
 
-		private StatusItem(int drawableId, String text) {
+		private StatusItem(int drawableId, PresenceStatus status, String text) {
 			this.drawableId = drawableId;
+			this.status = status;
 			this.text = text;
 		}
 	}

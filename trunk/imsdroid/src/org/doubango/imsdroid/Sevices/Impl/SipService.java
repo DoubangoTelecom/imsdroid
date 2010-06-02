@@ -19,6 +19,7 @@ import org.doubango.imsdroid.sip.MyPublicationSession;
 import org.doubango.imsdroid.sip.MyRegistrationSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MySubscriptionSession;
+import org.doubango.imsdroid.sip.PresenceStatus;
 import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.imsdroid.utils.StringUtils;
@@ -264,6 +265,23 @@ implements ISipService, tinyWRAPConstants {
 		Log.d(this.getClass().getCanonicalName(), "Already unregistered");
 		return true;
 	}
+	
+	public boolean publish(){
+		if(!this.isRegistered() || (this.pubPres == null)){
+			return false;
+		}
+		
+		if(!this.preferences.presence_enabled){
+			return true; // silently ignore
+		}
+		
+		String freeText = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT);
+		PresenceStatus status = Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
+				CONFIGURATION_SECTION.RCS,
+				CONFIGURATION_ENTRY.STATUS,
+				Configuration.DEFAULT_RCS_STATUS.toString()));
+		return this.pubPres.publish(status, freeText);
+	}
 
 	/* ===================== Add/Remove handlers ======================== */
 
@@ -373,11 +391,13 @@ implements ISipService, tinyWRAPConstants {
 				this.pubPres.setFromUri(this.preferences.impu);
 				this.pubPres.setToUri(this.preferences.impu);
 			}
-			//this.pubPres.publish("open", "busy", this.configurationService.getString(
-			//		CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT,
-			//		Configuration.DEFAULT_RCS_FREE_TEXT));
+			String freeText = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT);
+			PresenceStatus status = Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
+					CONFIGURATION_SECTION.RCS,
+					CONFIGURATION_ENTRY.STATUS,
+					Configuration.DEFAULT_RCS_STATUS.toString()));
+			this.pubPres.publish(status, freeText);
 		}
-		
 	}
 	
 

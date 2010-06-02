@@ -42,6 +42,7 @@
 
 <service android:name=".Sevices.Impl.ServiceManager"></service>
 <activity android:name=".Screens.ScreenAuthorizations"></activity>
+<activity android:name=".Screens.ScreenContactView"></activity>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />

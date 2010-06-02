@@ -57,7 +57,32 @@ public class MyPublicationSession  extends MySipSession{
 		return this.session;
 	}
 	
-	public boolean publish(String basic, String activity, String note){
+	public boolean publish(PresenceStatus status, String note){
+		String basic = "open";
+		String activity = "unknown";
+		switch(status)
+		{
+			case Online:
+				break;
+			case Busy:
+				activity = "busy";
+				break;
+			case Away:
+				activity = "away";
+				break;
+			case BeRightBack:
+				activity = "vacation";
+				break;
+			case OnThePhone:
+				activity = "onthephone";
+				break;
+			case Offline:
+				basic = "close";
+				break;
+			case HyperAvail:
+				break;
+		}
+		
 		String payload = String.format(MyPublicationSession.PUBLISH_PAYLOAD, 
 				this.getFromUri(), basic, activity, note, basic);
 		return this.session.Publish(payload.getBytes());
