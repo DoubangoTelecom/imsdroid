@@ -10,22 +10,26 @@ import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.events.ContactsEventArgs;
 import org.doubango.imsdroid.events.IContactsEventHandler;
-import org.doubango.imsdroid.xml.reginfo.Reginfo;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 public class ScreenContacts  extends Screen 
 implements IContactsEventHandler 
@@ -42,6 +46,17 @@ implements IContactsEventHandler
 	private final static int MENU_NEW_CONTACT = 0;
 	private final static int MENU_NEW_GROUP = 1;
 	private final static int MENU_REFRESH = 2;
+	private final static int MENU_DELETE_CONTACT = 3;
+	private final static int MENU_DELETE_GROUP = 4;
+	
+	private final static int MENU_VOICE_CALL = 10;
+	private final static int MENU_VISIO_CALL = 11;
+	private final static int MENU_SEND_MESSAGE = 12;
+	private final static int MENU_SEND_SMS = 13;
+	private final static int MENU_SEND_FILE = 14;
+	private final static int MENU_START_CHAT = 15;
+	private final static int MENU_CONFERENCE = 16;
+	
 	
 	public ScreenContacts() {
 		super(SCREEN_TYPE.CONTACTS_T);
@@ -65,6 +80,8 @@ implements IContactsEventHandler
 		this.gridView = (GridView) this.findViewById(R.id.screen_contacts_gridview);
 		this.gridView.setAdapter(this.adapter);
 		this.gridView.setOnItemClickListener(this.gridView_OnItemClickListener);
+		this.gridView.setOnItemLongClickListener(this.gridview_OnItemLongClickListener);
+		this.registerForContextMenu(this.gridView);
 		
 		// add event handler
 		this.contactService.addContactsEventHandler(this);
@@ -86,22 +103,82 @@ implements IContactsEventHandler
 		menu.add(0, ScreenContacts.MENU_NEW_CONTACT, 0, "New Contact").setIcon(R.drawable.user_add_48);
 		menu.add(0, ScreenContacts.MENU_NEW_GROUP, 0, "New Group").setIcon(R.drawable.group_add_48);
 		menu.add(0, ScreenContacts.MENU_REFRESH, 0, "Refresh").setIcon(R.drawable.user_refresh_48);
+		menu.add(1, ScreenContacts.MENU_DELETE_CONTACT, 0, "Delete Contact").setIcon(R.drawable.user_delete_48);
+		menu.add(1, ScreenContacts.MENU_DELETE_GROUP, 0, "Delete Group").setIcon(R.drawable.group_delete_48);
 		return true;
 	}
-
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		
 		switch(item.getItemId()){
 			case ScreenContacts.MENU_NEW_CONTACT:
+				Toast.makeText(this, "New Contact", Toast.LENGTH_SHORT).show();
 				break;
 			case ScreenContacts.MENU_NEW_GROUP:
+				Toast.makeText(this, "New Group", Toast.LENGTH_SHORT).show();
 				break;
 			case ScreenContacts.MENU_REFRESH:
+				Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+				break;
+			case ScreenContacts.MENU_DELETE_CONTACT:
+				Toast.makeText(this, "Delete Contact", Toast.LENGTH_SHORT).show();
+				break;
+			case ScreenContacts.MENU_DELETE_GROUP:
+				Toast.makeText(this, "Delete Group", Toast.LENGTH_SHORT).show();
 				break;
 		}
 		return true;
 	}
 	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		
+		menu.add(0, ScreenContacts.MENU_VOICE_CALL, 0, "Make Voice Call");
+		menu.add(0, ScreenContacts.MENU_VISIO_CALL, 0, "Make Visio Call");
+		menu.add(0, ScreenContacts.MENU_SEND_MESSAGE, 0, "Send Short Message");
+		menu.add(0, ScreenContacts.MENU_SEND_SMS, 0, "Send SMS");
+		menu.add(0, ScreenContacts.MENU_SEND_FILE, 0, "Send File");
+		menu.add(0, ScreenContacts.MENU_START_CHAT, 0, "Start Chat");
+		menu.add(0, ScreenContacts.MENU_CONFERENCE, 0, "Start Conference");
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		Contact contact = null;
+		
+		if((contact = this.adapter.getContact(((AdapterContextMenuInfo) item.getMenuInfo()).position)) == null){ /* should never happen ...but who know? */
+			return super.onContextItemSelected(item);
+		}
+		
+		switch(item.getItemId()){
+			case ScreenContacts.MENU_VOICE_CALL:
+				Toast.makeText(this, "Make Voice Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+				return true;
+			case ScreenContacts.MENU_VISIO_CALL:
+				Toast.makeText(this, "Make Visio Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+				return true;
+			case ScreenContacts.MENU_SEND_MESSAGE:
+				Toast.makeText(this, "Send Short Message: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+				return true;
+			case ScreenContacts.MENU_SEND_SMS:
+				Toast.makeText(this, "Send SMS: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+				return true;
+			case ScreenContacts.MENU_SEND_FILE:
+				Toast.makeText(this, "Send File: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+				return true;
+			case ScreenContacts.MENU_START_CHAT:
+				Toast.makeText(this, "Start Chat: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+				return true;
+			case ScreenContacts.MENU_CONFERENCE:
+				Toast.makeText(this, "Start Conference: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+				return true;
+			default:
+				return super.onContextItemSelected(item);
+		}
+	}
+
 	@Override
 	protected void onDestroy() {
 
@@ -114,6 +191,17 @@ implements IContactsEventHandler
 	/* ===================== UI Events ======================== */
 	private OnItemClickListener gridView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			Contact contact = ScreenContacts.this.adapter.getContact(position);
+			if(contact != null){
+				ScreenContactView.show(contact);
+			}
+		}
+	};
+	
+	private OnItemLongClickListener gridview_OnItemLongClickListener = new OnItemLongClickListener(){
+		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+			
+			return false;
 		}
 	};
 	
@@ -124,7 +212,6 @@ implements IContactsEventHandler
 	}
 	
 	/* ===================== IContactsEventHandler ======================== */
-	@Override
 	public boolean onContactsEvent(Object sender, ContactsEventArgs e) {
 		// already on its own thread
 		switch(e.getType()){
@@ -161,6 +248,13 @@ implements IContactsEventHandler
 		}
 
 		public Object getItem(int position) {
+			return null;
+		}
+		
+		public Contact getContact(int position){
+			if(this.getCount() > position){
+				return this.items.get(position);
+			}
 			return null;
 		}
 

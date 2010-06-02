@@ -23,7 +23,7 @@ import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Screens.Screen;
-import org.doubango.imsdroid.Screens.ScreenContacts;
+import org.doubango.imsdroid.Screens.ScreenPresence;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IScreenService;
@@ -32,6 +32,7 @@ import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.events.IRegistrationEventHandler;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
+import org.doubango.imsdroid.sip.PresenceStatus;
 
 import android.app.ActivityGroup;
 import android.content.ComponentName;
@@ -49,6 +50,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class Main extends ActivityGroup
@@ -58,9 +60,9 @@ implements IRegistrationEventHandler
     private final IScreenService screenService;
     private final IConfigurationService configurationService;
     
-    private volatile int connStateDrawableId = -1;
     private volatile String progressInfoText = "";
     
+    //private RelativeLayout rlTop;
     private TextView tvTitle;
     private TextView tvDisplayName;
     private TextView tvFreeText;
@@ -103,6 +105,7 @@ implements IRegistrationEventHandler
         setContentView(R.layout.main);
         
         // Gets controls
+        //this.rlTop = (RelativeLayout)this.findViewById(R.id.main_relativeLayout_top);
         this.tvTitle = (TextView)this.findViewById(R.id.main_textView_title);
         this.tvDisplayName = (TextView)this.findViewById(R.id.main_textView_displayname);
         this.tvFreeText = (TextView)this.findViewById(R.id.main_textView_freetext);
@@ -120,10 +123,15 @@ implements IRegistrationEventHandler
         this.bindService(new Intent(this, ServiceManager.class),
                 this.connection, Context.BIND_AUTO_CREATE);
         
-        // set values     
+        // set values
+        //this.rlTop.setVisibility(this.sipService.isRegistered() ? View.VISIBLE : View.INVISIBLE);
 		this.tvDisplayName.setText(this.configurationService.getString(
 				CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.DISPLAY_NAME, Configuration.DEFAULT_DISPLAY_NAME));
         this.tvFreeText.setText(this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT));
+        this.ivStatus.setImageResource(ScreenPresence.getStatusDrawableId(Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
+						CONFIGURATION_SECTION.RCS,
+						CONFIGURATION_ENTRY.STATUS,
+						Configuration.DEFAULT_RCS_STATUS.toString()))));
         
         // set event listeners
         this.ivStatus.setOnClickListener(this.ivStatus_OnClickListener);
@@ -173,15 +181,20 @@ implements IRegistrationEventHandler
 			this.screenService.show(ID);
 		}
 		
+		//this.rlTop.setVisibility(this.sipService.isRegistered() ? View.VISIBLE : View.INVISIBLE);
 		this.progressInfoText = savedInstanceState.getString("progressInfoText");
 		this.screenService.setProgressInfoText(this.progressInfoText);
+		this.ivStatus.setImageResource(ScreenPresence.getStatusDrawableId(Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
+				CONFIGURATION_SECTION.RCS,
+				CONFIGURATION_ENTRY.STATUS,
+				Configuration.DEFAULT_RCS_STATUS.toString()))));
 	}
 
-	protected void onDestroy() {        
+	protected void onDestroy() {
         // remove event handlers : do it after stop() to continue to receive Sip events
         this.sipService.removeRegistrationEventHandler(this);
         
-     // unbind to service manager
+        // unbind to service manager
         this.unbindService(this.connection);
         
         super.onDestroy();
@@ -202,6 +215,10 @@ implements IRegistrationEventHandler
 	
 	public void setFreeText(String value){
 		this.tvFreeText.setText(value);
+	}
+	
+	public void setStatus(int drawableId){
+		this.ivStatus.setImageResource(drawableId);
 	}
 	
 	public void exit(){
@@ -233,9 +250,10 @@ implements IRegistrationEventHandler
 			case REGISTRATION_OK:
 			this.handler.post(new Runnable() {
 				public void run() {
-					Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_green_16;
 					Main.this.progressInfoText = String.format("Registration: %s", phrase);
 					Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
+					
+					//Main.this.rlTop.setVisibility(View.VISIBLE);
 					ServiceManager.showNotification(R.drawable.bullet_ball_glass_green_16, "You are connected");
 				}});
 				break;
@@ -243,10 +261,13 @@ implements IRegistrationEventHandler
 			case UNREGISTRATION_OK:
 				this.handler.post(new Runnable() {
 					public void run() {
-						Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_red_16;
 						Main.this.progressInfoText = String.format("Unregistration: %s", phrase);
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
+						
 						ServiceManager.showNotification(R.drawable.bullet_ball_glass_red_16, "You are disconnected");
+						if(Main.this.screenService.getCurrentScreen().getId() != SCREEN_ID.HOME_I){
+							Main.this.screenService.show(Screen.SCREEN_ID.HOME_I);
+						}
 					}});
 				break;
 				
@@ -254,7 +275,6 @@ implements IRegistrationEventHandler
 			case UNREGISTRATION_INPROGRESS:
 				this.handler.post(new Runnable() {
 					public void run() {
-						Main.this.connStateDrawableId = R.drawable.bullet_ball_glass_grey_16;
 						Main.this.progressInfoText = String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "register" : "unregister");
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 						ServiceManager.showNotification(R.drawable.bullet_ball_glass_grey_16, String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "connect" : "disconnect"));

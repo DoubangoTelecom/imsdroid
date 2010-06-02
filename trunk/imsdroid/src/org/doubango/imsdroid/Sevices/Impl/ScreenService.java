@@ -8,6 +8,7 @@ import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAbout;
 import org.doubango.imsdroid.Screens.ScreenAuthorizations;
 import org.doubango.imsdroid.Screens.ScreenChatQueue;
+import org.doubango.imsdroid.Screens.ScreenContactView;
 import org.doubango.imsdroid.Screens.ScreenContacts;
 import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenGeneral;
@@ -85,37 +86,7 @@ public class ScreenService extends Service implements IScreenService {
 		}
 	}
 	
-	public boolean show(Screen screen) {
-		if (screen == null) {
-			Log.e(this.getClass().getCanonicalName(), "Null Screen");
-			return false;
-		}
-
-		Main mainActivity = ServiceManager.getMainActivity();
-		
-		Intent intent = new Intent(mainActivity, screen.getClass());
-		View view = mainActivity.getLocalActivityManager().startActivity(
-				screen.getId().toString(), intent).getDecorView();
-		
-		LinearLayout layout = (LinearLayout) mainActivity
-				.findViewById(R.id.main_linearLayout_principal);
-		layout.removeAllViews();
-		layout.addView(view);
-		
-		// title
-		mainActivity.setScreenTitle(screen.getScreenTitle());
-		
-		// add to stack
-		this.lastScreens[(++this.lastScreensIndex % this.lastScreens.length)] = screen;
-		this.lastScreensIndex %= this.lastScreens.length;
-		
-		// update current screen
-		this.currentScreen = screen;
-		
-		return true;
-	}
-
-	public boolean show(String id) {
+	public Screen get(String id){
 		Screen screen;
 
 		/* already exist? */
@@ -126,11 +97,11 @@ public class ScreenService extends Service implements IScreenService {
 				type = Screen.SCREEN_ID.valueOf(id);
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
-				return false;
+				return null;
 			}
 			catch(NullPointerException e){
 				e.printStackTrace();
-				return false;
+				return null;
 			}
 
 			switch (type) {
@@ -141,6 +112,9 @@ public class ScreenService extends Service implements IScreenService {
 					break;
 				case CHAT_QUEUE_I:
 					screen = new ScreenChatQueue();
+					break;
+				case CONTACT_VIEW_I:
+					screen = new ScreenContactView();
 					break;
 				case CONTACTS_I:
 					screen = new ScreenContacts();
@@ -194,6 +168,46 @@ public class ScreenService extends Service implements IScreenService {
 				this.screens.put(screen.getId().toString(), screen);
 			}
 		}
+		
+		return screen;
+	}
+	
+	public Screen get(Screen.SCREEN_ID id){
+		return this.get(id.toString());
+	}
+	
+	public boolean show(Screen screen) {
+		if (screen == null) {
+			Log.e(this.getClass().getCanonicalName(), "Null Screen");
+			return false;
+		}
+
+		Main mainActivity = ServiceManager.getMainActivity();
+		
+		Intent intent = new Intent(mainActivity, screen.getClass());
+		View view = mainActivity.getLocalActivityManager().startActivity(
+				screen.getId().toString(), intent).getDecorView();
+		
+		LinearLayout layout = (LinearLayout) mainActivity
+				.findViewById(R.id.main_linearLayout_principal);
+		layout.removeAllViews();
+		layout.addView(view);
+		
+		// title
+		mainActivity.setScreenTitle(screen.getScreenTitle());
+		
+		// add to stack
+		this.lastScreens[(++this.lastScreensIndex % this.lastScreens.length)] = screen;
+		this.lastScreensIndex %= this.lastScreens.length;
+		
+		// update current screen
+		this.currentScreen = screen;
+		
+		return true;
+	}
+
+	public boolean show(String id) {
+		Screen screen = this.get(id);
 
 		if (screen == null) {
 			Log.e(this.getClass().getCanonicalName(), String.format(

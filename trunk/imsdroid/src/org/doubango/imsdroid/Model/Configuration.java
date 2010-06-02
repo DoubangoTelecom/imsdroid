@@ -3,6 +3,7 @@ package org.doubango.imsdroid.Model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.doubango.imsdroid.sip.PresenceStatus;
 import org.doubango.imsdroid.utils.StringUtils;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -41,7 +42,7 @@ public class Configuration {
 	public static final boolean DEFAULT_RCS_PRESENCE = true;
 	public static final boolean DEFAULT_RCS_RLS = true;
 	public static final String DEFAULT_RCS_SMSC = "sip:smsc@open-ims.test";
-	public static final String DEFAULT_RCS_STATUS = "Online";
+	public static final PresenceStatus DEFAULT_RCS_STATUS = PresenceStatus.Online;
 	
 	public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "None";
 	public static final String DEFAULT_QOS_PRECOND_STRENGTH = "None";

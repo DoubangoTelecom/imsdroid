@@ -79,17 +79,14 @@ public class ContactService  extends Service implements IContactService, IRegist
 		return true;
 	}
 
-	@Override
 	public List<Contact> getContacts(){
 		return this.contacts.getList();
 	}
 	
-	@Override
 	public boolean isLoadingContacts(){
 		return this.loadingContacts;
 	}
 
-	@Override
 	public boolean loadContacts() {		
 		boolean remote = ServiceManager.getConfigurationService().getBoolean(
 				CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED,
@@ -108,12 +105,10 @@ public class ContactService  extends Service implements IContactService, IRegist
 	}
 	
 	/* ===================== Add/Remove handlers ======================== */
-	@Override
 	public boolean addContactsEventHandler(IContactsEventHandler handler) {
 		return EventHandler.addEventHandler(this.contactsEventHandlers, handler);
 	}
 
-	@Override
 	public boolean removeContactsEventHandler(IContactsEventHandler handler) {
 		return EventHandler.removeEventHandler(this.contactsEventHandlers, handler);
 	}
@@ -138,7 +133,6 @@ public class ContactService  extends Service implements IContactService, IRegist
 	}
 	
 	/* ===================== Sip Events ========================*/
-	@Override
 	public boolean onRegistrationEvent(Object sender, RegistrationEventArgs e) {
 		switch(e.getType()){
 			case REGISTRATION_OK:
@@ -156,7 +150,6 @@ public class ContactService  extends Service implements IContactService, IRegist
 	
 	/* ===================== Internal functions ========================*/
 	private Runnable  loadLocalContacts = new Runnable(){
-		@Override
 		public void run() {
 			ContactService.this.loadingContacts = true;
 			
@@ -174,7 +167,6 @@ public class ContactService  extends Service implements IContactService, IRegist
 	};
 	
 	private Runnable  loadRemoteContacts = new Runnable(){
-		@Override
 		public void run() {
 			
 		}
