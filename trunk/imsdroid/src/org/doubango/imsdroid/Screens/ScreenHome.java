@@ -236,8 +236,8 @@ implements IRegistrationEventHandler
 		}
 
 		public int getCount() {
-			//return this.registered ? this.items.size() : 4/* SignIn/SignOut; Exit/Quit; Options; About */;
-			return this.items.size();
+			return this.registered ? this.items.size() : 4/* SignIn/SignOut; Exit/Quit; Options; About */;
+			//return this.items.size();
 		}
 
 		public Object getItem(int position) {
