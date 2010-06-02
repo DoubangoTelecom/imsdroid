@@ -12,6 +12,8 @@
  * SMS Manager: http://www.damonkohler.com/2009/02/android-recipes.html
  * 
  * Audio Recorder/Trac: http://stackoverflow.com/questions/2416365/android-how-to-add-my-own-audio-codec-to-audiorecord
+ * 						http://androidforums.com/android-media/8974-can-system-sleep-while-audiorecord-recording.html
+ * 						-->http://groups.google.co.in/group/android-developers/browse_thread/thread/1bf74961d3480bde
  * Media Formats: http://developer.android.com/guide/appendix/media-formats.html
  * Android FFMPeg: http://oo-androidnews.blogspot.com/2010/02/ffmpeg-and-androidmk.html
  * 					http://groups.google.com/group/android-ndk/browse_thread/thread/f25d5c7f519bf0c5
