@@ -55,13 +55,16 @@ public abstract class Screen extends Activity implements IScreen {
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			ServiceManager.getScreenService().back();
 			return true;
 		}
 		else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
-			ServiceManager.getScreenService().show(SCREEN_ID.HOME_I);
-			return true;
+			if(!this.haveMenu()){
+				ServiceManager.getScreenService().show(SCREEN_ID.HOME_I);
+				return true;
+			}
 		}
 		return super.onKeyDown(keyCode, event);
 	}
@@ -142,6 +145,10 @@ public abstract class Screen extends Activity implements IScreen {
 		}
 	}
 
+	public boolean haveMenu(){
+		return false;
+	}
+	
 	public Screen.SCREEN_ID getId() {
 		switch (this.type) {
 		// Well-know screens

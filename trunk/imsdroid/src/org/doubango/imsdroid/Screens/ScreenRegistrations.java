@@ -189,7 +189,7 @@ implements ISubscriptionEventHandler
 			this.reginfo = reginfo;
 		}
 
-		private void update(Reginfo reginfo){
+		private synchronized void update(Reginfo reginfo){
 			this.reginfo = reginfo;
 			this.notifyDataSetChanged();
 		}

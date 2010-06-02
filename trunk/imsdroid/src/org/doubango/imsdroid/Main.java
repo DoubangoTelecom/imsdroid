@@ -10,6 +10,12 @@
  * Menus: http://developer.android.com/guide/topics/ui/menus.html
  * 
  * SMS Manager: http://www.damonkohler.com/2009/02/android-recipes.html
+ * 
+ * Audio Recorder/Trac: http://stackoverflow.com/questions/2416365/android-how-to-add-my-own-audio-codec-to-audiorecord
+ * Media Formats: http://developer.android.com/guide/appendix/media-formats.html
+ * Android FFMPeg: http://oo-androidnews.blogspot.com/2010/02/ffmpeg-and-androidmk.html
+ * 					http://groups.google.com/group/android-ndk/browse_thread/thread/f25d5c7f519bf0c5
+ * 
  */
 package org.doubango.imsdroid;
 
@@ -17,6 +23,7 @@ import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Screens.ScreenContacts;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IScreenService;
@@ -36,6 +43,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -132,10 +141,22 @@ implements IRegistrationEventHandler
 			return true;
 		}
 		else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
-			ServiceManager.getScreenService().show(SCREEN_ID.HOME_I);
-			return true;
+			if(!this.screenService.getCurrentScreen().haveMenu()){
+				this.screenService.show(SCREEN_ID.HOME_I);
+				return true;
+			}
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+    
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		return this.screenService.getCurrentScreen().onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		return this.screenService.getCurrentScreen().onOptionsItemSelected(item);
 	}
     
 	protected void onSaveInstanceState(Bundle outState) {

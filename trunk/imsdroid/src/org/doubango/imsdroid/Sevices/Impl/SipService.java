@@ -284,7 +284,7 @@ implements ISipService, tinyWRAPConstants {
 	}
 
 	/* ===================== Dispatch events ======================== */
-	private void onRegistrationEvent(final RegistrationEventArgs eargs) {
+	private synchronized void onRegistrationEvent(final RegistrationEventArgs eargs) {
 		for(int i = 0; i<this.registrationEventHandlers.size(); i++){
 			final IRegistrationEventHandler handler = this.registrationEventHandlers.get(i);
 			new Thread(new Runnable() {
@@ -297,7 +297,7 @@ implements ISipService, tinyWRAPConstants {
 		}
 	}
 	
-	private void onSubscriptionEvent(final SubscriptionEventArgs eargs) {
+	private synchronized void onSubscriptionEvent(final SubscriptionEventArgs eargs) {
 		for(int i = 0; i<this.subscriptionEventHandlers.size(); i++){
 			final ISubscriptionEventHandler handler = this.subscriptionEventHandlers.get(i);
 			new Thread(new Runnable() {
