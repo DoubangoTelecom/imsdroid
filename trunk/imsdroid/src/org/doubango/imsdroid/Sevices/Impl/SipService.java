@@ -20,6 +20,7 @@ import org.doubango.imsdroid.sip.MyRegistrationSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MySubscriptionSession;
 import org.doubango.imsdroid.sip.PresenceStatus;
+import org.doubango.imsdroid.sip.MySipStack.STACK_STATE;
 import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.imsdroid.utils.StringUtils;
@@ -579,6 +580,15 @@ implements ISipService, tinyWRAPConstants {
 						this.sipService.regSession.setConnected(false);
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.UNREGISTRATION_OK, code, phrase));
+						/* Stop the stack (as we are already in the stack-thread, then do it in a new thread) */
+						if(this.sipService.sipStack.getState() == STACK_STATE.STARTED){
+							new Thread(new Runnable(){
+								@Override
+								public void run() {	
+									SipService.this.sipStack.stop();
+								}
+							}).start();
+						}
 					}
 					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							
 						this.sipService.pubPres.setConnected(false);
@@ -586,6 +596,14 @@ implements ISipService, tinyWRAPConstants {
 					// Subscription
 					// Publication
 					// ...
+					break;
+					
+					
+				case tsip_event_code_stack_started:
+					this.sipService.sipStack.setState(STACK_STATE.STARTED);
+					break;
+				case tsip_event_code_stack_stopped:
+					this.sipService.sipStack.setState(STACK_STATE.STOPPED);
 					break;
 					
 				default:
