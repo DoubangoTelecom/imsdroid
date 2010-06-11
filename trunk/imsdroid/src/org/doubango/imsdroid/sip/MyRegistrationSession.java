@@ -21,6 +21,17 @@ public class MyRegistrationSession extends MySipSession {
 		/* support for OMA Large message (as per OMA SIMPLE IM v1) */
 		this.session.addCaps("+g.oma.sip-im.large-message");
 		
+		/* 3GPP TS 24.173
+		*
+		* 5.1 IMS communication service identifier
+		* URN used to define the ICSI for the IMS Multimedia Telephony Communication Service: urn:urn-7:3gpp-service.ims.icsi.mmtel. 
+		* The URN is registered at http://www.3gpp.com/Uniform-Resource-Name-URN-list.html.
+		* Summary of the URN: This URN indicates that the device supports the IMS Multimedia Telephony Communication Service.
+		*
+		* 5.2 Session control procedures
+		* The multimedia telephony participant shall include the g.3gpp. icsi-ref feature tag equal to the ICSI value defined 
+		* in subclause 5.1 in the Contact header field in initial requests and responses as described in 3GPP TS 24.229 [13].
+		*/
 		/* GSMA RCS phase 3 - 3.2 Registration */
 		this.session.addCaps("audio");
 		this.session.addCaps("+g.3gpp.icsi-ref", "\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
