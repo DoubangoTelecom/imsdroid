@@ -9,4 +9,6 @@
     android:layout_height="wrap_content" 
     android:text="@string/hello"
     />
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ButtonRegister" android:text="Register"></Button>
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ButtonCall" android:text="Call"></Button>
 </LinearLayout>
