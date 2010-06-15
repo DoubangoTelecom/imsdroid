@@ -20,6 +20,14 @@
 */
 package org.doubango.imsdroid;
 
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+
 import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.DDebugCallback;
 import org.doubango.tinyWRAP.RegistrationEvent;
@@ -58,7 +66,6 @@ public class Main extends Activity {
         
         @SuppressWarnings("unused")
 		boolean success;
-       
         
         //audioConsumer = new AudioConsumer();
         //audioConsumer.prepare(20, 8000, AudioManager.STREAM_MUSIC);
@@ -111,9 +118,52 @@ public class Main extends Activity {
         //consumer.start();
     }
     
+    /*private InetAddress findLocalIp() throws IOException {
+		Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
+		while (nics.hasMoreElements()) {
+			NetworkInterface nic = nics.nextElement();
+			if ("tiwlan0".equals(nic.getName())
+					|| "rmnet0".equals(nic.getName())
+					|| "eth0".equals(nic.getName()))
+				return nic.getInetAddresses().nextElement();
+		}
+		return InetAddress.getLocalHost();
+	}*/
+    
+    private void dump() throws IOException {
+		Enumeration netInter = NetworkInterface.getNetworkInterfaces();
+		while (netInter.hasMoreElements()) {
+			NetworkInterface ni = (NetworkInterface) netInter.nextElement();
+			System.out.println("Net. Int. : " + ni.getDisplayName());
+			Enumeration addrs = ni.getInetAddresses();
+			while (addrs.hasMoreElements()) {
+				Object o = addrs.nextElement();
+				if (o.getClass() == InetAddress.class
+						|| o.getClass() == Inet4Address.class
+						|| o.getClass() == Inet6Address.class) {
+					InetAddress iaddr = (InetAddress) o;
+					System.out.println(iaddr.getCanonicalHostName());
+					System.out.print("addr type: ");
+					if (o.getClass() == Inet4Address.class) {
+						Log.d("TEST", "IPv4");
+					}
+					if (o.getClass() == Inet6Address.class) {
+						Log.d("TEST", "IPv6");
+					}
+					System.out.println("IP: " + iaddr.getHostAddress());
+					System.out
+							.println("Loopback? " + iaddr.isLoopbackAddress());
+					System.out.println("SiteLocal?"
+							+ iaddr.isSiteLocalAddress());
+					System.out.println("LinkLocal?"
+							+ iaddr.isLinkLocalAddress());
+				}
+			}
+		}
+	}
+    
     
     public String getLocalIP(boolean ipv6){
-		
 		if(ipv6){
 			return null;
 		}
@@ -121,6 +171,22 @@ public class Main extends Activity {
 		WifiManager wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 		int ipAddress = wifiInfo.getIpAddress();
+		
+		InetAddress inetAddress;
+		try {
+			inetAddress = InetAddress.getLocalHost();
+			String ipAddress2 = inetAddress.getHostAddress();  
+			System.out.println(ipAddress2);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  
+		  
+		//Get a string representation of the ip address  
+		
+		  
+		//Print the ip address 
+		
 		
 		if(ipAddress != 0){
 			return String.format("%d.%d.%d.%d",
