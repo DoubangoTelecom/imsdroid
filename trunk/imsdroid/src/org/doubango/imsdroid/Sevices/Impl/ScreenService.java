@@ -107,6 +107,7 @@ public class ScreenService extends Service implements IScreenService {
 			switch (type) {
 				case ABOUT_I:
 					screen = new ScreenAbout();
+					break;
 				case AUTHORIZATIONS_I:
 					screen = new ScreenAuthorizations();
 					break;
