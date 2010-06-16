@@ -149,6 +149,11 @@ implements ISipService, tinyWRAPConstants {
 			}
 		}
 
+		// set the password
+		this.sipStack.setPassword(this.configurationService.getString(
+				CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.PASSWORD,
+				null));
+		
 		// Check stack validity
 		if (!this.sipStack.isValid()) {
 			Log.e(this.getClass().getCanonicalName(), "Trying to use invalid stack");
@@ -583,7 +588,6 @@ implements ISipService, tinyWRAPConstants {
 						/* Stop the stack (as we are already in the stack-thread, then do it in a new thread) */
 						if(this.sipService.sipStack.getState() == STACK_STATE.STARTED){
 							new Thread(new Runnable(){
-								@Override
 								public void run() {	
 									SipService.this.sipStack.stop();
 								}
