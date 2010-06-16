@@ -61,10 +61,10 @@ public class Main extends Activity {
             mCamera = Camera.open();
             try {
             	
-            	Camera.Parameters parameters = mCamera.getParameters(); 
+            	Camera.Parameters parameters = mCamera.getParameters();
             	parameters.setPreviewFrameRate(60);
             	parameters.setPictureSize(176, 144);
-            	mCamera.setParameters(parameters); 
+            	mCamera.setParameters(parameters);
             	
                mCamera.setPreviewDisplay(holder);
                mCamera.setPreviewCallback(this.callback);
