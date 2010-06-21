@@ -30,7 +30,7 @@ public class ScreenNetwork extends Screen {
 	private final static String[] spinner_proxydiscovery_items = new String[] {Configuration.DEFAULT_PCSCF_DISCOVERY, "DNS NAPTR+SRV", "DHCPv4/v6", "Both"};
 	
 	public ScreenNetwork() {
-		super(SCREEN_TYPE.NETWORK_T);
+		super(SCREEN_TYPE.NETWORK_T, ScreenNetwork.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 	}

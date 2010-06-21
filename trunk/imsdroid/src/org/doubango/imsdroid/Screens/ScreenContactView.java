@@ -26,7 +26,7 @@ public class ScreenContactView  extends Screen {
 	private final IScreenService screenService;
 	
 	public ScreenContactView() {
-		super(SCREEN_TYPE.CONTACT_VIEW_T);
+		super(SCREEN_TYPE.CONTACT_VIEW_T, ScreenContactView.class.getCanonicalName());
 		
 		this.screenService = ServiceManager.getScreenService();
 	}
@@ -72,7 +72,7 @@ public class ScreenContactView  extends Screen {
 	
 	private OnClickListener btContacts_OnClickListener = new OnClickListener() {
 		public void onClick(View v) {
-			ScreenContactView.this.screenService.show(SCREEN_ID.CONTACTS_I);
+			ScreenContactView.this.screenService.show(ScreenContacts.class);
 		}
 	};
 	
@@ -90,7 +90,7 @@ public class ScreenContactView  extends Screen {
 		}
 		/*synchronized (ScreenContactView.contact)*/ {
 			ScreenContactView.contact = contact;
-			ServiceManager.getScreenService().show(SCREEN_ID.CONTACT_VIEW_I);
+			ServiceManager.getScreenService().show(ScreenContactView.class);
 		}
 	}
 }

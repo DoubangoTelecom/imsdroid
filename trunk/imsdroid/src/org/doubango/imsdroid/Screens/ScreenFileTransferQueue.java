@@ -11,7 +11,7 @@ public class ScreenFileTransferQueue  extends Screen{
 	private final IConfigurationService configurationService;
 	
 	public ScreenFileTransferQueue() {
-		super(SCREEN_TYPE.FILE_TRANSFER_QUEUE_T);
+		super(SCREEN_TYPE.FILE_TRANSFER_QUEUE_T, ScreenFileTransferQueue.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 	}

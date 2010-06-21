@@ -8,6 +8,7 @@
  * Dialogs: http://developer.android.com/guide/topics/ui/dialogs.html#AlertDialog
  * Hard Keys: http://android-developers.blogspot.com/2009/12/back-and-other-hard-keys-three-stories.html
  * Menus: http://developer.android.com/guide/topics/ui/menus.html
+ * Toasts: http://developer.android.com/guide/topics/ui/notifiers/toasts.html
  * 
  * SMS Manager: http://www.damonkohler.com/2009/02/android-recipes.html
  * 
@@ -26,9 +27,8 @@ package org.doubango.imsdroid;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
-import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenPresence;
-import org.doubango.imsdroid.Screens.Screen.SCREEN_ID;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -116,7 +116,7 @@ implements IRegistrationEventHandler
         this.ivStatus = (ImageView)this.findViewById(R.id.main_imageView_status);
         this.ivAvatar = (ImageView)this.findViewById(R.id.main_imageView_avatar);
         
-        // starts our services
+        // starts our services (will do nothing if already started)
         if(!ServiceManager.start()){
         	Log.e(this.getClass().getName(), "Failed to start services");
         	return; // Should exit
@@ -143,9 +143,19 @@ implements IRegistrationEventHandler
         this.sipService.addRegistrationEventHandler(this);
         
         /* shows the home screen */
-        this.screenService.show(Screen.SCREEN_ID.HOME_I);
+        this.screenService.show(ScreenHome.class);
     }
 
+	protected void onDestroy() {
+        // remove event handlers : do it after stop() to continue to receive Sip events
+        this.sipService.removeRegistrationEventHandler(this);
+        
+        // unbind to service manager
+        this.unbindService(this.connection);
+        
+        super.onDestroy();
+	}
+	
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			this.screenService.back();
@@ -153,7 +163,7 @@ implements IRegistrationEventHandler
 		}
 		else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
 			if(!this.screenService.getCurrentScreen().haveMenu()){
-				this.screenService.show(SCREEN_ID.HOME_I);
+				this.screenService.show(ScreenHome.class);
 				return true;
 			}
 		}
@@ -193,16 +203,6 @@ implements IRegistrationEventHandler
 				Configuration.DEFAULT_RCS_STATUS.toString()))));
 	}
 
-	protected void onDestroy() {
-        // remove event handlers : do it after stop() to continue to receive Sip events
-        this.sipService.removeRegistrationEventHandler(this);
-        
-        // unbind to service manager
-        this.unbindService(this.connection);
-        
-        super.onDestroy();
-	}
-
 	/* ===================== Public functions ======================== */
 	public void setScreenTitle(String value){
 		this.tvTitle.setText(value);
@@ -235,7 +235,7 @@ implements IRegistrationEventHandler
 	/* ===================== UI Events ======================== */	
 	private OnClickListener ivStatus_OnClickListener = new OnClickListener() {
 		public void onClick(View v) {
-			Main.this.screenService.show(Screen.SCREEN_ID.PRESENCE_I);
+			Main.this.screenService.show(ScreenPresence.class);
 		}
 	};
 	
@@ -257,7 +257,7 @@ implements IRegistrationEventHandler
 					Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 					
 					//Main.this.rlTop.setVisibility(View.VISIBLE);
-					ServiceManager.showNotification(R.drawable.bullet_ball_glass_green_16, "You are connected");
+					ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_green_16, "You are connected");
 				}});
 				break;
 			
@@ -267,9 +267,9 @@ implements IRegistrationEventHandler
 						Main.this.progressInfoText = String.format("Unregistration: %s", phrase);
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 						
-						ServiceManager.showNotification(R.drawable.bullet_ball_glass_red_16, "You are disconnected");
-						if(Main.this.screenService.getCurrentScreen().getId() != SCREEN_ID.HOME_I){
-							Main.this.screenService.show(Screen.SCREEN_ID.HOME_I);
+						ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are disconnected");
+						if(!Main.this.screenService.getCurrentScreen().getId().equals(ScreenHome.class.getCanonicalName())){
+							Main.this.screenService.show(ScreenHome.class);
 						}
 					}});
 				break;
@@ -280,7 +280,7 @@ implements IRegistrationEventHandler
 					public void run() {
 						Main.this.progressInfoText = String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "register" : "unregister");
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
-						ServiceManager.showNotification(R.drawable.bullet_ball_glass_grey_16, String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "connect" : "disconnect"));
+						ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_grey_16, String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "connect" : "disconnect"));
 					}});
 				break;
 				

@@ -5,16 +5,22 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Services.ISipService;
+import org.doubango.imsdroid.events.CallEventArgs;
+import org.doubango.imsdroid.events.CallEventTypes;
 import org.doubango.imsdroid.events.EventHandler;
+import org.doubango.imsdroid.events.ICallEventHandler;
 import org.doubango.imsdroid.events.IRegistrationEventHandler;
 import org.doubango.imsdroid.events.ISubscriptionEventHandler;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
 import org.doubango.imsdroid.events.SubscriptionEventArgs;
 import org.doubango.imsdroid.events.SubscriptionEventTypes;
+import org.doubango.imsdroid.media.MediaType;
+import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.MyPublicationSession;
 import org.doubango.imsdroid.sip.MyRegistrationSession;
 import org.doubango.imsdroid.sip.MySipStack;
@@ -24,6 +30,8 @@ import org.doubango.imsdroid.sip.MySipStack.STACK_STATE;
 import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.tinyWRAP.CallEvent;
+import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.DDebugCallback;
 import org.doubango.tinyWRAP.DialogEvent;
 import org.doubango.tinyWRAP.OptionsEvent;
@@ -36,9 +44,8 @@ import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.SubscriptionEvent;
 import org.doubango.tinyWRAP.SubscriptionSession;
 import org.doubango.tinyWRAP.tinyWRAPConstants;
+import org.doubango.tinyWRAP.tsip_invite_event_type_t;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
-import org.doubango.tinyWRAP.tsip_publish_event_type_t;
-import org.doubango.tinyWRAP.tsip_register_event_type_t;
 import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
 
 import android.os.ConditionVariable;
@@ -56,6 +63,7 @@ implements ISipService, tinyWRAPConstants {
 	// Event Handlers
 	private final CopyOnWriteArrayList<IRegistrationEventHandler> registrationEventHandlers;
 	private final CopyOnWriteArrayList<ISubscriptionEventHandler> subscriptionEventHandlers;
+	private final CopyOnWriteArrayList<ICallEventHandler> callEventHandlers;
 
 	private byte[] reginfo;
 	private byte[] winfo;
@@ -84,7 +92,7 @@ implements ISipService, tinyWRAPConstants {
 
 		this.registrationEventHandlers = new CopyOnWriteArrayList<IRegistrationEventHandler>();
 		this.subscriptionEventHandlers = new CopyOnWriteArrayList<ISubscriptionEventHandler>();
-		
+		this.callEventHandlers = new CopyOnWriteArrayList<ICallEventHandler>();
 
 		this.configurationService = ServiceManager.getConfigurationService();
 		this.networkService = ServiceManager.getNetworkService();
@@ -107,6 +115,10 @@ implements ISipService, tinyWRAPConstants {
 		return false;
 	}
 
+	public MySipStack getStack(){
+		return this.sipStack;
+	}
+	
 	public byte[] getReginfo(){
 		return this.reginfo;
 	}
@@ -266,7 +278,12 @@ implements ISipService, tinyWRAPConstants {
 
 	public boolean unregister() {
 		if (this.isRegistered()) {
-			return this.sipStack.stop();
+			new Thread(new Runnable(){
+				@Override
+				public void run() {
+					SipService.this.sipStack.stop();
+				}
+			}).start();
 		}
 		Log.d(this.getClass().getCanonicalName(), "Already unregistered");
 		return true;
@@ -291,20 +308,34 @@ implements ISipService, tinyWRAPConstants {
 
 	/* ===================== Add/Remove handlers ======================== */
 
+	@Override
 	public boolean addRegistrationEventHandler(IRegistrationEventHandler handler) {
 		return EventHandler.addEventHandler(this.registrationEventHandlers, handler);
 	}
 
+	@Override
 	public boolean removeRegistrationEventHandler(IRegistrationEventHandler handler) {
 		return EventHandler.removeEventHandler(this.registrationEventHandlers, handler);
 	}
 
+	@Override
 	public boolean addSubscriptionEventHandler(ISubscriptionEventHandler handler) {
 		return EventHandler.addEventHandler(this.subscriptionEventHandlers, handler);
 	}
 
+	@Override
 	public boolean removeSubscriptionEventHandler(ISubscriptionEventHandler handler) {
 		return EventHandler.removeEventHandler(this.subscriptionEventHandlers, handler);
+	}
+	
+	@Override
+	public boolean addCallEventHandler(ICallEventHandler handler) {
+		return EventHandler.addEventHandler(this.callEventHandlers, handler);
+	}
+
+	@Override
+	public boolean removeCallEventHandler(ICallEventHandler handler) {
+		return EventHandler.removeEventHandler(this.callEventHandlers, handler);
 	}
 
 	/* ===================== Dispatch events ======================== */
@@ -328,6 +359,19 @@ implements ISipService, tinyWRAPConstants {
 				public void run() {
 					if (!handler.onSubscriptionEvent(this, eargs)) {
 						Log.w(handler.getClass().getName(), "onSubscriptionEvent failed");
+					}
+				}
+			}).start();
+		}
+	}
+	
+	private synchronized void onCallEvent(final CallEventArgs eargs) {
+		for(int i = 0; i<this.callEventHandlers.size(); i++){
+			final ICallEventHandler handler = this.callEventHandlers.get(i);
+			new Thread(new Runnable() {
+				public void run() {
+					if (!handler.onCallEvent(this, eargs)) {
+						Log.w(handler.getClass().getName(), "onCallEvent failed");
 					}
 				}
 			}).start();
@@ -405,7 +449,6 @@ implements ISipService, tinyWRAPConstants {
 			this.pubPres.publish(status, freeText);
 		}
 	}
-	
 
 	/* ===================== Sip Callback ======================== */
 	private class MySipCallback extends SipCallback {
@@ -418,50 +461,13 @@ implements ISipService, tinyWRAPConstants {
 			this.sipService = sipService;
 		}
 
-		@SuppressWarnings("unused")
-		private final boolean isSipCode(short code) {
-			return (code >= 100 && code <= 699);
-		}
-
-		private final boolean is2xx(short code) {
-			return (code >= 200 && code <= 299);
-		}
-
-		private final boolean is1xx(short code) {
-			return (code >= 100 && code <= 199);
-		}
-
 		@Override
 		public int OnRegistrationEvent(RegistrationEvent e) {
-			final short code = e.getCode();
-			final String phrase = e.getPhrase();
-			final tsip_register_event_type_t type = e.getType();
-
-			Log.d(SipService.TAG, String.format("OnRegistrationEvent (%s)", phrase));
-			
-			if (this.is1xx(code)) {
-				return 0;
-			}
-
-			switch (type) {
-			case tsip_ao_register:
-				if (this.is2xx(code)) { /* Success */
-					// see OnDialogEvent()
-				} else { /* Failure */
-					// see OnDialogEvent()
-				}
-				break;
-			case tsip_ao_unregister:
-				if (this.is2xx(code)) { /* Success */
-					// see OnDialogEvent()
-				} else { /* Failure */
-					// see OnDialogEvent()
-				}
-				break;
-
-			default:
-				break;
-			}
+			return 0;
+		}
+		
+		@Override
+		public int OnPublicationEvent(PublicationEvent e) {			
 			return 0;
 		}
 
@@ -478,9 +484,7 @@ implements ISipService, tinyWRAPConstants {
 			}
 			
 			switch(type){
-				case tsip_ao_subscribe:
-					break;
-					
+				case tsip_ao_subscribe:					
 				case tsip_ao_unsubscribe:
 					break;
 					
@@ -508,26 +512,6 @@ implements ISipService, tinyWRAPConstants {
 			
 			return 0;
 		}
-		
-		@Override
-		public int OnPublicationEvent(PublicationEvent e) {
-			@SuppressWarnings("unused")
-			short code = e.getCode();
-			tsip_publish_event_type_t type = e.getType();
-			
-			switch(type){
-				case tsip_i_publish:
-					break;
-				case tsip_ao_publish:
-					break;
-				case tsip_i_unpublish:
-					break;
-				case tsip_ao_unpublish:
-					break;
-			}
-			
-			return 0;
-		}
 
 		@Override
 		public int OnDialogEvent(DialogEvent e){
@@ -548,6 +532,10 @@ implements ISipService, tinyWRAPConstants {
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.REGISTRATION_INPROGRESS, code, phrase));
 					}
+					// Audio/Video Calls
+					if(MyAVSession.getSession(session.getId()) != null){
+						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.INPROGRESS, phrase)); 
+					}
 					// Subscription
 					// Publication
 					// ...
@@ -561,12 +549,17 @@ implements ISipService, tinyWRAPConstants {
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.REGISTRATION_OK, code, phrase));
 					}
+					// Presence Publication
 					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							
 						this.sipService.pubPres.setConnected(true);
 					}
+					// Audio/Video Calls
+					else if(MyAVSession.getSession(session.getId()) != null){
+						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.CONNECTED, phrase)); 
+					}
 					// Subscription
 					// Publication
-					// ...
+					//..
 					break;
 					
 				case tsip_event_code_dialog_terminating:
@@ -594,8 +587,13 @@ implements ISipService, tinyWRAPConstants {
 							}).start();
 						}
 					}
+					// Presence Publication
 					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							
 						this.sipService.pubPres.setConnected(false);
+					}
+					// Audio/Video Calls
+					if(MyAVSession.getSession(session.getId()) != null){
+						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.DISCONNECTED, phrase)); 
 					}
 					// Subscription
 					// Publication
@@ -614,6 +612,71 @@ implements ISipService, tinyWRAPConstants {
 					break;
 			}
 			
+			return 0;
+		}
+		
+		@Override
+		public int OnCallEvent(CallEvent e) {
+			//short code = e.getCode();
+			String phrase = "e.getPhrase()";
+			tsip_invite_event_type_t type = e.getType();
+			//SipMessage message = e.getSipMessage();
+			CallSession session = e.getSession();
+
+			switch(type){
+				case tsip_i_newcall:
+					if (session != null){ /* As we are not the owner, then the session MUST be null */
+                        Log.e(SipService.TAG, "Invalid incoming session");
+                        session.Hangup();
+                        return 0;
+                    }
+                    else if ((session = e.takeSessionOwnership()) != null){
+                    	SipMessage message = e.getSipMessage();
+                    	if(message != null){                    		
+                    		final String from = message.getSipHeaderValue("f");
+                    		final MyAVSession avSession = MyAVSession.takeIncomingSession(this.sipService.sipStack, session);
+	                    		                    	
+	                    	ServiceManager.getScreenService().runOnUiThread(new Runnable(){
+								@Override
+								public void run() {
+									ScreenAV.receiveCall(avSession, from, MediaType.AudioVideo);
+								}
+	                    	});
+	                    	
+	                    	CallEventArgs eargs = new CallEventArgs(avSession.getId(), CallEventTypes.INCOMING, phrase);
+	                    	eargs.putExtra("from", from);
+	                    	this.sipService.onCallEvent(eargs);
+                    	}
+                    	else{
+                    		 Log.e(SipService.TAG, "Invalid SIP message");
+                    	}
+                    }
+					break;
+				case tsip_i_request:
+				case tsip_ao_request:
+				case tsip_o_ect_ok:
+				case tsip_o_ect_nok:
+				case tsip_i_ect:
+					break;
+				case tsip_m_local_hold_ok:
+					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.LOCAL_HOLD_OK, phrase));
+					break;
+				case tsip_m_local_hold_nok:
+					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.LOCAL_HOLD_NOK, phrase));
+					break;
+				case tsip_m_local_resume_ok:
+					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.LOCAL_RESUME_OK, phrase));
+					break;
+				case tsip_m_local_resume_nok:
+					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.LOCAL_RESUME_NOK, phrase));
+					break;
+				case tsip_m_remote_hold:
+					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.REMOTE_HOLD, phrase));
+					break;
+				case tsip_m_remote_resume:
+					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.REMOTE_RESUME, phrase));
+					break;
+			}
 			return 0;
 		}
 		

@@ -7,7 +7,7 @@ import android.os.Bundle;
 public class ScreenAuthorizations extends Screen {
 
 	public ScreenAuthorizations() {
-		super(SCREEN_TYPE.AUTHORIZATIONS_T);
+		super(SCREEN_TYPE.AUTHORIZATIONS_T, ScreenAuthorizations.class.getCanonicalName());
 	}
 
 	@Override

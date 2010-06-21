@@ -43,6 +43,10 @@
 <service android:name=".Sevices.Impl.ServiceManager"></service>
 <activity android:name=".Screens.ScreenAuthorizations"></activity>
 <activity android:name=".Screens.ScreenContactView"></activity>
+<activity android:name=".Screens.ScreenDialer"></activity>
+<activity android:name=".Screens.ScreenAV"></activity>
+
+<service android:name=".Sevices.Impl.ServiceManager" android:enabled="true"></service>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />
@@ -52,8 +56,7 @@
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
 	<uses-permission android:name="android.permission.CAMERA"></uses-permission>
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
-	
-	
+	<uses-permission android:name="android.permission.RECORD_AUDIO"></uses-permission>
 	
 	
 	<uses-feature android:name="android.hardware.camera" />

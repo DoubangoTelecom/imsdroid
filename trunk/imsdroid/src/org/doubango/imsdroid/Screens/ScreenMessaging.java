@@ -24,7 +24,7 @@ public class ScreenMessaging  extends Screen {
 	private final static String TAG = ScreenMessaging.class.getCanonicalName();
 	
 	public ScreenMessaging() {
-		super(SCREEN_TYPE.MESSAGING_T);
+		super(SCREEN_TYPE.MESSAGING_T, ScreenMessaging.class.getCanonicalName());
 
 		// Services
 		this.configurationService = ServiceManager.getConfigurationService();

@@ -28,6 +28,8 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import org.doubango.imsdroid.media.AudioConsumer;
+import org.doubango.imsdroid.media.AudioProducer;
 import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.DDebugCallback;
 import org.doubango.tinyWRAP.RegistrationEvent;
@@ -73,11 +75,11 @@ public class Main extends Activity {
         
         this.debugCallBack = new DDebugCallback();
         this.sipCallBack = new MySipCallback();
-        this.sipStack = new SipStack(this.sipCallBack, "sip:ericsson.com", "mamadou", "sip:mamadou@ericsson.com");
+        this.sipStack = new SipStack(this.sipCallBack, "sip:micromethod.com", "mamadou", "sip:mamadou@micromethod.com");
         this.sipStack.setDebugCallback(this.debugCallBack);
         
         success = this.sipStack.isValid();
-        success = this.sipStack.setProxyCSCF("192.168.0.13", 5081, "tcp", "ipv4");
+        success = this.sipStack.setProxyCSCF("192.168.0.17", 5060, "tcp", "ipv4");
         this.sipStack.setLocalIP(this.getLocalIP(false));
         
         success = this.sipStack.start();
@@ -107,7 +109,7 @@ public class Main extends Activity {
 				}
 				audioConsumer.setActive();
 				audioProducer.setActive();
-				callSession.Call("sip:bob@ericsson.com");
+				callSession.CallAudio("sip:bob@micromethod.com");
 			}
         });
         

@@ -38,7 +38,7 @@ public class ScreenSecurity extends Screen {
 	private CheckBox cbTlsSecAgree;
 	
 	public  ScreenSecurity() {
-		super(SCREEN_TYPE.SECURITY_T);
+		super(SCREEN_TYPE.SECURITY_T, ScreenSecurity.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 	}
