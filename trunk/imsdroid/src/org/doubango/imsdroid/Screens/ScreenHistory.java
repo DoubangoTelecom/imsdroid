@@ -11,7 +11,7 @@ public class ScreenHistory  extends Screen{
 	private final IConfigurationService configurationService;
 	
 	public ScreenHistory() {
-		super(SCREEN_TYPE.HISTORY_T);
+		super(SCREEN_TYPE.HISTORY_T, ScreenHistory.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 	}

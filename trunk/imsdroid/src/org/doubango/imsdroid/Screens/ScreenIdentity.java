@@ -28,7 +28,7 @@ public class ScreenIdentity  extends Screen {
 	private CheckBox cbEarlyIMS;
 	
 	public ScreenIdentity() {
-		super(SCREEN_TYPE.IDENTITY_T);
+		super(SCREEN_TYPE.IDENTITY_T, ScreenIdentity.class.getCanonicalName());
 		
 		this.ConfigurationService = ServiceManager.getConfigurationService();
 	}

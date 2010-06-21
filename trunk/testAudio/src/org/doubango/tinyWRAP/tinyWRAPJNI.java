@@ -34,6 +34,10 @@ class tinyWRAPJNI {
   public final static native long SipEvent_getSipMessage(long jarg1, SipEvent jarg1_);
   public final static native void delete_DialogEvent(long jarg1);
   public final static native void delete_StackEvent(long jarg1);
+  public final static native void delete_CallEvent(long jarg1);
+  public final static native int CallEvent_getType(long jarg1, CallEvent jarg1_);
+  public final static native long CallEvent_getSession(long jarg1, CallEvent jarg1_);
+  public final static native long CallEvent_takeSessionOwnership(long jarg1, CallEvent jarg1_);
   public final static native void delete_MessagingEvent(long jarg1);
   public final static native int MessagingEvent_getType(long jarg1, MessagingEvent jarg1_);
   public final static native long MessagingEvent_getSession(long jarg1, MessagingEvent jarg1_);
@@ -65,7 +69,12 @@ class tinyWRAPJNI {
   public final static native long SipSession_getId(long jarg1, SipSession jarg1_);
   public final static native long new_CallSession(long jarg1, SipStack jarg1_);
   public final static native void delete_CallSession(long jarg1);
-  public final static native boolean CallSession_Call(long jarg1, CallSession jarg1_, String jarg2);
+  public final static native boolean CallSession_CallAudio(long jarg1, CallSession jarg1_, String jarg2);
+  public final static native boolean CallSession_CallAudioVideo(long jarg1, CallSession jarg1_, String jarg2);
+  public final static native boolean CallSession_CallVideo(long jarg1, CallSession jarg1_, String jarg2);
+  public final static native boolean CallSession_Accept(long jarg1, CallSession jarg1_);
+  public final static native boolean CallSession_Hold(long jarg1, CallSession jarg1_);
+  public final static native boolean CallSession_Resume(long jarg1, CallSession jarg1_);
   public final static native boolean CallSession_Hangup(long jarg1, CallSession jarg1_);
   public final static native long new_MessagingSession(long jarg1, SipStack jarg1_);
   public final static native void delete_MessagingSession(long jarg1);
@@ -123,6 +132,8 @@ class tinyWRAPJNI {
   public final static native int SipCallback_OnDialogEventSwigExplicitSipCallback(long jarg1, SipCallback jarg1_, long jarg2, DialogEvent jarg2_);
   public final static native int SipCallback_OnStackEvent(long jarg1, SipCallback jarg1_, long jarg2, StackEvent jarg2_);
   public final static native int SipCallback_OnStackEventSwigExplicitSipCallback(long jarg1, SipCallback jarg1_, long jarg2, StackEvent jarg2_);
+  public final static native int SipCallback_OnCallEvent(long jarg1, SipCallback jarg1_, long jarg2, CallEvent jarg2_);
+  public final static native int SipCallback_OnCallEventSwigExplicitSipCallback(long jarg1, SipCallback jarg1_, long jarg2, CallEvent jarg2_);
   public final static native int SipCallback_OnMessagingEvent(long jarg1, SipCallback jarg1_, long jarg2, MessagingEvent jarg2_);
   public final static native int SipCallback_OnMessagingEventSwigExplicitSipCallback(long jarg1, SipCallback jarg1_, long jarg2, MessagingEvent jarg2_);
   public final static native int SipCallback_OnOptionsEvent(long jarg1, SipCallback jarg1_, long jarg2, OptionsEvent jarg2_);
@@ -159,6 +170,7 @@ class tinyWRAPJNI {
   public final static native boolean SipStack_stop(long jarg1, SipStack jarg1_);
   public final static native long SWIGDialogEventUpcast(long jarg1);
   public final static native long SWIGStackEventUpcast(long jarg1);
+  public final static native long SWIGCallEventUpcast(long jarg1);
   public final static native long SWIGMessagingEventUpcast(long jarg1);
   public final static native long SWIGOptionsEventUpcast(long jarg1);
   public final static native long SWIGPublicationEventUpcast(long jarg1);
@@ -201,6 +213,9 @@ class tinyWRAPJNI {
   }
   public static int SwigDirector_SipCallback_OnStackEvent(SipCallback self, long e) {
     return self.OnStackEvent((e == 0) ? null : new StackEvent(e, false));
+  }
+  public static int SwigDirector_SipCallback_OnCallEvent(SipCallback self, long e) {
+    return self.OnCallEvent((e == 0) ? null : new CallEvent(e, false));
   }
   public static int SwigDirector_SipCallback_OnMessagingEvent(SipCallback self, long e) {
     return self.OnMessagingEvent((e == 0) ? null : new MessagingEvent(e, false));

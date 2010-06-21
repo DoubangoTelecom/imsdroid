@@ -7,7 +7,7 @@ import android.os.Bundle;
 public class ScreenAbout extends Screen {
 
 	public ScreenAbout() {
-		super(SCREEN_TYPE.ABOUT_T);
+		super(SCREEN_TYPE.ABOUT_T, ScreenAbout.class.getCanonicalName());
 	}
 
 	@Override

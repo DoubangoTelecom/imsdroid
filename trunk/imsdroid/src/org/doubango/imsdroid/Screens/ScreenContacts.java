@@ -59,7 +59,7 @@ implements IContactsEventHandler
 	
 	
 	public ScreenContacts() {
-		super(SCREEN_TYPE.CONTACTS_T);
+		super(SCREEN_TYPE.CONTACTS_T, ScreenContacts.class.getCanonicalName());
 		
 		// Services
 		this.contactService = ServiceManager.getContactService();

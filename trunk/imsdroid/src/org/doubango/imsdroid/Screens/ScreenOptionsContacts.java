@@ -28,7 +28,7 @@ public class ScreenOptionsContacts  extends Screen {
 	private final IConfigurationService configurationService;
 	
 	public ScreenOptionsContacts() {
-		super(SCREEN_TYPE.CONTACTS_OPTIONS_T);
+		super(SCREEN_TYPE.CONTACTS_OPTIONS_T, ScreenOptionsContacts.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 	}

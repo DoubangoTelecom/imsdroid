@@ -11,7 +11,7 @@ public class ScreenChatQueue  extends Screen{
 	private final IConfigurationService configurationService;
 	
 	public ScreenChatQueue() {
-		super(SCREEN_TYPE.CHAT_QUEUE_T);
+		super(SCREEN_TYPE.CHAT_QUEUE_T, ScreenChatQueue.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 	}

@@ -55,7 +55,7 @@ public class ScreenPresence  extends Screen {
 	private RelativeLayout rlPresence;
 	private Spinner spStatus;
 	
-	private static final String TAG = "Camera";
+	private static final String TAG = ScreenPresence.class.getCanonicalName();
 	private Camera camera;
 	private Preview preview;
 	
@@ -73,7 +73,7 @@ public class ScreenPresence  extends Screen {
 	private final ISipService sipService;
 	
 	public ScreenPresence() {
-		super(SCREEN_TYPE.PRESENCE_T);
+		super(SCREEN_TYPE.PRESENCE_T, ScreenPresence.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 		this.sipService = ServiceManager.getSipService();

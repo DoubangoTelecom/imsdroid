@@ -42,7 +42,7 @@ implements ISubscriptionEventHandler
 	//private ProgressDialog progressDialog;
 	
 	public ScreenRegistrations() {
-		super(SCREEN_TYPE.REGISTRATIONS_T);
+		super(SCREEN_TYPE.REGISTRATIONS_T, ScreenRegistrations.class.getCanonicalName());
 		
 		this.sipService = ServiceManager.getSipService();
 		

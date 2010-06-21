@@ -42,7 +42,7 @@ implements IRegistrationEventHandler
 	private final Handler handler;
 
 	public ScreenHome() {
-		super(SCREEN_TYPE.HOME_T);
+		super(SCREEN_TYPE.HOME_T, ScreenHome.class.getCanonicalName());
 
 		// Services
 		this.screenService = ServiceManager.getScreenService();
@@ -64,23 +64,25 @@ implements IRegistrationEventHandler
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.exit_48), "Exit/Quit", null));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.options_48), "Options", Screen.SCREEN_ID.OPTIONS_I));
+				getResources(), R.drawable.options_48), "Options", ScreenOptions.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.about_48), "About", Screen.SCREEN_ID.ABOUT_I));
+				getResources(), R.drawable.about_48), "About", ScreenAbout.class));
 		
 		// visible only if connected
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.id_cards_48), "Registrations", Screen.SCREEN_ID.REGISTRATIONS_I));
+				getResources(), R.drawable.dialer_48), "Dialer", ScreenDialer.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.lock_edit_48), "Authorizations", Screen.SCREEN_ID.AUTHORIZATIONS_I));
+				getResources(), R.drawable.id_cards_48), "Registrations", ScreenRegistrations.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.eab2_48), "Address Book", Screen.SCREEN_ID.CONTACTS_I));
+				getResources(), R.drawable.lock_edit_48), "Authorizations", ScreenAuthorizations.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.history_48), "History", Screen.SCREEN_ID.HISTORY_I));
+				getResources(), R.drawable.eab2_48), "Address Book", ScreenContacts.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.document_up_48), "File Transfer", Screen.SCREEN_ID.FILE_TRANSFER_QUEUE_I));
+				getResources(), R.drawable.history_48), "History", ScreenHistory.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.chat_48), "Chat", Screen.SCREEN_ID.CHAT_QUEUE_I));
+				getResources(), R.drawable.document_up_48), "File Transfer", ScreenFileTransferQueue.class));
+		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+				getResources(), R.drawable.chat_48), "Chat", ScreenChatQueue.class));
 		
 		// gridView
 		this.adapter = new ScreenHomeAdapter(this.items);
@@ -160,7 +162,7 @@ implements IRegistrationEventHandler
 						builder.create().show();
 					}
 					else{
-						ScreenHome.this.screenService.show(item.screenId);
+						ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
 					}
 				}
 			}
@@ -206,12 +208,12 @@ implements IRegistrationEventHandler
 	private class ScreenHomeItem {
 		private final Bitmap icon;
 		private final String text;
-		private final SCREEN_ID screenId;
+		private final Class<? extends Screen> screenCls;
 
-		private ScreenHomeItem(Bitmap icon, String text, SCREEN_ID screenId) {
+		private ScreenHomeItem(Bitmap icon, String text, Class<? extends Screen> screenCls) {
 			this.icon = icon;
 			this.text = text;
-			this.screenId = screenId;
+			this.screenCls = screenCls;
 		}
 	}
 

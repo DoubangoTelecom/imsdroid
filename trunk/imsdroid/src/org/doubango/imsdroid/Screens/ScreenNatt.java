@@ -34,7 +34,7 @@ public class ScreenNatt extends Screen {
 	private final static String TAG = ScreenNatt.class.getCanonicalName();
 	
 	public  ScreenNatt() {
-		super(SCREEN_TYPE.NATT_T);
+		super(SCREEN_TYPE.NATT_T, ScreenNatt.class.getCanonicalName());
 		
 		this.configurationService = ServiceManager.getConfigurationService();
 	}

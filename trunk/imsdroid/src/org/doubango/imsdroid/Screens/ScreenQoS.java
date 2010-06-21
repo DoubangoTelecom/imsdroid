@@ -37,7 +37,7 @@ public class ScreenQoS  extends Screen {
 	private static final String TAG = ScreenQoS.class.getCanonicalName();
 	
 	public ScreenQoS() {
-		super(SCREEN_TYPE.QOS_T);
+		super(SCREEN_TYPE.QOS_T, ScreenQoS.class.getCanonicalName());
 
 		// Services
 		this.configurationService = ServiceManager.getConfigurationService();

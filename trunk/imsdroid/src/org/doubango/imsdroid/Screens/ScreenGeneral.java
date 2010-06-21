@@ -7,7 +7,7 @@ import android.os.Bundle;
 public class ScreenGeneral  extends Screen {
 	
 	public ScreenGeneral() {
-		super(SCREEN_TYPE.GENERAL_T);
+		super(SCREEN_TYPE.GENERAL_T, ScreenGeneral.class.getCanonicalName());
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="fill_parent" android:layout_width="fill_parent">
+
+<RelativeLayout android:layout_height="wrap_content" android:id="@+id/screen_av_relativeLayout_top" android:layout_width="fill_parent">
+
+<TextView android:layout_height="wrap_content" android:id="@+id/screen_av_textView_info" android:textColor="@color/white" android:text="....." android:layout_toRightOf="@+id/screen_av_imageView_state" android:layout_alignParentLeft="true" android:layout_width="wrap_content"></TextView>
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/bullet_ball_glass_grey_16" android:id="@+id/screen_av_imageView_state" android:layout_alignParentRight="true"></ImageView>
+</RelativeLayout><SurfaceView android:id="@+id/screen_av_surfaceView_remote" android:background="@drawable/presentation_64" android:layout_centerHorizontal="true" android:layout_below="@+id/screen_av_relativeLayout_top" android:layout_height="144dp" android:layout_width="176dp" android:layout_marginTop="10px"></SurfaceView>
+
+
+
+
+
+
+
+<LinearLayout android:layout_below="@+id/screen_av_surfaceView_remote" android:layout_toRightOf="@+id/screen_av_imageButton_hangup" android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_horizontal" android:layout_marginTop="15px" android:id="@+id/screen_av_linearLayout">
+
+<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_av_imageButton_Pick" android:src="@drawable/phone_pick_up_48" android:layout_below="@+id/screen_av_surfaceView_remote" android:soundEffectsEnabled="true"></ImageButton>
+<ImageButton android:layout_width="wrap_content" android:layout_below="@+id/screen_av_surfaceView_remote" android:layout_toRightOf="@+id/screen_av_imageButton_Pick" android:layout_height="wrap_content" android:id="@+id/screen_av_imageButton_hangup" android:src="@drawable/phone_hang_up_48" android:layout_centerHorizontal="true" android:soundEffectsEnabled="true"></ImageButton>
+
+<ImageButton android:layout_below="@+id/screen_av_surfaceView_remote" android:layout_toRightOf="@+id/screen_av_imageButton_hangup" android:id="@+id/screen_av_imageButton_holdresume" android:src="@drawable/phone_hold_48" android:layout_height="wrap_content" android:layout_width="wrap_content" android:soundEffectsEnabled="true"></ImageButton>
+
+</LinearLayout>
+
+
+<TextView android:layout_height="wrap_content" android:id="@+id/screen_av_textView_time" android:textColor="@color/white" android:textStyle="bold" android:layout_below="@+id/screen_av_linearLayout" android:layout_marginTop="10px" android:textSize="30px" android:layout_width="fill_parent" android:gravity="fill_vertical|center_horizontal" android:text="00:00:00"></TextView>
+
+
+
+</RelativeLayout>

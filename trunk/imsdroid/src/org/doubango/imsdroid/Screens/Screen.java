@@ -1,5 +1,6 @@
 package org.doubango.imsdroid.Screens;
 
+import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.utils.StringUtils;
 
@@ -19,40 +20,42 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
-		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
-		REGISTRATIONS_T, SECURITY_T
-	}
-	
-	public static enum SCREEN_ID { 
-		ABOUT_I, AUTHORIZATIONS_I, CHAT_QUEUE_I, CONTACT_VIEW_I, CONTACTS_I, CONTACTS_OPTIONS_I, FILE_TRANSFER_QUEUE_I, GENERAL_I, HISTORY_I, HOME_I, IDENTITY_I, MESSAGING_I, NATT_I, NETWORK_I, OPTIONS_I, PRESENCE_I, QOS_I,
-		REGISTRATIONS_I, SECURITY_I
+		// Well-Known
+		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, DIALER_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
+		REGISTRATIONS_T, SECURITY_T,
+		// All others
+		AV_T
 	}
 
-	public static final String SCREEN_TITLE_ABOUT = "About";
-	public static final String SCREEN_TITLE_AUTHORIZATIONS = "Authorizations";
-	public static final String SCREEN_TITLE_CHAT_QUEUE = "Chat room";
-	public static final String SCREEN_TITLE_CONTACT_VIEW = null;
-	public static final String SCREEN_TITLE_CONTACTS = "Address Book";
-	public static final String SCREEN_TITLE_CONTACTS_OPTIONS = "Options-Contacts";
-	public static final String SCREEN_TITLE_FILE_TRANSFER_QUEUE = "File Transfers...";
-	public static final String SCREEN_TITLE_GENERAL = "Options-General";
-	public static final String SCREEN_TITLE_HISTORY = "History";
-	public static final String SCREEN_TITLE_HOME = "Home";
-	public static final String SCREEN_TITLE_IDENTITY = "Options-Identity";
-	public static final String SCREEN_TITLE_OPTIONS = "Options";
-	public static final String SCREEN_TITLE_MESSAGING = "Options-Messaging";
-	public static final String SCREEN_TITLE_NATT = "Options-Nat Traversal";
-	public static final String SCREEN_TITLE_NETWORK = "Options-Network";
-	public static final String SCREEN_TITLE_PRESENCE = "Options-Presence";
-	public static final String SCREEN_TITLE_QOS = "Options-QoS/QoE";
-	public static final String SCREEN_TITLE_REGISTRATIONS = "IMS Registrations";
-	public static final String SCREEN_TITLE_SECURITY = "Options-Security";
+//	public static final String SCREEN_TITLE_ABOUT = "About";
+//	public static final String SCREEN_TITLE_AUTHORIZATIONS = "Authorizations";
+//	public static final String SCREEN_TITLE_CALL = "Call";
+//	public static final String SCREEN_TITLE_CHAT_QUEUE = "Chat room";
+//	public static final String SCREEN_TITLE_CONTACT_VIEW = null;
+//	public static final String SCREEN_TITLE_CONTACTS = "Address Book";
+//	public static final String SCREEN_TITLE_CONTACTS_OPTIONS = "Options-Contacts";
+//	public static final String SCREEN_TITLE_DIALER = "Dialer";
+//	public static final String SCREEN_TITLE_FILE_TRANSFER_QUEUE = "File Transfers...";
+//	public static final String SCREEN_TITLE_GENERAL = "Options-General";
+//	public static final String SCREEN_TITLE_HISTORY = "History";
+//	public static final String SCREEN_TITLE_HOME = "Home";
+//	public static final String SCREEN_TITLE_IDENTITY = "Options-Identity";
+//	public static final String SCREEN_TITLE_OPTIONS = "Options";
+//	public static final String SCREEN_TITLE_MESSAGING = "Options-Messaging";
+//	public static final String SCREEN_TITLE_NATT = "Options-Nat Traversal";
+//	public static final String SCREEN_TITLE_NETWORK = "Options-Network";
+//	public static final String SCREEN_TITLE_PRESENCE = "Options-Presence";
+//	public static final String SCREEN_TITLE_QOS = "Options-QoS/QoE";
+//	public static final String SCREEN_TITLE_REGISTRATIONS = "IMS Registrations";
+//	public static final String SCREEN_TITLE_SECURITY = "Options-Security";
 	
+	protected String id;
 	protected final SCREEN_TYPE type;
 	protected boolean computeConfiguration;
 	
-	protected Screen(SCREEN_TYPE type) {
+	protected Screen(SCREEN_TYPE type, String id) {
 		this.type = type;
+		this.id = id;
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -63,142 +66,23 @@ public abstract class Screen extends Activity implements IScreen {
 		}
 		else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
 			if(!this.haveMenu()){
-				ServiceManager.getScreenService().show(SCREEN_ID.HOME_I);
+				ServiceManager.getScreenService().show(ScreenHome.class);
 				return true;
 			}
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	public static final boolean isWellknown(Screen.SCREEN_TYPE type) {
-		switch (type) {
-		// Well-know screens
-		case ABOUT_T:
-		case AUTHORIZATIONS_T:
-		case CHAT_QUEUE_T:
-		case CONTACT_VIEW_T:
-		case CONTACTS_T:
-		case CONTACTS_OPTIONS_T:
-		case FILE_TRANSFER_QUEUE_T:
-		case GENERAL_T:
-		case HISTORY_T:
-		case HOME_T:
-		case IDENTITY_T:
-		case MESSAGING_T:
-		case NATT_T:
-		case NETWORK_T:
-		case OPTIONS_T:
-		case PRESENCE_T:
-		case QOS_T:
-		case REGISTRATIONS_T:
-		case SECURITY_T:
-			return true;
-		}
-		return false;
-	}
-	
-	public boolean isWellknown() {
-		return Screen.isWellknown(this.type);
-	}
 
 	public String getScreenTitle() {
-		switch (this.type) {
-		// Well-know screens
-		case ABOUT_T:
-			return Screen.SCREEN_TITLE_ABOUT;
-		case AUTHORIZATIONS_T:
-			return Screen.SCREEN_TITLE_AUTHORIZATIONS;
-		case CHAT_QUEUE_T:
-			return Screen.SCREEN_TITLE_CHAT_QUEUE;
-		case CONTACT_VIEW_T:
-			return Screen.SCREEN_TITLE_CONTACT_VIEW;
-		case CONTACTS_T:
-			return Screen.SCREEN_TITLE_CONTACTS;
-		case CONTACTS_OPTIONS_T:
-			return Screen.SCREEN_TITLE_CONTACTS_OPTIONS;
-		case FILE_TRANSFER_QUEUE_T:
-			return Screen.SCREEN_TITLE_FILE_TRANSFER_QUEUE;
-		case GENERAL_T:
-			return Screen.SCREEN_TITLE_GENERAL;
-		case HISTORY_T:
-			return Screen.SCREEN_TITLE_HISTORY;
-		case HOME_T:
-			return Screen.SCREEN_TITLE_HOME;
-		case IDENTITY_T:
-			return Screen.SCREEN_TITLE_IDENTITY;
-		case MESSAGING_T:
-			return Screen.SCREEN_TITLE_MESSAGING;
-		case NATT_T:
-			return Screen.SCREEN_TITLE_NATT;
-		case NETWORK_T:
-			return Screen.SCREEN_TITLE_NETWORK;
-		case OPTIONS_T:
-			return Screen.SCREEN_TITLE_OPTIONS;
-		case PRESENCE_T:
-			return Screen.SCREEN_TITLE_PRESENCE;
-		case REGISTRATIONS_T:
-			return Screen.SCREEN_TITLE_REGISTRATIONS;
-		case QOS_T:
-			return Screen.SCREEN_TITLE_QOS;
-		case SECURITY_T:
-			return Screen.SCREEN_TITLE_SECURITY;
-
-			// all others
-		default:
-			return null;
-		}
+		return this.getId();
 	}
 
 	public boolean haveMenu(){
 		return false;
 	}
 	
-	public Screen.SCREEN_ID getId() {
-		switch (this.type) {
-		// Well-know screens
-		case ABOUT_T:
-			return Screen.SCREEN_ID.ABOUT_I;
-		case AUTHORIZATIONS_T:
-			return Screen.SCREEN_ID.AUTHORIZATIONS_I;
-		case CHAT_QUEUE_T:
-			return Screen.SCREEN_ID.CHAT_QUEUE_I;
-		case CONTACT_VIEW_T:
-			return Screen.SCREEN_ID.CONTACT_VIEW_I;
-		case CONTACTS_T:
-			return Screen.SCREEN_ID.CONTACTS_I;
-		case CONTACTS_OPTIONS_T:
-			return Screen.SCREEN_ID.CONTACTS_OPTIONS_I;
-		case FILE_TRANSFER_QUEUE_T:
-			return Screen.SCREEN_ID.FILE_TRANSFER_QUEUE_I;
-		case GENERAL_T:
-			return Screen.SCREEN_ID.GENERAL_I;
-		case HISTORY_T:
-			return Screen.SCREEN_ID.HISTORY_I;
-		case HOME_T:
-			return Screen.SCREEN_ID.HOME_I;
-		case IDENTITY_T:
-			return Screen.SCREEN_ID.IDENTITY_I;
-		case NATT_T:
-			return Screen.SCREEN_ID.NATT_I;
-		case NETWORK_T:
-			return Screen.SCREEN_ID.NETWORK_I;
-		case MESSAGING_T:
-			return Screen.SCREEN_ID.MESSAGING_I;
-		case OPTIONS_T:
-			return Screen.SCREEN_ID.OPTIONS_I;
-		case PRESENCE_T:
-			return Screen.SCREEN_ID.PRESENCE_I;
-		case REGISTRATIONS_T:
-			return Screen.SCREEN_ID.REGISTRATIONS_I;
-		case QOS_T:
-			return Screen.SCREEN_ID.QOS_I;
-		case SECURITY_T:
-			return Screen.SCREEN_ID.SECURITY_I;
-
-			// all others
-		default:
-			return null;
-		}
+	public String getId() {
+		return this.id;
 	}
 	
 	protected void addConfigurationListener(RadioButton radioButton){

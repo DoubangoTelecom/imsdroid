@@ -9,6 +9,8 @@ import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Services.IStorageService;
 import org.doubango.imsdroid.Services.IXcapService;
+import org.doubango.tinyWRAP.ProxyAudioConsumer;
+import org.doubango.tinyWRAP.ProxyAudioProducer;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -41,10 +43,17 @@ public class ServiceManager  extends Service {
 	private static boolean started;
 	private static Main mainActivity;
 	private static NotificationManager notifManager;
-	private static final int NOTIFICATION_ID = 19833891;
+	private static final int NOTIF_REGISTRATION_ID = 19833891;
+	private static final int NOTIF_AVCALL_ID = 19833892;
 	
 	private static ServiceManager instance;
 
+	// Register Plugins
+	static{
+		ProxyAudioProducer.registerPlugin();
+		ProxyAudioConsumer.registerPlugin();
+	}
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -57,7 +66,7 @@ public class ServiceManager  extends Service {
 		if(ServiceManager.notifManager == null){
 			ServiceManager.notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			// Display a notification about us starting.  We put an icon in the status bar.
-			ServiceManager.showNotification(R.drawable.bullet_ball_glass_red_16, "You are not connected");
+			ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are not connected");
 		}
 		ServiceManager.instance = this;
 	}
@@ -66,14 +75,15 @@ public class ServiceManager  extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 
-		// Cancel the persistent notification.
-		ServiceManager.notifManager.cancel(ServiceManager.NOTIFICATION_ID);
+		// Cancel the persistent notifications.
+		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_REGISTRATION_ID);
+		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
 
         // Tell the user we stopped.
         Toast.makeText(this, "imsdroid shutting down...", Toast.LENGTH_SHORT).show();
 	}
 	
-    public static void showNotification(int drawableId, String tickerText) {
+    private static void showNotification(int notifId, int drawableId, String tickerText) {
         // Set the icon, scrolling text and timestamp
         Notification notification = new Notification(drawableId, tickerText, System.currentTimeMillis());
 
@@ -86,7 +96,19 @@ public class ServiceManager  extends Service {
 
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
-        ServiceManager.notifManager.notify(NOTIFICATION_ID, notification);
+        ServiceManager.notifManager.notify(notifId, notification);
+    }
+    
+    public static void showRegistartionNotif(int drawableId, String tickerText){
+    	ServiceManager.showNotification(NOTIF_REGISTRATION_ID, drawableId, tickerText);
+    }
+    
+    public static void showAVCallNotif(int drawableId, String tickerText){
+    	ServiceManager.showNotification(NOTIF_AVCALL_ID, drawableId, tickerText);
+    }
+    
+    public static void cancelAVCallNotif(){
+    	ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
     }
     
     public static ServiceManager getInstance(){

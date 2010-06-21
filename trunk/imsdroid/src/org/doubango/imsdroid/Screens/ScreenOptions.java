@@ -29,7 +29,7 @@ public class ScreenOptions extends Screen {
 	private ScreenOptionsItem[] items;
 	
 	public ScreenOptions() {
-		super(SCREEN_TYPE.OPTIONS_T);
+		super(SCREEN_TYPE.OPTIONS_T, ScreenOptions.class.getCanonicalName());
 		
 		// Services
 		this.ScreenService = ServiceManager.getScreenService();
@@ -43,16 +43,16 @@ public class ScreenOptions extends Screen {
         
         // items
         this.items =  new ScreenOptionsItem[]{
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.general_48), "General", Screen.SCREEN_ID.GENERAL_I.toString()),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.identity_48), "Identity", Screen.SCREEN_ID.IDENTITY_I.toString()),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.network_48), "Network", Screen.SCREEN_ID.NETWORK_I.toString()),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.lock_48), "Security", Screen.SCREEN_ID.SECURITY_I.toString()),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.eab_48), "Contacts", Screen.SCREEN_ID.CONTACTS_OPTIONS_I.toString()),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.people_48), "Presence", Screen.SCREEN_ID.PRESENCE_I.toString()),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.general_48), "General", ScreenGeneral.class),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.identity_48), "Identity", ScreenIdentity.class ),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.network_48), "Network", ScreenNetwork.class),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.lock_48), "Security", ScreenSecurity.class),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.eab_48), "Contacts", ScreenContacts.class),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.people_48), "Presence", ScreenPresence.class),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.codecs_48), "Codecs", null),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.messaging_48), "Messaging", Screen.SCREEN_ID.MESSAGING_I.toString()),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.qos_qoe_48), "QoS/QoE", Screen.SCREEN_ID.QOS_I.toString()),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.natt_48), "NATT", Screen.SCREEN_ID.NATT_I.toString()),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.messaging_48), "Messaging", ScreenMessaging.class),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.qos_qoe_48), "QoS/QoE", ScreenQoS.class),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.natt_48), "NATT", ScreenNatt.class),
         };
         
         // gridView
@@ -72,7 +72,7 @@ public class ScreenOptions extends Screen {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				ScreenOptionsItem item;
 				if ((ScreenOptions.this.items.length > position) && ((item = ScreenOptions.this.items[position]) != null)) {
-					ScreenOptions.this.ScreenService.show(item.screenId);
+					ScreenOptions.this.ScreenService.show(item.screenCls, item.screenCls.getCanonicalName());
 				}
 			}
 		});
@@ -83,12 +83,12 @@ public class ScreenOptions extends Screen {
 	private class ScreenOptionsItem {
 		private Bitmap icon;
 		private String text;
-		private String screenId;
+		private Class<? extends Screen> screenCls;
 
-		private ScreenOptionsItem(Bitmap icon, String text, String screenId) {
+		private ScreenOptionsItem(Bitmap icon, String text, Class<? extends Screen> screenCls) {
 			this.icon = icon;
 			this.text = text;
-			this.screenId = screenId;
+			this.screenCls = screenCls;
 		}
 	}
 	
