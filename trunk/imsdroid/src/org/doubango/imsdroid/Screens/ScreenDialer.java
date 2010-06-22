@@ -58,6 +58,7 @@ public class ScreenDialer extends Screen {
 	private OnClickListener ibVideoCall_OnClickListener = new OnClickListener(){
 		@Override
 		public void onClick(View v) {
+			ScreenAV.makeCall(ScreenDialer.this.etAddress.getText().toString(), MediaType.AudioVideo);
 		}
 	};
 	
