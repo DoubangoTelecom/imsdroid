@@ -3,7 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
-<EditText android:layout_height="wrap_content" android:id="@+id/screen_dialer_editText_Address" android:layout_width="fill_parent" android:text="sip:bob@micromethod.com" android:layout_marginTop="10px"></EditText>
+<EditText android:layout_height="wrap_content" android:id="@+id/screen_dialer_editText_Address" android:layout_width="fill_parent" android:layout_marginTop="10px" android:text="sip:bob@micromethod.com"></EditText>
 
 
 
