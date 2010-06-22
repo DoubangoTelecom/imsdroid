@@ -34,7 +34,7 @@ import android.util.Log;
 public class AudioProducer {
 
 	private static String TAG = AudioProducer.class.getCanonicalName();
-	private static int factor = 5;
+	private static int factor = 10;
 	
 	private int bufferSize;
 	private int shorts_per_notif;

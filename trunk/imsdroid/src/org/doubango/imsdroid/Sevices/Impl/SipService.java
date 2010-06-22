@@ -265,6 +265,7 @@ implements ISipService, tinyWRAPConstants {
 				Log.e(SipService.TAG, e.getMessage());
 			}
 			this.condHack = null;
+			optSession.delete();
 		}
 
 		if (!this.regSession.register()) {
