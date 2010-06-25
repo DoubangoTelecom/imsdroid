@@ -11,6 +11,7 @@ import org.doubango.imsdroid.Services.IStorageService;
 import org.doubango.imsdroid.Services.IXcapService;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
+import org.doubango.tinyWRAP.ProxyVideoProducer;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -50,6 +51,7 @@ public class ServiceManager  extends Service {
 
 	// Register Plugins
 	static{
+		ProxyVideoProducer.registerPlugin();
 		ProxyAudioProducer.registerPlugin();
 		ProxyAudioConsumer.registerPlugin();
 	}

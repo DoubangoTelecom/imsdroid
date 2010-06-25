@@ -9,4 +9,9 @@
     android:layout_height="wrap_content" 
     android:text="@string/hello"
     />
+
+
+
+
+<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="176px" android:layout_height="144px"></LinearLayout>
 </LinearLayout>

@@ -162,7 +162,15 @@ implements IRegistrationEventHandler
 						builder.create().show();
 					}
 					else{
-						ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
+						String currentAVCall = ScreenAV.getCurrent();
+						if(item.screenCls == ScreenDialer.class && (currentAVCall = ScreenAV.getCurrent()) != null){
+							if(!ScreenHome.this.screenService.show(currentAVCall)){
+								ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
+							}
+						}
+						else{
+							ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
+						}
 					}
 				}
 			}

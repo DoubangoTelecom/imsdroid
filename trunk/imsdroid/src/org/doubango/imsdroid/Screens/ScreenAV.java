@@ -10,19 +10,20 @@ import java.util.UUID;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
-import org.doubango.imsdroid.Sevices.Impl.ScreenService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.events.CallEventArgs;
 import org.doubango.imsdroid.events.ICallEventHandler;
 import org.doubango.imsdroid.media.MediaType;
 import org.doubango.imsdroid.sip.MyAVSession;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
@@ -45,6 +46,8 @@ implements ICallEventHandler {
 	private final Timer timerSuicide;
 	private final Handler handler;
 	
+	private LinearLayout llVideoLocal;
+	private LinearLayout llVideoRemote;
 	private ImageView ivState;
 	private TextView tvInfo;
 	private TextView tvTime;
@@ -70,18 +73,20 @@ implements ICallEventHandler {
 		this.screenService = ServiceManager.getScreenService();
 		
 		this.handler = new Handler();
-	}
+	}	
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_av);
         
-        ScreenAV.put(this);
-        
         // retrieve id
         this.id = getIntent().getStringExtra("id");
         
+        ScreenAV.put(this);
+        
         // get controls
+        this.llVideoLocal = (LinearLayout)this.findViewById(R.id.screen_av_linearLayout_video_local);
+        this.llVideoRemote = (LinearLayout)this.findViewById(R.id.screen_av_linearLayout_video_remote);
         this.ivState = (ImageView)this.findViewById(R.id.screen_av_imageView_state);
         this.tvInfo = (TextView)this.findViewById(R.id.screen_av_textView_info);
         this.tvTime = (TextView)this.findViewById(R.id.screen_av_textView_time);
@@ -94,7 +99,7 @@ implements ICallEventHandler {
         this.ibHoldResume.setOnClickListener(this.ibHoldResume_OnClickListener);
         
         //this.timer.schedule(this.timerTask, 0, 1000);
-        
+                
         // add event handlers
         this.sipService.addCallEventHandler(this);
 	}	
@@ -109,6 +114,11 @@ implements ICallEventHandler {
 		// remove event handlers
         this.sipService.removeCallEventHandler(this);
         
+        if(avSession != null){
+        	// FIXME: cleanup
+        	MyAVSession.getVideoProducer().setContext(null);
+        }
+        
 		super.onDestroy();
 	}
 
@@ -122,6 +132,15 @@ implements ICallEventHandler {
 		synchronized(ScreenAV.screens){
 			ScreenAV.screens.remove(screen.getId());
 		}
+	}
+	
+	public static String getCurrent(){
+		synchronized(ScreenAV.screens){
+			if(!ScreenAV.screens.isEmpty()){
+				return ScreenAV.screens.entrySet().iterator().next().getKey();
+			}
+		}
+		return null;
 	}
 	
 	public static boolean makeCall(String remoteUri, MediaType mediaType){
@@ -177,6 +196,7 @@ implements ICallEventHandler {
 		if(this.avSession == null){
 			this.remoteUri = remoteUri;
 			this.avSession = MyAVSession.createOutgoingSession(this.sipService.getStack(), MediaType.AudioVideo);
+			MyAVSession.getVideoProducer().setContext(this);
 			return this.avSession.makeVideoCall(this.remoteUri);
 		}
 		return false;
@@ -255,7 +275,9 @@ implements ICallEventHandler {
 				final String from = (String) e.getExtra("from");
 				this.handler.post(new Runnable() {
 					public void run() {
-						ScreenAV.this.tvInfo.setText(String.format("Incoming Call from %s", from));
+						setRequestedOrientation(getResources().getConfiguration().orientation);
+						
+						ScreenAV.this.tvInfo.setText(String.format("Incoming Call from \"%s\"", from));
 						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
 						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "Incoming call");
 						ScreenAV.this.screenService.show(ScreenAV.this.getId());
@@ -263,8 +285,10 @@ implements ICallEventHandler {
 				break;
 			case INPROGRESS:
 				this.handler.post(new Runnable() {
-					public void run() {
-						ScreenAV.this.tvInfo.setText("In progress");
+					public void run() {		
+						setRequestedOrientation(getResources().getConfiguration().orientation);
+						
+						ScreenAV.this.tvInfo.setText("In progress ...");
 						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
 						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "Outgoing Call");
 					}});
@@ -279,9 +303,18 @@ implements ICallEventHandler {
 			case CONNECTED:
 				this.handler.post(new Runnable() {
 					public void run() {
+
 						ScreenAV.this.tvInfo.setText("In call");
 						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_green_16);
 						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "In Call");
+						
+						ScreenAV.this.llVideoLocal.removeAllViews();
+						if(ScreenAV.this.avSession != null && ScreenAV.this.avSession.getMediaType() == MediaType.AudioVideo){
+							final View preview = MyAVSession.getVideoProducer().startPreview();
+							if(preview != null){
+								ScreenAV.this.llVideoLocal.addView(preview);
+							}
+						}
 					}});
 				this.timer.schedule(ScreenAV.this.timerTaskChrono, 0, 1000);
 				break;
@@ -292,6 +325,9 @@ implements ICallEventHandler {
 						ScreenAV.this.tvInfo.setText(phrase);
 						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_red_16);
 						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "Call Terminated");
+						
+						setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+						
 					}});
 				/* release session */
 				MyAVSession.releaseSession(this.avSession);
