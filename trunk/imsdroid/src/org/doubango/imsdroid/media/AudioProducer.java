@@ -123,6 +123,8 @@ public class AudioProducer {
 		}
 	};
 	
+	
+	
 	class MyProxyAudioProducer extends ProxyAudioProducer
 	{
 		private final AudioProducer producer;

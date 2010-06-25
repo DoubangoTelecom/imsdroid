@@ -4,12 +4,14 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.LinearLayout;
 
 
 public class Main extends Activity {
@@ -17,19 +19,28 @@ public class Main extends Activity {
 	private final static String TAG = Main.class.getCanonicalName();
 	private Preview mPreview;
 	
+	LinearLayout llayout;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         mPreview = new Preview(this, this.previewCallback);
         
-        setContentView(mPreview);
+        setContentView(R.layout.main);
+        
+        llayout = (LinearLayout)findViewById(R.id.LinearLayout01);
+        llayout.removeAllViews();
+        llayout.addView(mPreview);
+        //setContentView(mPreview);
+        
+        
     }
     
     
     PreviewCallback previewCallback = new PreviewCallback() {
     	  public void onPreviewFrame(byte[] _data, Camera _camera) {
-    		  int i = 0;
+    		  int i = _data.length;
     		  i++;
     		  Log.d(Main.TAG, "i="+i);
     	  }
@@ -48,11 +59,13 @@ public class Main extends Activity {
             
             this.callback = callback;
             
+            //layout(0, 0, 176, 144);
+            
             // Install a SurfaceHolder.Callback so we get notified when the
             // underlying surface is created and destroyed.
             mHolder = getHolder();
             mHolder.addCallback(this);
-            mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+            mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // display
         }
 
         public void surfaceCreated(SurfaceHolder holder) {
@@ -62,9 +75,12 @@ public class Main extends Activity {
             try {
             	
             	Camera.Parameters parameters = mCamera.getParameters();
-            	parameters.setPreviewFrameRate(60);
+            	parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
+            	parameters.setPreviewFrameRate(15);
             	parameters.setPictureSize(176, 144);
             	mCamera.setParameters(parameters);
+            	
+            	//layout(0, 0, 176, 144);
             	
                mCamera.setPreviewDisplay(holder);
                mCamera.setPreviewCallback(this.callback);
@@ -81,16 +97,16 @@ public class Main extends Activity {
             // important to release it when the activity is paused.
             mCamera.stopPreview();
             mCamera.release();
-            mCamera = null; 
+            mCamera = null;
         }
 
         public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-            // Now that the size is known, set up the camera parameters and begin
-            // the preview.
             Camera.Parameters parameters = mCamera.getParameters();
-            parameters.setPreviewSize(w, h);
+            //parameters.setPreviewSize(w, h);
+            //layout(0, 0, 176, 144);
+            parameters.setPreviewSize(176, 144);
             mCamera.setParameters(parameters);
-            mCamera.startPreview();
+           mCamera.startPreview();
         }
     }
 }
