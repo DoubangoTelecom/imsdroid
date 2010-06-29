@@ -21,6 +21,7 @@
 package org.doubango.imsdroid.media;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Semaphore;
 
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 
@@ -33,18 +34,21 @@ import android.util.Log;
 public class AudioConsumer{
 	
 	private static String TAG = AudioConsumer.class.getCanonicalName();
-	private static int factor = 10;
+	private static int factor = 5;
 	private static int streamType = AudioManager.STREAM_VOICE_CALL; /* STREAM_MUSIC */
 	
 	private int bufferSize;
 	private int shorts_per_notif;
 	private final MyProxyAudioConsumer proxyAudioConsumer;
+	private final Semaphore semaphore;
 	
+	private boolean running;
 	private AudioTrack track;
 	private ByteBuffer chunck;
 	
 	public AudioConsumer(){
 		this.proxyAudioConsumer = new MyProxyAudioConsumer(this);
+		this.semaphore = new Semaphore(0);
 	}	
 
 	public void setActive(){
@@ -76,10 +80,8 @@ public class AudioConsumer{
 	private synchronized int start() {
 		Log.d(AudioConsumer.TAG, "start()");
 		if(this.track != null){
-			this.track.play();
-			/* Mandatory in order to have first notifications 
-			 * FIXME: Why when we write bufferSize bytes (like we do in the recorder) the callback function is not called ?*/
-			this.track.write(new byte[this.bufferSize*AudioConsumer.factor], 0, this.bufferSize*AudioConsumer.factor);
+			this.running = true;
+			new Thread(this.runnablePlayer).start();
 			return 0;
 		}
 		return -1;
@@ -97,11 +99,9 @@ public class AudioConsumer{
 	private synchronized int stop() {
 		Log.d(AudioConsumer.TAG, "stop()");
 		if(this.track != null){
-			this.track.stop();
-			this.track.release();
-			this.track = null;
+			this.running = false;
+			this.semaphore.release();
 			
-			System.gc();
 			return 0;
 		}
 		return -1;
@@ -112,18 +112,7 @@ public class AudioConsumer{
 		@Override
 		public void onPeriodicNotification(AudioTrack track) {
 			if(AudioConsumer.this.track != null){
-				try{
-					long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, AudioConsumer.this.chunck.capacity());			
-					final byte[] bytes = new byte[AudioConsumer.this.chunck.capacity()];		
-					if(sizeInBytes >0){ /* Otherwise it's silence */
-						AudioConsumer.this.chunck.get(bytes);
-					}
-					AudioConsumer.this.track.write(bytes, 0, bytes.length);
-					AudioConsumer.this.chunck.rewind();
-				}
-				catch(Exception e){
-					e.printStackTrace();
-				}
+				AudioConsumer.this.semaphore.release();
 			}
 		}
 
@@ -132,6 +121,49 @@ public class AudioConsumer{
 		}
 	};
 	
+	private Runnable runnablePlayer = new Runnable(){
+		@Override
+		public void run() {
+			Log.d(AudioConsumer.TAG, "Audio Player ===== START");
+			
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO );
+			
+			AudioConsumer.this.track.play();
+			/* Mandatory in order to have first notifications 
+			 * FIXME: Why when we write bufferSize bytes (like we do in the recorder) the callback function is not called ?*/
+			AudioConsumer.this.track.write(new byte[AudioConsumer.this.bufferSize*AudioConsumer.factor], 0, AudioConsumer.this.bufferSize*AudioConsumer.factor);
+			
+			while(true){
+				try {
+					AudioConsumer.this.semaphore.acquire();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					break;
+				}
+				
+				if(!AudioConsumer.this.running || AudioConsumer.this.proxyAudioConsumer == null || AudioConsumer.this.track == null){
+					break;
+				}
+				
+				final long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, AudioConsumer.this.chunck.capacity());			
+				final byte[] bytes = new byte[AudioConsumer.this.chunck.capacity()];		
+				if(sizeInBytes >0){ /* Otherwise it's silence */
+					AudioConsumer.this.chunck.get(bytes);
+				}
+				AudioConsumer.this.track.write(bytes, 0, bytes.length);
+				AudioConsumer.this.chunck.rewind();
+			}
+			
+			if(AudioConsumer.this.track != null){
+				AudioConsumer.this.track.stop();
+				AudioConsumer.this.track.release();
+				AudioConsumer.this.track = null;
+				
+				System.gc();
+			}
+			Log.d(AudioConsumer.TAG, "Audio Player ===== STOP");
+		}
+	};
 	
 	class MyProxyAudioConsumer extends ProxyAudioConsumer
     {

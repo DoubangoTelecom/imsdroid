@@ -21,6 +21,7 @@
 package org.doubango.imsdroid.media;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Semaphore;
 
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 
@@ -34,17 +35,20 @@ import android.util.Log;
 public class AudioProducer {
 
 	private static String TAG = AudioProducer.class.getCanonicalName();
-	private static int factor = 10;
+	private static int factor = 5;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
 	private final MyProxyAudioProducer proxyAudioProducer;
+	private final Semaphore semaphore;
 	
+	private boolean running;
 	private AudioRecord recorder;
 	private ByteBuffer chunck;
 	
 	public AudioProducer(){
 		this.proxyAudioProducer = new MyProxyAudioProducer(this);
+		this.semaphore = new Semaphore(0);
 	}
 	
 	public void setActive(){
@@ -74,9 +78,8 @@ public class AudioProducer {
 	private synchronized int start() {
 		Log.d(AudioProducer.TAG, "start()");
 		if(this.recorder != null){
-			this.recorder.startRecording();
-			/* Mandatory in order to have first notifications */
-			this.recorder.read(new byte[this.bufferSize], 0, this.bufferSize);
+			this.running = true;
+			new Thread(this.runnableRecorder).start();
 			return 0;
 		}
 		return -1;
@@ -84,17 +87,15 @@ public class AudioProducer {
 	
 	private synchronized int pause() {
 		Log.d(AudioProducer.TAG, "pause()");
+		
 		return 0;
 	}
 
 	private synchronized int stop() {
 		Log.d(AudioProducer.TAG, "stop()");
 		if(this.recorder != null){
-			this.recorder.stop();
-			this.recorder.release();
-			this.recorder = null;
-			
-			System.gc();
+			this.running = false;
+			this.semaphore.release();
 			return 0;
 		}
 		return -1;
@@ -105,16 +106,7 @@ public class AudioProducer {
 		@Override
 		public void onPeriodicNotification(AudioRecord recorder) {
 			if(AudioProducer.this.recorder != null){
-				try{
-					int read = AudioProducer.this.recorder.read(AudioProducer.this.chunck, shorts_per_notif*2);
-					if(read > 0){
-						AudioProducer.this.proxyAudioProducer.push(AudioProducer.this.chunck, read);
-					}
-					AudioProducer.this.chunck.rewind();
-				}
-				catch(Exception e){
-					e.printStackTrace();
-				}
+				AudioProducer.this.semaphore.release();
 			}
 		}
 		
@@ -123,7 +115,47 @@ public class AudioProducer {
 		}
 	};
 	
-	
+	private Runnable runnableRecorder = new Runnable(){
+		@Override
+		public void run() {
+			Log.d(AudioProducer.TAG, "Audio Recorder ===== START");
+			
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO );
+			
+			AudioProducer.this.recorder.startRecording();
+			/* Mandatory in order to have first notifications */
+			AudioProducer.this.recorder.read(new byte[AudioProducer.this.bufferSize], 0, AudioProducer.this.bufferSize);
+			
+			while(true){
+				try {
+					AudioProducer.this.semaphore.acquire();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					break;
+				}
+				
+				if(!AudioProducer.this.running || AudioProducer.this.proxyAudioProducer == null || AudioProducer.this.recorder == null){
+					break;
+				}
+				
+				final int read = AudioProducer.this.recorder.read(AudioProducer.this.chunck, AudioProducer.this.shorts_per_notif*2);
+				if(read > 0){
+					AudioProducer.this.proxyAudioProducer.push(AudioProducer.this.chunck, read);
+				}
+				AudioProducer.this.chunck.rewind();
+			}
+			
+			if(AudioProducer.this.recorder != null){
+				AudioProducer.this.recorder.stop();
+				AudioProducer.this.recorder.release();
+				AudioProducer.this.recorder = null;
+				
+				System.gc();
+			}
+			
+			Log.d(AudioProducer.TAG, "Audio Recorder ===== STOP");
+		}
+	};
 	
 	class MyProxyAudioProducer extends ProxyAudioProducer
 	{

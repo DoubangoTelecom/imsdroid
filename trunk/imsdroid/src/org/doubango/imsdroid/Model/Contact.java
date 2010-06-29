@@ -104,6 +104,7 @@ public class Contact implements Comparable<Contact> {
 		this.avatarImage = null;
 	}
 	
+	@Override
 	public int compareTo(Contact another) {
 		return this.uri.compareTo(another.uri);
 	}

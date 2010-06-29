@@ -73,7 +73,6 @@ public class ContactService  extends Service implements IContactService, IRegist
 	}
 
 	public boolean stop() {
-		
 		// remove sip event handlers
 		ServiceManager.getSipService().removeRegistrationEventHandler(this);
 		return true;
@@ -158,7 +157,7 @@ public class ContactService  extends Service implements IContactService, IRegist
 				ContactService.this.contacts = ContactService.this.serializer.read(ContactService.this.contacts.getClass(), ContactService.this.contacts_file);
 				Log.d(ContactService.TAG, "Contacts loaded(local)");
 			} catch (Exception e) {
-				Log.d(ContactService.TAG, "Failed to load contacts(local)");
+				Log.e(ContactService.TAG, "Failed to load contacts(local)");
 				e.printStackTrace();
 			}
 			ContactService.this.loadingContacts = false;

@@ -4,6 +4,7 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
+import org.doubango.imsdroid.Services.IHistoryService;
 import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -11,6 +12,7 @@ import org.doubango.imsdroid.Services.IStorageService;
 import org.doubango.imsdroid.Services.IXcapService;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
+import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
 
 import android.app.Notification;
@@ -32,6 +34,7 @@ public class ServiceManager  extends Service {
 	/* Singletons */
 	private static final ConfigurationService configurationService = new ConfigurationService();
 	private static final ContactService contactService = new ContactService();
+	private static final HistoryService historyService = new HistoryService();
 	private static final NetworkService networkService = new NetworkService();
 	private static final ScreenService screenService = new ScreenService();
 	private static final SipService sipService = new SipService();
@@ -49,9 +52,10 @@ public class ServiceManager  extends Service {
 	
 	private static ServiceManager instance;
 
-	// Register Plugins
+	// Register  Audio/Video plugins
 	static{
 		ProxyVideoProducer.registerPlugin();
+		ProxyVideoConsumer.registerPlugin();
 		ProxyAudioProducer.registerPlugin();
 		ProxyAudioConsumer.registerPlugin();
 	}
@@ -143,6 +147,7 @@ public class ServiceManager  extends Service {
 
 		success &= ServiceManager.configurationService.start();
 		success &= ServiceManager.contactService.start();
+		success &= ServiceManager.historyService.start();
 		success &= ServiceManager.networkService.start();
 		success &= ServiceManager.screenService.start();
 		success &= ServiceManager.sipService.start();
@@ -175,6 +180,7 @@ public class ServiceManager  extends Service {
 
 		success &= ServiceManager.configurationService.stop();
 		success &= ServiceManager.contactService.stop();
+		success &= ServiceManager.historyService.stop();
 		success &= ServiceManager.networkService.stop();
 		success &= ServiceManager.screenService.stop();
 		success &= ServiceManager.sipService.stop();
@@ -204,6 +210,15 @@ public class ServiceManager  extends Service {
 	 */
 	public static IContactService getContactService() {
 		return (IContactService) ServiceManager.contactService;
+	}
+	
+	/**
+	 * Gets the History Service.
+	 * 
+	 * @return
+	 */
+	public static IHistoryService getHistoryService() {
+		return ServiceManager.historyService;
 	}
 	
 	/**

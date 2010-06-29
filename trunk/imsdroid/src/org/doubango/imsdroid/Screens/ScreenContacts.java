@@ -182,7 +182,7 @@ implements IContactsEventHandler
 	@Override
 	protected void onDestroy() {
 
-		// add event handler
+		// remove event handler
 		this.contactService.removeContactsEventHandler(this);
 		
 		super.onDestroy();

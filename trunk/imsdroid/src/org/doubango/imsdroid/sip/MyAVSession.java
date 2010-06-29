@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.doubango.imsdroid.media.AudioConsumer;
 import org.doubango.imsdroid.media.AudioProducer;
 import org.doubango.imsdroid.media.MediaType;
+import org.doubango.imsdroid.media.VideoConsumer;
 import org.doubango.imsdroid.media.VideoProducer;
 import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.SipSession;
@@ -22,6 +23,7 @@ public class MyAVSession  extends MySipSession{
 	private static AudioConsumer __audioConsumer;
 	private static AudioProducer __audioProducer;
 	private static VideoProducer __videoProducer;
+	private static VideoConsumer __videoConsumer;
 	
 	static {
 		MyAVSession.sessions = new HashMap<Long, MyAVSession>();
@@ -29,14 +31,20 @@ public class MyAVSession  extends MySipSession{
 		__audioConsumer = new AudioConsumer();
 		__audioProducer = new AudioProducer();
 		__videoProducer = new VideoProducer();
+		__videoConsumer = new VideoConsumer();
 		
 		__audioConsumer.setActive();
 		__audioProducer.setActive();
 		__videoProducer.setActive();
+		__videoConsumer.setActive();
 	}
 	
 	public static VideoProducer getVideoProducer(){
 		return MyAVSession.__videoProducer;
+	}
+	
+	public static VideoConsumer getVideoConsumer(){
+		return MyAVSession.__videoConsumer;
 	}
 	
 	public static MyAVSession takeIncomingSession(MySipStack sipStack, CallSession session){
