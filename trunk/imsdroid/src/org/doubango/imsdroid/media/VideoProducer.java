@@ -1,6 +1,28 @@
+/*
+* Copyright (C) 2010 Mamadou Diop.
+*
+* Contact: Mamadou Diop <diopmamadou(at)doubango.org>
+*	
+* This file is part of imsdroid Project (http://code.google.com/p/imsdroid)
+*
+* imsdroid is free software: you can redistribute it and/or modify it under the terms of 
+* the GNU General Public License as published by the Free Software Foundation, either version 3 
+* of the License, or (at your option) any later version.
+*	
+* imsdroid is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU General Public License for more details.
+*	
+* You should have received a copy of the GNU General Public License along 
+* with this program; if not, write to the Free Software Foundation, Inc., 
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*
+*/
+
 package org.doubango.imsdroid.media;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
@@ -144,9 +166,15 @@ public class VideoProducer {
 				}
 				
 				if(data != null){
-					VideoProducer.this.frame.put(data);
-					VideoProducer.this.videoProducer.push(VideoProducer.this.frame, data.length);
-					VideoProducer.this.frame.rewind();
+					try{
+						VideoProducer.this.frame.put(data);
+						VideoProducer.this.videoProducer.push(VideoProducer.this.frame, data.length);
+						VideoProducer.this.frame.rewind();
+					}
+					catch(BufferOverflowException e){
+						e.printStackTrace();
+						break;
+					}
 				}
 			}
 			Log.d(VideoProducer.TAG, "Sender ===== STOP");
@@ -200,6 +228,11 @@ public class VideoProducer {
 
 				Camera.Parameters parameters = camera.getParameters();
 				
+				/*
+				 * http://developer.android.com/reference/android/graphics/ImageFormat.html#NV21
+				 * YCrCb format used for images, which uses the NV21 encoding format. 
+				 * This is the default format for camera preview images, when not otherwise set with setPreviewFormat(int). 
+				 */
 				parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 				parameters.setPreviewFrameRate(this.fps);
 				parameters.setPictureSize(this.width, this.height);
