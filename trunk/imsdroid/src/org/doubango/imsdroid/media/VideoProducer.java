@@ -24,6 +24,7 @@ public class VideoProducer {
 	private static int WIDTH = 176;
 	private static int HEIGHT = 144;
 	private static int FPS = 15;
+	private static int MAX_DELAY = 2;
 	
 	private final MyProxyVideoProducer videoProducer;
 	private final ArrayList<byte[]> buffers;
@@ -91,7 +92,7 @@ public class VideoProducer {
 	
 	private synchronized int stop() {
 		Log.d(VideoProducer.TAG, "stop()");
-		// FIXME: destroy surface view
+		
 		this.preview = null;
 		this.context = null;
 		
@@ -102,6 +103,7 @@ public class VideoProducer {
 	}
 	
 	private synchronized int prepare(int width, int height, int fps){
+		Log.d(VideoProducer.TAG, "prepare()");
 		this.width = width;
 		this.height = height;
 		this.fps = fps;
@@ -116,6 +118,9 @@ public class VideoProducer {
 		@Override
 		public void run() {
 			Log.d(VideoProducer.TAG, "Sender ===== START");
+			
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
+			
 			while(true){
 				try {
 					VideoProducer.this.semaphore.acquire();
@@ -128,7 +133,16 @@ public class VideoProducer {
 					break;
 				}
 				
-				byte[] data = VideoProducer.this.buffers.remove(0);
+				final byte[] data;
+				synchronized (VideoProducer.this.buffers) {
+					if(!VideoProducer.this.buffers.isEmpty()){
+						data = VideoProducer.this.buffers.remove(0);
+					}
+					else{
+						continue;
+					}
+				}
+				
 				if(data != null){
 					VideoProducer.this.frame.put(data);
 					VideoProducer.this.videoProducer.push(VideoProducer.this.frame, data.length);
@@ -141,13 +155,20 @@ public class VideoProducer {
 	
 	PreviewCallback previewCallback = new PreviewCallback() {
   	  public void onPreviewFrame(byte[] _data, Camera _camera) {
-  		  if(VideoProducer.this.videoProducer != null){
-  			  	if(VideoProducer.this.buffers.size()< VideoProducer.this.fps){
-					VideoProducer.this.buffers.add(_data);
+			if (VideoProducer.this.videoProducer != null) {
+				if (VideoProducer.this.buffers.size() < VideoProducer.this.fps * VideoProducer.MAX_DELAY) {
+					synchronized (VideoProducer.this.buffers) {
+						VideoProducer.this.buffers.add(_data);
+					}
 					VideoProducer.this.semaphore.release();
-  			  	}
-  		  }
-  	  }
+				}
+				else{
+					//synchronized (VideoProducer.this.buffers) {
+						//VideoProducer.this.buffers.clear();
+					//}
+				}
+			}
+		}
   	};
 	
 	/* ==================================================*/
