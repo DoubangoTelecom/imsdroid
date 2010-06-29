@@ -21,15 +21,12 @@
 package org.doubango.imsdroid.media;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.Semaphore;
 
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.AudioTrack;
 import android.media.MediaRecorder;
-import android.media.AudioRecord.OnRecordPositionUpdateListener;
 import android.util.Log;
 
 public class AudioProducer {
@@ -40,7 +37,7 @@ public class AudioProducer {
 	private int bufferSize;
 	private int shorts_per_notif;
 	private final MyProxyAudioProducer proxyAudioProducer;
-	private final Semaphore semaphore;
+	//private final Semaphore semaphore;
 	
 	private boolean running;
 	private AudioRecord recorder;
@@ -48,7 +45,7 @@ public class AudioProducer {
 	
 	public AudioProducer(){
 		this.proxyAudioProducer = new MyProxyAudioProducer(this);
-		this.semaphore = new Semaphore(0);
+		//this.semaphore = new Semaphore(0);
 	}
 	
 	public void setActive(){
@@ -56,7 +53,7 @@ public class AudioProducer {
 	}
 	
 	private synchronized int prepare(int ptime, int rate) {
-		int minBufferSize = AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		int minBufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		this.shorts_per_notif = (rate * ptime)/1000;
 		this.bufferSize = minBufferSize + (this.shorts_per_notif - (minBufferSize % this.shorts_per_notif));
 		this.chunck = ByteBuffer.allocateDirect(this.shorts_per_notif*2);
@@ -65,8 +62,8 @@ public class AudioProducer {
 				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT, (this.bufferSize * AudioProducer.factor));
 		if(this.recorder.getState() == AudioRecord.STATE_INITIALIZED){
-			this.recorder.setPositionNotificationPeriod(this.shorts_per_notif);
-			this.recorder.setRecordPositionUpdateListener(this.recordPositionUpdateListener);
+			//this.recorder.setPositionNotificationPeriod(this.shorts_per_notif);
+			//this.recorder.setRecordPositionUpdateListener(this.recordPositionUpdateListener);
 			return 0;
 		}
 		else{
@@ -95,25 +92,25 @@ public class AudioProducer {
 		Log.d(AudioProducer.TAG, "stop()");
 		if(this.recorder != null){
 			this.running = false;
-			this.semaphore.release();
+			//this.semaphore.release();
 			return 0;
 		}
 		return -1;
 	}
 	
-	private OnRecordPositionUpdateListener recordPositionUpdateListener = new OnRecordPositionUpdateListener()
-	{
-		@Override
-		public void onPeriodicNotification(AudioRecord recorder) {
-			if(AudioProducer.this.recorder != null){
-				AudioProducer.this.semaphore.release();
-			}
-		}
-		
-		@Override
-		public void onMarkerReached(AudioRecord recorder) {
-		}
-	};
+//	private OnRecordPositionUpdateListener recordPositionUpdateListener = new OnRecordPositionUpdateListener()
+//	{
+//		@Override
+//		public void onPeriodicNotification(AudioRecord recorder) {
+//			if(AudioProducer.this.recorder != null){
+//				AudioProducer.this.semaphore.release();
+//			}
+//		}
+//		
+//		@Override
+//		public void onMarkerReached(AudioRecord recorder) {
+//		}
+//	};
 	
 	private Runnable runnableRecorder = new Runnable(){
 		@Override
@@ -124,15 +121,15 @@ public class AudioProducer {
 			
 			AudioProducer.this.recorder.startRecording();
 			/* Mandatory in order to have first notifications */
-			AudioProducer.this.recorder.read(new byte[AudioProducer.this.bufferSize], 0, AudioProducer.this.bufferSize);
+			//AudioProducer.this.recorder.read(new byte[AudioProducer.this.bufferSize], 0, AudioProducer.this.bufferSize);
 			
 			while(true){
-				try {
-					AudioProducer.this.semaphore.acquire();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					break;
-				}
+				//try {
+					//AudioProducer.this.semaphore.acquire();
+				//} catch (InterruptedException e) {
+				//	e.printStackTrace();
+				//	break;
+				//}
 				
 				if(!AudioProducer.this.running || AudioProducer.this.proxyAudioProducer == null || AudioProducer.this.recorder == null){
 					break;
