@@ -35,8 +35,7 @@ public class MyAVSession  extends MySipSession{
 	private static HashMap<Long, MyAVSession> sessions;
 	
 	private final CallSession session;
-	//private final AudioConsumer audioConsumer;
-	//private final AudioProducer audioProducer;
+
 	private final MediaType mediaType;
 	private boolean connected;
 	

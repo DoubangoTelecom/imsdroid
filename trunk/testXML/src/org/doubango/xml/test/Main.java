@@ -1,7 +1,14 @@
 package org.doubango.xml.test;
 
-import org.doubango.imsdroid.Model.TestContacts;
 
+/*
+ * @XmlValue ==> @Text
+ * @XmlAttribute ==> @Attribute
+ * @XmlElement ===> @Element
+ * namespace=... ==> @Namespace(reference="....")
+ */
+
+import ietf.params.xml.ns.xcap_caps.TestXcapCaps;
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -12,11 +19,16 @@ public class Main extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        /* xcap-caps */
+        TestXcapCaps.run();
+        
+        /* resoource-lists */
+        //TestResourceLists.run();
         
         /* reginfo */
         //TestReginfo.run();
         
         /* contacts */
-        TestContacts.run();
+        //TestContacts.run();
     }
 }

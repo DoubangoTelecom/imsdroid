@@ -46,7 +46,7 @@ public class VideoProducer {
 	private static int WIDTH = 176;
 	private static int HEIGHT = 144;
 	private static int FPS = 15;
-	private static int MAX_DELAY = 2;
+	private static float MAX_DELAY = 0.5f;
 	
 	private final MyProxyVideoProducer videoProducer;
 	private final ArrayList<byte[]> buffers;
@@ -59,7 +59,7 @@ public class VideoProducer {
 	private ByteBuffer frame;
 	private Preview preview;
 	private boolean running;
-	
+	boolean skipFrames = false;
 	
 	public VideoProducer(){
 		this.videoProducer = new MyProxyVideoProducer(this);
@@ -101,7 +101,8 @@ public class VideoProducer {
 	
 	private synchronized int start() {
 		Log.d(VideoProducer.TAG, "start()");
-		if(this.context != null){
+		if(this.context != null){		
+			
 			this.running = true;
 			new Thread(this.runnableSender).start();
 			return 0;
@@ -143,7 +144,8 @@ public class VideoProducer {
 			
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
 			
-			while(true){
+			byte[] data;
+			while(VideoProducer.this.running){
 				try {
 					VideoProducer.this.semaphore.acquire();
 				} catch (InterruptedException e) {
@@ -151,12 +153,7 @@ public class VideoProducer {
 					break;
 				}
 				
-				if(!VideoProducer.this.running || (VideoProducer.this.videoProducer == null)){
-					break;
-				}
-				
-				final byte[] data;
-				synchronized (VideoProducer.this.buffers) {
+				synchronized (VideoProducer.this.buffers) {			
 					if(!VideoProducer.this.buffers.isEmpty()){
 						data = VideoProducer.this.buffers.remove(0);
 					}
@@ -174,27 +171,34 @@ public class VideoProducer {
 					catch(BufferOverflowException e){
 						e.printStackTrace();
 						break;
-					}
+					}				
 				}
 			}
 			Log.d(VideoProducer.TAG, "Sender ===== STOP");
 		}
 	};
 	
-	PreviewCallback previewCallback = new PreviewCallback() {
+	private PreviewCallback previewCallback = new PreviewCallback() {
   	  public void onPreviewFrame(byte[] _data, Camera _camera) {
-			if (VideoProducer.this.videoProducer != null) {
-				if (VideoProducer.this.buffers.size() < VideoProducer.this.fps * VideoProducer.MAX_DELAY) {
+			if (VideoProducer.this.videoProducer != null) {	
+				if(skipFrames){
+					//Log.d(VideoProducer.TAG, "Frame skipped");
 					synchronized (VideoProducer.this.buffers) {
-						VideoProducer.this.buffers.add(_data);
+						if (VideoProducer.this.buffers.size() == 0) {
+							skipFrames = false;
+						}
 					}
-					VideoProducer.this.semaphore.release();
+					return;
 				}
-				else{
-					//synchronized (VideoProducer.this.buffers) {
-						//VideoProducer.this.buffers.clear();
-					//}
+				else if (VideoProducer.this.buffers.size() >= VideoProducer.this.fps * VideoProducer.MAX_DELAY) {
+					//Log.d(VideoProducer.TAG, "....Too Many Frames");
+					skipFrames = true;
 				}
+				
+				synchronized (VideoProducer.this.buffers) {
+					VideoProducer.this.buffers.add(_data);
+				}
+				VideoProducer.this.semaphore.release();
 			}
 		}
   	};
@@ -219,13 +223,14 @@ public class VideoProducer {
 			
 			this.holder = getHolder();
 			this.holder.addCallback(this);
+			
 			this.holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // display
 		}
 
 		public void surfaceCreated(SurfaceHolder holder) {
-			this.camera = Camera.open();
 			try {
-
+				this.camera = Camera.open();
+				
 				Camera.Parameters parameters = camera.getParameters();
 				
 				/*
@@ -242,27 +247,32 @@ public class VideoProducer {
 
 				this.camera.setPreviewDisplay(holder);
 				this.camera.setPreviewCallback(this.callback);
-			} catch (IOException exception) {
-				this.camera.release();
-				this.camera = null;
-				// TODO: add more exception handling logic here
+			} catch (Exception exception) {
+				if(this.camera != null){
+					this.camera.release();
+					this.camera = null;
+				}
+				exception.printStackTrace();
 			}
 		}
 
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			camera.stopPreview();
-			camera.release();
-			camera = null;
+			if(this.camera != null){
+				this.camera.stopPreview();
+				this.camera.release();
+				this.camera = null;
+			}
 		}
 
-		public void surfaceChanged(SurfaceHolder holder, int format, int w,
-				int h) {
-			Camera.Parameters parameters = camera.getParameters();
-			// parameters.setPreviewSize(w, h);
-			// layout(0, 0, this.width, this.height);
-			parameters.setPreviewSize(this.width, this.height);
-			this.camera.setParameters(parameters);
-			this.camera.startPreview();
+		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+			if(this.camera != null){
+				Camera.Parameters parameters = camera.getParameters();
+				// parameters.setPreviewSize(w, h);
+				// layout(0, 0, this.width, this.height);
+				parameters.setPreviewSize(this.width, this.height);
+				this.camera.setParameters(parameters);
+				this.camera.startPreview();
+			}
 		}
 	}
 	

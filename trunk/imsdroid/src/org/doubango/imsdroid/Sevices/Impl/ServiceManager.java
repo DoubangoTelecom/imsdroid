@@ -53,13 +53,13 @@ import android.widget.Toast;
 public class ServiceManager  extends Service {
 	/* Singletons */
 	private static final ConfigurationService configurationService = new ConfigurationService();
+	private static final NetworkService networkService = new NetworkService();
+	private static final XcapService xcapService = new XcapService();
 	private static final ContactService contactService = new ContactService();
 	private static final HistoryService historyService = new HistoryService();
-	private static final NetworkService networkService = new NetworkService();
 	private static final ScreenService screenService = new ScreenService();
 	private static final SipService sipService = new SipService();
 	private static final StorageService storageService = new StorageService();
-	private static final XcapService xcapService = new XcapService();
 	
 	private static final String TAG = ServiceManager.class.getCanonicalName();
 	private static final String CONTENT_TITLE = "imsdroid";

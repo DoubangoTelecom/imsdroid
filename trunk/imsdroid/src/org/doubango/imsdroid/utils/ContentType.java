@@ -37,4 +37,7 @@ public class ContentType {
 	public final static String WATCHER_INFO = "application/watcherinfo+xml";
 	public final static String XCAP_DIFF = "application/xcap-diff+xml";
 	
+	
+	public final static String XCAP_CAPS = "application/xcap-caps+xml";
+	
 }

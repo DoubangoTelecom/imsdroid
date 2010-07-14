@@ -566,7 +566,12 @@ implements ISipService, tinyWRAPConstants {
 					// Registration
 					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){
 						this.sipService.regSession.setConnected(true);
-						this.sipService.doPostRegistrationOp();
+						new Thread(new Runnable(){
+							public void run() {
+								SipService.this.doPostRegistrationOp();
+							}
+						}).start();
+						
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.REGISTRATION_OK, code, phrase));
 					}
@@ -600,13 +605,14 @@ implements ISipService, tinyWRAPConstants {
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.UNREGISTRATION_OK, code, phrase));
 						/* Stop the stack (as we are already in the stack-thread, then do it in a new thread) */
-						if(this.sipService.sipStack.getState() == STACK_STATE.STARTED){
-							new Thread(new Runnable(){
-								public void run() {	
+						new Thread(new Runnable(){
+							public void run() {	
+								if(SipService.this.sipStack.getState() == STACK_STATE.STARTED){
 									SipService.this.sipStack.stop();
 								}
-							}).start();
-						}
+								ServiceManager.getXcapService().unPrepare();
+							}
+						}).start();
 					}
 					// Presence Publication
 					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							

@@ -31,6 +31,8 @@ import org.doubango.imsdroid.Model.ContactList;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IContactService;
+import org.doubango.imsdroid.Services.INetworkService;
+import org.doubango.imsdroid.Services.IXcapService;
 import org.doubango.imsdroid.events.ContactsEventArgs;
 import org.doubango.imsdroid.events.ContactsEventTypes;
 import org.doubango.imsdroid.events.EventHandler;
@@ -45,6 +47,8 @@ import android.util.Log;
 public class ContactService  extends Service implements IContactService, IRegistrationEventHandler{
 
 	private final static String TAG = ContactService.class.getCanonicalName();
+	
+	private final IXcapService xcapService;
 	
 	// Event Handlers
 	private final CopyOnWriteArrayList<IContactsEventHandler> contactsEventHandlers;
@@ -63,6 +67,7 @@ public class ContactService  extends Service implements IContactService, IRegist
 		this.contacts = new ContactList();
 		this.contactsEventHandlers = new CopyOnWriteArrayList<IContactsEventHandler>();
 		
+		this.xcapService = ServiceManager.getXcapService();
 		
 //		for(int i=0; i<5; i++){
 //			Contact c = new Contact();
@@ -106,7 +111,7 @@ public class ContactService  extends Service implements IContactService, IRegist
 		return this.loadingContacts;
 	}
 
-	public boolean loadContacts() {		
+	public boolean loadContacts() {
 		boolean remote = ServiceManager.getConfigurationService().getBoolean(
 				CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED,
 				Configuration.DEFAULT_XCAP_ENABLED);
@@ -187,7 +192,13 @@ public class ContactService  extends Service implements IContactService, IRegist
 	
 	private Runnable  loadRemoteContacts = new Runnable(){
 		public void run() {
+			if(!ContactService.this.xcapService.isPrepared()){
+				if(!ContactService.this.xcapService.prepare()){
+					return;
+				}
+			}
 			
+			ContactService.this.xcapService.downloadContacts();
 		}
 	};
 	

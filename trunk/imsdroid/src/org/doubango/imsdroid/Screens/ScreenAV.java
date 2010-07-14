@@ -42,12 +42,15 @@ import org.doubango.imsdroid.sip.MyAVSession;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class ScreenAV extends Screen 
@@ -59,6 +62,7 @@ implements ICallEventHandler {
 	
 	private boolean remoteHold;
 	private boolean localHold;
+	private boolean sendingVideo;
 	
 	private String remoteUri;
 	
@@ -76,13 +80,15 @@ implements ICallEventHandler {
 	private ImageView ivState;
 	private TextView tvInfo;
 	private TextView tvTime;
-	private ImageButton ibPickup;
-	private ImageButton ibHangup;
-	private ImageButton ibHoldResume;
 		
 	private final ISipService sipService;
 	private final IScreenService screenService;
 	private final IHistoryService historyService;
+	
+	private final static int MENU_PICKUP = 0;
+	private final static int MENU_HANGUP= 1;
+	private final static int MENU_HOLD_RESUME = 2;
+	private final static int MENU_SEND_STOP_VIDEO = 3;
 	
 	static {
 		ScreenAV.screens = new HashMap<String, ScreenAV>();
@@ -119,13 +125,6 @@ implements ICallEventHandler {
         this.ivState = (ImageView)this.findViewById(R.id.screen_av_imageView_state);
         this.tvInfo = (TextView)this.findViewById(R.id.screen_av_textView_info);
         this.tvTime = (TextView)this.findViewById(R.id.screen_av_textView_time);
-        this.ibPickup = (ImageButton)this.findViewById(R.id.screen_av_imageButton_Pick);
-        this.ibHangup = (ImageButton)this.findViewById(R.id.screen_av_imageButton_hangup);
-        this.ibHoldResume = (ImageButton)this.findViewById(R.id.screen_av_imageButton_holdresume);
-        
-        this.ibPickup.setOnClickListener(this.ibPickup_OnClickListener);
-        this.ibHangup.setOnClickListener(this.ibHangup_OnClickListener);
-        this.ibHoldResume.setOnClickListener(this.ibHoldResume_OnClickListener);
         
         //this.timer.schedule(this.timerTask, 0, 1000);
                 
@@ -150,7 +149,84 @@ implements ICallEventHandler {
         
 		super.onDestroy();
 	}
-
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(0, ScreenAV.MENU_PICKUP, 0, "Answer").setIcon(R.drawable.phone_pick_up_48);
+		menu.add(0, ScreenAV.MENU_HANGUP, 0, "Hang-up").setIcon(R.drawable.phone_hang_up_48);
+		menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, "Hold").setIcon(R.drawable.phone_hold_48);
+		menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, "Send Video").setIcon(R.drawable.video_start_48);
+		return true;
+	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu){
+		MenuItem item;
+		if((item = menu.findItem(ScreenAV.MENU_HOLD_RESUME)) != null){
+			item.setTitle(this.localHold? "Resume" : "Hold").setIcon(this.localHold? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
+		}
+		if((item = menu.findItem(ScreenAV.MENU_SEND_STOP_VIDEO)) != null){
+			item.setTitle(this.sendingVideo? "Stop Video" : "Send Video").setIcon(this.sendingVideo? R.drawable.video_stop_48 : R.drawable.video_start_48);
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		switch(item.getItemId()){
+			case ScreenAV.MENU_PICKUP:
+				if(ScreenAV.this.avSession != null){
+					ScreenAV.this.avSession.acceptCall();
+				}
+				break;
+				
+			case ScreenAV.MENU_HANGUP:
+				if(ScreenAV.this.avSession != null){
+					ScreenAV.this.avSession.hangUp();
+				}
+				break;
+				
+			case ScreenAV.MENU_HOLD_RESUME:
+				if(ScreenAV.this.avSession != null){
+					if(ScreenAV.this.localHold){
+						ScreenAV.this.avSession.resumeCall();
+					}
+					else{
+						ScreenAV.this.avSession.holdCall();
+					}
+				}
+				break;
+				
+			case ScreenAV.MENU_SEND_STOP_VIDEO:
+				this.llVideoLocal.removeAllViews();
+				if(!this.sendingVideo){
+					if(this.avSession != null && this.avSession.getMediaType() == MediaType.AudioVideo){
+						View local_preview = MyAVSession.getVideoProducer().startPreview();
+						if(local_preview != null){
+							ScreenAV.this.llVideoLocal.addView(local_preview);
+						}
+					}
+					this.sendingVideo = true;
+				}
+				else{
+					this.sendingVideo = false;
+				}
+				break;
+		}
+		return true;
+	}
+	
+	
+	/* ===================== IScreen (Screen) ======================== */
+	@Override
+	public boolean haveMenu(){
+		return true;
+	}
+	
+	
+	
+	
 	private static void put(ScreenAV screen){
 		synchronized(ScreenAV.screens){
 			ScreenAV.screens.put(screen.getId(), screen);
@@ -234,43 +310,6 @@ implements ICallEventHandler {
 		return false;
 	}
 	
-	@Override
-	public boolean haveMenu(){
-		return false;
-	}
-	
-	private OnClickListener ibPickup_OnClickListener = new OnClickListener(){
-		@Override
-		public void onClick(View v) {
-			if(ScreenAV.this.avSession != null){
-				ScreenAV.this.avSession.acceptCall();
-			}
-		}
-	};
-	
-	private OnClickListener ibHangup_OnClickListener = new OnClickListener(){
-		@Override
-		public void onClick(View v) {
-			if(ScreenAV.this.avSession != null){
-				ScreenAV.this.avSession.hangUp();
-			}
-		}
-	};
-	
-	private OnClickListener ibHoldResume_OnClickListener = new OnClickListener(){
-		@Override
-		public void onClick(View v) {
-			if(ScreenAV.this.avSession != null){
-				if(ScreenAV.this.localHold){
-					ScreenAV.this.avSession.resumeCall();
-				}
-				else{
-					ScreenAV.this.avSession.holdCall();
-				}
-			}
-		}
-	};
-	
 	private TimerTask timerTaskChrono = new TimerTask(){
 		@Override
 		public void run() {
@@ -341,7 +380,6 @@ implements ICallEventHandler {
 			case CONNECTED:
 				this.handler.post(new Runnable() {
 					public void run() {
-						
 						// Notification
 						ScreenAV.this.tvInfo.setText("In call");
 						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_green_16);
@@ -352,16 +390,20 @@ implements ICallEventHandler {
 							ScreenAV.this.historyEvent.setStartTime(new Date().getTime());
 						}
 						
-						
 						// Views
-						ScreenAV.this.llVideoLocal.removeAllViews();
+						//ScreenAV.this.llVideoLocal.removeAllViews();
 						ScreenAV.this.llVideoRemote.removeAllViews();
 						if(ScreenAV.this.avSession != null && ScreenAV.this.avSession.getMediaType() == MediaType.AudioVideo){
-							final View local_preview = MyAVSession.getVideoProducer().startPreview();
+							//final View local_preview = MyAVSession.getVideoProducer().startPreview();
 							final View remote_preview = MyAVSession.getVideoConsumer().startPreview();
-							if(local_preview != null){
-								ScreenAV.this.llVideoLocal.addView(local_preview);
-							}
+							remote_preview.setLayoutParams(new LinearLayout.LayoutParams(
+							          LinearLayout.LayoutParams.FILL_PARENT,
+							          LinearLayout.LayoutParams.FILL_PARENT
+							      ));
+
+							//if(local_preview != null){
+							//	ScreenAV.this.llVideoLocal.addView(local_preview);
+							//}
 							if(remote_preview != null){
 								ScreenAV.this.llVideoRemote.addView(remote_preview);
 							}
@@ -407,7 +449,7 @@ implements ICallEventHandler {
 				this.handler.post(new Runnable() {
 					public void run() {
 						ScreenAV.this.tvInfo.setText("Call placed on hold");
-						ScreenAV.this.ibHoldResume.setImageResource(R.drawable.phone_resume_48);
+						ScreenAV.this.localHold = true;
 					}});
 				this.localHold = true;
 				break;
@@ -421,7 +463,7 @@ implements ICallEventHandler {
 				this.handler.post(new Runnable() {
 					public void run() {
 						ScreenAV.this.tvInfo.setText("Call taken off hold");
-						ScreenAV.this.ibHoldResume.setImageResource(R.drawable.phone_hold_48);
+						ScreenAV.this.localHold = false;
 					}});
 				this.localHold = false;
 				break;
@@ -435,6 +477,7 @@ implements ICallEventHandler {
 				this.handler.post(new Runnable() {
 					public void run() {
 						ScreenAV.this.tvInfo.setText("Placed on hold by remote party");
+						ScreenAV.this.remoteHold = true;
 					}});
 				this.remoteHold = true;
 				break;
@@ -442,6 +485,7 @@ implements ICallEventHandler {
 				this.handler.post(new Runnable() {
 					public void run() {
 						ScreenAV.this.tvInfo.setText("Taken off hold by remote party");
+						ScreenAV.this.remoteHold = false;
 					}});
 				this.remoteHold = false;
 				break;

@@ -124,13 +124,14 @@ public class VideoConsumer {
 		if(VideoConsumer.this.buffers.size()< (VideoConsumer.this.fps * VideoConsumer.MAX_DELAY)){
 			_frame.getContent(this.frame, this.frame.capacity());
 			final IntBuffer buffer = this.frame.asIntBuffer();
-			synchronized(VideoConsumer.this.buffers){
+			//synchronized(VideoConsumer.this.buffers){
 				VideoConsumer.this.buffers.add(buffer);
-			}
+			//}
 			VideoConsumer.this.semaphore.release();
 			this.frame.rewind();
 		}
 		else{
+			Log.d(VideoConsumer.TAG, "Too many frames");
 			//synchronized(VideoConsumer.this.buffers){
 				//VideoConsumer.this.buffers.clear();
 			//}
@@ -156,11 +157,11 @@ public class VideoConsumer {
 		public void run() {
 			Log.d(VideoConsumer.TAG, "Drawer ===== START");
 			Bitmap bitmap = Bitmap.createBitmap(VideoConsumer.this.width, VideoConsumer.this.height, Bitmap.Config.RGB_565);
-			Rect CIF = new Rect(0, 0, 352, 288); // CIF
+			IntBuffer buffer;
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_LESS_FAVORABLE);
 			
-			while(true){
+			while(VideoConsumer.this.running){
 				try {
 					VideoConsumer.this.semaphore.acquire();
 				} catch (InterruptedException e) {
@@ -168,27 +169,28 @@ public class VideoConsumer {
 					break;
 				}
 				
-				if(!VideoConsumer.this.running || (VideoConsumer.this.videoConsumer == null) || (VideoConsumer.this.preview == null)){
+				if((VideoConsumer.this.videoConsumer == null) || (VideoConsumer.this.preview == null)){
 					break;
 				}
 				
-				final IntBuffer buffer;
-				synchronized(VideoConsumer.this.buffers){
+				
+				//synchronized(VideoConsumer.this.buffers){
 					if(!VideoConsumer.this.buffers.isEmpty()){
 						buffer = VideoConsumer.this.buffers.remove(0);
 					}
 					else{
 						continue;
 					}
-				}
+				//}
 				if(buffer != null){
 					bitmap.copyPixelsFromBuffer(buffer);
 					try{
 						final SurfaceHolder holder = VideoConsumer.this.preview.getHolder();
 						final Canvas canvas = holder.lockCanvas();
+						
 						if (canvas != null){
 							//canvas.drawBitmap(bitmap, 0, 0, null);
-							canvas.drawBitmap(bitmap, null, CIF, null);
+							canvas.drawBitmap(bitmap, null, holder.getSurfaceFrame(), null);
 							holder.unlockCanvasAndPost(canvas);
 						}
 					}
