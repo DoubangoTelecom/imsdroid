@@ -33,7 +33,8 @@ public class AudioConsumer{
 	
 	private static String TAG = AudioConsumer.class.getCanonicalName();
 	private static int factor = 5;
-	private static int streamType = AudioManager.STREAM_VOICE_CALL; /* STREAM_MUSIC */
+	//private static int streamType = AudioManager.STREAM_VOICE_CALL;
+	private static int streamType = AudioManager.STREAM_MUSIC;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
@@ -124,14 +125,14 @@ public class AudioConsumer{
 		public void run() {
 			Log.d(AudioConsumer.TAG, "Audio Player ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO );
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO );
 			
 			AudioConsumer.this.track.play();
 			/* Mandatory in order to have first notifications 
 			 * FIXME: Why when we write bufferSize bytes (like we do in the recorder) the callback function is not called ?*/
 			//AudioConsumer.this.track.write(new byte[AudioConsumer.this.bufferSize*AudioConsumer.factor], 0, AudioConsumer.this.bufferSize*AudioConsumer.factor);
 			
-			while(true){
+			while(AudioConsumer.this.running){
 				//try {
 				//	AudioConsumer.this.semaphore.acquire();
 				//} catch (InterruptedException e) {
@@ -139,7 +140,7 @@ public class AudioConsumer{
 				//	break;
 				//}
 				
-				if(!AudioConsumer.this.running || AudioConsumer.this.proxyAudioConsumer == null || AudioConsumer.this.track == null){
+				if(AudioConsumer.this.proxyAudioConsumer == null || AudioConsumer.this.track == null){
 					break;
 				}
 				

@@ -18,11 +18,11 @@ public class Contact {
     protected String uri;
     @Element(name = "display-name", required = false)
     protected Contact.DisplayName displayName;
-    @ElementList(entry="unknown-param", inline=true, required=false)
+    @ElementList(entry="unknown-param", inline = true, required = false)
     protected List<Contact.UnknownParam> unknownParam;
     @Attribute(required = true)
     protected String state;
-    @Attribute(required =true)
+    @Attribute(required = true)
     protected String event;
     @Attribute(name = "duration-registered", required = false)
     protected BigInteger durationRegistered;

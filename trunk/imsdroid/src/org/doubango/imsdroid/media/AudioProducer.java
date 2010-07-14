@@ -32,7 +32,7 @@ import android.util.Log;
 public class AudioProducer {
 
 	private static String TAG = AudioProducer.class.getCanonicalName();
-	private static int factor = 5;
+	private static int factor = 20;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
@@ -117,13 +117,13 @@ public class AudioProducer {
 		public void run() {
 			Log.d(AudioProducer.TAG, "Audio Recorder ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO );
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
 			AudioProducer.this.recorder.startRecording();
 			/* Mandatory in order to have first notifications */
 			//AudioProducer.this.recorder.read(new byte[AudioProducer.this.bufferSize], 0, AudioProducer.this.bufferSize);
 			
-			while(true){
+			while(AudioProducer.this.running){
 				//try {
 					//AudioProducer.this.semaphore.acquire();
 				//} catch (InterruptedException e) {
@@ -131,7 +131,7 @@ public class AudioProducer {
 				//	break;
 				//}
 				
-				if(!AudioProducer.this.running || AudioProducer.this.proxyAudioProducer == null || AudioProducer.this.recorder == null){
+				if(AudioProducer.this.proxyAudioProducer == null || AudioProducer.this.recorder == null){
 					break;
 				}
 				

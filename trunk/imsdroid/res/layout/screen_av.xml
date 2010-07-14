@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_height="fill_parent" android:layout_width="fill_parent">
+  android:layout_width="fill_parent" android:layout_height="fill_parent">
 
 <RelativeLayout android:id="@+id/screen_av_relativeLayout_top" android:layout_width="fill_parent" android:layout_height="17px">
 
@@ -15,25 +15,26 @@
 
 
 
-<LinearLayout android:layout_below="@+id/screen_av_relativeLayout_top" android:layout_toLeftOf="@+id/screen_av_surfaceView_remote" android:id="@+id/screen_av_linearLayout_video" android:layout_centerHorizontal="true" android:layout_height="288px" android:layout_width="352px">
+<LinearLayout android:layout_below="@+id/screen_av_relativeLayout_top" android:layout_toLeftOf="@+id/screen_av_surfaceView_remote" android:id="@+id/screen_av_linearLayout_video" android:layout_centerHorizontal="true" android:layout_width="fill_parent" android:orientation="vertical" android:layout_height="fill_parent" android:weightSum="10">
 
-<LinearLayout android:id="@+id/screen_av_linearLayout_video_remote" android:layout_height="fill_parent" android:layout_width="fill_parent" android:background="@drawable/green_qcif">
+<LinearLayout android:id="@+id/screen_av_linearLayout_video_remote" android:layout_width="fill_parent" android:background="@drawable/green_qcif" android:layout_height="fill_parent" android:layout_weight="9">
 </LinearLayout>
-</LinearLayout><LinearLayout android:id="@+id/screen_av_linearLayout_video_local" android:layout_gravity="bottom|right" android:layout_height="48px" android:layout_width="58px" android:layout_alignParentRight="true" android:background="@color/white" android:padding="2px" android:layout_below="@+id/screen_av_linearLayout_video" android:layout_alignParentBottom="false"></LinearLayout>
+<RelativeLayout android:layout_width="wrap_content" android:id="@+id/screen_av_relativeLayout_bottom" android:layout_height="54px" android:layout_weight="0">
+
+<TextView android:layout_below="@+id/screen_av_textView_time" android:id="@+id/screen_av_textView_remoteUri" android:text="In call with Alice since:" android:layout_alignParentLeft="true" android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView><TextView android:layout_height="wrap_content" android:id="@+id/screen_av_textView_time" android:textColor="@color/white" android:textStyle="bold" android:text="00:00:00" android:layout_below="@+id/screen_av_textView_remoteUri" android:textSize="20px" android:layout_alignParentLeft="true" android:layout_width="wrap_content"></TextView><LinearLayout android:id="@+id/screen_av_linearLayout_video_local" android:layout_height="48px" android:layout_width="58px" android:layout_alignParentRight="true" android:background="@color/white" android:padding="2px" android:layout_below="@+id/screen_av_linearLayout_video" android:layout_alignParentBottom="false"></LinearLayout>
 
 
-
-<LinearLayout android:layout_toRightOf="@+id/screen_av_imageButton_hangup" android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_horizontal" android:layout_marginTop="15px" android:id="@+id/screen_av_linearLayout" android:layout_below="@+id/screen_av_linearLayout_video">
-
-<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_av_imageButton_Pick" android:src="@drawable/phone_pick_up_48" android:layout_below="@+id/screen_av_surfaceView_remote" android:soundEffectsEnabled="true"></ImageButton>
-<ImageButton android:layout_width="wrap_content" android:layout_below="@+id/screen_av_surfaceView_remote" android:layout_toRightOf="@+id/screen_av_imageButton_Pick" android:layout_height="wrap_content" android:id="@+id/screen_av_imageButton_hangup" android:src="@drawable/phone_hang_up_48" android:layout_centerHorizontal="true" android:soundEffectsEnabled="true"></ImageButton>
-
-<ImageButton android:layout_below="@+id/screen_av_surfaceView_remote" android:layout_toRightOf="@+id/screen_av_imageButton_hangup" android:id="@+id/screen_av_imageButton_holdresume" android:src="@drawable/phone_hold_48" android:layout_height="wrap_content" android:layout_width="wrap_content" android:soundEffectsEnabled="true"></ImageButton>
-
+</RelativeLayout>
 </LinearLayout>
 
 
-<TextView android:layout_height="wrap_content" android:id="@+id/screen_av_textView_time" android:textColor="@color/white" android:textStyle="bold" android:layout_below="@+id/screen_av_linearLayout" android:layout_marginTop="10px" android:textSize="30px" android:layout_width="fill_parent" android:gravity="fill_vertical|center_horizontal" android:text="00:00:00" android:layout_alignParentBottom="false"></TextView>
+
+
+
+
+
+
+
 
 
 

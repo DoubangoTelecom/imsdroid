@@ -198,6 +198,11 @@ implements IRegistrationEventHandler
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu){
+		return this.screenService.getCurrentScreen().onPrepareOptionsMenu(menu);
+	}
+	
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return this.screenService.getCurrentScreen().onOptionsItemSelected(item);
 	}
