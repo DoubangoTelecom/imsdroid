@@ -20,10 +20,21 @@
 */
 package org.doubango.imsdroid.events;
 
+import java.util.HashMap;
+
 public class EventArgs {
 	public static final EventArgs Empty = new EventArgs();
+	private final HashMap<String, Object> extra;
 	
-	public EventArgs()
-	{
+	public EventArgs(){
+		this.extra = new HashMap<String, Object>();
+	}
+	
+	public Object getExtra(String key){
+		return this.extra.get(key);
+	}
+	
+	public void putExtra(String key, Object value){
+		this.extra.put(key, value);
 	}
 }

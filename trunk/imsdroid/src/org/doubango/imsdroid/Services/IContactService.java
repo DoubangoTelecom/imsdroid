@@ -22,7 +22,7 @@ package org.doubango.imsdroid.Services;
 
 import java.util.List;
 
-import org.doubango.imsdroid.Model.Contact;
+import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.events.IContactsEventDispatcher;
 
 public interface IContactService  extends IService, IContactsEventDispatcher
@@ -31,5 +31,9 @@ public interface IContactService  extends IService, IContactsEventDispatcher
 	boolean loadContacts();
 	boolean isLoadingContacts();
 	
-	List<Contact> getContacts();
+	void addContact(Group.Contact contact);
+	void editContact(Group.Contact contact);
+	void removeContact(Group.Contact contact);
+	
+	List<Group> getContacts();
 }

@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Model.Contact;
 import org.doubango.imsdroid.Model.HistoryEvent;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IHistoryService;

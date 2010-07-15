@@ -8,6 +8,8 @@ package org.doubango.xml.test;
  * namespace=... ==> @Namespace(reference="....")
  */
 
+import oma.xml.xdm.xcap_directory.TestXcapDirectory;
+import ietf.params.xml.ns.rls_services.TestRLS;
 import ietf.params.xml.ns.xcap_caps.TestXcapCaps;
 import android.app.Activity;
 import android.os.Bundle;
@@ -20,8 +22,13 @@ public class Main extends Activity {
         setContentView(R.layout.main);
         
         /* xcap-caps */
-        TestXcapCaps.run();
+        //TestXcapCaps.run();
         
+        /* OMA xcap-directory */
+        //TestXcapDirectory.run();
+        
+        /* rls-services */
+        TestRLS.run();
         /* resoource-lists */
         //TestResourceLists.run();
         

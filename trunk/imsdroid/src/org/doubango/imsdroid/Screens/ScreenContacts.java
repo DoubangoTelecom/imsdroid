@@ -21,10 +21,15 @@
 
 package org.doubango.imsdroid.Screens;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Model.Contact;
+import org.doubango.imsdroid.Model.Group;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -41,19 +46,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 public class ScreenContacts  extends Screen 
 implements IContactsEventHandler 
 {
 	
+	private Spinner spGroups;
 	private GridView gridView;
 	private ScreenContactsAdapter adapter;
 	
@@ -61,6 +69,8 @@ implements IContactsEventHandler
 	private final IScreenService screenService;
 	private final ISipService sipService;
 	private final Handler handler;
+	
+	private String currentGroup = "rcs";
 	
 	private final static int MENU_NEW_CONTACT = 0;
 	private final static int MENU_NEW_GROUP = 1;
@@ -94,8 +104,16 @@ implements IContactsEventHandler
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_contacts);
         
+        final List<Group>groups = ScreenContacts.this.contactService.getContacts();
+        
+        this.spGroups = (Spinner)this.findViewById(R.id.screen_contacts_spinner_Groups);
+        ArrayAdapter<Group> adapter = new ArrayAdapter<Group>(ScreenContacts.this, android.R.layout.simple_spinner_item, groups);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ScreenContacts.this.spGroups.setAdapter(adapter);
+        this.spGroups.setOnItemSelectedListener(this.spGroups_OnItemSelectedListener);
+        
         // gridView
-		this.adapter = new ScreenContactsAdapter(this.contactService.getContacts());
+		this.adapter = new ScreenContactsAdapter(groups);
 		this.gridView = (GridView) this.findViewById(R.id.screen_contacts_gridview);
 		this.gridView.setAdapter(this.adapter);
 		this.gridView.setOnItemClickListener(this.gridView_OnItemClickListener);
@@ -118,6 +136,11 @@ implements IContactsEventHandler
 	}
 	
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return true;
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(0, ScreenContacts.MENU_NEW_CONTACT, 0, "New Contact").setIcon(R.drawable.user_add_48);
 		menu.add(0, ScreenContacts.MENU_NEW_GROUP, 0, "New Group").setIcon(R.drawable.group_add_48);
@@ -132,7 +155,7 @@ implements IContactsEventHandler
 		
 		switch(item.getItemId()){
 			case ScreenContacts.MENU_NEW_CONTACT:
-				Toast.makeText(this, "New Contact", Toast.LENGTH_SHORT).show();
+				ScreenContactEdit.add();
 				break;
 			case ScreenContacts.MENU_NEW_GROUP:
 				Toast.makeText(this, "New Group", Toast.LENGTH_SHORT).show();
@@ -165,39 +188,53 @@ implements IContactsEventHandler
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		Contact contact = null;
+//		Contact contact = null;
+//		
+//		if((contact = this.adapter.getContact(((AdapterContextMenuInfo) item.getMenuInfo()).position)) == null){ /* should never happen ...but who know? */
+//			return super.onContextItemSelected(item);
+//		}
+//		
+//		switch(item.getItemId()){
+//			case ScreenContacts.MENU_VOICE_CALL:
+//				Toast.makeText(this, "Make Voice Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+//				return true;
+//			case ScreenContacts.MENU_VISIO_CALL:
+//				Toast.makeText(this, "Make Visio Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+//				return true;
+//			case ScreenContacts.MENU_SEND_MESSAGE:
+//				Toast.makeText(this, "Send Short Message: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+//				return true;
+//			case ScreenContacts.MENU_SEND_SMS:
+//				Toast.makeText(this, "Send SMS: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+//				return true;
+//			case ScreenContacts.MENU_SEND_FILE:
+//				Toast.makeText(this, "Send File: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+//				return true;
+//			case ScreenContacts.MENU_START_CHAT:
+//				Toast.makeText(this, "Start Chat: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+//				return true;
+//			case ScreenContacts.MENU_CONFERENCE:
+//				Toast.makeText(this, "Start Conference: " + contact.getUri(), Toast.LENGTH_SHORT).show();
+//				return true;
+//			default:
+//				return true;
+//		}
 		
-		if((contact = this.adapter.getContact(((AdapterContextMenuInfo) item.getMenuInfo()).position)) == null){ /* should never happen ...but who know? */
-			return super.onContextItemSelected(item);
-		}
-		
-		switch(item.getItemId()){
-			case ScreenContacts.MENU_VOICE_CALL:
-				Toast.makeText(this, "Make Voice Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-				return true;
-			case ScreenContacts.MENU_VISIO_CALL:
-				Toast.makeText(this, "Make Visio Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-				return true;
-			case ScreenContacts.MENU_SEND_MESSAGE:
-				Toast.makeText(this, "Send Short Message: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-				return true;
-			case ScreenContacts.MENU_SEND_SMS:
-				Toast.makeText(this, "Send SMS: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-				return true;
-			case ScreenContacts.MENU_SEND_FILE:
-				Toast.makeText(this, "Send File: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-				return true;
-			case ScreenContacts.MENU_START_CHAT:
-				Toast.makeText(this, "Start Chat: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-				return true;
-			case ScreenContacts.MENU_CONFERENCE:
-				Toast.makeText(this, "Start Conference: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-				return true;
-			default:
-				return super.onContextItemSelected(item);
-		}
+		return true;
 	}
-
+	
+	private OnItemSelectedListener spGroups_OnItemSelectedListener = new OnItemSelectedListener(){
+		@Override
+		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+			Group group = (Group)parent.getItemAtPosition(position);
+			ScreenContacts.this.currentGroup = group.getName();
+			ScreenContacts.this.adapter.update();
+		}
+		@Override
+		public void onNothingSelected(AdapterView<?> arg0) {
+		}
+	};
+	
 	@Override
 	protected void onDestroy() {
 
@@ -210,10 +247,10 @@ implements IContactsEventHandler
 	/* ===================== UI Events ======================== */
 	private OnItemClickListener gridView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			Contact contact = ScreenContacts.this.adapter.getContact(position);
-			if(contact != null){
-				ScreenContactView.show(contact);
-			}
+			//Contact contact = ScreenContacts.this.adapter.getContact(position);
+			//if(contact != null){
+			//	ScreenContactView.show(contact);
+			//}
 		}
 	};
 	
@@ -235,9 +272,16 @@ implements IContactsEventHandler
 		// already on its own thread
 		switch(e.getType()){
 			case CONTACTS_LOADED:
+			case CONTACT_ADDED:
 				this.handler.post(new Runnable(){
 					public void run() {
-						ScreenContacts.this.adapter.update(ScreenContacts.this.contactService.getContacts());
+						final List<Group>groups = ScreenContacts.this.contactService.getContacts();
+						
+						ArrayAdapter<Group> adapter = new ArrayAdapter<Group>(ScreenContacts.this, android.R.layout.simple_spinner_item, groups);
+				        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				        ScreenContacts.this.spGroups.setAdapter(adapter);
+				        
+						ScreenContacts.this.adapter.update(groups);
 					}
 				});
 				break;
@@ -250,27 +294,53 @@ implements IContactsEventHandler
 	
 	/* ===================== Adapter ======================== */
 
+	class MyDisplayNameComparable implements Comparator<Group.Contact>{
+	    @Override
+	    public int compare(Group.Contact c1, Group.Contact c2) {
+	    	final String d1 = c1.getDisplayName();
+	    	final String d2 = c2.getDisplayName();
+	    	if(d1 != null && d2 != null){
+	    		return d1.compareToIgnoreCase(d2);
+	    	}
+	    	return 0;
+	    }
+	}
+
 	private class ScreenContactsAdapter extends BaseAdapter {
-		private List<Contact> items;
+		private List<Group> items;
+		private List<Group.Contact> contacts;
 		
-		private ScreenContactsAdapter(List<Contact> items) {
+		private ScreenContactsAdapter(List<Group> items) {
 			this.items = items;
 		}
 
-		private synchronized void update(List<Contact> items){
+		private synchronized void update(List<Group> items){
 			this.items = items;
 			this.notifyDataSetChanged();
 		}
 		
+		private synchronized void update(){
+			this.notifyDataSetChanged();
+		}
+		
 		public int getCount() {
-			return this.items == null ? 0 : this.items.size();
+			if(this.items != null){
+				for(Group group : this.items){
+					if(group.getName().equals(ScreenContacts.this.currentGroup)){
+						this.contacts = group.getContacts();
+						Collections.sort(this.contacts, new MyDisplayNameComparable());
+						return this.contacts.size();
+					}
+				}
+			}
+			return 0;
 		}
 
 		public Object getItem(int position) {
 			return null;
 		}
 		
-		public Contact getContact(int position){
+		public Group getGroup(int position){
 			if(this.getCount() > position){
 				return this.items.get(position);
 			}
@@ -283,27 +353,39 @@ implements IContactsEventHandler
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
-			Contact contact;
-
+			
 			if (view == null) {
 				view = getLayoutInflater().inflate(R.layout.screen_contacts_item, null);
 			}
-			if ((contact = this.items.get(position)) == null) {
+			
+			final Group.Contact contact;
+			if (this.contacts == null || (contact = this.contacts.get(position)) == null) {
 				return view;
 			}
 
 			ImageView ivAvatar = (ImageView) view.findViewById(R.id.screen_contacts_item_imageView_avatar);
+			TextView tvUri = (TextView) view.findViewById(R.id.screen_contacts_item_textViewUri);
 			TextView tvDisplayName = (TextView) view.findViewById(R.id.screen_contacts_item_textView_displayname);
 			TextView tvFreeText = (TextView) view.findViewById(R.id.screen_contacts_item_textView_freetext);
 			
 			if(contact.getAvatar() != null){
 				ivAvatar.setImageBitmap(contact.getAvatar());
 			}
+			if(contact.getUri() != null){
+				tvUri.setText(contact.getUri());
+			}
+			
 			if(contact.getDisplayName() != null){
 				tvDisplayName.setText(contact.getDisplayName());
 			}
+			else{
+				tvDisplayName.setText("Unknown");
+			}
 			if(contact.getFreeText() != null){
 				tvFreeText.setText(contact.getFreeText());
+			}
+			else{
+				tvFreeText.setText("");
 			}
 
 			return view;

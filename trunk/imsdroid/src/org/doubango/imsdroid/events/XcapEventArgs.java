@@ -20,30 +20,15 @@
 */
 package org.doubango.imsdroid.events;
 
+public class XcapEventArgs {
 
-public class CallEventArgs extends EventArgs {
+	private XcapEventTypes type;
 	
-	private final CallEventTypes type;
-	private final long id;
-	private final String phrase;
-	
-	public CallEventArgs(long id, CallEventTypes type, String phrase){
-		super();
-		
+	public XcapEventArgs(XcapEventTypes type){
 		this.type = type;
-		this.id = id;
-		this.phrase = phrase;
 	}
 	
-	public CallEventTypes getType(){
+	public XcapEventTypes getType(){
 		return this.type;
-	}
-	
-	public long getSessionId(){
-		return this.id;
-	}
-	
-	public String getPhrase(){
-		return this.phrase;
 	}
 }

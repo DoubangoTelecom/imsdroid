@@ -41,33 +41,11 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
 		// Well-Known
-		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, DIALER_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
+		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CONTACT_EDIT_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, DIALER_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
 		REGISTRATIONS_T, SECURITY_T,
 		// All others
 		AV_T
 	}
-
-//	public static final String SCREEN_TITLE_ABOUT = "About";
-//	public static final String SCREEN_TITLE_AUTHORIZATIONS = "Authorizations";
-//	public static final String SCREEN_TITLE_CALL = "Call";
-//	public static final String SCREEN_TITLE_CHAT_QUEUE = "Chat room";
-//	public static final String SCREEN_TITLE_CONTACT_VIEW = null;
-//	public static final String SCREEN_TITLE_CONTACTS = "Address Book";
-//	public static final String SCREEN_TITLE_CONTACTS_OPTIONS = "Options-Contacts";
-//	public static final String SCREEN_TITLE_DIALER = "Dialer";
-//	public static final String SCREEN_TITLE_FILE_TRANSFER_QUEUE = "File Transfers...";
-//	public static final String SCREEN_TITLE_GENERAL = "Options-General";
-//	public static final String SCREEN_TITLE_HISTORY = "History";
-//	public static final String SCREEN_TITLE_HOME = "Home";
-//	public static final String SCREEN_TITLE_IDENTITY = "Options-Identity";
-//	public static final String SCREEN_TITLE_OPTIONS = "Options";
-//	public static final String SCREEN_TITLE_MESSAGING = "Options-Messaging";
-//	public static final String SCREEN_TITLE_NATT = "Options-Nat Traversal";
-//	public static final String SCREEN_TITLE_NETWORK = "Options-Network";
-//	public static final String SCREEN_TITLE_PRESENCE = "Options-Presence";
-//	public static final String SCREEN_TITLE_QOS = "Options-QoS/QoE";
-//	public static final String SCREEN_TITLE_REGISTRATIONS = "IMS Registrations";
-//	public static final String SCREEN_TITLE_SECURITY = "Options-Security";
 	
 	protected String id;
 	protected final SCREEN_TYPE type;

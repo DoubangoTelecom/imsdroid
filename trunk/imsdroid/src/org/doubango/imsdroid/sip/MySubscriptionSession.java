@@ -59,13 +59,16 @@ public class MySubscriptionSession extends MySipSession{
 			case PRESENCE:
 				this.session.addHeader("Event", "presence");
 				this.session.addHeader("Accept", 
-						String.format("%s, %s, %s, %s, %s, %s", 
-								ContentType.MULTIPART_RELATED, 
-								ContentType.RLMI, 
-								ContentType.PIDF, 
-								ContentType.RPID, 
-								ContentType.XCAP_DIFF, 
-								ContentType.EXTERNAL_BODY));
+						String.format("%s", 
+								ContentType.PIDF));
+//				this.session.addHeader("Accept", 
+//						String.format("%s, %s, %s, %s, %s, %s", 
+//								ContentType.MULTIPART_RELATED, 
+//								ContentType.RLMI, 
+//								ContentType.PIDF, 
+//								ContentType.RPID, 
+//								ContentType.XCAP_DIFF, 
+//								ContentType.EXTERNAL_BODY));
 				break;
 			case REG:
 				this.session.addHeader("Event", "reg");

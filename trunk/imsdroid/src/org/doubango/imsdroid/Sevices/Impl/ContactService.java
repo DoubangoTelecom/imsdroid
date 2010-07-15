@@ -25,57 +25,56 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.doubango.imsdroid.Model.AddressBook;
 import org.doubango.imsdroid.Model.Configuration;
-import org.doubango.imsdroid.Model.Contact;
-import org.doubango.imsdroid.Model.ContactList;
+import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IContactService;
-import org.doubango.imsdroid.Services.INetworkService;
-import org.doubango.imsdroid.Services.IXcapService;
 import org.doubango.imsdroid.events.ContactsEventArgs;
 import org.doubango.imsdroid.events.ContactsEventTypes;
 import org.doubango.imsdroid.events.EventHandler;
 import org.doubango.imsdroid.events.IContactsEventHandler;
 import org.doubango.imsdroid.events.IRegistrationEventHandler;
+import org.doubango.imsdroid.events.ISubscriptionEventHandler;
+import org.doubango.imsdroid.events.IXcapEventHandler;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
+import org.doubango.imsdroid.events.SubscriptionEventArgs;
+import org.doubango.imsdroid.events.XcapEventArgs;
+import org.doubango.imsdroid.sip.MySipStack;
+import org.doubango.imsdroid.sip.MySubscriptionSession;
+import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
+import org.doubango.imsdroid.utils.ContentType;
+import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.imsdroid.xml.reginfo.Contact;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 import android.util.Log;
 
-public class ContactService  extends Service implements IContactService, IRegistrationEventHandler{
+public class ContactService  extends Service implements IContactService, IRegistrationEventHandler, ISubscriptionEventHandler, IXcapEventHandler{
 
 	private final static String TAG = ContactService.class.getCanonicalName();
-	
-	private final IXcapService xcapService;
 	
 	// Event Handlers
 	private final CopyOnWriteArrayList<IContactsEventHandler> contactsEventHandlers;
 	
 	private final static String CONTACTS_FILE = "contacts.xml";
 	private File contacts_file;
-	private ContactList contacts;
+	private AddressBook addressBook;
 	private final Serializer serializer;
 	
+	private boolean remote;
+	private boolean presence;
+	private boolean rls;
 	private boolean loadingContacts;
 	
 	public ContactService(){
 		super();
 		
 		this.serializer = new Persister();
-		this.contacts = new ContactList();
+		this.addressBook = new AddressBook();
 		this.contactsEventHandlers = new CopyOnWriteArrayList<IContactsEventHandler>();
-		
-		this.xcapService = ServiceManager.getXcapService();
-		
-//		for(int i=0; i<5; i++){
-//			Contact c = new Contact();
-//			c.setUri("sip:" + i + "@open-ims.test");
-//			c.setDisplayName(Integer.toString(i));
-//			c.setFreeText("Hello world(" + i + ")");
-//			this.contacts.addContact(c);
-//		}
 	}
 	
 	public boolean start() {
@@ -92,19 +91,63 @@ public class ContactService  extends Service implements IContactService, IRegist
 			}
 		}
 		
-		// add sip event handlers
+		// add event handlers
 		ServiceManager.getSipService().addRegistrationEventHandler(this);
+		ServiceManager.getSipService().addSubscriptionEventHandler(this);
+		ServiceManager.getXcapService().addXcapEventHandler(this);
 		return true;
 	}
 
 	public boolean stop() {
-		// remove sip event handlers
+		// remove event handlers
 		ServiceManager.getSipService().removeRegistrationEventHandler(this);
+		ServiceManager.getSipService().removeSubscriptionEventHandler(this);
+		ServiceManager.getXcapService().removeXcapEventHandler(this);
 		return true;
 	}
 
-	public List<Contact> getContacts(){
-		return this.contacts.getList();
+	public void addContact(Group.Contact contact){
+		if(this.remote){
+			if(this.presence){
+				
+			}
+		}
+		else{
+			if(this.addressBook.addContact(contact)){
+				new Thread(new Runnable(){
+					@Override
+					public void run() {
+						ContactService.this.compute();
+						ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACT_ADDED));
+						if(ContactService.this.presence){
+							
+						}
+					}
+				}).start();
+			}
+		}
+	}
+	
+	public void editContact(Group.Contact contact){
+		if(this.remote){
+			
+		}
+		else{
+			
+		}
+	}
+	
+	public void removeContact(Group.Contact contact){
+		if(this.remote){
+			
+		}
+		else{
+			
+		}
+	}
+	
+	public List<Group> getContacts(){
+		return this.addressBook.getGroups();
 	}
 	
 	public boolean isLoadingContacts(){
@@ -112,11 +155,8 @@ public class ContactService  extends Service implements IContactService, IRegist
 	}
 
 	public boolean loadContacts() {
-		boolean remote = ServiceManager.getConfigurationService().getBoolean(
-				CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED,
-				Configuration.DEFAULT_XCAP_ENABLED);
-		if(remote){
-			new Thread(this.loadRemoteContacts).start();
+		if(this.remote){
+			// Wait for XcapService Events
 		}
 		else{
 			if(this.contacts_file == null){
@@ -129,26 +169,17 @@ public class ContactService  extends Service implements IContactService, IRegist
 	}
 	
 	/* ===================== Add/Remove handlers ======================== */
+	@Override
 	public boolean addContactsEventHandler(IContactsEventHandler handler) {
 		return EventHandler.addEventHandler(this.contactsEventHandlers, handler);
 	}
-
+	@Override
 	public boolean removeContactsEventHandler(IContactsEventHandler handler) {
 		return EventHandler.removeEventHandler(this.contactsEventHandlers, handler);
 	}
 	
 	/* ===================== Dispatch events ======================== */
 	private synchronized void onContactsEvent(final ContactsEventArgs eargs) {
-//		for(int i = 0; i<this.contactsEventHandlers.size(); i++){
-//			final IContactsEventHandler handler = this.contactsEventHandlers.get(i);
-//			new Thread(new Runnable() {
-//				public void run() {
-//					if (!handler.onContactsEvent(this, eargs)) {
-//						Log.w(handler.getClass().getName(), "onContactsEvent failed");
-//					}
-//				}
-//			}).start();
-//		}
 		for(IContactsEventHandler handler : this.contactsEventHandlers){
 			if (!handler.onContactsEvent(this, eargs)) {
 				Log.w(handler.getClass().getName(), "onContactsEvent failed");
@@ -156,14 +187,42 @@ public class ContactService  extends Service implements IContactService, IRegist
 		}
 	}
 	
+	/* ===================== IXcapEventHandler implement ======================== */
+	@Override
+	public boolean onXcapEvent(Object sender, XcapEventArgs e){
+		
+		switch(e.getType()){
+			case CONTACTS_DOWNLOADED:
+				/* Presence */
+				this.addressBook.set(ServiceManager.getXcapService().getGroups());
+				ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACTS_LOADED));
+				break;
+		}
+		return true;
+	}
+	
 	/* ===================== Sip Events ========================*/
+	@Override
 	public boolean onRegistrationEvent(Object sender, RegistrationEventArgs e) {
+		/* already in it's own thread */
 		switch(e.getType()){
 			case REGISTRATION_OK:
+				this.remote = ServiceManager.getConfigurationService().getBoolean(
+						CONFIGURATION_SECTION.XCAP, CONFIGURATION_ENTRY.ENABLED,
+						Configuration.DEFAULT_XCAP_ENABLED);
+				this.presence = ServiceManager.getConfigurationService().getBoolean(
+						CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE,
+							Configuration.DEFAULT_RCS_PRESENCE);
+				this.rls = ServiceManager.getConfigurationService().getBoolean(
+						CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.RLS, 
+						Configuration.DEFAULT_RCS_RLS);
 				return this.loadContacts();
+			case UNREGISTRATION_OK:
+				this.addressBook.clear();
+				ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACTS_LOADED));
+				break;
 			case REGISTRATION_NOK:
 			case REGISTRATION_INPROGRESS:
-			case UNREGISTRATION_OK:
 			case UNREGISTRATION_NOK:
 			case UNREGISTRATION_INPROGRESS:
 				break;
@@ -171,6 +230,24 @@ public class ContactService  extends Service implements IContactService, IRegist
 		return true;
 	}
 	
+	public boolean onSubscriptionEvent(Object sender, SubscriptionEventArgs e) {
+		/* already in it's own thread */
+		switch(e.getType()){
+			case INCOMING_NOTIFY:
+				final String contentType = e.getContentType();
+				if(StringUtils.equals(contentType, ContentType.PIDF, true)){
+					final byte[] content = e.getContent();
+					if(content == null){
+						return false;
+					}
+				}
+				break;
+				
+			default:
+				break;
+		}
+		return true;
+	}
 	
 	/* ===================== Internal functions ========================*/
 	private Runnable  loadLocalContacts = new Runnable(){
@@ -179,8 +256,22 @@ public class ContactService  extends Service implements IContactService, IRegist
 			
 			try {
 				Log.d(ContactService.TAG, "Loading contacts (local)");
-				ContactService.this.contacts = ContactService.this.serializer.read(ContactService.this.contacts.getClass(), ContactService.this.contacts_file);
+				ContactService.this.addressBook = ContactService.this.serializer.read(AddressBook.class, ContactService.this.contacts_file);
+				if(ContactService.this.addressBook.getGroup("rcs") == null){
+					ContactService.this.addressBook.addGroup("rcs", "Social buddies");
+				}
 				Log.d(ContactService.TAG, "Contacts loaded(local)");
+				
+				if(ContactService.this.presence){
+					Log.d(ContactService.TAG, "Subscribing to presence(local)");
+					Group group = ContactService.this.addressBook.getGroup("rcs");
+					if(group != null){
+						for(Group.Contact contact : group.getContacts()){
+							MySubscriptionSession session = ServiceManager.getSipService().createPresenceSession(contact.getUri(), EVENT_PACKAGE_TYPE.PRESENCE);
+							session.subscribe();
+						}
+					}
+				}
 			} catch (Exception e) {
 				Log.e(ContactService.TAG, "Failed to load contacts(local)");
 				e.printStackTrace();
@@ -190,24 +281,12 @@ public class ContactService  extends Service implements IContactService, IRegist
 		}
 	};
 	
-	private Runnable  loadRemoteContacts = new Runnable(){
-		public void run() {
-			if(!ContactService.this.xcapService.isPrepared()){
-				if(!ContactService.this.xcapService.prepare()){
-					return;
-				}
-			}
-			
-			ContactService.this.xcapService.downloadContacts();
-		}
-	};
-	
 	private boolean compute(){
 		if(this.contacts_file == null){
 			return false;
 		}
 		try{
-			this.serializer.write(this.contacts, this.contacts_file);
+			this.serializer.write(this.addressBook, this.contacts_file);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

@@ -30,11 +30,11 @@ import org.simpleframework.xml.Root;
 @Root(name = "xcap-caps", strict=false)
 public class XcapCaps {
 
-    @Element(name="auids", required = true)
+    @Element(name="auids", required = false) // Should be required
     protected XcapCaps.Auids auids;
-    @Element(name="extensions", required = true)
+    @Element(name="extensions", required = false) // Should be required
     protected XcapCaps.Extensions extensions;
-    @Element(name="namespaces", required = true)
+    @Element(name="namespaces", required = false) // Should be required
     protected XcapCaps.Namespaces namespaces;
     
     public XcapCaps.Auids getAuids() {

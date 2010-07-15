@@ -24,6 +24,8 @@ import org.doubango.imsdroid.events.ICallEventDispatcher;
 import org.doubango.imsdroid.events.IRegistrationEventDispatcher;
 import org.doubango.imsdroid.events.ISubscriptionEventDispatcher;
 import org.doubango.imsdroid.sip.MySipStack;
+import org.doubango.imsdroid.sip.MySubscriptionSession;
+import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 
 public interface ISipService  extends IService, 
 IRegistrationEventDispatcher, 
@@ -41,4 +43,8 @@ ICallEventDispatcher
 	boolean publish();
 	
 	boolean isRegistered();
+	
+	MySubscriptionSession createPresenceSession(String toUri, EVENT_PACKAGE_TYPE eventPackage);
+	void clearPresenceSessions();
+	void removePresenceSession(MySubscriptionSession session);
 }

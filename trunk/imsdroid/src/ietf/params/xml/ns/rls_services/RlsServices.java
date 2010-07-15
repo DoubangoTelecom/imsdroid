@@ -18,32 +18,25 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
-package org.doubango.imsdroid.events;
+package ietf.params.xml.ns.rls_services;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Root;
 
 
-public class CallEventArgs extends EventArgs {
-	
-	private final CallEventTypes type;
-	private final long id;
-	private final String phrase;
-	
-	public CallEventArgs(long id, CallEventTypes type, String phrase){
-		super();
-		
-		this.type = type;
-		this.id = id;
-		this.phrase = phrase;
-	}
-	
-	public CallEventTypes getType(){
-		return this.type;
-	}
-	
-	public long getSessionId(){
-		return this.id;
-	}
-	
-	public String getPhrase(){
-		return this.phrase;
-	}
+@Root(name = "rls-services", strict=false)
+public class RlsServices {
+
+	@ElementList(entry = "service", required=false, inline=true)
+    protected List<ServiceType> service;
+    
+    public List<ServiceType> getService() {
+        if (service == null) {
+            service = new ArrayList<ServiceType>();
+        }
+        return this.service;
+    }
 }

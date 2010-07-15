@@ -110,9 +110,9 @@ implements ISubscriptionEventHandler
 		switch(e.getType()){
 			case INCOMING_NOTIFY:
 				// Can also get the sip service cached version
-				final byte[] content = e.getContent();
 				final String contentType = e.getContentType();
-				if(content != null && StringUtils.equals(contentType, ContentType.REG_INFO, true)){
+				if(StringUtils.equals(contentType, ContentType.REG_INFO, true)){
+					//final byte[] content = e.getContent();
 					if(this.reginfo == null){
 						this.handler.post(new Runnable(){
 							public void run() {

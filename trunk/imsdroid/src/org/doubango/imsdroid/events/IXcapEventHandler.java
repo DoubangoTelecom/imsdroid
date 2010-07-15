@@ -18,32 +18,9 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+
 package org.doubango.imsdroid.events;
 
-
-public class CallEventArgs extends EventArgs {
-	
-	private final CallEventTypes type;
-	private final long id;
-	private final String phrase;
-	
-	public CallEventArgs(long id, CallEventTypes type, String phrase){
-		super();
-		
-		this.type = type;
-		this.id = id;
-		this.phrase = phrase;
-	}
-	
-	public CallEventTypes getType(){
-		return this.type;
-	}
-	
-	public long getSessionId(){
-		return this.id;
-	}
-	
-	public String getPhrase(){
-		return this.phrase;
-	}
+public interface IXcapEventHandler /* extends IEventHandler<XcapEventArgs> */{
+	boolean onXcapEvent(Object sender, XcapEventArgs e);
 }

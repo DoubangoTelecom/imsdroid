@@ -174,6 +174,9 @@ public class VideoProducer {
 					}				
 				}
 			}
+			
+			VideoProducer.this.buffers.clear();
+			
 			Log.d(VideoProducer.TAG, "Sender ===== STOP");
 		}
 	};

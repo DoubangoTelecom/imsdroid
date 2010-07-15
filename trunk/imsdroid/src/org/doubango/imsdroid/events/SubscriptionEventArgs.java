@@ -21,6 +21,7 @@
 
 package org.doubango.imsdroid.events;
 
+
 public class SubscriptionEventArgs  extends EventArgs{
 
 	private final SubscriptionEventTypes type;

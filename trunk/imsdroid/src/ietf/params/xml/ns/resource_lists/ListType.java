@@ -20,6 +20,8 @@
 */
 package ietf.params.xml.ns.resource_lists;
 
+import java.util.ArrayList;
+
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -58,6 +60,13 @@ public class ListType {
         this.name = value;
     }
    
+    public java.util.List<EntryType> getEntries(){
+    	if(this.entries == null){
+    		this.entries = new ArrayList<EntryType>();
+    	}
+    	return this.entries;
+    }
+    
     public static class List
         extends ListType
     {

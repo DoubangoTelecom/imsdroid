@@ -28,7 +28,7 @@ import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.tinyWRAP.SipSession;
 
-public abstract class MySipSession {
+public abstract class MySipSession implements Comparable<MySipSession>{
 	
 	// Services
 	protected final IConfigurationService configurationService;
@@ -87,4 +87,13 @@ public abstract class MySipSession {
 	}
 	
 	protected abstract SipSession getSession();
+	
+	@Override
+	public int compareTo(MySipSession another) {
+		SipSession session = this.getSession();
+		if(session != null && another != null){
+			return (int)(session.getId() - another.getId());
+		}
+		return -1;
+	}
 }
