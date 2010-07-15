@@ -24,15 +24,20 @@ package org.doubango.imsdroid.Model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.doubango.imsdroid.sip.PresenceStatus;
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
+import org.simpleframework.xml.Version;
+
+import android.graphics.Bitmap;
 
 @Root(name = "group")
 public class Group implements Comparable<Group> {
 	
-	@ElementList(required = false, inline=true)
-    private List<Contact> contact;
+	@ElementList(entry = "contact", inline=true, required=false)
+    protected List<Group.Contact> contacts;
 	
 	@Attribute(name = "name", required = true)
 	private String name;
@@ -44,15 +49,22 @@ public class Group implements Comparable<Group> {
 	}
 	
 	public Group(String name, String displayName){
-		this.contact = new ArrayList<Contact>();
+		this.contacts = new ArrayList<Contact>();
 		
 		this.name = name;
 		this.displayName = displayName;
 	}
 	
-	public List<Contact> getContacts(){
-		return this.contact;
+	public void addContact(Group.Contact contact){
+		this.contacts.add(contact);
 	}
+    
+    public List<Group.Contact> getContacts() {
+        if (contacts == null) {
+        	contacts = new ArrayList<Group.Contact>();
+        }
+        return this.contacts;
+    }
 
 	public String getName(){
 		return this.name;
@@ -62,7 +74,123 @@ public class Group implements Comparable<Group> {
 		return this.displayName;
 	}
 	
+	@Override
+	public String toString() {
+		return this.displayName;
+	}
+
+	@Override
 	public int compareTo(Group another) {
-		return 0;
+		if(this.name != null && another != null){
+			return this.name.compareTo(another.getName());
+		}
+		return -1;
+	}
+	
+	@Root(name = "contact", strict = false)
+    public static class Contact implements Comparable<Contact>{
+		@Attribute(name = "uri", required = true)
+		private String uri;
+		@Element(name = "group", required = false)
+		private String group;
+		@Element(name = "displayName", required = false)
+		private String displayName;
+		@Element(name = "firstName", required = false)
+		private String firstName;
+		@Element(name = "lastName", required = false)
+		private String lastName;
+		@Element(name = "phoneNumber", required = false)
+		private String phoneNumber;
+		@Element(name = "freeText", required = false)
+		private String freeText;
+		
+		private PresenceStatus status;
+		private Bitmap avatarImage;
+		
+		public Contact(String uri, String displayName){
+			this.uri = uri;
+			this.displayName = displayName;
+		}
+
+		public Contact(){
+			this(null, null);
+		}
+		
+		public String getUri(){
+			return this.uri;
+		}
+		
+		public void setUri(String  uri){
+			this.uri = uri;
+		}
+		
+		public String getDisplayName(){
+			return this.displayName;
+		}
+		
+		public void setDisplayName(String displayName){
+			this.displayName = displayName;
+		}
+		
+		public String getGroup(){
+			return this.group;
+		}
+		
+		public void setGroup(String group){
+			this.group = group;
+		}
+		
+		public String getFirstName(){
+			return this.firstName;
+		}
+		
+		public void setFirstName(String firstName){
+			this.firstName = firstName;
+		}
+		
+		public void setLastName(String lastName){
+			this.lastName = lastName;
+		}
+		
+		public String getLastName(){
+			return this.lastName;
+		}
+		
+		public void setPhoneNumber(String phoneNumber){
+			this.phoneNumber = phoneNumber;
+		}
+		
+		public String getPhoneNumber(){
+			return this.phoneNumber;
+		}
+		
+		public void setFreeText(String freeText){
+			this.freeText = freeText;
+		}
+		
+		public String getFreeText(){
+			return this.freeText;
+		}
+		
+		public void setStatus(PresenceStatus status){
+			this.status = status;
+		}
+		
+		public PresenceStatus getStatus(){
+			return this.status;
+		}
+		
+		public Bitmap getAvatar(){
+			return this.avatarImage;
+		}
+		
+		public void setAvatar(String base64String){
+			this.avatarImage = null;
+		}
+		
+		@Override
+		public int compareTo(Contact another) {
+			return this.uri.compareTo(another.uri);
+		}
 	}
 }

@@ -97,6 +97,7 @@ implements ISipService, tinyWRAPConstants {
 	private MySubscriptionSession subMwi;
 	private MySubscriptionSession subDebug;
 	private MyPublicationSession pubPres;
+	private final CopyOnWriteArrayList<MySubscriptionSession> subPres;
 	
 	private final SipPrefrences preferences;
 	private final DDebugCallback debugCallback;
@@ -116,6 +117,8 @@ implements ISipService, tinyWRAPConstants {
 
 		this.configurationService = ServiceManager.getConfigurationService();
 		this.networkService = ServiceManager.getNetworkService();
+		
+		this.subPres = new CopyOnWriteArrayList<MySubscriptionSession>();
 		
 		this.preferences = new SipPrefrences();
 	}
@@ -145,6 +148,28 @@ implements ISipService, tinyWRAPConstants {
 	
 	public byte[] getWinfo(){
 		return this.winfo;
+	}
+	
+	public MySubscriptionSession createPresenceSession(String toUri, EVENT_PACKAGE_TYPE eventPackage){
+		MySubscriptionSession session = new MySubscriptionSession(this.sipStack, toUri, eventPackage);
+		this.subPres.add(session);
+		return session;
+	}
+	
+	public void clearPresenceSessions(){
+		for(MySubscriptionSession session : this.subPres){
+			if(session.isConnected()){
+				session.unsubscribe();
+			}
+		}
+		//this.subPres.clear();
+	}
+	
+	public void removePresenceSession(MySubscriptionSession session){
+		if(session.isConnected()){
+			session.unsubscribe();
+		}
+		//this.subPres.remove(session);
 	}
 	
 	/* ===================== SIP functions ======================== */
@@ -513,8 +538,8 @@ implements ISipService, tinyWRAPConstants {
 					if(message == null){
 						return 0;
 					}
-					String contentType = message.getSipHeaderValue("c");
-					byte[] content = message.getSipContent();
+					final String contentType = message.getSipHeaderValue("c");
+					final byte[] content = message.getSipContent();
 					
 					if(content != null){
 						if(StringUtils.equals(contentType, ContentType.REG_INFO, true)){
@@ -526,6 +551,7 @@ implements ISipService, tinyWRAPConstants {
 						
 						SubscriptionEventArgs eargs = new SubscriptionEventArgs(SubscriptionEventTypes.INCOMING_NOTIFY, 
 								code, phrase, content, contentType);
+						eargs.putExtra("session", session);
 						this.sipService.onSubscriptionEvent(eargs);
 					}
 					break;
@@ -583,8 +609,19 @@ implements ISipService, tinyWRAPConstants {
 					else if(MyAVSession.getSession(session.getId()) != null){
 						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.CONNECTED, phrase)); 
 					}
-					// Subscription
 					// Publication
+					// Subscription
+					else{
+						for(MySubscriptionSession s : this.sipService.subPres){
+							if(s.getId() == session.getId()){
+								s.setConnected(true);
+								SubscriptionEventArgs eargs = new SubscriptionEventArgs(SubscriptionEventTypes.SUBSCRIPTION_OK, 
+										code, phrase, null, "null");
+								eargs.putExtra("session", s);
+								this.sipService.onSubscriptionEvent(eargs);
+							}
+						}
+					}
 					//..
 					break;
 					
@@ -610,7 +647,6 @@ implements ISipService, tinyWRAPConstants {
 								if(SipService.this.sipStack.getState() == STACK_STATE.STARTED){
 									SipService.this.sipStack.stop();
 								}
-								ServiceManager.getXcapService().unPrepare();
 							}
 						}).start();
 					}
@@ -622,8 +658,20 @@ implements ISipService, tinyWRAPConstants {
 					if(MyAVSession.getSession(session.getId()) != null){
 						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.DISCONNECTED, phrase)); 
 					}
-					// Subscription
 					// Publication
+					// Subscription
+					else{
+						for(MySubscriptionSession s : this.sipService.subPres){
+							if(s.getId() == session.getId()){
+								SubscriptionEventArgs eargs = new SubscriptionEventArgs(SubscriptionEventTypes.UNSUBSCRIPTION_OK, 
+										code, phrase, null, "null");
+								s.setConnected(false);
+								eargs.putExtra("session", s);
+								this.sipService.onSubscriptionEvent(eargs);
+								this.sipService.subPres.remove(s);
+							}
+						}
+					}
 					// ...
 					break;
 					

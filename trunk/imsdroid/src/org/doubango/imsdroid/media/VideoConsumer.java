@@ -199,6 +199,9 @@ public class VideoConsumer {
 					}
 				}
 			}
+			
+			VideoConsumer.this.buffers.clear();
+			
 			Log.d(VideoConsumer.TAG, "Drawer ===== STOP");
 		}
 	};

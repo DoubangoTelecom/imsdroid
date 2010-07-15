@@ -3,7 +3,7 @@
       package="org.doubango.imsdroid"
       android:versionCode="1"
       android:versionName="1.0">
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true" android:persistent="true">
         <activity android:name=".Main"
                   android:label="@string/app_name">
             <intent-filter>
@@ -47,6 +47,7 @@
 <activity android:name=".Screens.ScreenAV"></activity>
 
 <service android:name=".Sevices.Impl.ServiceManager" android:enabled="true"></service>
+<activity android:name=".Screens.ScreenContactEdit"></activity>
 </application>
 
     <uses-sdk android:minSdkVersion="3" />

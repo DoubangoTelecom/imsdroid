@@ -20,11 +20,11 @@
 */
 package org.doubango.imsdroid.Services;
 
-public interface IXcapService  extends IService{
-	
-	boolean prepare();
-	boolean unPrepare();
-	boolean isPrepared();
-	
-	void downloadContacts();
+import java.util.List;
+
+import org.doubango.imsdroid.Model.Group;
+import org.doubango.imsdroid.events.IXcapEventDispatcher;
+
+public interface IXcapService  extends IService, IXcapEventDispatcher{
+	List<Group> getGroups();
 }

@@ -199,7 +199,12 @@ implements IRegistrationEventHandler
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
-		return this.screenService.getCurrentScreen().onPrepareOptionsMenu(menu);
+		if(this.screenService.getCurrentScreen().haveMenu()){
+			return this.screenService.getCurrentScreen().onPrepareOptionsMenu(menu);
+		}
+		else{
+			return super.onPrepareOptionsMenu(menu);
+		}
 	}
 	
 	@Override

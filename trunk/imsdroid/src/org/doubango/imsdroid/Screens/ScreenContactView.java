@@ -22,7 +22,8 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Model.Contact;
+import org.doubango.imsdroid.Model.Group;
+import org.doubango.imsdroid.Model.Group.Contact;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 
@@ -36,7 +37,7 @@ import android.widget.TextView;
 
 public class ScreenContactView  extends Screen {
 
-	private static Contact contact;
+	private static Group.Contact contact;
 	
 	private Button btContacts;
 	private Button btEdit;
