@@ -24,10 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 
 
 @Root(name = "resource-lists", strict=false)
+@Namespace(reference = "urn:ietf:params:xml:ns:resource-lists")
 public class ResourceLists {
 
 	@ElementList(inline=true, required=false)

@@ -24,10 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 
 
 @Root(name = "rls-services", strict=false)
+@Namespace(reference = "urn:ietf:params:xml:ns:rls-services")
 public class RlsServices {
 
 	@ElementList(entry = "service", required=false, inline=true)

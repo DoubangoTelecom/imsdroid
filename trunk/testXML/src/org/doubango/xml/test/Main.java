@@ -9,6 +9,7 @@ package org.doubango.xml.test;
  */
 
 import oma.xml.xdm.xcap_directory.TestXcapDirectory;
+import ietf.params.xml.ns.pidf.TestPidf;
 import ietf.params.xml.ns.rls_services.TestRLS;
 import ietf.params.xml.ns.xcap_caps.TestXcapCaps;
 import android.app.Activity;
@@ -28,7 +29,7 @@ public class Main extends Activity {
         //TestXcapDirectory.run();
         
         /* rls-services */
-        TestRLS.run();
+        //TestRLS.run();
         /* resoource-lists */
         //TestResourceLists.run();
         
@@ -37,5 +38,8 @@ public class Main extends Activity {
         
         /* contacts */
         //TestContacts.run();
+        
+        /* Pidf */
+        TestPidf.run();
     }
 }

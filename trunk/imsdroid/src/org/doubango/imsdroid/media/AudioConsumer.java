@@ -33,13 +33,12 @@ public class AudioConsumer{
 	
 	private static String TAG = AudioConsumer.class.getCanonicalName();
 	private static int factor = 5;
-	//private static int streamType = AudioManager.STREAM_VOICE_CALL;
-	private static int streamType = AudioManager.STREAM_MUSIC;
+	private static int streamType = AudioManager.STREAM_VOICE_CALL;
+	//private static int streamType = AudioManager.STREAM_MUSIC;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
 	private final MyProxyAudioConsumer proxyAudioConsumer;
-	//private final Semaphore semaphore;
 	
 	private boolean running;
 	private AudioTrack track;
@@ -47,7 +46,6 @@ public class AudioConsumer{
 	
 	public AudioConsumer(){
 		this.proxyAudioConsumer = new MyProxyAudioConsumer(this);
-		//this.semaphore = new Semaphore(0);
 	}	
 
 	public void setActive(){
@@ -66,8 +64,6 @@ public class AudioConsumer{
 				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				(this.bufferSize * AudioConsumer.factor), AudioTrack.MODE_STREAM);
 		if(this.track.getState() == AudioTrack.STATE_INITIALIZED){
-			//this.track.setPositionNotificationPeriod(this.shorts_per_notif);
-			//this.track.setPlaybackPositionUpdateListener(this.playbackPositionUpdateListener);
 			return 0;
 		}
 		else{
@@ -99,26 +95,11 @@ public class AudioConsumer{
 		Log.d(AudioConsumer.TAG, "stop()");
 		if(this.track != null){
 			this.running = false;
-			//this.semaphore.release();
 			
 			return 0;
 		}
 		return -1;
 	}
-	
-//	private OnPlaybackPositionUpdateListener playbackPositionUpdateListener = new OnPlaybackPositionUpdateListener()
-//	{
-//		@Override
-//		public void onPeriodicNotification(AudioTrack track) {
-//			if(AudioConsumer.this.track != null){
-//				AudioConsumer.this.semaphore.release();
-//			}
-//		}
-//
-//		@Override
-//		public void onMarkerReached(AudioTrack track) {
-//		}
-//	};
 	
 	private Runnable runnablePlayer = new Runnable(){
 		@Override
@@ -128,18 +109,8 @@ public class AudioConsumer{
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO );
 			
 			AudioConsumer.this.track.play();
-			/* Mandatory in order to have first notifications 
-			 * FIXME: Why when we write bufferSize bytes (like we do in the recorder) the callback function is not called ?*/
-			//AudioConsumer.this.track.write(new byte[AudioConsumer.this.bufferSize*AudioConsumer.factor], 0, AudioConsumer.this.bufferSize*AudioConsumer.factor);
 			
-			while(AudioConsumer.this.running){
-				//try {
-				//	AudioConsumer.this.semaphore.acquire();
-				//} catch (InterruptedException e) {
-				//	e.printStackTrace();
-				//	break;
-				//}
-				
+			while(AudioConsumer.this.running){				
 				if(AudioConsumer.this.proxyAudioConsumer == null || AudioConsumer.this.track == null){
 					break;
 				}

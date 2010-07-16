@@ -253,6 +253,7 @@ implements IRegistrationEventHandler
 		
 		private ScreenHomeAdapter(ArrayList<ScreenHomeItem> items) {
 			this.items = items;
+			this.registered = ScreenHome.this.sipService.isRegistered();
 		}
 
 		private synchronized void setRegistered(boolean registered){

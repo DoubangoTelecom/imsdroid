@@ -112,7 +112,15 @@ public class ServiceManager  extends Service {
     private static void showNotification(int notifId, int drawableId, String tickerText) {
         // Set the icon, scrolling text and timestamp
         Notification notification = new Notification(drawableId, tickerText, System.currentTimeMillis());
-
+        switch(notifId){
+        	case NOTIF_REGISTRATION_ID:
+        		notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        		break;
+       		default:
+       			break;
+        }
+        
+        
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent contentIntent = PendingIntent.getActivity(ServiceManager.getMainActivity(), 0,
                 new Intent(ServiceManager.getMainActivity(), Main.class), 0);
@@ -207,6 +215,8 @@ public class ServiceManager  extends Service {
 		success &= ServiceManager.storageService.stop();
 		success &= ServiceManager.xcapService.stop();
 
+		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_REGISTRATION_ID);
+		
 		if(!success){
 			Log.e(ServiceManager.TAG, "Failed to stop services");
 		}

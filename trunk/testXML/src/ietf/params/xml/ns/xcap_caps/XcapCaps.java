@@ -25,9 +25,11 @@ import java.util.List;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 
 @Root(name = "xcap-caps", strict=false)
+@Namespace(reference = "urn:ietf:params:xml:ns:xcap-caps")
 public class XcapCaps {
 
     @Element(name="auids", required = false) // Should be required

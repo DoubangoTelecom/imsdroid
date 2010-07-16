@@ -28,6 +28,7 @@ import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 
 @Root(name="packages", strict=false)
+@Namespace(reference = "urn:ietf:params:xml:ns:rls-services")
 public class PackagesType {
 
     @ElementList(entry = "package", required=false, inline=true)

@@ -27,9 +27,11 @@ import java.util.List;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 
 @Root(name = "xcap-directory", strict = false)
+@Namespace(reference = "urn:oma:xml:xdm:xcap-directory")
 public class XcapDirectory {
 
 	@ElementList(entry = "folder", inline=true, required=false)

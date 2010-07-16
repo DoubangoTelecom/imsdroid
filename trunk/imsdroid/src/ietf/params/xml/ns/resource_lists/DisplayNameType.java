@@ -26,6 +26,7 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
 @Root(strict=false)
+@Namespace(reference = "urn:ietf:params:xml:ns:resource-lists")
 public class DisplayNameType {
 
     @Text(required=false)

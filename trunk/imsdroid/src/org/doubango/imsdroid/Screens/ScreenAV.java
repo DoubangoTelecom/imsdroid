@@ -165,9 +165,17 @@ implements ICallEventHandler {
 		if((item = menu.findItem(ScreenAV.MENU_HOLD_RESUME)) != null){
 			item.setTitle(this.localHold? "Resume" : "Hold").setIcon(this.localHold? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
 		}
+		
 		if((item = menu.findItem(ScreenAV.MENU_SEND_STOP_VIDEO)) != null){
-			item.setTitle(this.sendingVideo? "Stop Video" : "Send Video").setIcon(this.sendingVideo? R.drawable.video_stop_48 : R.drawable.video_start_48);
+			if(this.avSession != null && this.avSession.getMediaType() == MediaType.AudioVideo){
+				item.setTitle(this.sendingVideo? "Stop Video" : "Send Video").setIcon(this.sendingVideo? R.drawable.video_stop_48 : R.drawable.video_start_48);
+				item.setEnabled(true);
+			}
+			else{
+				item.setEnabled(false);
+			}
 		}
+		
 		return true;
 	}
 	
