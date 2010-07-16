@@ -8,9 +8,9 @@
 <RelativeLayout android:id="@+id/main_relativeLayout_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@color/main_relativeLayout_top_color" android:gravity="top">
 
 <RelativeLayout android:layout_height="wrap_content" android:id="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content">
-	<ImageView android:layout_height="wrap_content" android:id="@+id/main_imageView_avatar" android:layout_width="wrap_content" android:src="@drawable/android_48"></ImageView>
-	<TextView android:layout_height="wrap_content" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_displayname" android:layout_width="wrap_content" android:textColor="@color/white" android:textStyle="bold" android:ellipsize="end" android:text="John Doe"></TextView>
-	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/main_textView_displayname" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_freetext" android:text="Hello world" android:textColor="@color/white" android:textStyle="bold"></TextView>
+	<ImageView android:layout_height="wrap_content" android:id="@+id/main_imageView_avatar" android:layout_width="wrap_content" android:src="@drawable/android_48" android:background="@color/white"></ImageView>
+	<TextView android:layout_height="wrap_content" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_displayname" android:layout_width="wrap_content" android:textColor="@color/white" android:textStyle="bold" android:ellipsize="end" android:text="John Doe" android:layout_marginLeft="5px"></TextView>
+	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/main_textView_displayname" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_freetext" android:text="Hello world" android:textColor="@color/white" android:textStyle="bold" android:layout_marginLeft="5px"></TextView>
 </RelativeLayout>
 
 

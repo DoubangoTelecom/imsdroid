@@ -19,12 +19,16 @@
 
 <LinearLayout android:id="@+id/screen_av_linearLayout_video_remote" android:layout_width="fill_parent" android:background="@drawable/green_qcif" android:layout_height="fill_parent" android:layout_weight="9">
 </LinearLayout>
-<RelativeLayout android:layout_width="wrap_content" android:id="@+id/screen_av_relativeLayout_bottom" android:layout_height="54px" android:layout_weight="0">
 
-<TextView android:layout_below="@+id/screen_av_textView_time" android:id="@+id/screen_av_textView_remoteUri" android:text="In call with Alice since:" android:layout_alignParentLeft="true" android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView><TextView android:layout_height="wrap_content" android:id="@+id/screen_av_textView_time" android:textColor="@color/white" android:textStyle="bold" android:text="00:00:00" android:layout_below="@+id/screen_av_textView_remoteUri" android:textSize="20px" android:layout_alignParentLeft="true" android:layout_width="wrap_content"></TextView><LinearLayout android:id="@+id/screen_av_linearLayout_video_local" android:layout_height="48px" android:layout_width="58px" android:layout_alignParentRight="true" android:background="@color/white" android:padding="2px" android:layout_below="@+id/screen_av_linearLayout_video" android:layout_alignParentBottom="false"></LinearLayout>
+<LinearLayout android:layout_width="wrap_content" android:id="@+id/screen_av_linearLayout_bottom" android:layout_height="54px" android:layout_weight="0">
 
+<LinearLayout android:id="@+id/screen_av_linearLayout_video_local" android:layout_height="48px" android:layout_width="58px" android:layout_alignParentRight="true" android:background="@color/white" android:padding="2px" android:layout_below="@+id/screen_av_linearLayout_video" android:layout_alignParentBottom="false"></LinearLayout>
 
-</RelativeLayout>
+<LinearLayout android:orientation="vertical" android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_marginLeft="5px">
+<TextView android:layout_below="@+id/screen_av_textView_time" android:id="@+id/screen_av_textView_remoteUri" android:text="In call with Alice since:" android:layout_alignParentLeft="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textColor="@color/white"></TextView><TextView android:layout_height="wrap_content" android:id="@+id/screen_av_textView_time" android:textColor="@color/white" android:textStyle="bold" android:text="00:00:00" android:layout_below="@+id/screen_av_textView_remoteUri" android:layout_alignParentLeft="true" android:layout_width="wrap_content" android:textSize="25px"></TextView>
+</LinearLayout>
+
+</LinearLayout>
 </LinearLayout>
 
 

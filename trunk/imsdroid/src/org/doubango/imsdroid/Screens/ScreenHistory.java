@@ -119,6 +119,10 @@ implements IHistoryEventHandler
 		super.onDestroy();
 	}
 	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return true;
+	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

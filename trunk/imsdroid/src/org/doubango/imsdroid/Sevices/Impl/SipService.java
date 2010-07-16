@@ -128,6 +128,9 @@ implements ISipService, tinyWRAPConstants {
 	}
 
 	public boolean stop() {
+		if(this.sipStack != null && this.sipStack.getState() == STACK_STATE.STARTED){
+			this.sipStack.stop();
+		}
 		return true;
 	}
 
@@ -483,10 +486,10 @@ implements ISipService, tinyWRAPConstants {
 			if(this.pubPres == null){
 				this.pubPres = new MyPublicationSession(this.sipStack, this.preferences.impu);
 			}
-			else{
-				this.pubPres.setFromUri(this.preferences.impu);
-				this.pubPres.setToUri(this.preferences.impu);
-			}
+			
+			this.pubPres.setFromUri(this.preferences.impu);
+			this.pubPres.setToUri(this.preferences.impu);
+			
 			String freeText = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT);
 			PresenceStatus status = Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
 					CONFIGURATION_SECTION.RCS,

@@ -20,10 +20,23 @@
 */
 package org.doubango.imsdroid.Sevices.Impl;
 
+import ietf.params.xml.ns.pidf.Basic;
+import ietf.params.xml.ns.pidf.Note;
+import ietf.params.xml.ns.pidf.Presence;
+import ietf.params.xml.ns.pidf.Status;
+import ietf.params.xml.ns.pidf.Tuple;
+import ietf.params.xml.ns.pidf.data_model.NoteT;
+import ietf.params.xml.ns.pidf.data_model.Person;
+import ietf.params.xml.ns.pidf.rpid.Activities;
+import ietf.params.xml.ns.pidf.rpid.Activities.activity;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import oma.xml.prs.pidf.oma_pres.OverridingWillingness;
 
 import org.doubango.imsdroid.Model.AddressBook;
 import org.doubango.imsdroid.Model.Configuration;
@@ -41,12 +54,11 @@ import org.doubango.imsdroid.events.IXcapEventHandler;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.SubscriptionEventArgs;
 import org.doubango.imsdroid.events.XcapEventArgs;
-import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MySubscriptionSession;
+import org.doubango.imsdroid.sip.PresenceStatus;
 import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.imsdroid.utils.StringUtils;
-import org.doubango.imsdroid.xml.reginfo.Contact;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -240,6 +252,130 @@ public class ContactService  extends Service implements IContactService, IRegist
 					if(content == null){
 						return false;
 					}
+					
+					final Presence presence;
+					final String entity;
+					Person person = null;
+					Group.Contact contact = null;
+					String freeText = null;
+					PresenceStatus status = PresenceStatus.Offline;
+					
+					try {
+						presence = this.serializer.read(Presence.class, new String(content));
+					} catch (Exception e1) {
+						e1.printStackTrace();
+						return false;
+					}
+					
+					if(presence == null || (entity = presence.getEntity()) == null){
+						Log.e(ContactService.TAG, "Invalid Pidf document");
+						return false;
+					}
+					
+					Date timeStamp = null;
+					for(Person p : presence.getPersons()){
+						if(timeStamp == null || (p.getTimestamp() != null && p.getTimestamp().compareTo(timeStamp)>0)){
+							person = p;
+							timeStamp = p.getTimestamp();
+						}
+					}
+					
+					for(Group g : this.addressBook.getGroups()){
+						if((contact = g.getContact(entity)) != null){
+							break;
+						}
+					}
+					if(contact == null){
+						return false;
+					}
+					
+					if(person == null){
+						if(!presence.getTuple().isEmpty()){
+							Tuple tuple =  presence.getTuple().get(0);
+							if(tuple != null){
+								final Note note = tuple.getNote().isEmpty() ? null : tuple.getNote().get(0);
+								final Status s = tuple.getStatus();
+								if(note != null){
+									freeText = note.getValue();
+								}
+								if(s != null){
+									status = (s.getBasic() == Basic.open) ? PresenceStatus.Online : PresenceStatus.Offline;
+								}
+							}
+						}
+					}
+					else{
+						final OverridingWillingness overridingWillingness = person.getOverridingWillingness();
+						final Activities activities = person.getActivities();
+						
+						if(overridingWillingness != null){
+							// FIXME
+						}
+						
+						if(activities != null && !activities.getAppointmentOrAwayOrBreakfast().isEmpty()){
+							final activity activity = activities.getAppointmentOrAwayOrBreakfast().get(0);
+							
+							switch(activity.getType()){
+								case busy:
+									status = PresenceStatus.Busy;
+									break;
+									
+								case worship:
+								case working:
+								case playing:
+								case appointment:
+								case presentation:
+								case meeting:
+								case shopping:
+								case sleeping:
+								case in_transit:
+								case breakfast:
+								case meal:						
+								case dinner:
+								case vacation:
+									status = PresenceStatus.BeRightBack;
+									break;
+									
+								case on_the_phone:
+									status = PresenceStatus.OnThePhone;
+									break;
+									
+								case tv:
+								case travel:
+								case away:
+								case permanent_absence:
+								case holiday:				
+									status = PresenceStatus.Away;
+									break;
+														
+								case other:								
+								case looking_for_work:
+								case steering:
+								case spectator:
+								case performance:
+								default:
+									break;
+							}
+						}
+						
+						// FIXME: avatar
+						// FIXME
+						
+						if(!person.getNote().isEmpty()){
+							final NoteT note = person.getNote().get(0);
+							if(note != null){
+								freeText = note.getValue();
+							}
+						}
+					}
+					
+					contact.setStatus(status);
+					if(freeText != null){
+						contact.setFreeText(freeText);
+					}
+					final ContactsEventArgs eargs = new ContactsEventArgs(ContactsEventTypes.CONTACT_CHANGED);
+					eargs.putExtra("contact", contact);
+					ContactService.this.onContactsEvent(eargs);
 				}
 				break;
 				

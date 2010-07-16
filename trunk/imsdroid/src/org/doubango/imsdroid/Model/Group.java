@@ -29,7 +29,6 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Version;
 
 import android.graphics.Bitmap;
 
@@ -64,6 +63,17 @@ public class Group implements Comparable<Group> {
         	contacts = new ArrayList<Group.Contact>();
         }
         return this.contacts;
+    }
+    
+    public Group.Contact getContact(String uri) {
+        if (this.contacts != null) {
+        	for(Group.Contact contact : this.contacts){
+        		if(contact.getUri().equalsIgnoreCase(uri)){
+        			return contact;
+        		}
+        	}
+        }
+        return null;
     }
 
 	public String getName(){
@@ -110,6 +120,7 @@ public class Group implements Comparable<Group> {
 		public Contact(String uri, String displayName){
 			this.uri = uri;
 			this.displayName = displayName;
+			this.status = PresenceStatus.Offline;
 		}
 
 		public Contact(){

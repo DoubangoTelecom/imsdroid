@@ -20,7 +20,7 @@
 */
 package org.doubango.imsdroid.events;
 
-public class ContactsEventArgs {
+public class ContactsEventArgs extends EventArgs{
 	private final ContactsEventTypes type;
 	
 	public ContactsEventArgs(ContactsEventTypes type){

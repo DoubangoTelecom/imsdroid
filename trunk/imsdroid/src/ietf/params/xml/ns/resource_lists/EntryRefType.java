@@ -22,10 +22,12 @@ package ietf.params.xml.ns.resource_lists;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 
 
 @Root(name="entry-ref", strict=false)
+@Namespace(reference = "urn:ietf:params:xml:ns:resource-lists")
 public class EntryRefType {
 
     @Element(name = "display-name")

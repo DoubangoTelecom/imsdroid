@@ -37,15 +37,13 @@ public class AudioProducer {
 	private int bufferSize;
 	private int shorts_per_notif;
 	private final MyProxyAudioProducer proxyAudioProducer;
-	//private final Semaphore semaphore;
-	
+
 	private boolean running;
 	private AudioRecord recorder;
 	private ByteBuffer chunck;
 	
 	public AudioProducer(){
 		this.proxyAudioProducer = new MyProxyAudioProducer(this);
-		//this.semaphore = new Semaphore(0);
 	}
 	
 	public void setActive(){
@@ -62,8 +60,6 @@ public class AudioProducer {
 				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT, (this.bufferSize * AudioProducer.factor));
 		if(this.recorder.getState() == AudioRecord.STATE_INITIALIZED){
-			//this.recorder.setPositionNotificationPeriod(this.shorts_per_notif);
-			//this.recorder.setRecordPositionUpdateListener(this.recordPositionUpdateListener);
 			return 0;
 		}
 		else{
@@ -92,25 +88,10 @@ public class AudioProducer {
 		Log.d(AudioProducer.TAG, "stop()");
 		if(this.recorder != null){
 			this.running = false;
-			//this.semaphore.release();
 			return 0;
 		}
 		return -1;
 	}
-	
-//	private OnRecordPositionUpdateListener recordPositionUpdateListener = new OnRecordPositionUpdateListener()
-//	{
-//		@Override
-//		public void onPeriodicNotification(AudioRecord recorder) {
-//			if(AudioProducer.this.recorder != null){
-//				AudioProducer.this.semaphore.release();
-//			}
-//		}
-//		
-//		@Override
-//		public void onMarkerReached(AudioRecord recorder) {
-//		}
-//	};
 	
 	private Runnable runnableRecorder = new Runnable(){
 		@Override
@@ -120,16 +101,8 @@ public class AudioProducer {
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
 			AudioProducer.this.recorder.startRecording();
-			/* Mandatory in order to have first notifications */
-			//AudioProducer.this.recorder.read(new byte[AudioProducer.this.bufferSize], 0, AudioProducer.this.bufferSize);
 			
 			while(AudioProducer.this.running){
-				//try {
-					//AudioProducer.this.semaphore.acquire();
-				//} catch (InterruptedException e) {
-				//	e.printStackTrace();
-				//	break;
-				//}
 				
 				if(AudioProducer.this.proxyAudioProducer == null || AudioProducer.this.recorder == null){
 					break;

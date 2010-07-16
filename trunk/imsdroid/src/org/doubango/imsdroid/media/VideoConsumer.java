@@ -159,7 +159,7 @@ public class VideoConsumer {
 			Bitmap bitmap = Bitmap.createBitmap(VideoConsumer.this.width, VideoConsumer.this.height, Bitmap.Config.RGB_565);
 			IntBuffer buffer;
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_LESS_FAVORABLE);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
 			
 			while(VideoConsumer.this.running){
 				try {

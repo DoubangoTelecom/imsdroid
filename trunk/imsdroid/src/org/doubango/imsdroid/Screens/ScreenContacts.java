@@ -21,21 +21,19 @@
 
 package org.doubango.imsdroid.Screens;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Group;
-import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
-import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.events.ContactsEventArgs;
 import org.doubango.imsdroid.events.IContactsEventHandler;
+import org.doubango.imsdroid.media.MediaType;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,6 +51,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -188,19 +187,19 @@ implements IContactsEventHandler
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-//		Contact contact = null;
-//		
-//		if((contact = this.adapter.getContact(((AdapterContextMenuInfo) item.getMenuInfo()).position)) == null){ /* should never happen ...but who know? */
-//			return super.onContextItemSelected(item);
-//		}
-//		
-//		switch(item.getItemId()){
-//			case ScreenContacts.MENU_VOICE_CALL:
-//				Toast.makeText(this, "Make Voice Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-//				return true;
-//			case ScreenContacts.MENU_VISIO_CALL:
-//				Toast.makeText(this, "Make Visio Call: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-//				return true;
+		Group.Contact contact = null;
+		
+		if((contact = this.adapter.getContact(((AdapterContextMenuInfo) item.getMenuInfo()).position)) == null){ /* should never happen ...but who know? */
+			return super.onContextItemSelected(item);
+		}
+		
+		switch(item.getItemId()){
+			case ScreenContacts.MENU_VOICE_CALL:
+				ScreenAV.makeCall(contact.getUri(), MediaType.Audio);
+				break;
+			case ScreenContacts.MENU_VISIO_CALL:
+				ScreenAV.makeCall(contact.getUri(), MediaType.AudioVideo);
+				return true;
 //			case ScreenContacts.MENU_SEND_MESSAGE:
 //				Toast.makeText(this, "Send Short Message: " + contact.getUri(), Toast.LENGTH_SHORT).show();
 //				return true;
@@ -216,9 +215,8 @@ implements IContactsEventHandler
 //			case ScreenContacts.MENU_CONFERENCE:
 //				Toast.makeText(this, "Start Conference: " + contact.getUri(), Toast.LENGTH_SHORT).show();
 //				return true;
-//			default:
-//				return true;
-//		}
+
+		}
 		
 		return true;
 	}
@@ -273,6 +271,7 @@ implements IContactsEventHandler
 		switch(e.getType()){
 			case CONTACTS_LOADED:
 			case CONTACT_ADDED:
+			case CONTACT_CHANGED:
 				this.handler.post(new Runnable(){
 					public void run() {
 						final List<Group>groups = ScreenContacts.this.contactService.getContacts();
@@ -340,9 +339,9 @@ implements IContactsEventHandler
 			return null;
 		}
 		
-		public Group getGroup(int position){
+		public Group.Contact getContact(int position){
 			if(this.getCount() > position){
-				return this.items.get(position);
+				return this.contacts.get(position);
 			}
 			return null;
 		}
@@ -364,6 +363,7 @@ implements IContactsEventHandler
 			}
 
 			ImageView ivAvatar = (ImageView) view.findViewById(R.id.screen_contacts_item_imageView_avatar);
+			ImageView ivStatus = (ImageView) view.findViewById(R.id.screen_contacts_item_imageView_status);
 			TextView tvUri = (TextView) view.findViewById(R.id.screen_contacts_item_textViewUri);
 			TextView tvDisplayName = (TextView) view.findViewById(R.id.screen_contacts_item_textView_displayname);
 			TextView tvFreeText = (TextView) view.findViewById(R.id.screen_contacts_item_textView_freetext);
@@ -386,6 +386,31 @@ implements IContactsEventHandler
 			}
 			else{
 				tvFreeText.setText("");
+			}
+			
+			switch(contact.getStatus()){
+				case Online:
+					ivStatus.setImageResource(R.drawable.user_online_24);
+					break;
+				case Busy:
+					ivStatus.setImageResource(R.drawable.user_busy_24);
+					break;
+				case Away:
+					ivStatus.setImageResource(R.drawable.user_time_24);
+					break;
+				case BeRightBack:
+					ivStatus.setImageResource(R.drawable.user_back_24);
+					break;
+				case OnThePhone:
+					ivStatus.setImageResource(R.drawable.user_onthephone_24);
+					break;
+				case HyperAvail:
+					ivStatus.setImageResource(R.drawable.user_hyper_avail_24);
+					break;
+				case Offline:
+				default:
+					ivStatus.setImageResource(R.drawable.user_offline_24);
+					break;
 			}
 
 			return view;

@@ -94,7 +94,7 @@ public class MyPublicationSession  extends MySipSession{
 				activity = "vacation";
 				break;
 			case OnThePhone:
-				activity = "onthephone";
+				activity = "on-the-phone";
 				break;
 			case Offline:
 				basic = "close";
