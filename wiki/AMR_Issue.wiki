@@ -11,4 +11,4 @@ If you want to use AMR, it's up to you to activate the plugin as follow:<br />
       <entry key="CODECS" value="32"/>
    </section>
 }}}
- *32* is just an example and don't take care about.
+*32* is just an example and don't take care about.
