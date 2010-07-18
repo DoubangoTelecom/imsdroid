@@ -1,7 +1,7 @@
 #summary AMR Licensing Issue.
 #labels AMR_Issue,opencore_amr,VoiceAgeCorporation,License_Issue
 
-The AMR codec plugin is based on [http://sourceforge.net/projects/opencore-amr/ opencore-amr] which is licensed under the Apache License V2.0. However, AFAIK AMR itself is a patented audio data compression (by VoiceAge Corporation) and you should pay a fee in order to use the encoder (not the case for the decoder). Most Android devices AMR Narrow band encoder/decoder and the question is: *Is it possible possible to using AMR codec in a free project running on Android device?*<br /><br />
+The AMR codec plugin is based on [http://sourceforge.net/projects/opencore-amr/ opencore-amr] which is licensed under *The Apache License V2.0*. However, AFAIK AMR itself is a patented audio data compression (by VoiceAge Corporation) and you should pay a fee in order to use the encoder (not the case for the decoder). Most Android devices natively include AMR Narrow band encoder/decoder and the question is: *Is it possible to use AMR codec in a free project running on Android device?*<br /><br />
 As I'm not a lawyer, I decided to deactivated the AMR encoder/decoder in the application. <br />
 If you want to use AMR, it's up to you to activate the plugin as follow:<br />
 For information, codecs are declared like this: <br />
@@ -32,11 +32,11 @@ typedef enum tdav_codec_id_e
 }
 tdav_codec_id_t;
 }}}
-1- Open (from your device or emulator) the configuration file (under */data/data/org.doubango.imsdroid/configuration.xml*)<br />
-2- Add (if missing) a *MEDIA* section with a *CODECS* like this: <br />
+1- Open the configuration file (under */data/data/org.doubango.imsdroid/configuration.xml*)<br />
+2- Add (if missing) a *MEDIA* section with a *CODECS* entry like this: <br />
 {{{
    <section name="MEDIA">
       <entry key="CODECS" value="32"/>
    </section>
 }}}
-*32* is just an example and don't take care about if you have something else. As mentioned above, AMR-NB-OA codec value is equal to *1*(0x00000001<<0) and AMR-NB-BE to *2* (0x00000001<<1). To activate both AMR-NB-OA and AMR-NB-BE you should do a binary *OR* on the *CODECS*'s *value* which give you *35* (32 | 1 | 2).
+*32* is just an example and you can have any intefger (from 0 to 0xFFFFFFFF). As mentioned above, AMR-NB-OA codec value is equal to *1*(0x00000001<<0) and AMR-NB-BE to *2* (0x00000001<<1). To activate both AMR-NB-OA and AMR-NB-BE you should do a binary *OR* on the *CODECS*'s *value* which give you *35* (32 | 1 | 2).
