@@ -1,1 +1,7 @@
 #summary Commercial License
+#labels Commercial,non_GPL
+
+[http://code.google.com/p/imsdroid/ IMSDroid] is a free software licensed under the GNU GPLv3 license terms. As far as the commercial product based on IMSDroid or [http://doubango.org doubango] isn't a closed-source software, there is no license violation. However, if your commercial product is a closed-source software and you want to keep it closed, then you should get a non-GPL license. <br />
+We provided a non-GPL version of all components used in both [http://code.google.com/p/imsdroid/ IMSDroid] and [http://doubango.org doubango] except for [http://www.videolan.org/developers/x264.html x264]. <br /> 
+
+For more information, please send me a mail at *diopmamadou(at)doubango.org* <br />
