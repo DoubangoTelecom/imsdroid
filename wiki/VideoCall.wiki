@@ -1,2 +1,7 @@
 #summary Video Call
 
+== Supported Video Codecs ==
+ * H.264 (Base Profile 1.0, 2.0 and 3.0)
+ * Theora
+ * H.263, H.263-1998, H.23-2000 
+ * H.261
