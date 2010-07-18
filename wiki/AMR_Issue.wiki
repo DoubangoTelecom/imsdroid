@@ -1,5 +1,5 @@
+#summary AMR Licensing Issue.
 #labels AMR_Issue,opencore_amr,VoiceAgeCorporation,License_Issue
-#AMR Licensing Issue.
 
 The AMR codec plugin is based on [http://sourceforge.net/projects/opencore-amr/ opencore-amr] which is licensed under the Apache License V2.0. However, AFAIK AMR itself is a patented audio data compression (by VoiceAge Corporation) and you should pay a fee in order to use the encoder (not the case for the decoder). Most Android devices AMR Narrow band encoder/decoder and the question is: *Is it possible ...*<br /><br />
 As I'm not a lawyer, I decided to deactivated the AMR encoder/decoder in the application. <br />
