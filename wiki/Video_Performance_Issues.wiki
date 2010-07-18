@@ -6,5 +6,5 @@ The Video Producer plugin use [http://developer.android.com/reference/android/ha
 A workaround is to use [http://developer.android.com/reference/android/hardware/Camera.html addCallbackBuffer] function. Unfortunately this function is only available starting API level 8 and we cannot use it as we target Android platform version 1.5 (API level 3) and later. 
 
 == Full Screen ==
-By default Surface view displaying the video sent by the remote party is displayed "AS IS" without being re-sized for performance reasons. <br />
+By default, for performance reasons, Surface view displaying the video sent by the remote party is displayed "AS IS" without being re-sized. <br />
 If you'd like to have the full screen mode, then you should enable it by checking the appropriate checkbox in "Options -> General -> Enable Full Screen Video" <br />
