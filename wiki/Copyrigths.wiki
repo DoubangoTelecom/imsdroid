@@ -1,5 +1,10 @@
 #summary Copyrights
+#labels Copyrights,thirdparties,license
 
 IMSDroid uses the following Third Party Libraries: <br />
 
  * [http://www.doubango.org/ doubango 3GPP IMS/LTE Framework] under [http://www.gnu.org/licenses/gpl.html GPL] license
+ * [http://www.ffmpeg.org/ FFmpeg] under [http://www.gnu.org/licenses/gpl.html GPL] license
+ * [http://www.videolan.org/developers/x264.html x264] under [http://www.gnu.org/licenses/gpl.html GPL] license
+ * [http://www.theora.org Theora] under BSD-style license
+ * [http://www.speex.org/ Speex] under the [http://www.xiph.org/licenses/bsd/speex/ revised BSD] license 
