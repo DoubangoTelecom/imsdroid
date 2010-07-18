@@ -5,9 +5,3 @@
  * Theora
  * H.263, H.263-1998, H.23-2000 
  * H.261
-
-== Full Screen ==
-
-== Performance Issue ==
-The Video Producer plugin use [http://developer.android.com/reference/android/hardware/Camera.PreviewCallback.html PreviewCallback] class and override onPreviewFrame(byte[] _data, Camera _camera) function to have access to the current preview frame. The problem with this function is that it will copy each frame in a newly allocated memory which gives poor performance results. This is discussed here [http://code.google.com/p/android/issues/detail?id=2794 http://code.google.com/p/android/issues/detail?id=2794].<br />
-A workaround is to use [http://developer.android.com/reference/android/hardware/Camera.html addCallbackBuffer] function. Unfortunately this function is only available starting API level 8 and we cannot use it as we target Android platform version 1.5 (API level 3) and later. 
