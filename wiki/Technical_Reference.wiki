@@ -1,7 +1,7 @@
 #summary Technical Reference
 #labels Technical,3GPP,IETF,RCS
 
-* SIP (RFC 3261, 3GPP TS 24.229 Rel-9)
+ * SIP (RFC 3261, 3GPP TS 24.229 Rel-9)
  * 3GPP IMS-AKA (RFC 3310, 3GPP TS 33.203, 35.205, 35.206, 35.207, 35.208 and 35.909) with possibilities to activate Early IMS Security (3GPP TS 33.978) for non IMS Registrar
  * Private extension headers for 3GPP
  * Service-Route Discovery (RFC 3608)
