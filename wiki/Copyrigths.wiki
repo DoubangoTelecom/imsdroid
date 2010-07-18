@@ -1,0 +1,5 @@
+#summary Copyrights
+
+IMSDroid uses the following Third Party Libraries: <br />
+
+ * [http://www.doubango.org/ doubango 3GPP IMS/LTE Framework] under [http://www.gnu.org/licenses/gpl.html GPL] license
