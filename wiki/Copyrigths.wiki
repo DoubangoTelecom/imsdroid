@@ -8,3 +8,4 @@ IMSDroid uses the following Third Party Libraries: <br />
  * [http://www.videolan.org/developers/x264.html x264] under [http://www.gnu.org/licenses/gpl.html GPL] license
  * [http://www.theora.org Theora] under BSD-style license
  * [http://www.speex.org/ Speex] under the [http://www.xiph.org/licenses/bsd/speex/ revised BSD] license 
+ * [http://simple.sourceforge.net/ Simple XML] under ...
