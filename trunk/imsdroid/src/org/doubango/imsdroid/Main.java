@@ -46,9 +46,13 @@
  */
 package org.doubango.imsdroid;
 
+import java.io.File;
+
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenPresence;
 import org.doubango.imsdroid.Services.IConfigurationService;
@@ -65,6 +69,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -158,6 +164,19 @@ implements IRegistrationEventHandler
 						CONFIGURATION_ENTRY.STATUS,
 						Configuration.DEFAULT_RCS_STATUS.toString()))));
         
+       String avatarPath = String.format("%s/%s", ServiceManager.getStorageService().getCurrentDir(), "/avatar.png");
+       if(new File(avatarPath).exists()){
+    	   this.ivAvatar.setImageURI(new Uri.Builder().path(avatarPath).build());
+       }
+       // try {
+        //	   FileOutputStream fos = super.openFileOutput("avatar.png", MODE_WORLD_READABLE);
+       // 	   mBitmap.compress(CompressFormat.JPEG, 75, fos);
+        //	   fos.flush();
+       // 	   fos.close();
+      //  	   } catch (Exception e) {
+      //  	   Log.e("MyLog", e.toString());
+      //  	}
+
         // set event listeners
         this.ivStatus.setOnClickListener(this.ivStatus_OnClickListener);
         
@@ -166,8 +185,12 @@ implements IRegistrationEventHandler
         
         /* shows the home screen */
         this.screenService.show(ScreenHome.class);
+        
+        //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
+    @Override
 	protected void onDestroy() {
         // remove event handlers : do it after stop() to continue to receive Sip events
         this.sipService.removeRegistrationEventHandler(this);
@@ -178,6 +201,7 @@ implements IRegistrationEventHandler
         super.onDestroy();
 	}
 	
+	@Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			this.screenService.back();
@@ -211,7 +235,30 @@ implements IRegistrationEventHandler
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return this.screenService.getCurrentScreen().onOptionsItemSelected(item);
 	}
-    
+
+	@Override
+	protected void onNewIntent(Intent intent) {		
+		Bundle bundle = intent.getExtras();
+		String ID = null;
+		if(bundle != null){
+			ID = bundle.getString("SCREEN_ID");
+		}
+		
+		if(ID != null){
+			// FIXME
+			if(ID.equals(ScreenHistory.class.getCanonicalName())){
+				this.screenService.show(ScreenHistory.class);
+			}
+			else{
+				this.screenService.show(ID);
+			}
+		}
+		
+		setIntent(intent);
+		super.onNewIntent(intent);
+	}
+	
+	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString("SCREEN_ID", this.screenService.getCurrentScreen().getId().toString());
 		outState.putString("progressInfoText", this.progressInfoText);
@@ -219,6 +266,7 @@ implements IRegistrationEventHandler
 		super.onSaveInstanceState(outState);
 	}
 	
+	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		String ID = savedInstanceState.getString("SCREEN_ID");
@@ -273,7 +321,6 @@ implements IRegistrationEventHandler
 	
 	
     /* ===================== Sip Events ========================*/
-	
 	public boolean onRegistrationEvent(Object sender, RegistrationEventArgs e) {
 		Log.i(this.getClass().getName(), "onRegistrationEvent");
 		

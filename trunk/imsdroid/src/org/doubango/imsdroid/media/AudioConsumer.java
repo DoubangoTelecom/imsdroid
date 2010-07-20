@@ -33,8 +33,8 @@ public class AudioConsumer{
 	
 	private static String TAG = AudioConsumer.class.getCanonicalName();
 	private static int factor = 5;
-	private static int streamType = AudioManager.STREAM_VOICE_CALL;
-	//private static int streamType = AudioManager.STREAM_MUSIC;
+	//private static int streamType = AudioManager.STREAM_VOICE_CALL;
+	private static int streamType = AudioManager.STREAM_MUSIC;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
@@ -106,21 +106,26 @@ public class AudioConsumer{
 		public void run() {
 			Log.d(AudioConsumer.TAG, "Audio Player ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO );
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
 			AudioConsumer.this.track.play();
+			final byte[] bytes = new byte[AudioConsumer.this.chunck.capacity()];
+			final byte[] silence = new byte[bytes.length];
 			
 			while(AudioConsumer.this.running){				
-				if(AudioConsumer.this.proxyAudioConsumer == null || AudioConsumer.this.track == null){
+				if(AudioConsumer.this.track == null){
 					break;
 				}
 				
-				final long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, AudioConsumer.this.chunck.capacity());			
-				final byte[] bytes = new byte[AudioConsumer.this.chunck.capacity()];		
+				final long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, bytes.length);				
 				if(sizeInBytes >0){ /* Otherwise it's silence */
 					AudioConsumer.this.chunck.get(bytes);
+					AudioConsumer.this.track.write(bytes, 0, bytes.length);
 				}
-				AudioConsumer.this.track.write(bytes, 0, bytes.length);
+				else{
+					AudioConsumer.this.track.write(silence, 0, silence.length);
+				}
+				
 				AudioConsumer.this.chunck.rewind();
 			}
 			

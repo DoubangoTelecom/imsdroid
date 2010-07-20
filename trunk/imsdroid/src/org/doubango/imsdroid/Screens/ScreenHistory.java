@@ -26,8 +26,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.doubango.imsdroid.R;
+import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.Model.HistoryEvent;
+import org.doubango.imsdroid.Model.HistorySMSEvent;
 import org.doubango.imsdroid.Services.IConfigurationService;
+import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.events.HistoryEventArgs;
@@ -44,12 +47,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class ScreenHistory  extends Screen
 implements IHistoryEventHandler 
@@ -57,6 +62,7 @@ implements IHistoryEventHandler
 
 	private final IConfigurationService configurationService;
 	private final IHistoryService historytService;
+	private final IContactService contactService;
 	
 	private final Handler handler;
 	
@@ -80,6 +86,7 @@ implements IHistoryEventHandler
 		// services
 		this.configurationService = ServiceManager.getConfigurationService();
 		this.historytService = ServiceManager.getHistoryService();
+		this.contactService = ServiceManager.getContactService();
 		
 		this.handler = new Handler();
 	}
@@ -95,6 +102,7 @@ implements IHistoryEventHandler
 		this.gridView = (GridView) this.findViewById(R.id.screen_history_gridView);
 		this.gridView.setAdapter(this.adapter);
 		this.registerForContextMenu(this.gridView);
+		this.gridView.setOnItemClickListener(this.gridView_OnItemClickListener);
 		
 		// add event handler
 		this.historytService.addHistoryEventHandler(this);
@@ -183,25 +191,25 @@ implements IHistoryEventHandler
 		
 		switch(item.getItemId()){
 			case ScreenHistory.MENU_VOICE_CALL:
-				ScreenAV.makeCall(event.getRemotePrty(), MediaType.Audio);
+				ScreenAV.makeCall(event.getRemoteParty(), MediaType.Audio);
 				return true;
 			case ScreenHistory.MENU_VISIO_CALL:
-				ScreenAV.makeCall(event.getRemotePrty(), MediaType.AudioVideo);
+				ScreenAV.makeCall(event.getRemoteParty(), MediaType.AudioVideo);
 				return true;
-			case ScreenHistory.MENU_SEND_MESSAGE:
-				Toast.makeText(this, "Send Short Message: " + event.getRemotePrty(), Toast.LENGTH_SHORT).show();
-				return true;
+			//case ScreenHistory.MENU_SEND_MESSAGE:
+			//	Toast.makeText(this, "Send Short Message: " + event.getRemotePrty(), Toast.LENGTH_SHORT).show();
+			//	return true;
 			case ScreenHistory.MENU_SEND_SMS:
-				Toast.makeText(this, "Send SMS: " + event.getRemotePrty(), Toast.LENGTH_SHORT).show();
+				ScreenSMSCompose.sendSMS(event.getRemoteParty());
 				return true;
 			case ScreenHistory.MENU_SEND_FILE:
-				Toast.makeText(this, "Send File: " + event.getRemotePrty(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Send File: " + event.getRemoteParty(), Toast.LENGTH_SHORT).show();
 				return true;
 			case ScreenHistory.MENU_START_CHAT:
-				Toast.makeText(this, "Start Chat: " + event.getRemotePrty(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Start Chat: " + event.getRemoteParty(), Toast.LENGTH_SHORT).show();
 				return true;
 			case ScreenHistory.MENU_CONFERENCE:
-				Toast.makeText(this, "Start Conference: " + event.getRemotePrty(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Start Conference: " + event.getRemoteParty(), Toast.LENGTH_SHORT).show();
 				return true;
 				
 				
@@ -226,6 +234,16 @@ implements IHistoryEventHandler
 				return super.onContextItemSelected(item);
 		}
 	}
+	
+	private OnItemClickListener gridView_OnItemClickListener = new OnItemClickListener(){
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			final HistoryEvent event = ScreenHistory.this.adapter.getEvent(position);
+			if(event != null && event.getMediaType() == MediaType.SMS && event instanceof HistorySMSEvent){
+				ScreenSMSView.showSMS((HistorySMSEvent)event);
+			}
+		}
+	};
 	
 	/* ===================== IScreen (Screen) ======================== */
 	@Override
@@ -277,7 +295,7 @@ implements IHistoryEventHandler
 		}
 
 		public Object getItem(int position) {
-			return null;
+			return (this.items.size() >position ? this.items.get(position) : null);
 		}
 		
 		public HistoryEvent getEvent(int position){
@@ -309,18 +327,58 @@ implements IHistoryEventHandler
 			
 			switch(event.getStatus()){
 				case Outgoing:
-					imageView.setImageResource(R.drawable.call_outgoing_45);
+					switch(event.getMediaType()){
+						case Audio:
+						case AudioVideo:
+							imageView.setImageResource(R.drawable.call_outgoing_45);
+						break;
+						case SMS:
+							imageView.setImageResource(R.drawable.sms_out_45);
+						break;
+					}
 					break;
 				case Incoming:
-					imageView.setImageResource(R.drawable.call_incoming_45);
+					switch(event.getMediaType()){
+						case Audio:
+						case AudioVideo:
+							imageView.setImageResource(R.drawable.call_incoming_45);
+							break;
+						case SMS:
+							imageView.setImageResource(R.drawable.sms_into_45);
+						break;
+					}
+					break;
+				case Failed:
+					switch(event.getMediaType()){
+						case Audio:
+						case AudioVideo:
+							break;
+						case SMS:
+							imageView.setImageResource(R.drawable.sms_error_45);
+						break;
+					}
 					break;
 				case Missed:
-					imageView.setImageResource(R.drawable.call_missed_45);
+					switch(event.getMediaType()){
+						case Audio:
+						case AudioVideo:
+							imageView.setImageResource(R.drawable.call_missed_45);
+							break;
+						case SMS:
+						break;
+					}
 					break;
 			}
 			
-			if(event.getRemotePrty() != null){
-				tvRemoteUri.setText(event.getRemotePrty());
+			final String remoteParty = event.getRemoteParty();
+			if(remoteParty != null){
+				final Group.Contact contact = ScreenHistory.this.contactService.getContact(remoteParty);
+				if(contact != null && contact.getDisplayName() != null){
+					tvRemoteUri.setText(contact.getDisplayName());
+				}
+				else{
+					tvRemoteUri.setText(event.getRemoteParty());
+				}
 			}
 			
 			tvDate.setText(this.dateFormat.format(new Date(event.getStartTime())));

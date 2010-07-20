@@ -3,5 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
-<DatePicker android:id="@+id/DatePicker01" android:layout_width="wrap_content" android:layout_height="wrap_content"></DatePicker>
+
+<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_general_checkBox_autoStart" android:text="Launch when sytem starts"></CheckBox>
+<CheckBox android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/screen_general_checkBox_autoStart" android:text="Enable Video Full-Screen Mode" android:id="@+id/screen_general_checkBox_fullscreen"></CheckBox>
 </RelativeLayout>

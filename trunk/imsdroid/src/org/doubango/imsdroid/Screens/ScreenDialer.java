@@ -92,6 +92,7 @@ public class ScreenDialer extends Screen {
 	private OnClickListener ibMessage_OnClickListener = new OnClickListener(){
 		@Override
 		public void onClick(View v) {
+			ScreenSMSCompose.sendSMS(ScreenDialer.this.etAddress.getText().toString());
 		}
 	};
 	

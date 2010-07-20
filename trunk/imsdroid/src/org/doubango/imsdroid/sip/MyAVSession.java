@@ -22,6 +22,11 @@ package org.doubango.imsdroid.sip;
 
 import java.util.HashMap;
 
+import org.doubango.imsdroid.Model.Configuration;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Services.IConfigurationService;
+import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.media.AudioConsumer;
 import org.doubango.imsdroid.media.AudioProducer;
 import org.doubango.imsdroid.media.MediaType;
@@ -29,6 +34,8 @@ import org.doubango.imsdroid.media.VideoConsumer;
 import org.doubango.imsdroid.media.VideoProducer;
 import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.SipSession;
+import org.doubango.tinyWRAP.tmedia_qos_strength_t;
+import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 
 public class MyAVSession  extends MySipSession{
 
@@ -93,16 +100,37 @@ public class MyAVSession  extends MySipSession{
 		super();
 		
 		this.session = (session == null) ? new CallSession(sipStack) : session;
-		
-		//this.audioConsumer = new AudioConsumer();
-		//this.audioProducer = new AudioProducer();
 		this.mediaType = mediaType;
 		
-		//this.audioConsumer.setActive();
-		//this.audioProducer.setActive();
+		final IConfigurationService configurationService = ServiceManager.getConfigurationService();
 		
 		// commons
 		this.init();
+		
+		// 100rel
+		this.session.set100rel(true); // will add "Supported: 100rel"
+		
+		// Session timers
+		if(configurationService.getBoolean(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.SESSION_TIMERS, Configuration.DEFAULT_QOS_SESSION_TIMERS)){
+			this.session.setSessionTimer((long) configurationService.getInt(
+					CONFIGURATION_SECTION.QOS,
+					CONFIGURATION_ENTRY.SIP_CALLS_TIMEOUT,
+					Configuration.DEFAULT_QOS_SIP_CALLS_TIMEOUT),
+					configurationService.getString(CONFIGURATION_SECTION.QOS,
+							CONFIGURATION_ENTRY.REFRESHER,
+							Configuration.DEFAULT_QOS_REFRESHER));
+		}
+		// Precondition
+		this.session.setQoS(
+				tmedia_qos_stype_t.valueOf(configurationService.getString(
+				CONFIGURATION_SECTION.QOS,
+				CONFIGURATION_ENTRY.PRECOND_TYPE,
+				Configuration.DEFAULT_QOS_PRECOND_TYPE)), 
+				tmedia_qos_strength_t.valueOf(configurationService.getString(
+				CONFIGURATION_SECTION.QOS,
+				CONFIGURATION_ENTRY.PRECOND_STRENGTH,
+				Configuration.DEFAULT_QOS_PRECOND_STRENGTH)));
+		this.session.addHeader("Supported", "precondition");
 		
 		/* 3GPP TS 24.173
 		*
@@ -126,47 +154,36 @@ public class MyAVSession  extends MySipSession{
 		return this.mediaType;
 	}
 	
-	public boolean acceptCall(){
-		//this.audioConsumer.setActive();
-		//this.audioProducer.setActive();
-		
-		return this.session.Accept();
+	public boolean acceptCall(){		
+		return this.session.accept();
 	}
 	
 	public boolean rejectCall(){
-		// Disable
-		return this.session.Hangup();
+		return this.session.hangup();
 	}
 	
 	public boolean hangUp(){
-		// Disable
-		return this.session.Hangup();
+		return this.session.hangup();
 	}
 	
 	public boolean holdCall(){
-		// Disable
-		return this.session.Hold();
+		return this.session.hold();
 	}
 	
-	public boolean resumeCall(){
-		//this.audioConsumer.setActive();
-		//this.audioProducer.setActive();
-		
-		return this.session.Resume();
+	public boolean resumeCall(){		
+		return this.session.resume();
 	}
 	
-	public boolean makeAudioCall(String remoteUri){
-		//this.audioConsumer.setActive();
-		//this.audioProducer.setActive();
-		
-		return this.session.CallAudio(remoteUri);
+	public boolean makeAudioCall(String remoteUri){		
+		return this.session.callAudio(remoteUri);
 	}
 	
-	public boolean makeVideoCall(String remoteUri){
-		//this.audioConsumer.setActive();
-		//this.audioProducer.setActive();
-		
-		return this.session.CallAudioVideo(remoteUri);
+	public boolean makeVideoCall(String remoteUri){		
+		return this.session.callAudioVideo(remoteUri);
+	}
+	
+	public boolean sendDTMF(int number){		
+		return this.session.sendDTMF(number);
 	}
 
 	@Override

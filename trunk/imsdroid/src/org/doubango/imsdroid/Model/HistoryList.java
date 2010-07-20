@@ -40,7 +40,7 @@ public class HistoryList {
 		if(this.events == null){
 			this.events = new ArrayList<HistoryEvent>();
 		}
-		this.events.add(e);
+		this.events.add(0, e);
 	}
 	
 	public void removeEvent(HistoryEvent e){

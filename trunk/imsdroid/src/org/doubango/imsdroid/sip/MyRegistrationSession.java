@@ -67,10 +67,10 @@ public class MyRegistrationSession extends MySipSession {
 	}
 	
 	public boolean register(){
-		return this.session.Register();
+		return this.session.register_();
 	}
 	
 	public boolean unregister(){
-		return this.session.UnRegister();
+		return this.session.unRegister();
 	}
 }

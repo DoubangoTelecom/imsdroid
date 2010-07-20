@@ -21,6 +21,33 @@
 
 package org.doubango.imsdroid.utils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.doubango.imsdroid.Model.Group;
+import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+
 public class UriUtils {
 
+	public static String getDisplayName(String uri){
+		String displayname = null;
+		Group.Contact contact = ServiceManager.getContactService().getContact(uri);
+		if(contact != null  && (displayname = contact.getDisplayName()) != null){
+			return displayname;
+		}
+		
+		URI myUri;
+		try {
+			myUri = new URI(uri);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return uri;
+		}
+		
+		if((displayname = myUri.getRawUserInfo()) != null){
+			return displayname;
+		}
+		
+		return displayname;
+	}
 }

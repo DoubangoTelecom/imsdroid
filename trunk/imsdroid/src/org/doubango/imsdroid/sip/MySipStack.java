@@ -21,6 +21,7 @@
 
 package org.doubango.imsdroid.sip;
 
+import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.imsdroid.Sevices.Impl.NetworkService.DNS_TYPE;
@@ -52,9 +53,9 @@ public class MySipStack extends SipStack {
 		
 		// Sip headers
 		this.addHeader("Allow", "INVITE, ACK, CANCEL, BYE, MESSAGE, OPTIONS, NOTIFY, PRACK, UPDATE, REFER");
-		this.addHeader("Privacy", "header;id");
+		this.addHeader("Privacy", "none");
 		this.addHeader("P-Access-Network-Info", "ADSL;utran-cell-id-3gpp=00000000");
-		this.addHeader("User-Agent", "IM-client/OMA1.0 imsdroid/v1.0.0"); // Get version from ConfigurationService or strings res
+		this.addHeader("User-Agent", String.format("IM-client/OMA1.0 IMSDroid/v%s", ServiceManager.getMainActivity().getString(R.string.Version)));
 	}
 
 	@Override

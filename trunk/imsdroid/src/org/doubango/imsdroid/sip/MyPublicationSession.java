@@ -109,6 +109,6 @@ public class MyPublicationSession  extends MySipSession{
 	}
 	
 	public boolean unpublish(){
-		return this.session.UnPublish();
+		return this.session.unPublish();
 	}
 }
