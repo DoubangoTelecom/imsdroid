@@ -1,15 +1,17 @@
 #summary FAQ
 
-Why the size of apk so important (~3Mo)?
+<wiki:toc max_depth="1" />
 
-Could I reuse the source code of IMSDroid in my application?
-Is there a library to develop a custom application?
+==Why the size of apk so important (~3Mo)?==
 
-Could I register to any SIP server?
-How to lower registration 'Expires' value?
+==Could I reuse the source code of IMSDroid in my application?==
+==Is there a library to develop a custom application?<br>==
 
-Is iLBC supported?
-Is AMR supported?
-Could I have G.729?
+==Could I register to any SIP server?==
+==How to lower registration 'Expires' value?==
 
-How to lower video CPU usage?
+==Is iLBC supported?==
+==Is AMR supported?==
+==Could I have G.729?==
+
+==How to lower video CPU usage?==
