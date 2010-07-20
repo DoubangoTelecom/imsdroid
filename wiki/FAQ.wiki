@@ -1,6 +1,6 @@
 #summary FAQ
 
-<wiki:toc max_depth="1" />
+<wiki:toc max_depth="3" />
 
 ==Why the size of apk so important (~3Mo)?==
 
