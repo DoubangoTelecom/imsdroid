@@ -12,6 +12,7 @@
 
 ===Is iLBC supported?===
 ===Is AMR supported?===
-===Could I have G.729?===
+===Could I have G.729 codec?===
+===Could I have EVRC codec?===
 
 ===How to lower video CPU usage?===
