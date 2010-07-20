@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="hello">Hello World, Main!</string>
-    <string name="app_name">imsdroid</string>
+    <string name="app_name">IMSDroid</string>
 	<string name="Version">1.0.0</string>
 	<string name="spinner_ipversion">Select IP version</string>
 	<string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>

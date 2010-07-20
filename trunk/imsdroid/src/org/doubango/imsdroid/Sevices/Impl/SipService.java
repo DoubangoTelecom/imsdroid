@@ -20,11 +20,15 @@
 */
 package org.doubango.imsdroid.Sevices.Impl;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
+import org.doubango.imsdroid.Model.HistorySMSEvent;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
 import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.INetworkService;
@@ -54,6 +58,8 @@ import org.doubango.tinyWRAP.CallEvent;
 import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.DDebugCallback;
 import org.doubango.tinyWRAP.DialogEvent;
+import org.doubango.tinyWRAP.MessagingEvent;
+import org.doubango.tinyWRAP.MessagingSession;
 import org.doubango.tinyWRAP.OptionsEvent;
 import org.doubango.tinyWRAP.OptionsSession;
 import org.doubango.tinyWRAP.PublicationEvent;
@@ -61,10 +67,12 @@ import org.doubango.tinyWRAP.RegistrationEvent;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
+import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.SubscriptionEvent;
 import org.doubango.tinyWRAP.SubscriptionSession;
 import org.doubango.tinyWRAP.tinyWRAPConstants;
 import org.doubango.tinyWRAP.tsip_invite_event_type_t;
+import org.doubango.tinyWRAP.tsip_message_event_type_t;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
 import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
 
@@ -194,6 +202,8 @@ implements ISipService, tinyWRAPConstants {
 		if (this.sipStack == null) {
 			this.sipStack = new MySipStack(this.sipCallback, this.preferences.realm, this.preferences.impi, this.preferences.impu);
 			this.sipStack.setDebugCallback(this.debugCallback);
+			SipStack.setCodecs_2(this.configurationService.getInt(CONFIGURATION_SECTION.MEDIA, 
+	        		CONFIGURATION_ENTRY.CODECS, Configuration.DEFAULT_MEDIA_CODECS));
 		} else {
 			if (!this.sipStack.setRealm(this.preferences.realm)) {
 				Log.e(this.getClass().getCanonicalName(), "Failed to set realm");
@@ -301,7 +311,7 @@ implements ISipService, tinyWRAPConstants {
 			}
 			final OptionsSession optSession = new OptionsSession(this.sipStack);
 			// optSession.setToUri(String.format("sip:%s@%s", "hacking_the_aor", this.preferences.realm));
-			optSession.Send();
+			optSession.send();
 			try {
 				synchronized (this.condHack) {
 					this.condHack.wait(this.configurationService.getInt(
@@ -355,6 +365,24 @@ implements ISipService, tinyWRAPConstants {
 		return this.pubPres.publish(status, freeText);
 	}
 
+	public boolean sendSMS(byte[] content, String remoteUri, String contentType){
+		if(!this.isRegistered() || content == null){
+			return false;
+		}
+		
+		final MessagingSession session = new MessagingSession(this.sipStack);
+		session.setToUri(remoteUri);
+		session.addHeader("Content-Type", contentType);
+		
+		final ByteBuffer payload = ByteBuffer.allocateDirect(content.length);
+		payload.put(content);
+		final boolean ret = session.send(payload, content.length);
+		
+		session.delete();
+		
+		return ret;
+	}
+	
 	/* ===================== Add/Remove handlers ======================== */
 
 	@Override
@@ -521,12 +549,39 @@ implements ISipService, tinyWRAPConstants {
 		}
 
 		@Override
+		public int OnMessagingEvent(MessagingEvent e){			
+			final tsip_message_event_type_t type = e.getType();
+			
+			switch(type){
+				case tsip_ao_message:
+					/* String phrase = e.getPhrase(); */
+					/* short code = e.getCode(); */
+					break;
+				case tsip_i_message:
+					final SipMessage message = e.getSipMessage();
+					if(message == null){
+						return 0;
+					}
+					final String from = message.getSipHeaderValue("f");
+					/* final String contentType = message.getSipHeaderValue("c"); */
+					final byte[] content = message.getSipContent();
+					HistorySMSEvent event = new HistorySMSEvent(from);
+					event.setStatus(StatusType.Incoming);
+					event.setContent(new String(content));
+					ServiceManager.getHistoryService().addEvent(event);
+					ServiceManager.showSMSNotif(R.drawable.sms_into_16, "New SMS");
+					ServiceManager.getSoundService().playNewSMS();
+					
+					break;
+			}
+			
+			return 0;
+		}
+		
+		@Override
 		public int OnSubscriptionEvent(SubscriptionEvent e) {
-			short code = e.getCode();
-			String phrase = e.getPhrase();
-			tsip_subscribe_event_type_t type = e.getType();
-			SipMessage message = e.getSipMessage();
-			SubscriptionSession session = e.getSession();
+			final tsip_subscribe_event_type_t type = e.getType();
+			final SubscriptionSession session = e.getSession();
 			
 			if(session == null){
 				return 0;
@@ -538,6 +593,9 @@ implements ISipService, tinyWRAPConstants {
 					break;
 					
 				case tsip_i_notify:
+					final short code = e.getCode();
+					final String phrase = e.getPhrase();
+					final SipMessage message = e.getSipMessage();
 					if(message == null){
 						return 0;
 					}
@@ -705,7 +763,7 @@ implements ISipService, tinyWRAPConstants {
 				case tsip_i_newcall:
 					if (session != null){ /* As we are not the owner, then the session MUST be null */
                         Log.e(SipService.TAG, "Invalid incoming session");
-                        session.Hangup();
+                        session.hangup();
                         return 0;
                     }
                     else if ((session = e.takeSessionOwnership()) != null){

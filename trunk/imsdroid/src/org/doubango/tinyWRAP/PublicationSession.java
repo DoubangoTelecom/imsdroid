@@ -36,7 +36,7 @@ public class PublicationSession extends SipSession {
   public boolean Publish(byte[] bytes) {
     if(bytes != null){
 		final java.nio.ByteBuffer byteBuffer = this.getByteBuffer(bytes);
-        return this.Publish(byteBuffer, bytes.length);
+        return this.publish(byteBuffer, bytes.length);
     }
     return false;
   }
@@ -45,12 +45,12 @@ public class PublicationSession extends SipSession {
     this(tinyWRAPJNI.new_PublicationSession(SipStack.getCPtr(Stack), Stack), true);
   }
 
-  public boolean Publish(java.nio.ByteBuffer payload, long len) {
-    return tinyWRAPJNI.PublicationSession_Publish(swigCPtr, this, payload, len);
+  public boolean publish(java.nio.ByteBuffer payload, long len) {
+    return tinyWRAPJNI.PublicationSession_publish(swigCPtr, this, payload, len);
   }
 
-  public boolean UnPublish() {
-    return tinyWRAPJNI.PublicationSession_UnPublish(swigCPtr, this);
+  public boolean unPublish() {
+    return tinyWRAPJNI.PublicationSession_unPublish(swigCPtr, this);
   }
 
 }

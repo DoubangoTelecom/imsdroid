@@ -8,15 +8,15 @@
 
 
 
-<ViewFlipper android:id="@+id/ViewFlipper01" android:layout_width="wrap_content" android:layout_height="wrap_content">
-<FrameLayout android:id="@+id/FrameLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content">
-	<Button android:id="@+id/Button01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="kkk"></Button>
+<ViewFlipper android:id="@+id/ViewFlipper01" android:layout_height="fill_parent" android:layout_width="fill_parent">
+<FrameLayout android:id="@+id/FrameLayout01" android:background="@color/red" android:layout_height="fill_parent" android:layout_width="fill_parent">
+	<Button android:id="@+id/Button01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1111111111111111111111111"></Button>
 	
 </FrameLayout>
 
-<FrameLayout android:id="@+id/FrameLayout02" android:layout_width="wrap_content" android:layout_height="wrap_content">
+<FrameLayout android:id="@+id/FrameLayout02" android:layout_height="fill_parent">
 <RadioButton android:text="@+id/RadioButton01" android:id="@+id/RadioButton01" android:layout_width="wrap_content" android:layout_height="wrap_content"></RadioButton>
-	<Button android:text="@+id/dkjdjkdjkdkjjk" android:id="@+id/Button02" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+	<Button android:id="@+id/Button02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="22222222222222222222222222222"></Button>
 </FrameLayout>
 
 </ViewFlipper>

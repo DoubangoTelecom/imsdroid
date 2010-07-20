@@ -22,12 +22,15 @@ package org.doubango.imsdroid.Sevices.Impl;
 
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
+import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
 import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
+import org.doubango.imsdroid.Services.ISoundService;
 import org.doubango.imsdroid.Services.IStorageService;
 import org.doubango.imsdroid.Services.IXcapService;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
@@ -39,8 +42,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -59,16 +64,20 @@ public class ServiceManager  extends Service {
 	private static final HistoryService historyService = new HistoryService();
 	private static final ScreenService screenService = new ScreenService();
 	private static final SipService sipService = new SipService();
+	private static final SoundService soundService = new SoundService();
 	private static final StorageService storageService = new StorageService();
 	
 	private static final String TAG = ServiceManager.class.getCanonicalName();
-	private static final String CONTENT_TITLE = "imsdroid";
+	private static final String CONTENT_TITLE = "IMSDroid";
+	
+	private static Vibrator vibrator;
 	
 	private static boolean started;
 	private static Main mainActivity;
 	private static NotificationManager notifManager;
 	private static final int NOTIF_REGISTRATION_ID = 19833891;
 	private static final int NOTIF_AVCALL_ID = 19833892;
+	private static final int NOTIF_SMS_ID = 19833893;
 	
 	private static ServiceManager instance;
 
@@ -96,7 +105,7 @@ public class ServiceManager  extends Service {
 		}
 		ServiceManager.instance = this;
 	}
-
+	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -111,19 +120,34 @@ public class ServiceManager  extends Service {
 	
     private static void showNotification(int notifId, int drawableId, String tickerText) {
         // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(drawableId, tickerText, System.currentTimeMillis());
+        final Notification notification = new Notification(drawableId, tickerText, System.currentTimeMillis());
+        
+        
+        
+        Intent intent = new Intent(ServiceManager.getMainActivity(), Main.class);
+    	intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP  | Intent.FLAG_ACTIVITY_NEW_TASK);
+        
         switch(notifId){
         	case NOTIF_REGISTRATION_ID:
         		notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        		intent.putExtra("notif-type", "reg");
+        		/* Main activity already onTop -> do not pass the screen Id */
+        		break;
+        	case NOTIF_SMS_ID:
+        		notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        		intent.putExtra("notif-type", "newsms");
+        		intent.putExtra("SCREEN_ID", ScreenHistory.class.getCanonicalName());
+        		break;
+        	case NOTIF_AVCALL_ID:
+        		intent.putExtra("notif-type", "call");
+        		intent.putExtra("SCREEN_ID", ScreenAV.getCurrent());
         		break;
        		default:
+       			
        			break;
         }
         
-        
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(ServiceManager.getMainActivity(), 0,
-                new Intent(ServiceManager.getMainActivity(), Main.class), 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(ServiceManager.getMainActivity(), notifId/*requestCode*/, intent, PendingIntent.FLAG_UPDATE_CURRENT);     
 
         // Set the info for the views that show in the notification panel.
         notification.setLatestEventInfo(ServiceManager.getMainActivity(), ServiceManager.CONTENT_TITLE, tickerText, contentIntent);
@@ -139,6 +163,10 @@ public class ServiceManager  extends Service {
     
     public static void showAVCallNotif(int drawableId, String tickerText){
     	ServiceManager.showNotification(NOTIF_AVCALL_ID, drawableId, tickerText);
+    }
+    
+    public static void showSMSNotif(int drawableId, String tickerText){
+    	ServiceManager.showNotification(NOTIF_SMS_ID, drawableId, tickerText);
     }
     
     public static void cancelAVCallNotif(){
@@ -179,6 +207,7 @@ public class ServiceManager  extends Service {
 		success &= ServiceManager.networkService.start();
 		success &= ServiceManager.screenService.start();
 		success &= ServiceManager.sipService.start();
+		success &= ServiceManager.soundService.start();
 		success &= ServiceManager.storageService.start();
 		success &= ServiceManager.xcapService.start();
 
@@ -212,6 +241,7 @@ public class ServiceManager  extends Service {
 		success &= ServiceManager.networkService.stop();
 		success &= ServiceManager.screenService.stop();
 		success &= ServiceManager.sipService.stop();
+		success &= ServiceManager.soundService.stop();
 		success &= ServiceManager.storageService.stop();
 		success &= ServiceManager.xcapService.stop();
 
@@ -222,6 +252,13 @@ public class ServiceManager  extends Service {
 		}
 		
 		return success;
+	}
+	
+	public static void vibrate(long milliseconds){
+		if(ServiceManager.vibrator == null){
+			ServiceManager.vibrator = (Vibrator)ServiceManager.getMainActivity().getSystemService(Context.VIBRATOR_SERVICE);
+		}
+		ServiceManager.vibrator.vibrate(milliseconds);
 	}
 	
 	/**
@@ -278,6 +315,15 @@ public class ServiceManager  extends Service {
 		return (ISipService) ServiceManager.sipService;
 	}
 
+	/**
+	 * Gets the Sound Service.
+	 * 
+	 * @return
+	 */
+	public static ISoundService getSoundService() {
+		return (ISoundService) ServiceManager.soundService;
+	}
+	
 	/**
 	 * Gets the Storage Service.
 	 * 

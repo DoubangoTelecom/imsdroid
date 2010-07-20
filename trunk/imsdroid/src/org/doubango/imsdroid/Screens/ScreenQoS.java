@@ -27,6 +27,8 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.tinyWRAP.tmedia_qos_strength_t;
+import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -49,9 +51,18 @@ public class ScreenQoS  extends Screen {
 	private Spinner spPrecondType;
 	private Spinner spPrecondBandwidth;
 	
-	private final static String[] spinner_refresher_items = new String[] {Configuration.DEFAULT_QOS_REFRESHER, "Client", "Server"};
-	private final static String[] spinner_precond_strength_items = new String[] {Configuration.DEFAULT_QOS_PRECOND_STRENGTH, "Optional", "Mandatory"};
-	private final static String[] spinner_precond_type_items = new String[] {Configuration.DEFAULT_QOS_PRECOND_TYPE, "End-to-End"};
+	private final static String[] spinner_refresher_items = new String[] {Configuration.DEFAULT_QOS_REFRESHER, "uas", "uac"};
+	private final static ScreenQoSStrength[] spinner_precond_strength_items = new ScreenQoSStrength[] {
+			new ScreenQoSStrength(tmedia_qos_strength_t.tmedia_qos_strength_none, "None"),
+			new ScreenQoSStrength(tmedia_qos_strength_t.tmedia_qos_strength_optional, "Optional"),
+			new ScreenQoSStrength(tmedia_qos_strength_t.tmedia_qos_strength_mandatory, "Mandatory"),
+		};
+	private final static ScreenQoSType[] spinner_precond_type_items = new ScreenQoSType[] {
+		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_none, "None"),
+		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_segmented, "Segmented"),
+		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_e2e, "End2End")
+		};
+	
 	private final static String[] spinner_precond_bandwidth_items = new String[] {Configuration.DEFAULT_QOS_PRECOND_BANDWIDTH, "Low", "Medium", "High"};
 	
 	private final IConfigurationService configurationService;
@@ -81,16 +92,18 @@ public class ScreenQoS  extends Screen {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.spinner_refresher_items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         this.spRefresher.setAdapter(adapter);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.spinner_precond_strength_items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        this.spPrecondStrength.setAdapter(adapter);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.spinner_precond_type_items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        this.spPrecondType.setAdapter(adapter);
+        
+        ArrayAdapter<ScreenQoSStrength> adapterStrength = new ArrayAdapter<ScreenQoSStrength>(this, android.R.layout.simple_spinner_item, ScreenQoS.spinner_precond_strength_items);
+        adapterStrength.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        this.spPrecondStrength.setAdapter(adapterStrength);
+        
+        ArrayAdapter<ScreenQoSType> adapterType = new ArrayAdapter<ScreenQoSType>(this, android.R.layout.simple_spinner_item, ScreenQoS.spinner_precond_type_items);
+        adapterType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        this.spPrecondType.setAdapter(adapterType);
+        
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.spinner_precond_bandwidth_items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         this.spPrecondBandwidth.setAdapter(adapter);
-        
         
         // load values from configuration file (Do it before adding UI listeners)
         this.cbEnableSessionTimers.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.SESSION_TIMERS, Configuration.DEFAULT_QOS_SESSION_TIMERS));
@@ -101,18 +114,18 @@ public class ScreenQoS  extends Screen {
 						CONFIGURATION_ENTRY.REFRESHER,
 						ScreenQoS.spinner_refresher_items[0]),
 						ScreenQoS.spinner_refresher_items));
-		this.spPrecondStrength.setSelection(this.getSpinnerIndex(
-				this.configurationService.getString(
-						CONFIGURATION_SECTION.QOS,
-						CONFIGURATION_ENTRY.PRECOND_STRENGTH,
-						ScreenQoS.spinner_precond_strength_items[0]),
-						ScreenQoS.spinner_precond_strength_items));
-		this.spPrecondType.setSelection(this.getSpinnerIndex(
-				this.configurationService.getString(
+		
+		this.spPrecondStrength.setSelection(ScreenQoSStrength.getSpinnerIndex(tmedia_qos_strength_t.valueOf(this.configurationService.getString(
+				CONFIGURATION_SECTION.QOS,
+				CONFIGURATION_ENTRY.PRECOND_STRENGTH,
+				Configuration.DEFAULT_QOS_PRECOND_STRENGTH))));
+		
+		
+		this.spPrecondType.setSelection(ScreenQoSType.getSpinnerIndex(tmedia_qos_stype_t.valueOf(this.configurationService.getString(
 						CONFIGURATION_SECTION.QOS,
 						CONFIGURATION_ENTRY.PRECOND_TYPE,
-						ScreenQoS.spinner_precond_type_items[0]),
-						ScreenQoS.spinner_precond_type_items));
+						Configuration.DEFAULT_QOS_PRECOND_TYPE))));
+		
 		this.spPrecondBandwidth.setSelection(this.getSpinnerIndex(
 				this.configurationService.getString(
 						CONFIGURATION_SECTION.QOS,
@@ -144,9 +157,9 @@ public class ScreenQoS  extends Screen {
 			this.configurationService.setString(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.REFRESHER, 
 					ScreenQoS.spinner_refresher_items[this.spRefresher.getSelectedItemPosition()]);
 			this.configurationService.setString(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.PRECOND_STRENGTH, 
-					ScreenQoS.spinner_precond_strength_items[this.spPrecondStrength.getSelectedItemPosition()]);
+					ScreenQoS.spinner_precond_strength_items[this.spPrecondStrength.getSelectedItemPosition()].strength.toString());
 			this.configurationService.setString(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.PRECOND_TYPE, 
-					ScreenQoS.spinner_precond_type_items[this.spPrecondType.getSelectedItemPosition()]);
+					ScreenQoS.spinner_precond_type_items[this.spPrecondType.getSelectedItemPosition()].type.toString());
 			this.configurationService.setString(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.PRECOND_BANDWIDTH, 
 					ScreenQoS.spinner_precond_bandwidth_items[this.spPrecondBandwidth.getSelectedItemPosition()]);
 			
@@ -167,4 +180,62 @@ public class ScreenQoS  extends Screen {
 			ScreenQoS.this.computeConfiguration = true;
 		}
 	};
+	
+	private static class ScreenQoSStrength {
+		private final String description;
+		private final tmedia_qos_strength_t strength;
+
+		private ScreenQoSStrength(tmedia_qos_strength_t strength, String description) {
+			this.strength = strength;
+			this.description = description;
+		}
+
+		@Override
+		public String toString() {
+			return this.description;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return this.strength.equals(((ScreenQoSStrength)o).strength);
+		}
+		
+		static int getSpinnerIndex(tmedia_qos_strength_t strength){
+			for(int i = 0; i< ScreenQoS.spinner_precond_strength_items.length; i++){
+				if(strength == ScreenQoS.spinner_precond_strength_items[i].strength){
+					return i;
+				}
+			}
+			return 0;
+		}
+	}
+	
+	private static class ScreenQoSType {
+		private final String description;
+		private final tmedia_qos_stype_t type;
+
+		private ScreenQoSType(tmedia_qos_stype_t type, String description) {
+			this.type = type;
+			this.description = description;
+		}
+
+		@Override
+		public String toString() {
+			return this.description;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return this.type.equals(((ScreenQoSType)o).type);
+		}
+		
+		static int getSpinnerIndex(tmedia_qos_stype_t type){
+			for(int i = 0; i< ScreenQoS.spinner_precond_type_items.length; i++){
+				if(type == ScreenQoS.spinner_precond_type_items[i].type){
+					return i;
+				}
+			}
+			return 0;
+		}
+	}
 }

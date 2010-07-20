@@ -41,8 +41,8 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
 		// Well-Known
-		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CONTACT_EDIT_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, DIALER_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
-		REGISTRATIONS_T, SECURITY_T,
+		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CODECS_T, CONTACT_EDIT_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, DIALER_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
+		REGISTRATIONS_T, SECURITY_T, SMS_COMPOSE_T, SMS_VIEW_T,
 		// All others
 		AV_T
 	}
@@ -119,9 +119,17 @@ public abstract class Screen extends Activity implements IScreen {
 	}
 	
 	protected int getSpinnerIndex(String value, String[] values){
-		int i;
-		for(i = 0; i< values.length; i++){
+		for(int i = 0; i< values.length; i++){
 			if(StringUtils.equals(value, values[i], true)){
+				return i;
+			}
+		}
+		return 0;
+	}
+	
+	protected int getSpinnerIndex(Object value, Object[] values){
+		for(int i = 0; i< values.length; i++){
+			if(value.equals(values[i])){
 				return i;
 			}
 		}

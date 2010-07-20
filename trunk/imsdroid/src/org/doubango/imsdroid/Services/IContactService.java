@@ -35,5 +35,6 @@ public interface IContactService  extends IService, IContactsEventDispatcher
 	void editContact(Group.Contact contact);
 	void removeContact(Group.Contact contact);
 	
+	Group.Contact getContact(String uri);
 	List<Group> getContacts();
 }

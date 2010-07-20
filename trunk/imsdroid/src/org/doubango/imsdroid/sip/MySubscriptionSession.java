@@ -100,11 +100,11 @@ public class MySubscriptionSession extends MySipSession{
 	}
 	
 	public boolean subscribe(){
-		return this.session.Subscribe();
+		return this.session.subscribe();
 	}
 	
 	public boolean unsubscribe(){
-		return this.session.UnSubscribe();
+		return this.session.unSubscribe();
 	}
 	
 	public EVENT_PACKAGE_TYPE getEventPackage(){

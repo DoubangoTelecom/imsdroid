@@ -158,6 +158,16 @@ public class ContactService  extends Service implements IContactService, IRegist
 		}
 	}
 	
+	public Group.Contact getContact(String uri){
+		Group.Contact contact = null;
+		for(Group g : this.addressBook.getGroups()){
+			if((contact = g.getContact(uri)) != null){
+				return contact;
+			}
+		}
+		return contact;
+	}
+	
 	public List<Group> getContacts(){
 		return this.addressBook.getGroups();
 	}

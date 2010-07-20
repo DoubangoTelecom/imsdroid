@@ -21,7 +21,6 @@
 
 package org.doubango.imsdroid.media;
 
-import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -101,7 +100,7 @@ public class VideoProducer {
 	
 	private synchronized int start() {
 		Log.d(VideoProducer.TAG, "start()");
-		if(this.context != null){		
+		if(this.context != null){
 			
 			this.running = true;
 			new Thread(this.runnableSender).start();
@@ -142,7 +141,7 @@ public class VideoProducer {
 		public void run() {
 			Log.d(VideoProducer.TAG, "Sender ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_LESS_FAVORABLE);
 			
 			byte[] data;
 			while(VideoProducer.this.running){

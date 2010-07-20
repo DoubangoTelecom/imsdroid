@@ -33,7 +33,8 @@ public abstract class HistoryEvent  implements Comparable<HistoryEvent> {
 	public enum StatusType{
 		Outgoing,
 		Incoming,
-		Missed
+		Missed,
+		Failed
 	}
 	
 	// For performance reasons, do not use Date() class
@@ -80,7 +81,7 @@ public abstract class HistoryEvent  implements Comparable<HistoryEvent> {
 		return this.mediaType;
 	}
 	
-	public String getRemotePrty(){
+	public String getRemoteParty(){
 		return this.remoteParty;
 	}
 	

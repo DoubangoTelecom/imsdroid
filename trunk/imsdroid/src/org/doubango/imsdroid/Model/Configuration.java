@@ -26,6 +26,9 @@ import java.util.List;
 
 import org.doubango.imsdroid.sip.PresenceStatus;
 import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.tinyWRAP.tdav_codec_id_t;
+import org.doubango.tinyWRAP.tmedia_qos_strength_t;
+import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
@@ -36,7 +39,7 @@ public class Configuration {
 	private List<ConfigurationSection> sections;
 
 	public static enum CONFIGURATION_SECTION {
-		IDENTITY, GENERAL, LTE, NETWORK, QOS, RCS, SECURITY, SESSIONS, MMTEL, NATT, XCAP
+		IDENTITY, GENERAL, LTE, NETWORK, QOS, RCS, SECURITY, SESSIONS, MEDIA, NATT, XCAP
 	}
 
 	// Default values
@@ -53,6 +56,9 @@ public class Configuration {
 	public static final boolean DEFAULT_SIGCOMP = false;
 	public static final String DEFAULT_TRANSPORT = "udp";
 	
+	public static final boolean DEFAULT_GENERAL_FULL_SCREEN_VIDEO = true;
+	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
+	
 	public static final String DEFAULT_RCS_AVATAR_PATH = "";
 	public static final String DEFAULT_RCS_CONF_FACT = "sip:Conference-Factory@open-ims.test";
 	public static final String DEFAULT_RCS_FREE_TEXT = "Hello world";
@@ -60,16 +66,16 @@ public class Configuration {
 	public static final boolean DEFAULT_RCS_MSRP_SUCCESS = false;
 	public static final boolean DEFAULT_RCS_OMAFDR = false;
 	public static final boolean DEFAULT_RCS_PARTIAL_PUB = false;
-	public static final boolean DEFAULT_RCS_PRESENCE = true;
+	public static final boolean DEFAULT_RCS_PRESENCE = false;
 	public static final boolean DEFAULT_RCS_RLS = true;
 	public static final String DEFAULT_RCS_SMSC = "sip:smsc@open-ims.test";
 	public static final PresenceStatus DEFAULT_RCS_STATUS = PresenceStatus.Online;
 	
-	public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "None";
-	public static final String DEFAULT_QOS_PRECOND_STRENGTH = "None";
-	public static final String DEFAULT_QOS_PRECOND_TYPE = "Segmented";
-	public static final String DEFAULT_QOS_REFRESHER = "None";
-	public static final int DEFAULT_QOS_SIP_SESSIONS_TIMEOUT = 36; // For debug. FIXME: change to 600000 in release versions
+	public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "Low";
+	public static final String DEFAULT_QOS_PRECOND_STRENGTH = tmedia_qos_strength_t.tmedia_qos_strength_optional.toString();
+	public static final String DEFAULT_QOS_PRECOND_TYPE = tmedia_qos_stype_t.tmedia_qos_stype_segmented.toString();
+	public static final String DEFAULT_QOS_REFRESHER = "none";
+	public static final int DEFAULT_QOS_SIP_SESSIONS_TIMEOUT = 600000;
 	public static final int DEFAULT_QOS_SIP_CALLS_TIMEOUT = 3600;
 	public static final boolean DEFAULT_QOS_SESSION_TIMERS = false;
 	
@@ -90,11 +96,23 @@ public class Configuration {
 	public static final String DEFAULT_XCAP_ROOT = "http://doubango.org:8080/services";
 	public static final String DEFAULT_XUI = "sip:johndoe@open-ims.test";
 	
+	public static final int DEFAULT_MEDIA_CODECS = 
+			tdav_codec_id_t.tdav_codec_id_gsm.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_pcma.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_pcmu.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_speex_nb.swigValue() |
+			
+			tdav_codec_id_t.tdav_codec_id_theora.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_h263.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_h263p.swigValue();
+	
 	public static enum CONFIGURATION_ENTRY {
 		/* === IDENTITY === */
 		DISPLAY_NAME, IMPI, IMPU, PASSWORD,
 
 		/* === GENERAL === */
+		FULL_SCREEN_VIDEO, AUTOSTART,
 
 		/* === LTE === */
 
@@ -112,7 +130,8 @@ public class Configuration {
 
 		/* === SESSIONS === */
 
-		/* === MMTEL === */
+		/* === MEDIA === */
+		CODECS,
 
 		/* === NATT === */
 		HACK_AOR, HACK_AOR_TIMEOUT, USE_STUN, USE_ICE, STUN_DISCO, STUN_SERVER, STUN_PORT, 

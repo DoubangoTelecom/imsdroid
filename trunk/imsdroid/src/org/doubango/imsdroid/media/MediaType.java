@@ -25,7 +25,6 @@ public enum MediaType {
 	Audio,
 	AudioVideo,
 	SMS,
-	IM,
 	Chat,
 	FileTransfer
 }

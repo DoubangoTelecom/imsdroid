@@ -98,9 +98,10 @@ public class AudioProducer {
 		public void run() {
 			Log.d(AudioProducer.TAG, "Audio Recorder ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
 			
 			AudioProducer.this.recorder.startRecording();
+			int size = AudioProducer.this.shorts_per_notif*2;
 			
 			while(AudioProducer.this.running){
 				
@@ -108,7 +109,7 @@ public class AudioProducer {
 					break;
 				}
 				
-				final int read = AudioProducer.this.recorder.read(AudioProducer.this.chunck, AudioProducer.this.shorts_per_notif*2);
+				final int read = AudioProducer.this.recorder.read(AudioProducer.this.chunck, size);
 				if(read > 0){
 					AudioProducer.this.proxyAudioProducer.push(AudioProducer.this.chunck, read);
 				}
