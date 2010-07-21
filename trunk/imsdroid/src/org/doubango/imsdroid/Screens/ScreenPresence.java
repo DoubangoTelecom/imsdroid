@@ -40,7 +40,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -62,7 +61,7 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
-public class ScreenPresence  extends Screen {
+public class ScreenPresence  extends Screen{
 	
 	private CheckBox cbEnablePresence;
 	private CheckBox cbEnableRLS;
@@ -71,12 +70,10 @@ public class ScreenPresence  extends Screen {
 	private ImageView ivAvatar;
 	private ImageButton btCamera;
 	private ImageButton btChooseFile;
-	private FrameLayout flPreview;
 	private RelativeLayout rlPresence;
 	private Spinner spStatus;
 	
 	private static final String TAG = ScreenPresence.class.getCanonicalName();
-	private Camera camera;
 	private Preview preview;
 	
 	private final static StatusItem[] spinner_status_items = new StatusItem[] {
@@ -111,7 +108,6 @@ public class ScreenPresence  extends Screen {
         this.ivAvatar = (ImageView)this.findViewById(R.id.screen_presence_imageView);
         this.btCamera = (ImageButton)this.findViewById(R.id.screen_presence_imageButton_cam);
         this.btChooseFile = (ImageButton)this.findViewById(R.id.screen_presence_imageButton_file);
-        this.flPreview = (FrameLayout)this.findViewById(R.id.screen_presence_frameLayout_preview);
         this.rlPresence = (RelativeLayout)this.findViewById(R.id.screen_presence_relativeLayout_presence);
         this.spStatus = (Spinner)this.findViewById(R.id.screen_presence_spinner_status);
         
@@ -142,13 +138,12 @@ public class ScreenPresence  extends Screen {
         /* this.addConfigurationListener(this.spStatus); */
         
         // Camera
-        this.preview = new Preview(ServiceManager.getMainActivity());
-        this.flPreview.addView(this.preview);
+        this.preview = new Preview(this);
         
         this.btCamera.setOnClickListener(this.btCamera_OnClickListener);
         this.btChooseFile.setOnClickListener(this.btChooseFile_OnClickListener);
 	}
-	
+
 	protected void onPause() {
 		if(this.computeConfiguration){
 			String oldFreeText = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT);
@@ -183,9 +178,9 @@ public class ScreenPresence  extends Screen {
 	
 	private OnClickListener btCamera_OnClickListener = new OnClickListener(){
 		public void onClick(View v) {
-			
-			// ScreenPresence.this.preview.camera.takePicture(null, null, ScreenPresence.this.jpegCallback);
-			// ScreenPresence.this.computeConfiguration = true;
+			ScreenPresence.this.setContentView(ScreenPresence.this.preview);
+			//ScreenPresence.this.flPreview.removeAllViews();
+			//ScreenPresence.this.flPreview.addView(ScreenPresence.this.preview);
 		}
 	};
 	
@@ -209,31 +204,7 @@ public class ScreenPresence  extends Screen {
 		public void onNothingSelected(AdapterView<?> arg0) {
 		}
 	};
-	
-	private PictureCallback jpegCallback = new PictureCallback() {
-		public void onPictureTaken(byte[] data, Camera camera) {
-			FileOutputStream outStream = null;
-			try {
-				// write to local sandbox file system
-				// outStream =
-				// CameraDemo.this.openFileOutput(String.format("%d.jpg",
-				// System.currentTimeMillis()), 0);
-				// Or write to sdcard
-				outStream = new FileOutputStream(String.format(
-						"/sdcard/%d.jpg", System.currentTimeMillis()));
-				outStream.write(data);
-				outStream.close();
-				Log.d(TAG, "onPictureTaken - wrote bytes: " + data.length);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-			}
-			Log.d(TAG, "onPictureTaken - jpeg");
-		}
-	};
-	
+		
 	private OnClickListener btChooseFile_OnClickListener = new OnClickListener(){
 		public void onClick(View v) {
 			
@@ -342,30 +313,31 @@ public class ScreenPresence  extends Screen {
 		public void surfaceCreated(SurfaceHolder holder) {
 			// The Surface has been created, acquire the camera and tell it where
 			// to draw.
-			camera = Camera.open();
+			
 			try {
+				camera = Camera.open();
 				camera.setPreviewDisplay(holder);
-
-				camera.setPreviewCallback(new PreviewCallback() {
-
-					public void onPreviewFrame(byte[] data, Camera arg1) {
-						FileOutputStream outStream = null;
-						try {
-							outStream = new FileOutputStream(String.format(
-									"/sdcard/%d.jpg", System.currentTimeMillis()));
-							outStream.write(data);
-							outStream.close();
-							Log.d(TAG, "onPreviewFrame - wrote bytes: "
-									+ data.length);
-						} catch (FileNotFoundException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						} finally {
-						}
-						Preview.this.invalidate();
-					}
-				});
+				
+//				camera.setPreviewCallback(new PreviewCallback() {
+//
+//					public void onPreviewFrame(byte[] data, Camera arg1) {
+//						FileOutputStream outStream = null;
+//						try {
+//							outStream = new FileOutputStream(String.format(
+//									"/sdcard/%d.jpg", System.currentTimeMillis()));
+//							outStream.write(data);
+//							outStream.close();
+//							Log.d(TAG, "onPreviewFrame - wrote bytes: "
+//									+ data.length);
+//						} catch (FileNotFoundException e) {
+//							e.printStackTrace();
+//						} catch (IOException e) {
+//							e.printStackTrace();
+//						} finally {
+//						}
+//						Preview.this.invalidate();
+//					}
+//				});
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -376,6 +348,7 @@ public class ScreenPresence  extends Screen {
 			// Because the CameraDevice object is not a shared resource, it's very
 			// important to release it when the activity is paused.
 			camera.stopPreview();
+			camera.release();
 			camera = null;
 		}
 
@@ -387,13 +360,13 @@ public class ScreenPresence  extends Screen {
 			camera.setParameters(parameters);
 			camera.startPreview();
 		}
-
-		public void draw(Canvas canvas) {
-			super.draw(canvas);
-			Paint p = new Paint(Color.RED);
-			Log.d(TAG, "draw");
-			canvas.drawText("PREVIEW", canvas.getWidth() / 2,
-					canvas.getHeight() / 2, p);
-		}
 	}
+
+
+
+//	@Override
+//	public void onPictureTaken(byte[] data, Camera camera) {
+//		int i = 0;
+//		i++;
+//	}
 }
