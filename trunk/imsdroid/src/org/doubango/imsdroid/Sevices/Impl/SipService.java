@@ -185,6 +185,13 @@ implements ISipService, tinyWRAPConstants {
 	
 	/* ===================== SIP functions ======================== */
 
+	public boolean stopStack(){
+		if(this.sipStack != null){
+			return this.sipStack.stop();
+		}
+		return true;
+	}
+	
 	public boolean register() {
 		this.preferences.realm = this.configurationService.getString(
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.REALM,

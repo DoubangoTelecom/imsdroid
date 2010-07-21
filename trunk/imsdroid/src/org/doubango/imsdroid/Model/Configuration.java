@@ -60,6 +60,7 @@ public class Configuration {
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
 	
 	public static final String DEFAULT_RCS_AVATAR_PATH = "";
+	public static final boolean DEFAULT_RCS_BINARY_SMS = true;
 	public static final String DEFAULT_RCS_CONF_FACT = "sip:Conference-Factory@open-ims.test";
 	public static final String DEFAULT_RCS_FREE_TEXT = "Hello world";
 	public static final boolean DEFAULT_RCS_MSRP_FAILURE = true;
@@ -123,7 +124,7 @@ public class Configuration {
 		PRECOND_BANDWIDTH, PRECOND_STRENGTH, PRECOND_TYPE, REFRESHER, SIP_CALLS_TIMEOUT, SIP_SESSIONS_TIMEOUT, SESSION_TIMERS,
 
 		/* === RCS (GSMA Rich Communication Suite) === */
-		AVATAR_PATH, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, STATUS,
+		AVATAR_PATH, BINARY_SMS, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, STATUS,
 
 		/* === SECURITY === */
 		TLS_CA_FILE, TLS_PRIV_KEY_FILE, TLS_PUB_KEY_FILE, TLS_SEC_AGREE,

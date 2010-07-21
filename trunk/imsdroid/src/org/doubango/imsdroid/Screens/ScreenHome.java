@@ -159,6 +159,12 @@ implements IRegistrationEventHandler
 				ScreenHomeItem item = ScreenHome.this.items.get(position);
 				if(item != null){
 					if(position == ScreenHome.itemSignInOutPosition){
+						// FIXME
+						if(ScreenHome.this.adapter.inprogress){
+							ScreenHome.this.sipService.stopStack();
+							return;
+						}
+						
 						if(ScreenHome.this.sipService.isRegistered()){
 							ScreenHome.this.sipService.unregister();
 						}
@@ -258,8 +264,8 @@ implements IRegistrationEventHandler
 
 		private synchronized void setRegistered(boolean registered){
 			this.registered = registered;
-			this.notifyDataSetChanged();
 			this.inprogress = false;
+			this.notifyDataSetChanged();
 		}
 		
 		private synchronized void setInprogress(boolean inprogress){
@@ -297,13 +303,19 @@ implements IRegistrationEventHandler
 			TextView tv = (TextView) view.findViewById(R.id.screen_home_item_text);
 			
 			if(position == ScreenHome.itemSignInOutPosition){
-				if(registered){
-					tv.setText("Sign Out");
-					iv.setImageDrawable(getResources().getDrawable(R.drawable.sign_out_48));
+				if(this.inprogress){
+					tv.setText("Cancel");
+					iv.setImageDrawable(getResources().getDrawable(R.drawable.sign_inprogress_48));
 				}
 				else{
-					tv.setText("Sign In");
-					iv.setImageDrawable(getResources().getDrawable(R.drawable.sign_in_48));
+					if(registered){
+						tv.setText("Sign Out");
+						iv.setImageDrawable(getResources().getDrawable(R.drawable.sign_out_48));
+					}
+					else{
+						tv.setText("Sign In");
+						iv.setImageDrawable(getResources().getDrawable(R.drawable.sign_in_48));
+					}
 				}
 			}
 			else{				

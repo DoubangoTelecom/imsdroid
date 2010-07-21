@@ -37,6 +37,7 @@ ICallEventDispatcher
 	byte[] getReginfo();
 	byte[] getWinfo();
 	
+	boolean stopStack();
 	boolean register();
 	boolean unregister();
 	
