@@ -15,5 +15,6 @@
 ===Could I have G.729 codec?===
 ===Could I have EVRC codec?===
 ===Could I make and receive calls on the emulator?===
+===How to call E.164 (tel:) numbers?
 
 ===How to lower video CPU usage?===
