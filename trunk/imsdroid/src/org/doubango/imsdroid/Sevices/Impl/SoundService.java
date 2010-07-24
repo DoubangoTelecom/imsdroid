@@ -27,6 +27,7 @@ import org.doubango.imsdroid.Services.ISoundService;
 
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnPreparedListener;
 
 //FIXME: refactor, use ON stop() and ONE start()
 
@@ -37,7 +38,12 @@ public class SoundService extends Service implements ISoundService {
 	private MediaPlayer ringBackTonePlayer;
 	private MediaPlayer smsPlayer;
 	private MediaPlayer connPlayer;
+	
+	private boolean ringTonePlayerPlayOnPrepared;
 
+	public SoundService(){
+	}
+	
 	@Override
 	public void playDTMF(int number) {
 		if(this.dtmfPlayer == null){
@@ -119,8 +125,33 @@ public class SoundService extends Service implements ISoundService {
 
 	@Override
 	public void playRingTone() {
+		synchronized(this){
+			this.ringTonePlayerPlayOnPrepared = true;
+		}
+		/* Horrible HACK */
 		if(this.ringTonePlayer == null){
 			this.ringTonePlayer  = MediaPlayer.create(ServiceManager.getMainActivity(), R.raw.ringtone);
+			this.ringTonePlayer.setOnPreparedListener(new OnPreparedListener(){
+				@Override
+				public void onPrepared(MediaPlayer mp) {
+					synchronized(this){
+						if(SoundService.this.ringTonePlayerPlayOnPrepared){
+							ServiceManager.getMainActivity().runOnUiThread(new Runnable(){
+								@Override
+								public void run() {
+									try{
+										SoundService.this.ringTonePlayer.setLooping(true);
+										SoundService.this.ringTonePlayer.start();
+									}
+									catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
+						}
+					}
+				}
+			});
 		}
 		else{
 			this.ringTonePlayer.reset();
@@ -138,17 +169,20 @@ public class SoundService extends Service implements ISoundService {
 			}
 		}
 		
-		try{
+		/*try{
 			this.ringTonePlayer.setLooping(true);
 			this.ringTonePlayer.start();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	@Override
 	public void stopRingTone() {
+		synchronized(this){
+			this.ringTonePlayerPlayOnPrepared = false;
+		}
 		if(this.ringTonePlayer == null){
 			return;
 		}
@@ -263,6 +297,8 @@ public class SoundService extends Service implements ISoundService {
 
 	@Override
 	public boolean stop() {
+		this.stopRingBackTone();
+		this.stopRingTone();
 		return true;
 	}
 }

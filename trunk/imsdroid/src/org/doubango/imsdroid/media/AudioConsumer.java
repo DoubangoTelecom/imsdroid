@@ -22,6 +22,10 @@ package org.doubango.imsdroid.media;
 
 import java.nio.ByteBuffer;
 
+import org.doubango.imsdroid.Model.Configuration;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 
 import android.media.AudioFormat;
@@ -32,9 +36,9 @@ import android.util.Log;
 public class AudioConsumer{
 	
 	private static String TAG = AudioConsumer.class.getCanonicalName();
-	private static int factor = 5;
-	//private static int streamType = AudioManager.STREAM_VOICE_CALL;
-	private static int streamType = AudioManager.STREAM_MUSIC;
+	private static int factor = 10;
+	private static int streamType = AudioManager.STREAM_VOICE_CALL;
+	//private static int streamType = AudioManager.STREAM_MUSIC;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
@@ -64,6 +68,11 @@ public class AudioConsumer{
 				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				(this.bufferSize * AudioConsumer.factor), AudioTrack.MODE_STREAM);
 		if(this.track.getState() == AudioTrack.STATE_INITIALIZED){
+			float audioPlaybackLevel = ServiceManager.getConfigurationService().getFloat(
+					CONFIGURATION_SECTION.GENERAL,
+					CONFIGURATION_ENTRY.AUDIO_PLAY_LEVEL,
+					Configuration.DEFAULT_GENERAL_AUDIO_PLAY_LEVEL);
+			this.track.setStereoVolume(AudioTrack.getMaxVolume()*audioPlaybackLevel, AudioTrack.getMaxVolume()*0.25f);
 			return 0;
 		}
 		else{
@@ -117,8 +126,9 @@ public class AudioConsumer{
 					break;
 				}
 				
+				/* get sound data from the jitter buffer */
 				final long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, bytes.length);				
-				if(sizeInBytes >0){ /* Otherwise it's silence */
+				if(sizeInBytes >0){ // Otherwise it's silence
 					AudioConsumer.this.chunck.get(bytes);
 					AudioConsumer.this.track.write(bytes, 0, bytes.length);
 				}

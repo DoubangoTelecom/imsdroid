@@ -58,6 +58,8 @@ public class Configuration {
 	
 	public static final boolean DEFAULT_GENERAL_FULL_SCREEN_VIDEO = true;
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
+	public static final float DEFAULT_GENERAL_AUDIO_PLAY_LEVEL = 0.25f;
+	public static final String DEFAULT_GENERAL_ENUM_DOMAIN = "e164.org";
 	
 	public static final String DEFAULT_RCS_AVATAR_PATH = "";
 	public static final boolean DEFAULT_RCS_BINARY_SMS = true;
@@ -84,6 +86,8 @@ public class Configuration {
 	public static final String DEFAULT_TLS_PRIV_KEY_FILE = "";
 	public static final String DEFAULT_TLS_PUB_KEY_FILE = "";
 	public static boolean DEFAULT_TLS_SEC_AGREE = false;
+	public static final String DEFAULT_IMSAKA_AMF = "0x0000";
+	public static final String DEFAULT_IMSAKA_OPID = "0x00000000000000000000000000000000";
 	
 	public static final int DEFAULT_NATT_HACK_AOR_TIMEOUT = 2000;
 	public static final boolean DEFAULT_NATT_HACK_AOR = false;
@@ -113,7 +117,7 @@ public class Configuration {
 		DISPLAY_NAME, IMPI, IMPU, PASSWORD,
 
 		/* === GENERAL === */
-		FULL_SCREEN_VIDEO, AUTOSTART,
+		FULL_SCREEN_VIDEO, AUTOSTART, AUDIO_PLAY_LEVEL, ENUM_DOMAIN,
 
 		/* === LTE === */
 
@@ -127,7 +131,7 @@ public class Configuration {
 		AVATAR_PATH, BINARY_SMS, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, STATUS,
 
 		/* === SECURITY === */
-		TLS_CA_FILE, TLS_PRIV_KEY_FILE, TLS_PUB_KEY_FILE, TLS_SEC_AGREE,
+		TLS_CA_FILE, TLS_PRIV_KEY_FILE, TLS_PUB_KEY_FILE, TLS_SEC_AGREE, IMSAKA_AMF, IMSAKA_OPID,
 
 		/* === SESSIONS === */
 

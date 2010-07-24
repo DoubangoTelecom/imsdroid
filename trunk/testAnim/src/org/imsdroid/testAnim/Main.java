@@ -1,5 +1,8 @@
 package org.imsdroid.testAnim;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +18,18 @@ public class Main extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        URI uri;
+        try {
+			uri = new URI("mailto:java-net@java.sun.com");
+			String toto = uri.getScheme();
+			String titi = uri.getUserInfo();
+			String tata = uri.getHost();
+			
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
         
         final Button btn1 = (Button)this.findViewById(R.id.Button01);

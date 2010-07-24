@@ -106,9 +106,9 @@ implements IContactsEventHandler
         final List<Group>groups = ScreenContacts.this.contactService.getContacts();
         
         this.spGroups = (Spinner)this.findViewById(R.id.screen_contacts_spinner_Groups);
-        ArrayAdapter<Group> adapter = new ArrayAdapter<Group>(ScreenContacts.this, android.R.layout.simple_spinner_item, groups);
+        ArrayAdapter<Group> adapter = new ArrayAdapter<Group>(this, android.R.layout.simple_spinner_item, groups);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ScreenContacts.this.spGroups.setAdapter(adapter);
+        this.spGroups.setAdapter(adapter);
         this.spGroups.setOnItemSelectedListener(this.spGroups_OnItemSelectedListener);
         
         // gridView

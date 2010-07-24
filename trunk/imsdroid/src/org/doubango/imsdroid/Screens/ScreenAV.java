@@ -29,16 +29,21 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import org.doubango.imsdroid.R;
+import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.HistoryAVCallEvent;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
 import org.doubango.imsdroid.Services.IHistoryService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Sevices.Impl.SipService;
 import org.doubango.imsdroid.events.CallEventArgs;
 import org.doubango.imsdroid.events.ICallEventHandler;
 import org.doubango.imsdroid.media.MediaType;
 import org.doubango.imsdroid.sip.MyAVSession;
+import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.utils.UriUtils;
 
 import android.content.Context;
@@ -77,7 +82,7 @@ implements ICallEventHandler {
 	
 	private HistoryAVCallEvent historyEvent;
 	private int timerCount;
-	private final Timer timer;
+	private final Timer timerInCall;
 	private final Timer timerSuicide;
 	private final Handler handler;
 	private final AudioManager audioManager;
@@ -113,6 +118,7 @@ implements ICallEventHandler {
 	private final static int MENU_HANGUP= 1;
 	private final static int MENU_HOLD_RESUME = 2;
 	private final static int MENU_SEND_STOP_VIDEO = 3;
+	private final static int MENU_SPEAKER = 4;
 	
 	static {
 		ScreenAV.screens = new HashMap<String, ScreenAV>();
@@ -122,7 +128,7 @@ implements ICallEventHandler {
 	public ScreenAV() {
 		super(SCREEN_TYPE.AV_T, null);
 		
-		this.timer = new Timer();
+		this.timerInCall = new Timer();
 		this.timerSuicide = new Timer();
 		
 		this.sipService = ServiceManager.getSipService();
@@ -203,13 +209,15 @@ implements ICallEventHandler {
         
         // add event handlers
         this.sipService.addCallEventHandler(this);
+        
+        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 	}	
 	
 	@Override
 	protected void onDestroy() {
 		ScreenAV.remove(this);
 		
-		this.timer.cancel();
+		this.timerInCall.cancel();
 		this.timerSuicide.cancel();
 		
 		// remove event handlers
@@ -229,6 +237,7 @@ implements ICallEventHandler {
 		menu.add(0, ScreenAV.MENU_HANGUP, 0, "Hang-up").setIcon(R.drawable.phone_hang_up_48);
 		menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, "Hold").setIcon(R.drawable.phone_hold_48);
 		menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, "Send Video").setIcon(R.drawable.video_start_48);
+		menu.add(1, ScreenAV.MENU_SPEAKER, 0, "Speaker").setIcon(R.drawable.phone_speaker_48);
 		return true;
 	}
 	
@@ -247,6 +256,10 @@ implements ICallEventHandler {
 			else{
 				item.setEnabled(false);
 			}
+		}
+		
+		if((item = menu.findItem(ScreenAV.MENU_SPEAKER)) != null){
+			item.setTitle(this.audioManager.isSpeakerphoneOn() ? "Speaker OFF" : "Speaker ON");
 		}
 		
 		return true;
@@ -298,6 +311,10 @@ implements ICallEventHandler {
 					this.sendingVideo = false;
 				}
 				break;
+				
+			case ScreenAV.MENU_SPEAKER:
+				this.audioManager.setSpeakerphoneOn(!this.audioManager.isSpeakerphoneOn());
+				break;
 		}
 		return true;
 	}
@@ -308,9 +325,6 @@ implements ICallEventHandler {
 	public boolean haveMenu(){
 		return true;
 	}
-	
-	
-	
 	
 	private static void put(ScreenAV screen){
 		synchronized(ScreenAV.screens){
@@ -334,6 +348,29 @@ implements ICallEventHandler {
 	}
 	
 	public static boolean makeCall(String remoteUri, MediaType mediaType){
+		String validUri = UriUtils.makeValidSipUri(remoteUri);
+		if(validUri == null){
+			// Show DialogError
+			return false;
+		}
+		else{
+			remoteUri = validUri;
+			if(remoteUri.startsWith("tel:")){
+				// E.164 number => use ENUM protocol
+				final MySipStack sipStack = ServiceManager.getSipService().getStack();
+				if(sipStack != null){
+					String phoneNumber = UriUtils.getValidPhoneNumber(remoteUri);
+					if(phoneNumber != null){
+						String enumDomain = ServiceManager.getConfigurationService().getString(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.ENUM_DOMAIN, Configuration.DEFAULT_GENERAL_ENUM_DOMAIN);
+						String sipUri = sipStack.dnsENUM("E2U+SIP", phoneNumber, enumDomain);
+						if(sipUri != null){
+							remoteUri = sipUri;
+						}
+					}
+				}
+			}
+		}
+		
 		String id = UUID.randomUUID().toString();
 		ServiceManager.getScreenService().show(ScreenAV.class, id);
 		
@@ -365,6 +402,7 @@ implements ICallEventHandler {
 					av.historyEvent = new HistoryAVCallEvent(mediaType == MediaType.AudioVideo, remoteUri);
 					av.historyEvent.setStatus(StatusType.Incoming);
 					
+					ServiceManager.vibrate(500);
 					ServiceManager.getSoundService().playRingTone();
 					
 					av.tvInfo.setText(String.format("Incoming Call from %s", UriUtils.getDisplayName(remoteUri)));
@@ -400,7 +438,7 @@ implements ICallEventHandler {
 		return false;
 	}
 	
-	private TimerTask timerTaskChrono = new TimerTask(){
+	private TimerTask timerTaskInCall = new TimerTask(){
 		@Override
 		public void run() {
 			ScreenAV.this.timerCount++;
@@ -431,6 +469,8 @@ implements ICallEventHandler {
 			return true;
 		}
 		
+		final String phrase = e.getPhrase();
+		
 		switch(e.getType()){
 			case INCOMING:
 				ScreenAV.this.remoteUri = (String) e.getExtra("from");
@@ -441,6 +481,7 @@ implements ICallEventHandler {
 						ScreenAV.this.historyEvent = new HistoryAVCallEvent(ScreenAV.this.avSession.getMediaType() == MediaType.AudioVideo, ScreenAV.this.remoteUri);
 						ScreenAV.this.historyEvent.setStatus(StatusType.Incoming);
 						
+						ServiceManager.vibrate(500);
 						ServiceManager.getSoundService().playRingTone();
 						
 						ScreenAV.this.tvInfo.setText(String.format("Incoming Call from \"%s\"", UriUtils.getDisplayName(ScreenAV.this.remoteUri)));
@@ -474,23 +515,37 @@ implements ICallEventHandler {
 						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
 					}});
 				break;
+			case EARLY_MEDIA:
+				this.handler.post(new Runnable() {
+					public void run() {
+						ServiceManager.getSoundService().stopRingBackTone();
+						ServiceManager.getSoundService().stopRingTone();
+						
+						ScreenAV.this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+						ScreenAV.this.audioManager.setSpeakerphoneOn(false);
+						
+						// Notification
+						ScreenAV.this.tvInfo.setText(phrase);
+					}});
+				break;
 			case CONNECTED:
 				this.handler.post(new Runnable() {
 					public void run() {
+						ServiceManager.getSoundService().stopRingBackTone();
+						ServiceManager.getSoundService().stopRingTone();
+						
 						ScreenAV.this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+						ScreenAV.this.audioManager.setSpeakerphoneOn(false);
 						
 						// Notification
 						ScreenAV.this.tvInfo.setText("In call");
 						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_green_16);
-						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "In Call");
+						ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "In Call");
 						
 						// History event
 						if(ScreenAV.this.historyEvent != null){
 							ScreenAV.this.historyEvent.setStartTime(new Date().getTime());
 						}
-						
-						ServiceManager.getSoundService().stopRingBackTone();
-						ServiceManager.getSoundService().stopRingTone();
 						
 						// Views
 						//ScreenAV.this.llVideoLocal.removeAllViews();
@@ -514,10 +569,9 @@ implements ICallEventHandler {
 						
 						ScreenAV.this.tvRemoteUri.setText(String.format("In call with %s since:", UriUtils.getDisplayName(ScreenAV.this.remoteUri)));
 					}});
-				this.timer.schedule(ScreenAV.this.timerTaskChrono, 0, 1000);
+				this.timerInCall.schedule(ScreenAV.this.timerTaskInCall, 0, 1000);
 				break;
 			case DISCONNECTED:
-				final String phrase = e.getPhrase();
 				this.handler.post(new Runnable() {
 					public void run() {
 						
@@ -552,7 +606,7 @@ implements ICallEventHandler {
 				MyAVSession.releaseSession(this.avSession);
 				/* schedule suicide */
 				this.timerSuicide.schedule(this.timerTaskSuicide, new Date(new Date().getTime() + 1500));
-				this.timerTaskChrono.cancel();
+				this.timerTaskInCall.cancel();
 				break;
 			case LOCAL_HOLD_OK:
 				this.handler.post(new Runnable() {

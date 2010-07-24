@@ -32,6 +32,8 @@ import android.util.Log;
 
 public class ConfigurationService  extends Service implements IConfigurationService{
 
+	private final static String TAG = ConfigurationService.class.getCanonicalName();
+	
 	private final static String CONFIG_FILE = "configuration.xml";
 	private File config_file; 
 	private Configuration configuration;
@@ -87,6 +89,10 @@ public class ConfigurationService  extends Service implements IConfigurationServ
 		return this.setString(section, entry, new Integer(value).toString());
 	}
 	
+	public boolean setFloat(Configuration.CONFIGURATION_SECTION section, Configuration.CONFIGURATION_ENTRY entry, float value){
+		return this.setString(section, entry, new Float(value).toString());
+	}
+	
 	public boolean setBoolean(Configuration.CONFIGURATION_SECTION section, Configuration.CONFIGURATION_ENTRY entry, boolean value){
 		return this.setString(section, entry, (value ? "true" : "false"));
 	}
@@ -111,7 +117,23 @@ public class ConfigurationService  extends Service implements IConfigurationServ
 				return Integer.parseInt(value);
 			}
 			catch(NumberFormatException e){
-				Log.e(this.getClass().getCanonicalName(), e.getMessage());
+				Log.e(ConfigurationService.TAG, e.getMessage());
+				return defaultValue;
+			}
+		}
+	}
+	
+	public float getFloat(Configuration.CONFIGURATION_SECTION section, Configuration.CONFIGURATION_ENTRY entry, float defaultValue){
+		String value = this.configuration.getValue(section.toString(), entry.toString());
+		if(value == null){
+			return defaultValue;
+		}
+		else {
+			try{
+				return Float.parseFloat(value);
+			}
+			catch(NumberFormatException e){
+				Log.e(ConfigurationService.TAG, e.getMessage());
 				return defaultValue;
 			}
 		}

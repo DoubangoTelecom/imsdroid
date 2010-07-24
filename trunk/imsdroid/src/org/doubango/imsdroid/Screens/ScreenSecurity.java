@@ -38,6 +38,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class ScreenSecurity extends Screen {
@@ -49,13 +51,17 @@ public class ScreenSecurity extends Screen {
 	private final static int REQUEST_CODE_PUB_KEY = 12345;
 	private final static int REQUEST_CODE_CA = 123456;
 	
+	private LinearLayout llTlsFiles;
 	private ImageButton ibPrivKey;
 	private ImageButton ibPubKey;
 	private ImageButton ibCA;
+	private EditText etAMF;
+	private EditText etOpId;
 	private EditText etPrivKey;
 	private EditText etPubKey;
 	private EditText etCA;
 	private CheckBox cbTlsSecAgree;
+	private CheckBox cbTlsFiles;
 	
 	public  ScreenSecurity() {
 		super(SCREEN_TYPE.SECURITY_T, ScreenSecurity.class.getCanonicalName());
@@ -68,29 +74,43 @@ public class ScreenSecurity extends Screen {
         setContentView(R.layout.screen_security);
         
       // get controls
+        this.llTlsFiles = (LinearLayout)this.findViewById(R.id.screen_security_linearLayout_tlsfiles);
+        this.cbTlsFiles = (CheckBox)this.findViewById(R.id.screen_security_checkBox_tlsfiles);
         this.ibPrivKey = (ImageButton)this.findViewById(R.id.screen_security_imageButton_private_key);
         this.ibPubKey = (ImageButton)this.findViewById(R.id.screen_security_imageButton_public_key);
         this.ibCA = (ImageButton)this.findViewById(R.id.screen_security_imageButton_ca);
+        this.etAMF = (EditText)this.findViewById(R.id.screen_security_editText_amf);
+        this.etOpId = (EditText)this.findViewById(R.id.screen_security_editText_opid);
         this.etPrivKey = (EditText)this.findViewById(R.id.screen_security_editText_private_key);
         this.etPubKey = (EditText)this.findViewById(R.id.screen_security_editText_public_key);
         this.etCA = (EditText)this.findViewById(R.id.screen_security_editText_ca);
         this.cbTlsSecAgree = (CheckBox)this.findViewById(R.id.screen_security_checkBox_tls_secagree);
         
         // load values from configuration file (do it before adding UI listeners)
+        this.etAMF.setText(this.configurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.IMSAKA_AMF, Configuration.DEFAULT_IMSAKA_AMF));
+        this.etOpId.setText(this.configurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.IMSAKA_OPID, Configuration.DEFAULT_IMSAKA_OPID));
         this.etPrivKey.setText(this.configurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PRIV_KEY_FILE, Configuration.DEFAULT_TLS_PRIV_KEY_FILE));
         this.etPubKey.setText(this.configurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PUB_KEY_FILE, Configuration.DEFAULT_TLS_PUB_KEY_FILE));
         this.etCA.setText(this.configurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_CA_FILE, Configuration.DEFAULT_TLS_CA_FILE));
         this.cbTlsSecAgree.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_SEC_AGREE, Configuration.DEFAULT_TLS_SEC_AGREE));
+        
+        
+        this.addConfigurationListener(this.etAMF);
+        this.addConfigurationListener(this.etOpId);
         
         // local listeners
         this.ibPrivKey.setOnClickListener(this.ibPrivKey_OnClickListener);
         this.ibPubKey.setOnClickListener(this.ibPubKey_OnClickListener);
         this.ibCA.setOnClickListener(this.ibCA_OnClickListener);
         this.cbTlsSecAgree.setOnCheckedChangeListener(this.cbTlsSecAgree_OnCheckedChangeListener);
+        this.cbTlsFiles.setOnCheckedChangeListener(this.cbTlsFiles_OnCheckedChangeListener);
 	}
 	
 	protected void onPause() {
 		if(this.computeConfiguration){
+			
+			this.configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.IMSAKA_AMF, this.etAMF.getText().toString());
+			this.configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.IMSAKA_OPID, this.etOpId.getText().toString());
 			
 			//this.configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PRIV_KEY_FILE, this.etPrivKey.getText().toString());
 			//this.configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PUB_KEY_FILE, this.etPubKey.getText().toString());
@@ -130,16 +150,17 @@ public class ScreenSecurity extends Screen {
 	
 	private OnClickListener ibPrivKey_OnClickListener = new OnClickListener(){
 		public void onClick(View v) {
+			
 			// Files and directories !
 			// Files and directories !
 			
 
-			Intent intent = new Intent(Intent.ACTION_GET_CONTENT); 
-			//intent.setType("file:///sdcard/image/*");  
-			//startActivityForResult(intent, 1);
-			intent.setType("*/*");                    
-			intent.addCategory(Intent.CATEGORY_OPENABLE);          
-			ServiceManager.getMainActivity().startActivityForResult(intent, 1);
+//			Intent intent = new Intent(Intent.ACTION_GET_CONTENT); 
+//			//intent.setType("file:///sdcard/image/*");  
+//			//startActivityForResult(intent, 1);
+//			intent.setType("*/*");                    
+//			intent.addCategory(Intent.CATEGORY_OPENABLE);          
+//			ServiceManager.getMainActivity().startActivityForResult(intent, 1);
 			
 			
 			
@@ -166,7 +187,7 @@ public class ScreenSecurity extends Screen {
 			intent.setDataAndType(directory, "vnd.android.cursor.dir/*");
 			//intent.setDataAndType(directory, "file://");
 			intent.putExtra("browser_list_layout", "2");
-			intent.putExtra("explorer_title", "alors christophe");
+			intent.putExtra("explorer_title", "ça ne marche pas");
 			startActivityForResult(intent, 666);*/
 			
 			//intent.setDataAndType(startDir, "vnd.android.cursor.dir/*");
@@ -185,6 +206,13 @@ public class ScreenSecurity extends Screen {
 	
 	private OnClickListener ibCA_OnClickListener = new OnClickListener(){
 		public void onClick(View v) {
+		}
+	};
+	
+	private OnCheckedChangeListener cbTlsFiles_OnCheckedChangeListener = new OnCheckedChangeListener(){
+		public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
+			ScreenSecurity.this.llTlsFiles.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
+			Toast.makeText(ScreenSecurity.this, "Not implemented", Toast.LENGTH_SHORT).show();
 		}
 	};
 	
