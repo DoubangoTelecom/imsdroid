@@ -213,6 +213,7 @@ class tinyWRAPJNI {
   public final static native boolean SipStack_addHeader(long jarg1, SipStack jarg1_, String jarg2, String jarg3);
   public final static native boolean SipStack_removeHeader(long jarg1, SipStack jarg1_, String jarg2);
   public final static native boolean SipStack_addDnsServer(long jarg1, SipStack jarg1_, String jarg2);
+  public final static native boolean SipStack_setDnsDiscovery(long jarg1, SipStack jarg1_, boolean jarg2);
   public final static native boolean SipStack_setAoR(long jarg1, SipStack jarg1_, String jarg2, int jarg3);
   public final static native boolean SipStack_setSTUNServer(long jarg1, SipStack jarg1_, String jarg2, int jarg3);
   public final static native boolean SipStack_setSTUNCred(long jarg1, SipStack jarg1_, String jarg2, String jarg3);

@@ -46,9 +46,9 @@ public class ScreenNetwork extends Screen {
 	private Spinner spProxyDiscovery;
 	private CheckBox cbSigComp;
 	
-	private final static String[] spinner_ipversion_items = new String[] {Configuration.DEFAULT_IP_VERSION, "IPv6"};
-	private final static String[] spinner_transport_items = new String[] {Configuration.DEFAULT_TRANSPORT.toUpperCase(), "TCP", "TLS", "SCTP"};
-	private final static String[] spinner_proxydiscovery_items = new String[] {Configuration.DEFAULT_PCSCF_DISCOVERY, "DNS NAPTR+SRV", "DHCPv4/v6", "Both"};
+	private final static String[] spinner_ipversion_items = new String[] {Configuration.DEFAULT_IP_VERSION/*, "IPv6"*/};
+	private final static String[] spinner_transport_items = new String[] {Configuration.DEFAULT_TRANSPORT.toUpperCase(), "TCP", /*"TLS", "SCTP"*/};
+	private final static String[] spinner_proxydiscovery_items = new String[] {Configuration.DEFAULT_PCSCF_DISCOVERY, Configuration.PCSCF_DISCOVERY_DNS/*, "DHCPv4/v6", "Both"*/};
 	
 	public ScreenNetwork() {
 		super(SCREEN_TYPE.NETWORK_T, ScreenNetwork.class.getCanonicalName());

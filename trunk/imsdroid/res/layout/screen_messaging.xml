@@ -12,9 +12,10 @@
 <EditText android:layout_below="@+id/screen_messaging_textView_psi" android:layout_height="wrap_content" android:id="@+id/screen_messaging_editText_psi" android:text="sip:smsc@open-ims.test" android:layout_width="fill_parent" android:layout_marginLeft="5px" android:layout_marginRight="5px"></EditText>
 
 <CheckBox android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_binary_sms" android:layout_width="fill_parent" android:layout_below="@+id/screen_messaging_editText_psi" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:text="Enable Binary SMS (RP-DATA)"></CheckBox><CheckBox android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_msrp_success" android:layout_width="fill_parent" android:text="Enable MSRP Success Reports" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:layout_below="@+id/screen_messaging_checkBox_binary_sms"></CheckBox><CheckBox android:layout_below="@+id/screen_messaging_checkBox_msrp_success" android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_msrp_failure" android:text="Enable MSRP Failure Reports" android:layout_width="fill_parent" android:layout_marginLeft="5px" android:layout_marginRight="5px"></CheckBox>
-<CheckBox android:layout_below="@+id/screen_messaging_checkBox_msrp_failure" android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_ofdr" android:text="Enable OMA Final Delivery Reports" android:layout_width="fill_parent" android:layout_marginBottom="10px" android:layout_marginLeft="5px" android:layout_marginRight="5px"></CheckBox>
+<CheckBox android:layout_below="@+id/screen_messaging_checkBox_msrp_failure" android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_ofdr" android:text="Enable OMA Final Delivery Reports" android:layout_width="fill_parent" android:layout_marginLeft="5px" android:layout_marginRight="5px"></CheckBox>
 
 
+<CheckBox android:layout_height="wrap_content" android:layout_below="@+id/screen_messaging_checkBox_ofdr" android:layout_marginLeft="5px" android:layout_width="fill_parent" android:text="Subscribe to message waiting indication" android:id="@+id/screen_messaging_checkBox_mwi"></CheckBox>
 </RelativeLayout>
 
 </ScrollView>
