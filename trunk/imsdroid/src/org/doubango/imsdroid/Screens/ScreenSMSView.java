@@ -22,7 +22,7 @@ package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.HistorySMSEvent;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.utils.UriUtils;
 
 import android.os.Bundle;

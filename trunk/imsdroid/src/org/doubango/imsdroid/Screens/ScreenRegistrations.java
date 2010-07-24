@@ -23,7 +23,7 @@ package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.ISipService;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.events.ISubscriptionEventHandler;
 import org.doubango.imsdroid.events.SubscriptionEventArgs;
 import org.doubango.imsdroid.utils.ContentType;

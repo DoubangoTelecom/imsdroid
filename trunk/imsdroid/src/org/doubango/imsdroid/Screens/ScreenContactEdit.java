@@ -25,7 +25,7 @@ import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.Model.Group.Contact;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;

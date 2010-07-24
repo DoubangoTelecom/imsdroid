@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoFrame;
 import org.doubango.tinyWRAP.tmedia_chroma_t;
