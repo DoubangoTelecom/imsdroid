@@ -42,6 +42,9 @@ public class Configuration {
 		IDENTITY, GENERAL, LTE, NETWORK, QOS, RCS, SECURITY, SESSIONS, MEDIA, NATT, XCAP
 	}
 
+	public static final String PCSCF_DISCOVERY_NONE = "None";
+	public static final String PCSCF_DISCOVERY_DNS = "DNS NAPTR+SRV";
+	
 	// Default values
 	public static final String DEFAULT_DISPLAY_NAME = "johndoe";
 	public static final String DEFAULT_IMPI = "johndoe@open-ims.test";
@@ -67,6 +70,7 @@ public class Configuration {
 	public static final String DEFAULT_RCS_FREE_TEXT = "Hello world";
 	public static final boolean DEFAULT_RCS_MSRP_FAILURE = true;
 	public static final boolean DEFAULT_RCS_MSRP_SUCCESS = false;
+	public static final boolean DEFAULT_RCS_MWI = false;
 	public static final boolean DEFAULT_RCS_OMAFDR = false;
 	public static final boolean DEFAULT_RCS_PARTIAL_PUB = false;
 	public static final boolean DEFAULT_RCS_PRESENCE = false;
@@ -128,7 +132,7 @@ public class Configuration {
 		PRECOND_BANDWIDTH, PRECOND_STRENGTH, PRECOND_TYPE, REFRESHER, SIP_CALLS_TIMEOUT, SIP_SESSIONS_TIMEOUT, SESSION_TIMERS,
 
 		/* === RCS (GSMA Rich Communication Suite) === */
-		AVATAR_PATH, BINARY_SMS, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, STATUS,
+		AVATAR_PATH, BINARY_SMS, CONF_FACT, FREE_TEXT, MSRP_FAILURE, MSRP_SUCCESS, MWI, OMAFDR, PARTIAL_PUB, PRESENCE, RLS, SMSC, STATUS,
 
 		/* === SECURITY === */
 		TLS_CA_FILE, TLS_PRIV_KEY_FILE, TLS_PUB_KEY_FILE, TLS_SEC_AGREE, IMSAKA_AMF, IMSAKA_OPID,

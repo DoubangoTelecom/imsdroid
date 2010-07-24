@@ -31,6 +31,7 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
 import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.imsdroid.Screens.ScreenNetwork;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -296,8 +297,7 @@ implements ISipService, tinyWRAPConstants {
 
 		if (!this.sipStack.setProxyCSCF(this.preferences.pcscf_host, this.preferences.pcscf_port, this.preferences.transport,
 				this.preferences.ipversion)) {
-			Log.e(this.getClass().getCanonicalName(),
-					"Failed to set Proxy-CSCF parameters");
+			Log.e(this.getClass().getCanonicalName(), "Failed to set Proxy-CSCF parameters");
 			return false;
 		}
 
@@ -308,11 +308,15 @@ implements ISipService, tinyWRAPConstants {
 			this.preferences.localIP = ipv6 ? "::" : "10.0.2.15"; /* Probably on the emulator */
 		}
 		if (!this.sipStack.setLocalIP(this.preferences.localIP)) {
-			Log.e(this.getClass().getCanonicalName(),
-					"Failed to set the local IP");
+			Log.e(this.getClass().getCanonicalName(), "Failed to set the local IP");
 			return false;
 		}
 
+		// Whether to use DNS NAPTR+SRV for the Proxy-CSCF discovery (even if the DNS requests are sent only when the stack starts,
+		// should be done after setProxyCSCF())
+		String discoverType = this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_DISCOVERY, Configuration.PCSCF_DISCOVERY_NONE);
+		this.sipStack.setDnsDiscovery(StringUtils.equals(discoverType, Configuration.PCSCF_DISCOVERY_DNS, true));		
+		
 		// enable/disable 3GPP early IMS
 		this.sipStack.setEarlyIMS(this.configurationService.getBoolean(
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.EARLY_IMS,
@@ -336,7 +340,10 @@ implements ISipService, tinyWRAPConstants {
 		this.preferences.presence_enabled = this.configurationService.getBoolean(
 				CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.PRESENCE,
 				Configuration.DEFAULT_RCS_PRESENCE);
-
+		this.preferences.mwi = this.configurationService.getBoolean(
+				CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.MWI,
+				Configuration.DEFAULT_RCS_MWI);
+		
 		// Create registration session
 		if (this.regSession == null) {
 			this.regSession = new MyRegistrationSession(this.sipStack);
@@ -546,17 +553,19 @@ implements ISipService, tinyWRAPConstants {
 			this.subReg.setToUri(this.preferences.impu);
 			this.subReg.setFromUri(this.preferences.impu);
 		}
-		this.subReg.subscribe();
+		this.subReg.subscribe();		
 		
-		// Subscribe to "message-summary" (Message waiting indication)
-		if(this.subMwi == null){
-			this.subMwi = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.MESSAGE_SUMMARY); 
+		// Message Waiting Indication
+		if(this.preferences.mwi){
+			if(this.subMwi == null){
+				this.subMwi = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.MESSAGE_SUMMARY); 
+			}
+			else{
+				this.subMwi.setToUri(this.preferences.impu);
+				this.subMwi.setFromUri(this.preferences.impu);
+			}
+			this.subMwi.subscribe();
 		}
-		else{
-			this.subMwi.setToUri(this.preferences.impu);
-			this.subMwi.setFromUri(this.preferences.impu);
-		}
-		this.subMwi.subscribe();
 		
 		// Presence
 		if(this.preferences.presence_enabled){
@@ -955,7 +964,7 @@ implements ISipService, tinyWRAPConstants {
 		private boolean preslist;
 		private boolean deferredMsg;
 		private boolean presence_enabled;
-		private boolean messageSummary;
+		private boolean mwi;
 		private String impi;
 		private String impu;
 		private String realm;
