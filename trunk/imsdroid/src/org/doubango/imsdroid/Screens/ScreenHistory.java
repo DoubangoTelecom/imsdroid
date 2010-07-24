@@ -32,7 +32,7 @@ import org.doubango.imsdroid.Model.HistorySMSEvent;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.events.HistoryEventArgs;
 import org.doubango.imsdroid.events.IHistoryEventHandler;
 import org.doubango.imsdroid.media.MediaType;

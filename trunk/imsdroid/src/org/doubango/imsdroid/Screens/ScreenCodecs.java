@@ -25,7 +25,7 @@ import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
 

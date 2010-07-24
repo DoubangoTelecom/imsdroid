@@ -24,7 +24,7 @@ import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.Model.HistorySMSEvent;
 import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 
 import android.os.Bundle;
 import android.view.View;

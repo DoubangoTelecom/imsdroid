@@ -21,7 +21,7 @@
 
 package org.doubango.imsdroid.Screens;
 
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.utils.StringUtils;
 
 import android.app.Activity;

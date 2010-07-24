@@ -18,28 +18,30 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+package org.doubango.imsdroid.Services.Impl;
 
-package org.doubango.imsdroid.Screens;
+import org.doubango.imsdroid.Main;
+import org.doubango.imsdroid.Services.IStorageService;
 
-import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Services.Impl.ServiceManager;
+public class StorageService  extends Service implements IStorageService{
 
-import android.os.Bundle;
-
-public class ScreenFileTransferQueue  extends Screen{
-
-	private final IConfigurationService configurationService;
+	private final String currentDir;
 	
-	public ScreenFileTransferQueue() {
-		super(SCREEN_TYPE.FILE_TRANSFER_QUEUE_T, ScreenFileTransferQueue.class.getCanonicalName());
-		
-		this.configurationService = ServiceManager.getConfigurationService();
+	public StorageService(){
+		this.currentDir = String.format("/data/data/%s", Main.class.getPackage().getName());
 	}
 	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-        setContentView(R.layout.screen_file_transfer_queue);
+	public boolean start() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	public boolean stop() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	public String getCurrentDir(){
+		return this.currentDir;
 	}
 }

@@ -23,7 +23,7 @@ package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.media.MediaType;
 
 import android.os.Bundle;

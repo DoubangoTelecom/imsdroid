@@ -40,13 +40,13 @@
 <activity android:name=".Screens.ScreenHistory"></activity>
 <activity android:name=".Screens.ScreenRegistrations"></activity>
 
-<service android:name=".Sevices.Impl.ServiceManager"></service>
+<service android:name=".Services.Impl.ServiceManager"></service>
 <activity android:name=".Screens.ScreenAuthorizations"></activity>
 <activity android:name=".Screens.ScreenContactView"></activity>
 <activity android:name=".Screens.ScreenDialer"></activity>
 <activity android:name=".Screens.ScreenAV"></activity>
 
-<service android:name=".Sevices.Impl.ServiceManager" android:enabled="true"></service>
+<service android:name=".Services.Impl.ServiceManager" android:enabled="true"></service>
 <activity android:name=".Screens.ScreenContactEdit"></activity>
 
 <activity android:name=".Screens.ScreenCodecs"></activity>
