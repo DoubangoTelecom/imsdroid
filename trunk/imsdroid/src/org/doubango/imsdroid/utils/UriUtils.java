@@ -21,14 +21,18 @@
 
 package org.doubango.imsdroid.utils;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Group;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Sevices.Impl.ServiceManager;
+import org.doubango.tinyWRAP.SipUri;
 
 public class UriUtils {
 
+	private final static long MAX_PHONE_NUMBER = 1000000000000L;
+	private final static String INVALID_SIP_URI = "sip:invalid@open-ims.tes";
+	
 	public static String getDisplayName(String uri){
 		String displayname = null;
 		Group.Contact contact = ServiceManager.getContactService().getContact(uri);
@@ -36,18 +40,65 @@ public class UriUtils {
 			return displayname;
 		}
 		
-		URI myUri;
-		try {
-			myUri = new URI(uri);
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return uri;
+		SipUri sipUri = new SipUri(uri);
+		if(sipUri.isValid()){
+			displayname = sipUri.getUserName();
 		}
-		
-		if((displayname = myUri.getRawUserInfo()) != null){
-			return displayname;
-		}
+		sipUri.delete();
 		
 		return displayname;
+	}
+	
+	public static boolean isValidSipUri(String uri){
+		return SipUri.isValid(uri);
+	}
+	
+	// Very very basic
+	public static String makeValidSipUri(String uri){
+		if(StringUtils.isNullOrEmpty(uri)){
+			return UriUtils.INVALID_SIP_URI;
+		}
+		if(uri.startsWith("sip:") || uri.startsWith("sip:") || uri.startsWith("tel:")){
+			//FIXME
+			return uri;
+		}
+		else{
+			if(uri.contains("@")){
+				return String.format("sip:%s", uri);
+			}
+			else{
+				String realm = ServiceManager.getConfigurationService().getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.REALM, Configuration.DEFAULT_REALM);
+				if(realm.contains(":")){
+					realm = realm.substring(realm.indexOf(":")+1);
+				}
+				return String.format("sip:%s@%s", uri, realm);
+			}
+		}
+	}
+	
+	public static String getValidPhoneNumber(String uri){
+		SipUri sipUri = new SipUri(uri);
+		if(sipUri.isValid()){
+			String userName = sipUri.getUserName();
+			if(userName != null){
+				try{
+					String scheme = sipUri.getScheme();
+					if(scheme != null && scheme.equals("tel")){
+						userName = userName.replace("-", "");
+					}
+					long result = Long.parseLong(userName.startsWith("+") ? userName.substring(1) : userName);
+					if(result < UriUtils.MAX_PHONE_NUMBER){
+						return userName;
+					}
+				}
+				catch (Exception e){
+					e.printStackTrace();
+				}
+				finally{
+					sipUri.delete();
+				}
+			}
+		}
+		return null;
 	}
 }

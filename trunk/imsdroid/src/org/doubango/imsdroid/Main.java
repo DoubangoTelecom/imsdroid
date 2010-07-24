@@ -37,7 +37,7 @@
  * Audio Recorder/Trac: http://stackoverflow.com/questions/2416365/android-how-to-add-my-own-audio-codec-to-audiorecord
  * 						http://androidforums.com/android-media/8974-can-system-sleep-while-audiorecord-recording.html
  * 						-->http://groups.google.co.in/group/android-developers/browse_thread/thread/1bf74961d3480bde
- * Video Recoder:		onPreviewFrame(byte[] data, Camera camera) 
+ * Video Recorder:		onPreviewFrame(byte[] data, Camera camera) 
  * 
  * Media Formats: http://developer.android.com/guide/appendix/media-formats.html
  * Android FFMPeg: http://oo-androidnews.blogspot.com/2010/02/ffmpeg-and-androidmk.html
@@ -51,7 +51,6 @@ import java.io.File;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
-import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenPresence;
@@ -186,8 +185,8 @@ implements IRegistrationEventHandler
         /* shows the home screen */
         this.screenService.show(ScreenHome.class);
         
-        //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+        //setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override
@@ -234,7 +233,30 @@ implements IRegistrationEventHandler
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return this.screenService.getCurrentScreen().onOptionsItemSelected(item);
-	}
+	}	
+	
+//	@Override
+//	protected void onResume() {
+//		// TODO Auto-generated method stub
+//		super.onResume();
+//		
+//		AudioManager manager = ((AudioManager)getSystemService(Context.AUDIO_SERVICE));
+//		
+//		
+//		manager.setMode(AudioManager.MODE_IN_CALL);
+//		manager.setSpeakerphoneOn(false);
+//		manager.setRouting(AudioManager.MODE_IN_CALL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
+//		setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+//		manager.setMode(AudioManager.MODE_IN_CALL);
+//		
+//		//manager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+//		//manager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, manager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)/10, 0);
+//		manager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
+//		
+//		//setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+//		//manager.setMode(AudioManager.MODE_IN_CALL);
+//		//manager.setSpeakerphoneOn(false);
+//	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {		
@@ -332,7 +354,7 @@ implements IRegistrationEventHandler
 			case REGISTRATION_OK:
 			this.handler.post(new Runnable() {
 				public void run() {
-					Main.this.progressInfoText = String.format("Registration: %s", phrase);
+					Main.this.progressInfoText = String.format("Registered: %s", phrase);
 					Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 					
 					//Main.this.rlTop.setVisibility(View.VISIBLE);
@@ -343,7 +365,7 @@ implements IRegistrationEventHandler
 			case UNREGISTRATION_OK:
 				this.handler.post(new Runnable() {
 					public void run() {
-						Main.this.progressInfoText = String.format("Unregistration: %s", phrase);
+						Main.this.progressInfoText = String.format("UnRegistered: %s", phrase);
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 						
 						ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are disconnected");

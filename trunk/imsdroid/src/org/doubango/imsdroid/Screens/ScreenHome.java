@@ -23,6 +23,7 @@ package org.doubango.imsdroid.Screens;
 
 import java.util.ArrayList;
 
+import org.doubango.imsdroid.CustomDialog;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -173,20 +174,24 @@ implements IRegistrationEventHandler
 						}
 					}
 					else if(position == ScreenHome.itemExitPosition){
-						AlertDialog.Builder builder = new AlertDialog.Builder(ScreenHome.this);
-						builder.setMessage("Are you sure you want to exit?")
-						       .setCancelable(false)
-						       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-						           public void onClick(DialogInterface dialog, int id) {
-						                ServiceManager.getMainActivity().exit();
-						           }
-						       })
-						       .setNegativeButton("No", new DialogInterface.OnClickListener() {
-						           public void onClick(DialogInterface dialog, int id) {
-						                dialog.cancel();
-						           }
-						       });
-						builder.create().show();
+						CustomDialog.show(
+								ScreenHome.this,
+								R.drawable.exit_48,
+								null,
+								"Are you sure you want to exit?",
+								"Yes",
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										ServiceManager.getMainActivity().exit();
+									}
+								}, "No",
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										dialog.cancel();
+									}
+								});
 					}
 					else{
 						String currentAVCall;

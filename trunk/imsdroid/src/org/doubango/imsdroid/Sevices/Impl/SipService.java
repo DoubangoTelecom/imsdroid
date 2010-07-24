@@ -23,6 +23,7 @@ package org.doubango.imsdroid.Sevices.Impl;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.doubango.imsdroid.CustomDialog;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.HistorySMSEvent;
@@ -54,6 +55,7 @@ import org.doubango.imsdroid.sip.MySipStack.STACK_STATE;
 import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.imsdroid.utils.StringUtils;
+import org.doubango.imsdroid.utils.UriUtils;
 import org.doubango.tinyWRAP.CallEvent;
 import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.DDebugCallback;
@@ -63,11 +65,14 @@ import org.doubango.tinyWRAP.MessagingSession;
 import org.doubango.tinyWRAP.OptionsEvent;
 import org.doubango.tinyWRAP.OptionsSession;
 import org.doubango.tinyWRAP.PublicationEvent;
+import org.doubango.tinyWRAP.RPData;
 import org.doubango.tinyWRAP.RegistrationEvent;
+import org.doubango.tinyWRAP.SMSEncoder;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.SipStack;
+import org.doubango.tinyWRAP.StackEvent;
 import org.doubango.tinyWRAP.SubscriptionEvent;
 import org.doubango.tinyWRAP.SubscriptionSession;
 import org.doubango.tinyWRAP.tinyWRAPConstants;
@@ -76,6 +81,8 @@ import org.doubango.tinyWRAP.tsip_message_event_type_t;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
 import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.ConditionVariable;
 import android.util.Log;
 
@@ -111,6 +118,8 @@ implements ISipService, tinyWRAPConstants {
 	private final DDebugCallback debugCallback;
 
 	private ConditionVariable condHack;
+	
+	private static int SMS_MR = 0;
 
 	public SipService() {
 		super();
@@ -207,7 +216,7 @@ implements ISipService, tinyWRAPConstants {
 				"realm=%s, impu=%s, impi=%s", this.preferences.realm, this.preferences.impu, this.preferences.impi));
 
 		if (this.sipStack == null) {
-			this.sipStack = new MySipStack(this.sipCallback, this.preferences.realm, this.preferences.impi, this.preferences.impu);
+			this.sipStack = new MySipStack(this.sipCallback, this.preferences.realm, this.preferences.impi, this.preferences.impu);	
 			this.sipStack.setDebugCallback(this.debugCallback);
 			SipStack.setCodecs_2(this.configurationService.getInt(CONFIGURATION_SECTION.MEDIA, 
 	        		CONFIGURATION_ENTRY.CODECS, Configuration.DEFAULT_MEDIA_CODECS));
@@ -231,12 +240,43 @@ implements ISipService, tinyWRAPConstants {
 				CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.PASSWORD,
 				null));
 		
+		// Set AMF
+		this.sipStack.setAMF(this.configurationService.getString(
+				CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.IMSAKA_AMF,
+				Configuration.DEFAULT_IMSAKA_AMF));
+		
+		// Set Operator Id
+		this.sipStack.setOperatorId(this.configurationService.getString(
+				CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.IMSAKA_OPID,
+				Configuration.DEFAULT_IMSAKA_OPID));
+		
 		// Check stack validity
 		if (!this.sipStack.isValid()) {
 			Log.e(this.getClass().getCanonicalName(), "Trying to use invalid stack");
 			return false;
 		}
 
+		// Set STUN information
+		if(this.configurationService.getBoolean(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.USE_STUN, Configuration.DEFAULT_NATT_USE_STUN)){			
+			if(this.configurationService.getBoolean(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.STUN_DISCO, Configuration.DEFAULT_NATT_STUN_DISCO)){
+				String domain = this.preferences.realm.substring(this.preferences.realm.indexOf(':')+1);
+				int []port = new int[1];
+				String server = this.sipStack.dnsSrv(String.format("_stun._udp.%s", domain), port);
+				if(server == null){
+					ServiceManager.getScreenService().setProgressInfoText("STUN discovery has failed");
+				}
+				this.sipStack.setSTUNServer(server, port[0]);// Needed event if null
+			}
+			else{
+				String server = this.configurationService.getString(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.STUN_SERVER, Configuration.DEFAULT_NATT_STUN_SERVER);
+				int port = this.configurationService.getInt(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.STUN_PORT, Configuration.DEFAULT_NATT_STUN_PORT);
+				this.sipStack.setSTUNServer(server, port);
+			}
+		}
+		else{
+			this.sipStack.setSTUNServer(null, 0);
+		}
+		
 		// Set Proxy-CSCF
 		this.preferences.pcscf_host = this.configurationService.getString(
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST,
@@ -334,8 +374,7 @@ implements ISipService, tinyWRAPConstants {
 		}
 
 		if (!this.regSession.register()) {
-			Log.e(this.getClass().getCanonicalName(),
-					"Failed to send REGISTER request");
+			Log.e(SipService.TAG, "Failed to send REGISTER request");
 			return false;
 		}
 
@@ -377,14 +416,36 @@ implements ISipService, tinyWRAPConstants {
 			return false;
 		}
 		
+		final boolean ret;
 		final MessagingSession session = new MessagingSession(this.sipStack);
-		session.setToUri(remoteUri);
-		session.addHeader("Content-Type", contentType);
+		final boolean binarySMS = this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.BINARY_SMS, Configuration.DEFAULT_RCS_BINARY_SMS);
+		final String SMSC = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.SMSC, Configuration.DEFAULT_RCS_SMSC);
+		final String SMSCPhoneNumber;
+		final String dstPhoneNumber;
 		
-		final ByteBuffer payload = ByteBuffer.allocateDirect(content.length);
-		payload.put(content);
-		final boolean ret = session.send(payload, content.length);
-		
+		if(binarySMS && (SMSCPhoneNumber = UriUtils.getValidPhoneNumber(SMSC)) != null && (dstPhoneNumber = UriUtils.getValidPhoneNumber(remoteUri)) != null){
+			session.setToUri(SMSC);
+			session.addHeader("Content-Type", "application/vnd.3gpp.sms");
+			session.addHeader("Transfer-Encoding", "binary");
+			
+			RPData rpdata = SMSEncoder.encodeSubmit(++SipService.SMS_MR, SMSCPhoneNumber, dstPhoneNumber, new String(content));
+			long payloadLength = rpdata.getPayloadLength();
+			final ByteBuffer payload = ByteBuffer.allocateDirect((int)payloadLength);
+			payloadLength = rpdata.getPayload(payload, payload.capacity());
+			ret = session.send(payload, payloadLength);
+			
+			if(SipService.SMS_MR >= 255){
+				SipService.SMS_MR = 0;
+			}
+		}
+		else{
+			session.setToUri(remoteUri);
+			session.addHeader("Content-Type", contentType);
+			
+			final ByteBuffer payload = ByteBuffer.allocateDirect(content.length);
+			payload.put(content);
+			ret = session.send(payload, content.length);
+		}
 		session.delete();
 		
 		return ret;
@@ -743,25 +804,54 @@ implements ISipService, tinyWRAPConstants {
 					// ...
 					break;
 					
-					
-				case tsip_event_code_stack_started:
-					this.sipService.sipStack.setState(STACK_STATE.STARTED);
-					break;
-				case tsip_event_code_stack_stopped:
-					this.sipService.sipStack.setState(STACK_STATE.STOPPED);
-					break;
-					
 				default:
 					break;
 			}
 			
 			return 0;
-		}
+		}	
 		
+		@Override
+		public int OnStackEvent(StackEvent e) {
+			//final String phrase = e.getPhrase();
+			final short code = e.getCode();
+			switch(code){
+				case tsip_event_code_stack_started:
+					this.sipService.sipStack.setState(STACK_STATE.STARTED);
+					Log.d(SipService.TAG, "Stack started");
+					break;
+				case tsip_event_code_stack_failed_to_start:
+					final String phrase = e.getPhrase();
+					ServiceManager.getScreenService().runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							CustomDialog.show(ServiceManager.getMainActivity(), R.drawable.delete_48, "Failed to start the IMS stack", 
+									String.format("\nPlease check your connection information. \nAdditional info:\n%s", phrase),
+											"OK", new DialogInterface.OnClickListener(){
+												@Override
+												public void onClick(DialogInterface dialog, int which) {
+												}
+									}, null, null);
+						}
+					});
+										
+					Log.e(SipService.TAG, "Failed to start the stack");
+					break;
+				case tsip_event_code_stack_failed_to_stop:
+					Log.e(SipService.TAG, "Failed to stop the stack");
+					break;
+				case tsip_event_code_stack_stopped:
+					this.sipService.sipStack.setState(STACK_STATE.STOPPED);
+					Log.d(SipService.TAG, "Stack stoped");
+					break;
+			}
+			return 0;
+		}
+
 		@Override
 		public int OnCallEvent(CallEvent e) {
 			//short code = e.getCode();
-			String phrase = "e.getPhrase()";
+			String phrase = e.getPhrase();
 			tsip_invite_event_type_t type = e.getType();
 			//SipMessage message = e.getSipMessage();
 			CallSession session = e.getSession();
@@ -800,6 +890,9 @@ implements ISipService, tinyWRAPConstants {
 				case tsip_o_ect_ok:
 				case tsip_o_ect_nok:
 				case tsip_i_ect:
+					break;
+				case tsip_m_early_media:
+					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.EARLY_MEDIA, phrase));
 					break;
 				case tsip_m_local_hold_ok:
 					this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.LOCAL_HOLD_OK, phrase));

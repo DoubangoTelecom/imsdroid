@@ -8,48 +8,40 @@
 
 package org.doubango.tinyWRAP;
 
-public enum tsip_invite_event_type_t {
-  tsip_i_newcall,
-  tsip_i_request,
-  tsip_ao_request,
-  tsip_o_ect_ok,
-  tsip_o_ect_nok,
-  tsip_i_ect,
-  tsip_m_early_media,
-  tsip_m_local_hold_ok,
-  tsip_m_local_hold_nok,
-  tsip_m_local_resume_ok,
-  tsip_m_local_resume_nok,
-  tsip_m_remote_hold,
-  tsip_m_remote_resume;
+public enum twrap_rpdata_type_t {
+  twrap_rpdata_type_sms_none,
+  twrap_rpdata_type_sms_submit,
+  twrap_rpdata_type_sms_deliver,
+  twrap_rpdata_type_sms_status_report,
+  twrap_rpdata_type_sms_command;
 
   public final int swigValue() {
     return swigValue;
   }
 
-  public static tsip_invite_event_type_t swigToEnum(int swigValue) {
-    tsip_invite_event_type_t[] swigValues = tsip_invite_event_type_t.class.getEnumConstants();
+  public static twrap_rpdata_type_t swigToEnum(int swigValue) {
+    twrap_rpdata_type_t[] swigValues = twrap_rpdata_type_t.class.getEnumConstants();
     if (swigValue < swigValues.length && swigValue >= 0 && swigValues[swigValue].swigValue == swigValue)
       return swigValues[swigValue];
-    for (tsip_invite_event_type_t swigEnum : swigValues)
+    for (twrap_rpdata_type_t swigEnum : swigValues)
       if (swigEnum.swigValue == swigValue)
         return swigEnum;
-    throw new IllegalArgumentException("No enum " + tsip_invite_event_type_t.class + " with value " + swigValue);
+    throw new IllegalArgumentException("No enum " + twrap_rpdata_type_t.class + " with value " + swigValue);
   }
 
   @SuppressWarnings("unused")
-  private tsip_invite_event_type_t() {
+  private twrap_rpdata_type_t() {
     this.swigValue = SwigNext.next++;
   }
 
   @SuppressWarnings("unused")
-  private tsip_invite_event_type_t(int swigValue) {
+  private twrap_rpdata_type_t(int swigValue) {
     this.swigValue = swigValue;
     SwigNext.next = swigValue+1;
   }
 
   @SuppressWarnings("unused")
-  private tsip_invite_event_type_t(tsip_invite_event_type_t swigEnum) {
+  private twrap_rpdata_type_t(twrap_rpdata_type_t swigEnum) {
     this.swigValue = swigEnum.swigValue;
     SwigNext.next = this.swigValue+1;
   }

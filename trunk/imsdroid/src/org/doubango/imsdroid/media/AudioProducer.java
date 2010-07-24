@@ -32,7 +32,7 @@ import android.util.Log;
 public class AudioProducer {
 
 	private static String TAG = AudioProducer.class.getCanonicalName();
-	private static int factor = 20;
+	private static int factor = 10;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
@@ -102,18 +102,16 @@ public class AudioProducer {
 			
 			AudioProducer.this.recorder.startRecording();
 			int size = AudioProducer.this.shorts_per_notif*2;
+			int read;
 			
 			while(AudioProducer.this.running){
-				
-				if(AudioProducer.this.proxyAudioProducer == null || AudioProducer.this.recorder == null){
+				if(AudioProducer.this.recorder == null){
 					break;
 				}
 				
-				final int read = AudioProducer.this.recorder.read(AudioProducer.this.chunck, size);
-				if(read > 0){
+				 if((read = AudioProducer.this.recorder.read(AudioProducer.this.chunck, size)) > 0){
 					AudioProducer.this.proxyAudioProducer.push(AudioProducer.this.chunck, read);
 				}
-				AudioProducer.this.chunck.rewind();
 			}
 			
 			if(AudioProducer.this.recorder != null){

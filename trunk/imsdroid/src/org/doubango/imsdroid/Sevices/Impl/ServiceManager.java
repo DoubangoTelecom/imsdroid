@@ -129,7 +129,11 @@ public class ServiceManager  extends Service {
         
         switch(notifId){
         	case NOTIF_REGISTRATION_ID:
-        		notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        		//notification.ledARGB = 0xff00ff00;
+        		//notification.ledOnMS = 300;
+        		//notification.ledOffMS = 1000;
+        		notification.flags |= Notification.FLAG_ONGOING_EVENT /*| Notification.FLAG_SHOW_LIGHTS*/;
+        		//notification.defaults |= Notification.DEFAULT_SOUND;
         		intent.putExtra("notif-type", "reg");
         		/* Main activity already onTop -> do not pass the screen Id */
         		break;
