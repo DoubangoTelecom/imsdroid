@@ -21,6 +21,7 @@
 package org.doubango.imsdroid.Services.Impl;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.doubango.imsdroid.CustomDialog;
@@ -322,9 +323,14 @@ implements ISipService, tinyWRAPConstants {
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.EARLY_IMS,
 				Configuration.DEFAULT_EARLY_IMS));
 		
-
-		// Set stack-level headers
-		// Supported, Access-Network, Preferred-Identity, ...
+		// SigComp (only update compartment Id if changed)
+		if(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, Configuration.DEFAULT_SIGCOMP)){
+			String compId = String.format("urn:uuid:%s", UUID.randomUUID().toString());
+			this.sipStack.setSigCompId(compId);
+		}
+		else{
+			this.sipStack.setSigCompId(null);
+		}
 
 		// Start the Stack
 		if (!this.sipStack.start()) {
@@ -348,7 +354,10 @@ implements ISipService, tinyWRAPConstants {
 		if (this.regSession == null) {
 			this.regSession = new MyRegistrationSession(this.sipStack);
 		}
-
+		else{
+			this.regSession.setSigCompId(this.sipStack.getSigCompId());
+		}
+		
 		// Set/update From URI. For Registration ToUri should be equals to realm
 		// (done by the stack)
 		this.regSession.setFromUri(this.preferences.impu);
@@ -428,6 +437,10 @@ implements ISipService, tinyWRAPConstants {
 		final String SMSC = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.SMSC, Configuration.DEFAULT_RCS_SMSC);
 		final String SMSCPhoneNumber;
 		final String dstPhoneNumber;
+		
+		if(this.sipStack.getSigCompId() != null){
+			session.addSigCompCompartment(this.sipStack.getSigCompId());
+		}
 		
 		if(binarySMS && (SMSCPhoneNumber = UriUtils.getValidPhoneNumber(SMSC)) != null && (dstPhoneNumber = UriUtils.getValidPhoneNumber(remoteUri)) != null){
 			session.setToUri(SMSC);
@@ -563,6 +576,7 @@ implements ISipService, tinyWRAPConstants {
 			else{
 				this.subMwi.setToUri(this.preferences.impu);
 				this.subMwi.setFromUri(this.preferences.impu);
+				this.subMwi.setSigCompId(this.sipStack.getSigCompId());
 			}
 			this.subMwi.subscribe();
 		}
@@ -578,6 +592,7 @@ implements ISipService, tinyWRAPConstants {
 				else{
 					this.subWinfo.setToUri(this.preferences.impu);
 					this.subWinfo.setFromUri(this.preferences.impu);
+					this.subMwi.setSigCompId(this.sipStack.getSigCompId());
 				}
 				this.subWinfo.subscribe();
 				// "eventlist"
@@ -590,9 +605,11 @@ implements ISipService, tinyWRAPConstants {
 			if(this.pubPres == null){
 				this.pubPres = new MyPublicationSession(this.sipStack, this.preferences.impu);
 			}
-			
-			this.pubPres.setFromUri(this.preferences.impu);
-			this.pubPres.setToUri(this.preferences.impu);
+			else{
+				this.pubPres.setFromUri(this.preferences.impu);
+				this.pubPres.setToUri(this.preferences.impu);
+				this.subMwi.setSigCompId(this.sipStack.getSigCompId());
+			}
 			
 			String freeText = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT);
 			PresenceStatus status = Enum.valueOf(PresenceStatus.class, this.configurationService.getString(

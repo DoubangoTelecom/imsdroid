@@ -34,19 +34,26 @@ public abstract class MySipSession implements Comparable<MySipSession>{
 	protected final IConfigurationService configurationService;
 	
 	//
+	protected MySipStack sipStack;
 	protected boolean connected;
 	protected String fromUri;
 	protected String toUri;
+	protected String compId;
 	
-	public MySipSession() {
+	public MySipSession(MySipStack sipStack) {
 				
 		this.configurationService = ServiceManager.getConfigurationService();
+		this.sipStack = sipStack;
 		/* init must be called by the child class after session_create() */
 		/* this.init(); */
 	}
 	
 	public long getId(){
 		return this.getSession().getId();
+	}
+	
+	public MySipStack getStack(){
+		return this.sipStack;
 	}
 	
 	public boolean isConnected(){
@@ -75,6 +82,15 @@ public abstract class MySipSession implements Comparable<MySipSession>{
 		boolean ret = this.getSession().setToUri(fromUri);
 		this.toUri = toUri;
 		return ret;
+	}
+	
+	public void setSigCompId(String compId){
+		if(this.compId != null && this.compId != compId){
+			this.getSession().removeSigCompCompartment();
+		}
+		if((this.compId = compId) != null){
+			this.getSession().addSigCompCompartment(this.compId);
+		}
 	}
 	
 	protected void init(){

@@ -35,6 +35,7 @@ public class MySipStack extends SipStack {
 	}
 	private final INetworkService networkService;
 	private STACK_STATE state = STACK_STATE.NONE;
+	private String compId;
 		
 	public MySipStack(SipCallback callback, String realmUri, String impiUri, String impuUri) {
 		super(callback, realmUri, impiUri, impuUri);
@@ -80,5 +81,18 @@ public class MySipStack extends SipStack {
 	
 	public STACK_STATE getState(){
 		return this.state;
+	}
+	
+	public String getSigCompId(){
+		return this.compId;
+	}
+	
+	public void setSigCompId(String compId){
+		if(this.compId != null && this.compId != compId){
+			this.removeSigCompCompartment(this.compId);
+		}
+		if((this.compId = compId) != null){
+			this.addSigCompCompartment(this.compId);
+		}
 	}
 }

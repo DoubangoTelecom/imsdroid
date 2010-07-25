@@ -35,13 +35,16 @@ public class MySubscriptionSession extends MySipSession{
 	}
 	
 	public MySubscriptionSession(MySipStack sipStack, String toUri, EVENT_PACKAGE_TYPE eventPackage) {
-		super();
+		super(sipStack);
 		
 		this.session = new SubscriptionSession(sipStack);
 		this.eventPackage = eventPackage;
 		
 		// commons
 		this.init();
+		
+		// SigComp
+		this.setSigCompId(sipStack.getSigCompId());
 		
 		switch(eventPackage){
 			case CONFERENCE:
