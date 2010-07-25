@@ -98,7 +98,7 @@ public class AudioProducer {
 		public void run() {
 			Log.d(AudioProducer.TAG, "Audio Recorder ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
 			AudioProducer.this.recorder.startRecording();
 			int size = AudioProducer.this.shorts_per_notif*2;

@@ -102,7 +102,7 @@ public class ScreenNetwork extends Screen {
 						CONFIGURATION_ENTRY.PCSCF_DISCOVERY,
 						ScreenNetwork.spinner_proxydiscovery_items[0]),
 				ScreenNetwork.spinner_proxydiscovery_items));
-        this.cbSigComp.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, false));
+        this.cbSigComp.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, Configuration.DEFAULT_SIGCOMP));
         
         // add listeners (for the configuration)
         this.addConfigurationListener(this.spIPversion);

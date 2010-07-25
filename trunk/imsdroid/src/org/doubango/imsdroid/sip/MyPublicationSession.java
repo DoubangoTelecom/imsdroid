@@ -60,13 +60,17 @@ public class MyPublicationSession  extends MySipSession{
 			"</presence>";
 	
 	public MyPublicationSession(MySipStack sipStack, String toUri) {
-		super();
+		super(sipStack);
 		
 		this.session = new PublicationSession(sipStack);
 		
 		// commons
 		this.init();
 		
+		// SigComp
+		this.setSigCompId(sipStack.getSigCompId());
+		
+		// headers
 		this.session.addHeader("Event", "presence");
 		this.session.addHeader("Content-Type", ContentType.PIDF);
 		

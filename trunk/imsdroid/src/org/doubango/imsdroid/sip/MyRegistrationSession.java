@@ -29,12 +29,15 @@ public class MyRegistrationSession extends MySipSession {
 	private final RegistrationSession session;
 	
 	public MyRegistrationSession(MySipStack sipStack) {
-		super();
+		super(sipStack);
 		
 		this.session = new RegistrationSession(sipStack);
 		
 		// commons
 		this.init();
+		
+		// SigComp
+		this.setSigCompId(sipStack.getSigCompId());
 		
 		/* support for 3GPP SMS over IP */
 		this.session.addCaps("+g.3gpp.smsip");

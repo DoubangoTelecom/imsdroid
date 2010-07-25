@@ -97,7 +97,7 @@ public class MyAVSession  extends MySipSession{
 	}
 	
 	public MyAVSession(MySipStack sipStack, CallSession session, MediaType mediaType) {
-		super();
+		super(sipStack);
 		
 		this.session = (session == null) ? new CallSession(sipStack) : session;
 		this.mediaType = mediaType;
@@ -106,6 +106,9 @@ public class MyAVSession  extends MySipSession{
 		
 		// commons
 		this.init();
+		
+		// SigComp
+		this.setSigCompId(sipStack.getSigCompId());
 		
 		// 100rel
 		this.session.set100rel(true); // will add "Supported: 100rel"
