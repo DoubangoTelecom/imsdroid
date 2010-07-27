@@ -51,9 +51,11 @@ import java.io.File;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
-import org.doubango.imsdroid.Screens.ScreenHistory;
+import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenPresence;
+import org.doubango.imsdroid.Screens.Screen.SCREEN_TYPE;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -101,6 +103,10 @@ implements IRegistrationEventHandler
     private ImageView ivAvatar;
    
     private final Handler handler;
+    
+    public static final int ACTION_NONE = 0;
+    public static final int ACTION_SHOW_AVSCREEN = 1;
+    public static final int ACTION_RESTORE_LAST_STATE = 2;
     
     public Main()
     {
@@ -167,14 +173,6 @@ implements IRegistrationEventHandler
        if(new File(avatarPath).exists()){
     	   this.ivAvatar.setImageURI(new Uri.Builder().path(avatarPath).build());
        }
-       // try {
-        //	   FileOutputStream fos = super.openFileOutput("avatar.png", MODE_WORLD_READABLE);
-       // 	   mBitmap.compress(CompressFormat.JPEG, 75, fos);
-        //	   fos.flush();
-       // 	   fos.close();
-      //  	   } catch (Exception e) {
-      //  	   Log.e("MyLog", e.toString());
-      //  	}
 
         // set event listeners
         this.ivStatus.setOnClickListener(this.ivStatus_OnClickListener);
@@ -182,14 +180,25 @@ implements IRegistrationEventHandler
         // add event handlers
         this.sipService.addRegistrationEventHandler(this);
         
-        /* shows the home screen */
-        this.screenService.show(ScreenHome.class);
+        Bundle bundle = savedInstanceState;
+        if(bundle == null){
+	        Intent intent = getIntent();
+	        bundle = intent == null ? null : intent.getExtras();
+        }
         
+        if(bundle != null && bundle.getInt("action", Main.ACTION_NONE) != Main.ACTION_NONE){
+        	this.handleAction(bundle);
+        }
+        else{
+            /* shows the home screen */
+            this.screenService.show(ScreenHome.class);
+        }
+                
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
         //setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
-    @Override
+	@Override
 	protected void onDestroy() {
         // remove event handlers : do it after stop() to continue to receive Sip events
         this.sipService.removeRegistrationEventHandler(this);
@@ -202,14 +211,17 @@ implements IRegistrationEventHandler
 	
 	@Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			this.screenService.back();
-			return true;
-		}
-		else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
-			if(!this.screenService.getCurrentScreen().haveMenu()){
-				this.screenService.show(ScreenHome.class);
+		Screen current = this.screenService.getCurrentScreen();
+		if(current != null){
+			if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && current.getType() != SCREEN_TYPE.HOME_T) {
+				this.screenService.back();
 				return true;
+			}
+			else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
+				if(!current.haveMenu()){
+					this.screenService.show(ScreenHome.class);
+					return true;
+				}
 			}
 		}
 		return super.onKeyDown(keyCode, event);
@@ -234,33 +246,17 @@ implements IRegistrationEventHandler
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return this.screenService.getCurrentScreen().onOptionsItemSelected(item);
 	}	
-	
-//	@Override
-//	protected void onResume() {
-//		// TODO Auto-generated method stub
-//		super.onResume();
-//		
-//		AudioManager manager = ((AudioManager)getSystemService(Context.AUDIO_SERVICE));
-//		
-//		
-//		manager.setMode(AudioManager.MODE_IN_CALL);
-//		manager.setSpeakerphoneOn(false);
-//		manager.setRouting(AudioManager.MODE_IN_CALL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
-//		setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-//		manager.setMode(AudioManager.MODE_IN_CALL);
-//		
-//		//manager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
-//		//manager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, manager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)/10, 0);
-//		manager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
-//		
-//		//setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-//		//manager.setMode(AudioManager.MODE_IN_CALL);
-//		//manager.setSpeakerphoneOn(false);
-//	}
 
 	@Override
-	protected void onNewIntent(Intent intent) {		
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		
 		Bundle bundle = intent.getExtras();
+		if(bundle != null){
+			this.handleAction(bundle);
+		}
+		
+		/*Bundle bundle = intent.getExtras();
 		String ID = null;
 		if(bundle != null){
 			ID = bundle.getString("SCREEN_ID");
@@ -274,16 +270,20 @@ implements IRegistrationEventHandler
 			else{
 				this.screenService.show(ID);
 			}
-		}
+		}*/
 		
-		setIntent(intent);
-		super.onNewIntent(intent);
+		//setIntent(intent);
 	}
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putString("SCREEN_ID", this.screenService.getCurrentScreen().getId().toString());
 		outState.putString("progressInfoText", this.progressInfoText);
+		Screen screen = this.screenService.getCurrentScreen();
+		if(screen != null){
+			outState.putInt("action", Main.ACTION_RESTORE_LAST_STATE);
+			outState.putString("screen-id", screen.getId());
+			outState.putString("screen-type", screen.getType().toString());
+		}
 		
 		super.onSaveInstanceState(outState);
 	}
@@ -291,18 +291,8 @@ implements IRegistrationEventHandler
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		String ID = savedInstanceState.getString("SCREEN_ID");
-		if(ID != null){
-			this.screenService.show(ID);
-		}
-		
-		//this.rlTop.setVisibility(this.sipService.isRegistered() ? View.VISIBLE : View.INVISIBLE);
-		this.progressInfoText = savedInstanceState.getString("progressInfoText");
-		this.screenService.setProgressInfoText(this.progressInfoText);
-		this.ivStatus.setImageResource(ScreenPresence.getStatusDrawableId(Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
-				CONFIGURATION_SECTION.RCS,
-				CONFIGURATION_ENTRY.STATUS,
-				Configuration.DEFAULT_RCS_STATUS.toString()))));
+
+		this.handleAction(savedInstanceState);
 	}
 
 	/* ===================== Public functions ======================== */
@@ -327,11 +317,14 @@ implements IRegistrationEventHandler
 	}
 	
 	public void exit(){
-		// stops all services
-        if(!ServiceManager.stop()){
-        	Log.e(this.getClass().getName(), "Failed to stop services");
-        }
-		this.finish();
+		this.handler.post(new Runnable() {
+			public void run() {
+				if (!ServiceManager.stop()) {
+					Log.e(Main.this.getClass().getName(), "Failed to stop services");
+				}				
+				Main.this.finish();
+			}
+		});
 	}
 	
 	/* ===================== UI Events ======================== */	
@@ -356,9 +349,6 @@ implements IRegistrationEventHandler
 				public void run() {
 					Main.this.progressInfoText = String.format("Registered: %s", phrase);
 					Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
-					
-					//Main.this.rlTop.setVisibility(View.VISIBLE);
-					ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_green_16, "You are connected");
 				}});
 				break;
 			
@@ -368,7 +358,6 @@ implements IRegistrationEventHandler
 						Main.this.progressInfoText = String.format("UnRegistered: %s", phrase);
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
 						
-						ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are disconnected");
 						if(!Main.this.screenService.getCurrentScreen().getId().equals(ScreenHome.class.getCanonicalName())){
 							Main.this.screenService.show(ScreenHome.class);
 						}
@@ -381,7 +370,6 @@ implements IRegistrationEventHandler
 					public void run() {
 						Main.this.progressInfoText = String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "register" : "unregister");
 						Main.this.screenService.setProgressInfoText(Main.this.progressInfoText);
-						ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_grey_16, String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "connect" : "disconnect"));
 					}});
 				break;
 				
@@ -397,24 +385,37 @@ implements IRegistrationEventHandler
 		return true;
 	}
 	
-	
-	/* ===================== UI Actions ======================== */	
-	
-	
-	
-	
-	static {
-		try {
-			//System.loadLibrary("tinyWRAP");
-			System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class
-					.getPackage().getName()));
-
-		} catch (UnsatisfiedLinkError e) {
-			Log.e(Main.class.getCanonicalName(),
-					"Native code library failed to load.\n" + e.getMessage());
-		} catch (Exception e) {
-			Log.e(Main.class.getCanonicalName(),
-					"Native code library failed to load.\n" + e.getMessage());
+	/* ===================== Private functions ======================== */
+	private void handleAction(Bundle bundle){
+		switch(bundle.getInt("action", Main.ACTION_NONE)){
+			case Main.ACTION_SHOW_AVSCREEN:
+				String id = bundle.getString("session-id");
+				if(id != null){
+					ServiceManager.getScreenService().show(ScreenAV.class, id);
+				}
+				break;
+				
+			case Main.ACTION_RESTORE_LAST_STATE:
+				String screenId = bundle.getString("screen-id");
+				Screen.SCREEN_TYPE screenType = Screen.SCREEN_TYPE.valueOf(bundle.getString("screen-type"));
+				switch(screenType){
+					case AV_T:
+						ServiceManager.getScreenService().show(ScreenAV.class, screenId);
+						break;
+					default:
+						if(!ServiceManager.getScreenService().show(screenId)){
+							ServiceManager.getScreenService().show(ScreenHome.class);
+						}
+						break;
+				}
+				
+				this.progressInfoText = bundle.getString("progressInfoText");
+				this.screenService.setProgressInfoText(this.progressInfoText);
+				this.ivStatus.setImageResource(ScreenPresence.getStatusDrawableId(Enum.valueOf(PresenceStatus.class, this.configurationService.getString(
+						CONFIGURATION_SECTION.RCS,
+						CONFIGURATION_ENTRY.STATUS,
+						Configuration.DEFAULT_RCS_STATUS.toString()))));
+				break;
 		}
 	}
 }

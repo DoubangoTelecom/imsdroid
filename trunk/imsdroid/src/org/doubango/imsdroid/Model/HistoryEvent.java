@@ -85,6 +85,10 @@ public abstract class HistoryEvent  implements Comparable<HistoryEvent> {
 		return this.remoteParty;
 	}
 	
+	public void setRemoteParty(String remoteParty){
+		this.remoteParty = remoteParty;
+	}
+	
 	public boolean isSeen(){
 		return this.seen;
 	}

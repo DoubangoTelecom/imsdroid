@@ -21,6 +21,7 @@
 
 package org.doubango.imsdroid.Screens;
 
+import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
@@ -28,6 +29,7 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -73,7 +75,8 @@ public class ScreenGeneral  extends Screen {
         this.spAudioPlaybackLevel.setAdapter(adapter);
         
         this.cbFullScreenVideo.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FULL_SCREEN_VIDEO, Configuration.DEFAULT_GENERAL_FULL_SCREEN_VIDEO));
-        this.cbAutoStart.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.AUTOSTART, Configuration.DEFAULT_GENERAL_AUTOSTART));
+        SharedPreferences settings = getSharedPreferences(Main.class.getCanonicalName(), 0);
+        this.cbAutoStart.setChecked((settings != null && settings.getBoolean("autostarts", Configuration.DEFAULT_GENERAL_AUTOSTART)));
         this.spAudioPlaybackLevel.setSelection(this.getSpinnerIndex(
 				this.configurationService.getFloat(
 						CONFIGURATION_SECTION.GENERAL,
@@ -90,9 +93,13 @@ public class ScreenGeneral  extends Screen {
 		if(this.computeConfiguration){
 			
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FULL_SCREEN_VIDEO, this.cbFullScreenVideo.isChecked());
-			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.AUTOSTART, this.cbAutoStart.isChecked());
 			this.configurationService.setFloat(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.AUDIO_PLAY_LEVEL, ((AudioPlayBackLevel)this.spAudioPlaybackLevel.getSelectedItem()).value);
 			this.configurationService.setString(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.ENUM_DOMAIN, this.etEnumDomain.getText().toString());
+			
+			SharedPreferences settings = getSharedPreferences(Main.class.getCanonicalName(), 0);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putBoolean("autostarts", this.cbAutoStart.isChecked());
+			editor.commit();
 			
 			// Compute
 			if(!this.configurationService.compute()){

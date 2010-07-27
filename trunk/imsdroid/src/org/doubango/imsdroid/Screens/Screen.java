@@ -58,7 +58,7 @@ public abstract class Screen extends Activity implements IScreen {
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		
-		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && this.type != SCREEN_TYPE.HOME_T) {
 			ServiceManager.getScreenService().back();
 			return true;
 		}
@@ -71,16 +71,23 @@ public abstract class Screen extends Activity implements IScreen {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	@Override
 	public String getScreenTitle() {
 		return this.getId();
 	}
 
+	@Override
 	public boolean haveMenu(){
 		return false;
 	}
 	
+	@Override
 	public String getId() {
 		return this.id;
+	}
+	
+	public SCREEN_TYPE getType(){
+		return this.type;
 	}
 	
 	protected void addConfigurationListener(RadioButton radioButton){

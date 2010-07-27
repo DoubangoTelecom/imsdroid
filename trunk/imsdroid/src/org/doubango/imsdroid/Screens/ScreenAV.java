@@ -23,38 +23,37 @@ package org.doubango.imsdroid.Screens;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 
+import org.doubango.imsdroid.CallDialog;
+import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
-import org.doubango.imsdroid.Model.HistoryAVCallEvent;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
-import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
-import org.doubango.imsdroid.Services.IHistoryService;
 import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
-import org.doubango.imsdroid.Services.Impl.SipService;
 import org.doubango.imsdroid.events.CallEventArgs;
 import org.doubango.imsdroid.events.ICallEventHandler;
 import org.doubango.imsdroid.media.MediaType;
 import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.MySipStack;
+import org.doubango.imsdroid.sip.MyAVSession.CallState;
 import org.doubango.imsdroid.utils.UriUtils;
 
+import android.app.KeyguardManager;
+import android.app.KeyguardManager.KeyguardLock;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.PowerManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -65,27 +64,21 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 
-public class ScreenAV extends Screen 
-implements ICallEventHandler {
-	
-	private static HashMap<String, ScreenAV> screens;
-	private static SimpleDateFormat timerFormat;
+public class ScreenAV extends Screen {
 	
 	
-	private boolean remoteHold;
-	private boolean localHold;
-	private boolean sendingVideo;
+	private static SimpleDateFormat __timerFormat;
+	
+	private final static String TAG = ScreenAV.class.getCanonicalName();
 	
 	private String remoteUri;
 	
 	private MyAVSession avSession;
 	
-	private HistoryAVCallEvent historyEvent;
-	private int timerCount;
+	private long startTime;
 	private final Timer timerInCall;
 	private final Timer timerSuicide;
-	private final Handler handler;
-	private final AudioManager audioManager;
+	
 	
 	private ViewFlipper fvFlipper;
 	private ImageView ivDialer;
@@ -110,9 +103,9 @@ implements ICallEventHandler {
 	private ImageButton btDtmf_Sharp;
 	private ImageButton btDtmf_Star;
 		
-	private final ISipService sipService;
+	private KeyguardLock keyguardLock;
+	private PowerManager.WakeLock wakeLock;
 	private final IScreenService screenService;
-	private final IHistoryService historyService;
 	
 	private final static int MENU_PICKUP = 0;
 	private final static int MENU_HANGUP= 1;
@@ -121,8 +114,8 @@ implements ICallEventHandler {
 	private final static int MENU_SPEAKER = 4;
 	
 	static {
-		ScreenAV.screens = new HashMap<String, ScreenAV>();
-		ScreenAV.timerFormat = new SimpleDateFormat("HH:mm:ss");
+		//ScreenAV.__timerFormat = new SimpleDateFormat("HH:mm:ss");
+		ScreenAV.__timerFormat = new SimpleDateFormat("mm:ss");
 	}
 	
 	public ScreenAV() {
@@ -131,12 +124,7 @@ implements ICallEventHandler {
 		this.timerInCall = new Timer();
 		this.timerSuicide = new Timer();
 		
-		this.sipService = ServiceManager.getSipService();
 		this.screenService = ServiceManager.getScreenService();
-		this.historyService = ServiceManager.getHistoryService();
-		
-		this.audioManager = (AudioManager)ServiceManager.getMainActivity().getSystemService(Context.AUDIO_SERVICE);
-		this.handler = new Handler();
 	}	
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -145,8 +133,8 @@ implements ICallEventHandler {
         
         // retrieve id
         this.id = getIntent().getStringExtra("id");
-        
-        ScreenAV.put(this);
+        this.avSession = MyAVSession.getSession(Long.parseLong(this.id));
+        MyAVSession.getCallEventHandler().setAvScreen(this);
         
         // get controls
         this.fvFlipper = (ViewFlipper) this.findViewById(R.id.screen_av_flipperView);
@@ -157,7 +145,6 @@ implements ICallEventHandler {
         this.tvInfo = (TextView)this.findViewById(R.id.screen_av_textView_info);
         this.tvTime = (TextView)this.findViewById(R.id.screen_av_textView_time);
         this.tvRemoteUri = (TextView)this.findViewById(R.id.screen_av_textView_remoteUri);
-        
         
         this.btBack2Call = (Button)this.findViewById(R.id.screen_av_button_back2call);
         
@@ -174,7 +161,15 @@ implements ICallEventHandler {
         this.btDtmf_Sharp = (ImageButton)this.findViewById(R.id.screen_av_imageButton_sharp);
         this.btDtmf_Star = (ImageButton)this.findViewById(R.id.screen_av_imageButton_star);
         
-        //this.timer.schedule(this.timerTask, 0, 1000);
+        if(this.avSession != null){
+        	this.remoteUri = this.avSession.getRemoteParty();
+        	this.tvRemoteUri.setText(String.format("In call with %s since:", UriUtils.getDisplayName(this.remoteUri)));
+        	
+        	MyAVSession.getVideoProducer().setContext(this);
+			MyAVSession.getVideoConsumer().setContext(this);
+			
+			this.updateState(this.avSession.getState());
+        }
         
         this.fvFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
 				R.anim.slidein));
@@ -207,26 +202,51 @@ implements ICallEventHandler {
         this.btDtmf_Sharp.setOnClickListener(this.dtmf_OnClickListener);
         this.btDtmf_Star.setOnClickListener(this.dtmf_OnClickListener);
         
-        // add event handlers
-        this.sipService.addCallEventHandler(this);
-        
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	}	
+        
+        PowerManager pm = (PowerManager) ServiceManager.getAppContext().getSystemService(Context.POWER_SERVICE);
+		this.wakeLock = pm == null ? null : pm.newWakeLock(PowerManager.ON_AFTER_RELEASE | PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, ScreenAV.TAG);
+		if(this.wakeLock != null && !this.wakeLock.isHeld()){
+			this.wakeLock.acquire();
+		}
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
+		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+		if(keyguardManager != null && keyguardManager.inKeyguardRestrictedInputMode()){
+			if(this.keyguardLock == null){
+				this.keyguardLock = keyguardManager.newKeyguardLock(ScreenAV.TAG);
+			}
+			this.keyguardLock.disableKeyguard();
+		}
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		
+		if(this.keyguardLock != null){
+			this.keyguardLock.reenableKeyguard();
+		}
+	}
 	
 	@Override
 	protected void onDestroy() {
-		ScreenAV.remove(this);
+		MyAVSession.getCallEventHandler().setAvScreen(null);
 		
 		this.timerInCall.cancel();
 		this.timerSuicide.cancel();
-		
-		// remove event handlers
-        this.sipService.removeCallEventHandler(this);
         
         if(avSession != null){
         	// FIXME: cleanup
         	MyAVSession.getVideoProducer().setContext(null);
         }
+        if(this.wakeLock != null && this.wakeLock.isHeld()){
+			this.wakeLock.release();
+		}    
         
 		super.onDestroy();
 	}
@@ -237,31 +257,61 @@ implements ICallEventHandler {
 		menu.add(0, ScreenAV.MENU_HANGUP, 0, "Hang-up").setIcon(R.drawable.phone_hang_up_48);
 		menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, "Hold").setIcon(R.drawable.phone_hold_48);
 		menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, "Send Video").setIcon(R.drawable.video_start_48);
-		menu.add(1, ScreenAV.MENU_SPEAKER, 0, "Speaker").setIcon(R.drawable.phone_speaker_48);
+		menu.add(1, ScreenAV.MENU_SPEAKER, 0, "Speaker ON").setIcon(R.drawable.phone_speaker_48);
 		return true;
 	}
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
-		MenuItem item;
-		if((item = menu.findItem(ScreenAV.MENU_HOLD_RESUME)) != null){
-			item.setTitle(this.localHold? "Resume" : "Hold").setIcon(this.localHold? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
+		if(this.avSession == null){
+			return true;
 		}
 		
-		if((item = menu.findItem(ScreenAV.MENU_SEND_STOP_VIDEO)) != null){
-			if(this.avSession != null && this.avSession.getMediaType() == MediaType.AudioVideo){
-				item.setTitle(this.sendingVideo? "Stop Video" : "Send Video").setIcon(this.sendingVideo? R.drawable.video_stop_48 : R.drawable.video_start_48);
-				item.setEnabled(true);
-			}
-			else{
-				item.setEnabled(false);
-			}
-		}
+		final MenuItem itemPickUp = menu.findItem(ScreenAV.MENU_PICKUP);
+		final MenuItem itemHangUp = menu.findItem(ScreenAV.MENU_HANGUP);
+		final MenuItem itemHoldResume = menu.findItem(ScreenAV.MENU_HOLD_RESUME);
+		final MenuItem itemSendStopVideo = menu.findItem(ScreenAV.MENU_SEND_STOP_VIDEO);
+		final MenuItem itemSpeaker = menu.findItem(ScreenAV.MENU_SPEAKER);
 		
-		if((item = menu.findItem(ScreenAV.MENU_SPEAKER)) != null){
-			item.setTitle(this.audioManager.isSpeakerphoneOn() ? "Speaker OFF" : "Speaker ON");
+		switch(this.avSession.getState()){
+			case CALL_INCOMING:
+				itemPickUp.setEnabled(true);
+				itemHangUp.setEnabled(true);
+				itemHoldResume.setEnabled(false);
+				itemSpeaker.setEnabled(false);
+				itemSendStopVideo.setEnabled(false);
+				break;
+			case CALL_INPROGRESS:
+				itemPickUp.setEnabled(false);
+				itemHangUp.setEnabled(true);
+				itemHoldResume.setEnabled(false);
+				itemSpeaker.setEnabled(false);
+				itemSendStopVideo.setEnabled(false);
+				break;
+			case INCALL:
+				itemPickUp.setEnabled(false);
+				itemHangUp.setEnabled(true);
+				itemHoldResume.setEnabled(true);
+				itemSpeaker.setEnabled(true);
+				itemSpeaker.setTitle(((AudioManager)getSystemService(Context.AUDIO_SERVICE)).isSpeakerphoneOn() ? "Speaker OFF" : "Speaker ON");
+				
+				if((this.avSession.getMediaType() == MediaType.AudioVideo || this.avSession.getMediaType() == MediaType.Video)){
+					itemSendStopVideo.setTitle(this.avSession.isSendingVideo()? "Stop Video" : "Send Video").setIcon(this.avSession.isSendingVideo()? R.drawable.video_stop_48 : R.drawable.video_start_48);
+					itemSendStopVideo.setEnabled(true);
+				}
+				else{
+					itemSendStopVideo.setEnabled(false);
+				}
+				itemHoldResume.setTitle(this.avSession.isLocalHeld()? "Resume" : "Hold").setIcon(this.avSession.isLocalHeld()? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
+				break;
+			case CALL_TERMINATED:
+				itemPickUp.setEnabled(false);
+				itemHangUp.setEnabled(false);
+				itemHoldResume.setEnabled(false);
+				itemSpeaker.setEnabled(false);
+				itemSendStopVideo.setEnabled(false);
+				break;
 		}
-		
 		return true;
 	}
 	
@@ -270,84 +320,55 @@ implements ICallEventHandler {
 		
 		switch(item.getItemId()){
 			case ScreenAV.MENU_PICKUP:
-				if(ScreenAV.this.avSession != null){
-					MyAVSession.getVideoProducer().setContext(this);
-					MyAVSession.getVideoConsumer().setContext(this);
-					
-					ScreenAV.this.avSession.acceptCall();
+				if(this.avSession != null){					
+					this.avSession.acceptCall();
 				}
 				break;
 				
 			case ScreenAV.MENU_HANGUP:
-				if(ScreenAV.this.avSession != null){
-					ScreenAV.this.avSession.hangUp();
+				if(this.avSession != null){
+					this.tvInfo.setText("Ending the call...");
+					this.avSession.hangUp();
 				}
 				break;
 				
 			case ScreenAV.MENU_HOLD_RESUME:
-				if(ScreenAV.this.avSession != null){
-					if(ScreenAV.this.localHold){
-						ScreenAV.this.avSession.resumeCall();
+				if(this.avSession != null){
+					if(this.avSession.isLocalHeld()){
+						this.avSession.resumeCall();
 					}
 					else{
-						ScreenAV.this.avSession.holdCall();
+						this.avSession.holdCall();
 					}
 				}
 				break;
 				
 			case ScreenAV.MENU_SEND_STOP_VIDEO:
-				this.llVideoLocal.removeAllViews();
-				if(!this.sendingVideo){
-					if(this.avSession != null && this.avSession.getMediaType() == MediaType.AudioVideo){
-						View local_preview = MyAVSession.getVideoProducer().startPreview();
-						if(local_preview != null){
-							ScreenAV.this.llVideoLocal.removeAllViews();
-							ScreenAV.this.llVideoLocal.addView(local_preview);
-						}
-					}
-					this.sendingVideo = true;
-				}
-				else{
-					this.sendingVideo = false;
+				if(this.avSession != null){
+					this.startStopVideo(!this.avSession.isSendingVideo());
 				}
 				break;
 				
 			case ScreenAV.MENU_SPEAKER:
-				this.audioManager.setSpeakerphoneOn(!this.audioManager.isSpeakerphoneOn());
+				AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+				am.setSpeakerphoneOn(!am.isSpeakerphoneOn());
 				break;
 		}
 		return true;
 	}
-	
-	
+
 	/* ===================== IScreen (Screen) ======================== */
 	@Override
 	public boolean haveMenu(){
 		return true;
 	}
 	
-	private static void put(ScreenAV screen){
-		synchronized(ScreenAV.screens){
-			ScreenAV.screens.put(screen.getId(), screen);
-		}
-	}
-	
-	private static void remove(ScreenAV screen){
-		synchronized(ScreenAV.screens){
-			ScreenAV.screens.remove(screen.getId());
-		}
-	}
-	
-	public static String getCurrent(){
-		synchronized(ScreenAV.screens){
-			if(!ScreenAV.screens.isEmpty()){
-				return ScreenAV.screens.entrySet().iterator().next().getKey();
-			}
-		}
-		return null;
-	}
-	
 	public static boolean makeCall(String remoteUri, MediaType mediaType){
+		if(MyAVSession.getFirstId() != null){
+			Log.e(ScreenAV.TAG, "There is already an outgoing audio/video session");
+			return false;
+		}
+		
 		String validUri = UriUtils.makeValidSipUri(remoteUri);
 		if(validUri == null){
 			// Show DialogError
@@ -371,81 +392,34 @@ implements ICallEventHandler {
 			}
 		}
 		
-		String id = UUID.randomUUID().toString();
-		ServiceManager.getScreenService().show(ScreenAV.class, id);
+		MyAVSession avSession = MyAVSession.createOutgoingSession(ServiceManager.getSipService().getStack(), mediaType);
+		avSession.setRemoteParty(remoteUri); // HACK
+		ServiceManager.getScreenService().show(ScreenAV.class, new Long(avSession.getId()).toString());
 		
-		ScreenAV av = (ScreenAV)ServiceManager.getScreenService().getScreen(id);
-		if(av != null){
-			switch(mediaType){
-				case AudioVideo:
-					return av.makeVideoCall(remoteUri);
-				default:
-					return av.makeAudioCall(remoteUri);
-			}
+		switch(mediaType){
+			case AudioVideo:
+			case Video:
+				return avSession.makeVideoCall(remoteUri);
+			default:
+				return avSession.makeAudioCall(remoteUri);
 		}
-		return false;
 	}
 	
-	public static boolean receiveCall(MyAVSession avSession, String remoteUri, MediaType mediaType){
-		String id = UUID.randomUUID().toString();
-		ServiceManager.getScreenService().show(ScreenAV.class, id);
+	public static boolean receiveCall(MyAVSession avSession){
 		
-		ScreenAV av = (ScreenAV)ServiceManager.getScreenService().getScreen(id);
-		if(av != null){
-			switch(mediaType){
-				case Audio:
-				case AudioVideo:
-					av.avSession = avSession;
-					av.remoteUri = remoteUri;
-					
-					/***** HACK: OnIncoming() event could be raised before Activity.onCreated() ******/
-					av.historyEvent = new HistoryAVCallEvent(mediaType == MediaType.AudioVideo, remoteUri);
-					av.historyEvent.setStatus(StatusType.Incoming);
-					
-					ServiceManager.vibrate(500);
-					ServiceManager.getSoundService().playRingTone();
-					
-					av.tvInfo.setText(String.format("Incoming Call from %s", UriUtils.getDisplayName(remoteUri)));
-					av.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
-					ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "Incoming call");
-					return true;
-				default:
-					return false;
-			}
-		}
-		return false;
-	}
-	
-	public boolean makeAudioCall(String remoteUri){
-		if(this.avSession == null){
-			this.remoteUri = remoteUri;
-			this.avSession = MyAVSession.createOutgoingSession(this.sipService.getStack(), MediaType.Audio);
-			return this.avSession.makeAudioCall(this.remoteUri);
-		}
-		return false;
-	}
-	
-	public boolean makeVideoCall(String remoteUri){
-		if(this.avSession == null){
-			this.remoteUri = remoteUri;
-			this.avSession = MyAVSession.createOutgoingSession(this.sipService.getStack(), MediaType.AudioVideo);
-			
-			MyAVSession.getVideoProducer().setContext(this);
-			MyAVSession.getVideoConsumer().setContext(this);
-			
-			return this.avSession.makeVideoCall(this.remoteUri);
-		}
-		return false;
+		ServiceManager.getScreenService().bringToFront(Main.ACTION_SHOW_AVSCREEN,
+				new String[] {"session-id", new Long(avSession.getId()).toString()}
+		);
+		return true;
 	}
 	
 	private TimerTask timerTaskInCall = new TimerTask(){
 		@Override
-		public void run() {
-			ScreenAV.this.timerCount++;
-			final Date date = new Date(2000, 1, 1, ScreenAV.this.timerCount/3600, ScreenAV.this.timerCount/60, ScreenAV.this.timerCount%60);
-			ScreenAV.this.handler.post(new Runnable() {
+		public void run() {			
+			final Date date = new Date(new Date().getTime() - ScreenAV.this.startTime);
+			ScreenAV.this.runOnUiThread(new Runnable() {
 				public void run() {
-					ScreenAV.this.tvTime.setText(ScreenAV.timerFormat.format(date));
+					ScreenAV.this.tvTime.setText(ScreenAV.__timerFormat.format(date));
 				}});
 		}
 	};
@@ -453,209 +427,14 @@ implements ICallEventHandler {
 	private TimerTask timerTaskSuicide = new TimerTask(){
 		@Override
 		public void run() {
-			ScreenAV.this.handler.post(new Runnable() {
+			ScreenAV.this.runOnUiThread(new Runnable() {
 				public void run() {
-					ServiceManager.cancelAVCallNotif();
 					ScreenAV.this.screenService.show(ScreenHome.class);
 					ScreenAV.this.screenService.destroy(ScreenAV.this.getId());
 				}});
 		}
 	};
 	
-
-	@Override
-	public boolean onCallEvent(Object sender, CallEventArgs e) {
-		if(this.avSession == null || this.avSession.getId() != e.getSessionId()){
-			return true;
-		}
-		
-		final String phrase = e.getPhrase();
-		
-		switch(e.getType()){
-			case INCOMING:
-				ScreenAV.this.remoteUri = (String) e.getExtra("from");
-				this.handler.post(new Runnable() {
-					public void run() {
-						setRequestedOrientation(getResources().getConfiguration().orientation);
-						
-						ScreenAV.this.historyEvent = new HistoryAVCallEvent(ScreenAV.this.avSession.getMediaType() == MediaType.AudioVideo, ScreenAV.this.remoteUri);
-						ScreenAV.this.historyEvent.setStatus(StatusType.Incoming);
-						
-						ServiceManager.vibrate(500);
-						ServiceManager.getSoundService().playRingTone();
-						
-						ScreenAV.this.tvInfo.setText(String.format("Incoming Call from \"%s\"", UriUtils.getDisplayName(ScreenAV.this.remoteUri)));
-						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
-						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "Incoming call");
-						ScreenAV.this.screenService.show(ScreenAV.this.getId());
-					}});
-				break;
-			case INPROGRESS:
-				this.handler.post(new Runnable() {
-					public void run() {		
-						setRequestedOrientation(getResources().getConfiguration().orientation);
-						
-						ScreenAV.this.historyEvent = new HistoryAVCallEvent(ScreenAV.this.avSession.getMediaType() == MediaType.AudioVideo, ScreenAV.this.remoteUri);
-						ScreenAV.this.historyEvent.setStatus(StatusType.Outgoing);
-						
-						ServiceManager.getSoundService().playRingBackTone();
-						
-						ScreenAV.this.tvInfo.setText("In progress ...");
-						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
-						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "Outgoing Call");
-					}});
-				break;
-			case RINGING:
-				this.handler.post(new Runnable() {
-					public void run() {
-						// FIXME: Not raised by the SIP stack
-						//ServiceManager.getSoundService().playRingBackTone();
-						
-						ScreenAV.this.tvInfo.setText("Ringing");
-						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
-					}});
-				break;
-			case EARLY_MEDIA:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ServiceManager.getSoundService().stopRingBackTone();
-						ServiceManager.getSoundService().stopRingTone();
-						
-						ScreenAV.this.audioManager.setMode(AudioManager.MODE_IN_CALL);
-						ScreenAV.this.audioManager.setSpeakerphoneOn(false);
-						
-						// Notification
-						ScreenAV.this.tvInfo.setText(phrase);
-					}});
-				break;
-			case CONNECTED:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ServiceManager.getSoundService().stopRingBackTone();
-						ServiceManager.getSoundService().stopRingTone();
-						
-						ScreenAV.this.audioManager.setMode(AudioManager.MODE_IN_CALL);
-						ScreenAV.this.audioManager.setSpeakerphoneOn(false);
-						
-						// Notification
-						ScreenAV.this.tvInfo.setText("In call");
-						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_green_16);
-						ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "In Call");
-						
-						// History event
-						if(ScreenAV.this.historyEvent != null){
-							ScreenAV.this.historyEvent.setStartTime(new Date().getTime());
-						}
-						
-						// Views
-						//ScreenAV.this.llVideoLocal.removeAllViews();
-						ScreenAV.this.llVideoRemote.removeAllViews();
-						if(ScreenAV.this.avSession != null && ScreenAV.this.avSession.getMediaType() == MediaType.AudioVideo){
-							
-							//final View local_preview = MyAVSession.getVideoProducer().startPreview();
-							final View remote_preview = MyAVSession.getVideoConsumer().startPreview();
-							//remote_preview.setLayoutParams(new LinearLayout.LayoutParams(
-							//          LinearLayout.LayoutParams.FILL_PARENT,
-							//          LinearLayout.LayoutParams.FILL_PARENT
-							//      ));
-
-							//if(local_preview != null){
-							//	ScreenAV.this.llVideoLocal.addView(local_preview);
-							//}
-							if(remote_preview != null){
-								ScreenAV.this.llVideoRemote.addView(remote_preview);
-							}
-						}
-						
-						ScreenAV.this.tvRemoteUri.setText(String.format("In call with %s since:", UriUtils.getDisplayName(ScreenAV.this.remoteUri)));
-					}});
-				this.timerInCall.schedule(ScreenAV.this.timerTaskInCall, 0, 1000);
-				break;
-			case DISCONNECTED:
-				this.handler.post(new Runnable() {
-					public void run() {
-						
-						ScreenAV.this.tvInfo.setText(phrase);
-						ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_red_16);
-						ServiceManager.showAVCallNotif(R.drawable.phone_call_16, "Call Terminated");
-						
-						ServiceManager.getSoundService().stopRingBackTone();
-						ServiceManager.getSoundService().stopRingTone();
-						
-						if (ScreenAV.this.historyEvent != null) {
-							// StartTime should be updated by onConnected() event,
-							// otherwise both times are equal
-							if (ScreenAV.this.historyEvent.getStartTime() == ScreenAV.this.historyEvent
-									.getEndTime()) {
-								if (ScreenAV.this.historyEvent.getStatus() == StatusType.Incoming) {
-									ScreenAV.this.historyEvent
-											.setStatus(StatusType.Missed);
-								}
-							} else {
-								ScreenAV.this.historyEvent.setEndTime(new Date()
-										.getTime());
-							}
-							ScreenAV.this.historyService.addEvent(ScreenAV.this.historyEvent);
-						}
-						
-						ScreenAV.this.audioManager.setMode(AudioManager.MODE_NORMAL);
-						
-						ServiceManager.vibrate(100);
-					}});
-				/* release session */
-				MyAVSession.releaseSession(this.avSession);
-				/* schedule suicide */
-				this.timerSuicide.schedule(this.timerTaskSuicide, new Date(new Date().getTime() + 1500));
-				this.timerTaskInCall.cancel();
-				break;
-			case LOCAL_HOLD_OK:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ScreenAV.this.tvInfo.setText("Call placed on hold");
-						ScreenAV.this.localHold = true;
-					}});
-				this.localHold = true;
-				break;
-			case LOCAL_HOLD_NOK:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ScreenAV.this.tvInfo.setText("Local hold NOK");
-					}});
-				break;
-			case LOCAL_RESUME_OK:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ScreenAV.this.tvInfo.setText("Call taken off hold");
-						ScreenAV.this.localHold = false;
-					}});
-				this.localHold = false;
-				break;
-			case LOCAL_RESUME_NOK:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ScreenAV.this.tvInfo.setText("Local Resume NOK");
-					}});
-				break;
-			case REMOTE_HOLD:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ScreenAV.this.tvInfo.setText("Placed on hold by remote party");
-						ScreenAV.this.remoteHold = true;
-					}});
-				this.remoteHold = true;
-				break;
-			case REMOTE_RESUME:
-				this.handler.post(new Runnable() {
-					public void run() {
-						ScreenAV.this.tvInfo.setText("Taken off hold by remote party");
-						ScreenAV.this.remoteHold = false;
-					}});
-				this.remoteHold = false;
-				break;
-		}
-		
-		return true;
-	}
 	
 	private OnClickListener dtmf_OnClickListener = new OnClickListener(){
 		@Override
@@ -726,4 +505,320 @@ implements ICallEventHandler {
 			}
 		}
 	};
+
+	private void startStopVideo(boolean start){
+		if(this.avSession== null || (this.avSession.getMediaType() != MediaType.AudioVideo && this.avSession.getMediaType() != MediaType.Video)){
+			return;
+		}
+		
+		this.avSession.setSendingVideo(start);
+		
+		this.llVideoLocal.removeAllViews();
+		if(start){
+			final View local_preview = MyAVSession.getVideoProducer().startPreview();
+			if(local_preview != null){
+				final ViewParent viewParent = local_preview.getParent();
+				if(viewParent != null && viewParent instanceof ViewGroup){
+					((ViewGroup)(viewParent)).removeView(local_preview);
+				}
+				this.llVideoLocal.addView(local_preview);
+			}
+		}
+	}
+	
+	private void updateState(CallState state){
+		if(this.avSession== null){
+			return;
+		}
+		
+		switch(state){
+			case CALL_INPROGRESS:						
+				this.tvInfo.setText("In progress ...");
+				this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
+				this.runOnUiThread(new Runnable(){
+					@Override
+					public void run() {
+							View layout = CallDialog.getView(ScreenAV.this,
+									UriUtils.getDisplayName(ScreenAV.this.avSession.getRemoteParty()),
+									null
+									, new OnClickListener() {
+										@Override
+										public void onClick(View v) {
+											ScreenAV.this.tvInfo
+													.setText("Ending the call...");
+											ScreenAV.this.avSession.hangUp();
+										}
+									});
+							layout.setLayoutParams(new LinearLayout.LayoutParams(
+									          LinearLayout.LayoutParams.FILL_PARENT,
+									          LinearLayout.LayoutParams.FILL_PARENT
+									      ));
+							ScreenAV.this.llVideoRemote.removeAllViews();
+							ScreenAV.this.llVideoRemote.addView(layout);
+						}
+					});
+			break;
+			
+			case CALL_INCOMING:							
+					this.tvInfo.setText(String.format("Incoming Call from %s", UriUtils.getDisplayName(remoteUri)));
+					this.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
+					this.runOnUiThread(new Runnable(){
+						@Override
+						public void run() {
+								View layout = CallDialog.getView(ScreenAV.this,
+										UriUtils.getDisplayName(ScreenAV.this.avSession.getRemoteParty()),
+										new OnClickListener() {
+											@Override
+											public void onClick(View v) {
+												ScreenAV.this.avSession.acceptCall();
+											}
+										}, new OnClickListener() {
+											@Override
+											public void onClick(View v) {
+												ScreenAV.this.tvInfo
+														.setText("Ending the call...");
+												ScreenAV.this.avSession.hangUp();
+											}
+										});
+								layout.setLayoutParams(new LinearLayout.LayoutParams(
+										          LinearLayout.LayoutParams.FILL_PARENT,
+										          LinearLayout.LayoutParams.FILL_PARENT
+										      ));
+								ScreenAV.this.llVideoRemote.removeAllViews();
+								ScreenAV.this.llVideoRemote.addView(layout);
+							}
+						});
+				break;
+				
+			case INCALL:				
+					this.tvInfo.setText("In call");
+					this.ivState.setImageResource(R.drawable.bullet_ball_glass_green_16);
+					
+					this.startTime = this.avSession.getStartTime();
+					this.timerInCall.schedule(this.timerTaskInCall, 0, 1000);
+					
+					// Video consumer
+					this.llVideoRemote.removeAllViews();
+					if(this.avSession.getMediaType() == MediaType.AudioVideo || this.avSession.getMediaType() == MediaType.Video){
+						final View remote_preview = MyAVSession.getVideoConsumer().startPreview();
+						if(remote_preview != null){
+							final ViewParent viewParent = remote_preview.getParent();
+							if(viewParent != null && viewParent instanceof ViewGroup){
+								((ViewGroup)(viewParent)).removeView(remote_preview);
+							}
+							this.llVideoRemote.addView(remote_preview);
+						}
+					}
+					else{
+						if(this.wakeLock != null && this.wakeLock.isHeld()){
+							this.wakeLock.release();
+						}
+					}
+					// Video producer
+					this.startStopVideo(this.avSession.isSendingVideo());
+				break;
+				
+			case CALL_TERMINATED:
+					ScreenAV.this.tvInfo.setText("Call Terminated");
+					ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_red_16);
+					
+					/* schedule suicide */
+					this.timerSuicide.schedule(this.timerTaskSuicide, new Date(new Date().getTime() + 1500));
+					this.timerTaskInCall.cancel();
+				break;
+		}
+		
+		if(this.avSession.isLocalHeld()){
+			this.tvInfo.setText("Call placed on hold");
+		}
+		else if(this.avSession.isRemoteHeld()){
+			this.tvInfo.setText("Placed on hold by remote party");
+		}
+	}
+	
+	
+	
+	
+	/* ============================ Static Call Event Handler =========================*/
+	public static class CallEventHandler implements ICallEventHandler
+	{
+		final static String TAG = CallEventHandler.class.getCanonicalName();
+		ScreenAV avScreen;
+		final AudioManager audioManager;
+		
+		public CallEventHandler(){
+			this.audioManager = (AudioManager)ServiceManager.getAppContext().getSystemService(Context.AUDIO_SERVICE);
+		}
+		
+		public void init(){
+			ServiceManager.getSipService().addCallEventHandler(this);
+		}
+		void deinit(){
+			ServiceManager.getSipService().removeCallEventHandler(this);
+		}
+		
+		void setAvScreen(ScreenAV avScreen){
+			this.avScreen = avScreen;
+		}
+		
+		@Override
+		public boolean onCallEvent(Object sender, CallEventArgs e) {
+			final String phrase = e.getPhrase();
+			MyAVSession avSession;
+			
+			switch(e.getType()){
+				case INCOMING:
+					ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "Incoming call");
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setState(CallState.CALL_INCOMING);
+					}
+					
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.updateState(CallState.CALL_INCOMING);
+							}});
+					}
+					ServiceManager.vibrate(500);
+					ServiceManager.getSoundService().playRingTone();
+					break;
+				case INPROGRESS:
+					ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "Outgoing Call");
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setState(CallState.CALL_INPROGRESS);
+					}
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {		
+								CallEventHandler.this.avScreen.updateState(CallState.CALL_INPROGRESS);
+							}});
+					}
+					break;
+				case RINGING:
+					ServiceManager.getSoundService().playRingBackTone();
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {								
+								CallEventHandler.this.avScreen.tvInfo.setText(phrase);
+								CallEventHandler.this.avScreen.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
+							}});
+					}
+					break;
+				case EARLY_MEDIA:
+					this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+					this.audioManager.setSpeakerphoneOn(false);
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								ServiceManager.getSoundService().stopRingBackTone();
+								ServiceManager.getSoundService().stopRingTone();
+								
+								// Notification
+								CallEventHandler.this.avScreen.tvInfo.setText(phrase);
+							}});
+					}
+					break;
+				case CONNECTED:
+					ServiceManager.getSoundService().stopRingBackTone();
+					ServiceManager.getSoundService().stopRingTone();
+					ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "In Call");
+					
+					this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+					this.audioManager.setSpeakerphoneOn(false);
+					
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setState(CallState.INCALL);
+					}
+					
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.updateState(CallState.INCALL);					
+							}});
+					}
+					break;
+				case DISCONNECTED:
+					ServiceManager.getSoundService().stopRingBackTone();
+					ServiceManager.getSoundService().stopRingTone();
+					ServiceManager.cancelAVCallNotif();
+					
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setState(CallState.CALL_TERMINATED);
+					}
+					
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.updateState(CallState.CALL_TERMINATED);
+							}});
+					}
+					ServiceManager.vibrate(100);
+					MyAVSession.releaseSession(e.getSessionId());
+					this.audioManager.setMode(AudioManager.MODE_NORMAL);
+					break;
+				case LOCAL_HOLD_OK:
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setLocalHold(true);
+					}
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.tvInfo.setText("Call placed on hold");
+							}});
+					}
+					break;
+				case LOCAL_HOLD_NOK:
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.tvInfo.setText("Failed to place remote party on hold");
+							}});
+					}
+					break;
+				case LOCAL_RESUME_OK:
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setLocalHold(false);
+					}
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.tvInfo.setText("Call taken off hold");
+							}});
+					}
+					break;
+				case LOCAL_RESUME_NOK:
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.tvInfo.setText("Failed to unhold call");
+							}});
+					}
+					break;
+				case REMOTE_HOLD:
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setRemoteHold(true);
+					}
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.tvInfo.setText("Placed on hold by remote party");
+							}});
+					}
+					break;
+				case REMOTE_RESUME:
+					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
+						avSession.setRemoteHold(false);
+					}
+					if(this.avScreen != null){
+						this.avScreen.runOnUiThread(new Runnable() {
+							public void run() {
+								CallEventHandler.this.avScreen.tvInfo.setText("Taken off hold by remote party");
+							}});
+					}
+					break;
+			}
+			
+			return true;
+		}
+	}
 }

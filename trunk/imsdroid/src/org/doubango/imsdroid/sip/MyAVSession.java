@@ -20,11 +20,15 @@
 */
 package org.doubango.imsdroid.sip;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import org.doubango.imsdroid.Model.Configuration;
+import org.doubango.imsdroid.Model.HistoryAVCallEvent;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
+import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.media.AudioConsumer;
@@ -43,13 +47,29 @@ public class MyAVSession  extends MySipSession{
 	
 	private final CallSession session;
 
+	private String remoteParty;
 	private final MediaType mediaType;
-	private boolean connected;
+	private CallState state;
+	private boolean sendingVideo;
+	private boolean remoteHold;
+	private boolean localHold;
+	private HistoryAVCallEvent historyEvent;
 	
 	private static AudioConsumer __audioConsumer;
 	private static AudioProducer __audioProducer;
 	private static VideoProducer __videoProducer;
 	private static VideoConsumer __videoConsumer;
+	private static ScreenAV.CallEventHandler __callEventHandler;
+	
+	public enum CallState{
+		NONE,
+		CALL_INCOMING,
+		CALL_INPROGRESS,
+		REMOTE_RINGING,
+		EARLY_MEDIA,
+		INCALL,
+		CALL_TERMINATED,
+	}
 	
 	static {
 		MyAVSession.sessions = new HashMap<Long, MyAVSession>();
@@ -59,10 +79,14 @@ public class MyAVSession  extends MySipSession{
 		__videoProducer = new VideoProducer();
 		__videoConsumer = new VideoConsumer();
 		
+		__callEventHandler = new ScreenAV.CallEventHandler();
+		
 		__audioConsumer.setActive();
 		__audioProducer.setActive();
 		__videoProducer.setActive();
 		__videoConsumer.setActive();
+		
+		__callEventHandler.init();
 	}
 	
 	public static VideoProducer getVideoProducer(){
@@ -73,34 +97,67 @@ public class MyAVSession  extends MySipSession{
 		return MyAVSession.__videoConsumer;
 	}
 	
-	public static MyAVSession takeIncomingSession(MySipStack sipStack, CallSession session){
-		MyAVSession avSession = new MyAVSession(sipStack, session, MediaType.AudioVideo);
+	public static ScreenAV.CallEventHandler getCallEventHandler(){
+		return MyAVSession.__callEventHandler;
+	}
+	
+	public static MyAVSession takeIncomingSession(MySipStack sipStack, CallSession session, MediaType mediaType){
+		MyAVSession avSession = new MyAVSession(sipStack, session, mediaType, CallState.CALL_INCOMING);
 		MyAVSession.sessions.put(avSession.getId(), avSession);
 		return avSession;
 	}
 	
 	public static MyAVSession createOutgoingSession(MySipStack sipStack, MediaType mediaType){
-		MyAVSession avSession = new MyAVSession(sipStack, null, mediaType);
+		MyAVSession avSession = new MyAVSession(sipStack, null, mediaType, CallState.CALL_INPROGRESS);
 		MyAVSession.sessions.put(avSession.getId(), avSession);
 		
 		return avSession;
 	}
 	
 	public static MyAVSession getSession(long id){
-		return MyAVSession.sessions.get(id);
+		synchronized(MyAVSession.sessions){
+			return MyAVSession.sessions.get(id);
+		}
+	}
+	
+	public static Long getFirstId(){
+		if(!MyAVSession.sessions.isEmpty()){
+			return MyAVSession.sessions.entrySet().iterator().next().getKey();
+		}
+		return null;
 	}
 	
 	public static void releaseSession(MyAVSession session){
 		if(session != null){
-			MyAVSession.sessions.remove(session.getId());
+			synchronized(MyAVSession.sessions){
+				session.delete();
+				MyAVSession.sessions.remove(session.getId());
+			}
 		}
 	}
 	
-	public MyAVSession(MySipStack sipStack, CallSession session, MediaType mediaType) {
+	public static void releaseSession(long id){
+		synchronized(MyAVSession.sessions){
+			MyAVSession.sessions.remove(id);
+		}
+	}
+	
+	private MyAVSession(MySipStack sipStack, CallSession session, MediaType mediaType, CallState state) {
 		super(sipStack);
 		
 		this.session = (session == null) ? new CallSession(sipStack) : session;
 		this.mediaType = mediaType;
+		this.state = state;
+		this.historyEvent = new HistoryAVCallEvent((mediaType == MediaType.AudioVideo || mediaType == MediaType.Video), "Unknown");
+		
+		switch(this.state){
+			case CALL_INCOMING:
+				this.historyEvent.setStatus(StatusType.Incoming);
+				break;
+			case CALL_INPROGRESS:
+				this.historyEvent.setStatus(StatusType.Outgoing);
+				break;
+		}
 		
 		final IConfigurationService configurationService = ServiceManager.getConfigurationService();
 		
@@ -146,27 +203,77 @@ public class MyAVSession  extends MySipSession{
 		this.session.addHeader("P-Preferred-Service", "urn:urn-7:3gpp-service.ims.icsi.mmtel");
 	}
 	
-	public void setConnected(boolean connected){
-		this.connected = connected;
-		if(this.connected){
-			
+	public MediaType getMediaType(){
+		return this.mediaType;
+	}
+	
+	public CallState getState(){
+		return this.state;
+	}
+	
+	public void setState(CallState state){
+		if(this.state == state){
+			return;
+		}
+		
+		this.state = state;
+		switch(state){
+			case CALL_INCOMING:
+				this.historyEvent.setStatus(StatusType.Incoming);
+				break;
+			case CALL_INPROGRESS:
+				this.historyEvent.setStatus(StatusType.Outgoing);
+				break;
+			case INCALL:
+				this.setConnected(true);
+				this.historyEvent.setStartTime(new Date().getTime());
+				break;
+			case CALL_TERMINATED:
+				this.setConnected(false);
+				if (this.historyEvent.getStartTime() == this.historyEvent.getEndTime()) {
+					if (this.historyEvent.getStatus() == StatusType.Incoming) {
+						this.historyEvent.setStatus(StatusType.Missed);
+					}
+				} else {
+					this.historyEvent.setEndTime(new Date().getTime());
+				}
+				ServiceManager.getHistoryService().addEvent(this.historyEvent);
+				break;
 		}
 	}
 	
-	public MediaType getMediaType(){
-		return this.mediaType;
+	public long getStartTime(){
+		return this.historyEvent.getStartTime();
+	}
+	
+	public boolean  isSendingVideo(){
+		return this.sendingVideo;
+	}
+	
+	public void  setSendingVideo(boolean sendingVideo){
+		this.sendingVideo = sendingVideo;
+	}
+	
+	public String getRemoteParty(){
+		return this.remoteParty;
+	}
+	
+	public void setRemoteParty(String remoteParty){
+		this.remoteParty = remoteParty;
+		this.historyEvent.setRemoteParty(remoteParty);
 	}
 	
 	public boolean acceptCall(){		
 		return this.session.accept();
 	}
 	
-	public boolean rejectCall(){
-		return this.session.hangup();
-	}
-	
 	public boolean hangUp(){
-		return this.session.hangup();
+		if(this.connected){
+			return this.session.hangup();
+		}
+		else{
+			return this.session.reject();
+		}
 	}
 	
 	public boolean holdCall(){
@@ -177,11 +284,29 @@ public class MyAVSession  extends MySipSession{
 		return this.session.resume();
 	}
 	
-	public boolean makeAudioCall(String remoteUri){		
+	public boolean isLocalHeld(){
+		return this.localHold;
+	}
+	
+	public void setLocalHold(boolean localHold){
+		this.localHold = localHold;
+	}
+	
+	public boolean isRemoteHeld(){
+		return this.remoteHold;
+	}
+	
+	public void setRemoteHold(boolean remoteHold){
+		this.remoteHold = remoteHold;
+	}
+	
+	public boolean makeAudioCall(String remoteUri){
+		this.setRemoteParty(remoteUri);
 		return this.session.callAudio(remoteUri);
 	}
 	
-	public boolean makeVideoCall(String remoteUri){		
+	public boolean makeVideoCall(String remoteUri){	
+		this.setRemoteParty(remoteUri);
 		return this.session.callAudioVideo(remoteUri);
 	}
 	

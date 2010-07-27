@@ -178,11 +178,11 @@ implements IContactsEventHandler
 		
 		menu.add(0, ScreenContacts.MENU_VOICE_CALL, 0, "Make Voice Call");
 		menu.add(0, ScreenContacts.MENU_VISIO_CALL, 0, "Make Visio Call");
-		menu.add(0, ScreenContacts.MENU_SEND_MESSAGE, 0, "Send Short Message");
+		//menu.add(0, ScreenContacts.MENU_SEND_MESSAGE, 0, "Send Short Message");
 		menu.add(0, ScreenContacts.MENU_SEND_SMS, 0, "Send SMS");
-		menu.add(0, ScreenContacts.MENU_SEND_FILE, 0, "Send File");
-		menu.add(0, ScreenContacts.MENU_START_CHAT, 0, "Start Chat");
-		menu.add(0, ScreenContacts.MENU_CONFERENCE, 0, "Start Conference");
+		//menu.add(0, ScreenContacts.MENU_SEND_FILE, 0, "Send File");
+		//menu.add(0, ScreenContacts.MENU_START_CHAT, 0, "Start Chat");
+		//menu.add(0, ScreenContacts.MENU_CONFERENCE, 0, "Start Conference");
 	}
 	
 	@Override
@@ -203,9 +203,9 @@ implements IContactsEventHandler
 //			case ScreenContacts.MENU_SEND_MESSAGE:
 //				Toast.makeText(this, "Send Short Message: " + contact.getUri(), Toast.LENGTH_SHORT).show();
 //				return true;
-//			case ScreenContacts.MENU_SEND_SMS:
-//				Toast.makeText(this, "Send SMS: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-//				return true;
+			case ScreenContacts.MENU_SEND_SMS:
+				ScreenSMSCompose.sendSMS(contact.getUri());
+				return true;
 //			case ScreenContacts.MENU_SEND_FILE:
 //				Toast.makeText(this, "Send File: " + contact.getUri(), Toast.LENGTH_SHORT).show();
 //				return true;
