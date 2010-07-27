@@ -141,7 +141,7 @@ public class VideoProducer {
 		public void run() {
 			Log.d(VideoProducer.TAG, "Sender ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_LESS_FAVORABLE);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
 			
 			byte[] data;
 			while(VideoProducer.this.running){
@@ -183,18 +183,18 @@ public class VideoProducer {
 	private PreviewCallback previewCallback = new PreviewCallback() {
   	  public void onPreviewFrame(byte[] _data, Camera _camera) {
 			if (VideoProducer.this.videoProducer != null) {	
-				if(skipFrames){
+				if(VideoProducer.this.skipFrames){
 					//Log.d(VideoProducer.TAG, "Frame skipped");
 					synchronized (VideoProducer.this.buffers) {
 						if (VideoProducer.this.buffers.size() == 0) {
-							skipFrames = false;
+							VideoProducer.this.skipFrames = false;
 						}
 					}
 					return;
 				}
 				else if (VideoProducer.this.buffers.size() >= VideoProducer.this.fps * VideoProducer.MAX_DELAY) {
 					//Log.d(VideoProducer.TAG, "....Too Many Frames");
-					skipFrames = true;
+					VideoProducer.this.skipFrames = true;
 				}
 				
 				synchronized (VideoProducer.this.buffers) {

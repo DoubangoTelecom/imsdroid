@@ -93,6 +93,10 @@ public abstract class MySipSession implements Comparable<MySipSession>{
 		}
 	}
 	
+	public void delete(){
+		this.getSession().delete();
+	}
+	
 	protected void init(){
 		// Sip Expires
 		this.getSession().setExpires(this.configurationService.getInt(CONFIGURATION_SECTION.QOS, CONFIGURATION_ENTRY.SIP_SESSIONS_TIMEOUT, Configuration.DEFAULT_QOS_SIP_SESSIONS_TIMEOUT));

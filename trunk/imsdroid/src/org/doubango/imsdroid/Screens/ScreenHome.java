@@ -30,8 +30,8 @@ import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.events.IRegistrationEventHandler;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
+import org.doubango.imsdroid.sip.MyAVSession;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -140,7 +140,6 @@ implements IRegistrationEventHandler
 		this.adapter.setRegistered(this.sipService.isRegistered());
 	}
 	
-	
 	@Override
 	protected void onDestroy() { 
         // remove event handlers
@@ -194,9 +193,8 @@ implements IRegistrationEventHandler
 								});
 					}
 					else{
-						String currentAVCall;
-						if(item.screenCls == ScreenDialer.class && (currentAVCall = ScreenAV.getCurrent()) != null){
-							if(!ScreenHome.this.screenService.show(currentAVCall)){
+						if(item.screenCls == ScreenDialer.class && MyAVSession.getFirstId() != null){
+							if(!ScreenHome.this.screenService.show(ScreenAV.class, MyAVSession.getFirstId().toString())){
 								ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
 							}
 						}

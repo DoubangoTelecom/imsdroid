@@ -22,7 +22,6 @@ package org.doubango.imsdroid.Services.Impl;
 
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
@@ -33,6 +32,10 @@ import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Services.ISoundService;
 import org.doubango.imsdroid.Services.IStorageService;
 import org.doubango.imsdroid.Services.IXcapService;
+import org.doubango.imsdroid.events.IRegistrationEventHandler;
+import org.doubango.imsdroid.events.RegistrationEventArgs;
+import org.doubango.imsdroid.events.RegistrationEventTypes;
+import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
@@ -44,10 +47,11 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * Screen Manager. Entry point to retrieve all services (Singletons).
@@ -55,7 +59,30 @@ import android.widget.Toast;
  * @author root
  * 
  */
-public class ServiceManager  extends Service {
+public class ServiceManager  extends Service 
+implements IRegistrationEventHandler
+{
+	
+	static {
+		try {
+			//System.loadLibrary("tinyWRAP");
+			System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class
+					.getPackage().getName()));
+			
+			ProxyVideoProducer.registerPlugin();
+			ProxyVideoConsumer.registerPlugin();
+			ProxyAudioProducer.registerPlugin();
+			ProxyAudioConsumer.registerPlugin();
+
+		} catch (UnsatisfiedLinkError e) {
+			Log.e(Main.class.getCanonicalName(),
+					"Native code library failed to load.\n" + e.getMessage());
+		} catch (Exception e) {
+			Log.e(Main.class.getCanonicalName(),
+					"Native code library failed to load.\n" + e.getMessage());
+		}
+	}
+	
 	/* Singletons */
 	private static final ConfigurationService configurationService = new ConfigurationService();
 	private static final NetworkService networkService = new NetworkService();
@@ -80,14 +107,6 @@ public class ServiceManager  extends Service {
 	private static final int NOTIF_SMS_ID = 19833893;
 	
 	private static ServiceManager instance;
-
-	// Register  Audio/Video plugins
-	static{
-		ProxyVideoProducer.registerPlugin();
-		ProxyVideoConsumer.registerPlugin();
-		ProxyAudioProducer.registerPlugin();
-		ProxyAudioConsumer.registerPlugin();
-	}
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -98,14 +117,33 @@ public class ServiceManager  extends Service {
 	public void onCreate() {
 		super.onCreate();
 
+		ServiceManager.instance = this;
 		if(ServiceManager.notifManager == null){
 			ServiceManager.notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			// Display a notification about us starting.  We put an icon in the status bar.
 			ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are not connected");
 		}
-		ServiceManager.instance = this;
 	}
 	
+	@Override
+	public void onStart(Intent intent, int startId) {
+		super.onStart(intent, startId);
+		
+		Bundle bundle = intent.getExtras();
+		if(bundle != null && bundle.getBoolean("autostarted")){
+			ServiceManager.start();
+			getSipService().register();
+		}
+		
+		/* autostarts next time, unless user explicitly exited */
+		SharedPreferences settings = getSharedPreferences(Main.class.getCanonicalName(), 0);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean("autostarts", true);
+		editor.commit();
+		
+		ServiceManager.sipService.addRegistrationEventHandler(this);
+	}
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -114,17 +152,17 @@ public class ServiceManager  extends Service {
 		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_REGISTRATION_ID);
 		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
 
+		ServiceManager.sipService.removeRegistrationEventHandler(this);
+		
         // Tell the user we stopped.
-        Toast.makeText(this, "imsdroid shutting down...", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "imsdroid shutting down...", Toast.LENGTH_SHORT).show();
 	}
 	
     private static void showNotification(int notifId, int drawableId, String tickerText) {
         // Set the icon, scrolling text and timestamp
-        final Notification notification = new Notification(drawableId, tickerText, System.currentTimeMillis());
+        final Notification notification = new Notification(drawableId, "", System.currentTimeMillis());
         
-        
-        
-        Intent intent = new Intent(ServiceManager.getMainActivity(), Main.class);
+        Intent intent = new Intent(ServiceManager.instance, Main.class);
     	intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP  | Intent.FLAG_ACTIVITY_NEW_TASK);
         
         switch(notifId){
@@ -143,18 +181,20 @@ public class ServiceManager  extends Service {
         		intent.putExtra("SCREEN_ID", ScreenHistory.class.getCanonicalName());
         		break;
         	case NOTIF_AVCALL_ID:
-        		intent.putExtra("notif-type", "call");
-        		intent.putExtra("SCREEN_ID", ScreenAV.getCurrent());
+        		if(MyAVSession.getFirstId() != null){
+        			intent.putExtra("action", Main.ACTION_SHOW_AVSCREEN);
+        			intent.putExtra("session-id", MyAVSession.getFirstId().toString());
+        		}
         		break;
        		default:
        			
        			break;
         }
         
-        PendingIntent contentIntent = PendingIntent.getActivity(ServiceManager.getMainActivity(), notifId/*requestCode*/, intent, PendingIntent.FLAG_UPDATE_CURRENT);     
+        PendingIntent contentIntent = PendingIntent.getActivity(ServiceManager.instance, notifId/*requestCode*/, intent, PendingIntent.FLAG_UPDATE_CURRENT);     
 
         // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(ServiceManager.getMainActivity(), ServiceManager.CONTENT_TITLE, tickerText, contentIntent);
+        notification.setLatestEventInfo(ServiceManager.instance, ServiceManager.CONTENT_TITLE, tickerText, contentIntent);
 
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
@@ -175,6 +215,18 @@ public class ServiceManager  extends Service {
     
     public static void cancelAVCallNotif(){
     	ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
+    }
+    
+    public static Context getAppContext(){
+    	if(ServiceManager.instance != null){
+    		return ServiceManager.instance.getApplication().getApplicationContext();
+    	}
+    	else if(ServiceManager.mainActivity != null){
+    		return ServiceManager.mainActivity.getApplication().getApplicationContext();
+    	}
+    	else{
+    		return null;
+    	}
     }
     
     public static ServiceManager getInstance(){
@@ -200,8 +252,10 @@ public class ServiceManager  extends Service {
 		}
 		
 		// starts android service
-		ServiceManager.getMainActivity().startService(
+		if(ServiceManager.getMainActivity() != null){
+			ServiceManager.getMainActivity().startService(
 				new Intent(getMainActivity(), ServiceManager.class));
+		}
 		
 		boolean success = true;
 
@@ -260,7 +314,7 @@ public class ServiceManager  extends Service {
 	
 	public static void vibrate(long milliseconds){
 		if(ServiceManager.vibrator == null){
-			ServiceManager.vibrator = (Vibrator)ServiceManager.getMainActivity().getSystemService(Context.VIBRATOR_SERVICE);
+			ServiceManager.vibrator = (Vibrator)ServiceManager.getAppContext().getSystemService(Context.VIBRATOR_SERVICE);
 		}
 		ServiceManager.vibrator.vibrate(milliseconds);
 	}
@@ -344,5 +398,41 @@ public class ServiceManager  extends Service {
 	 */
 	public static IXcapService getXcapService() {
 		return ServiceManager.xcapService;
+	}
+	
+	
+	
+	/* ===================== Sip Events ========================*/
+	public boolean onRegistrationEvent(Object sender, RegistrationEventArgs e) {
+		Log.i(this.getClass().getName(), "onRegistrationEvent");
+		
+		final RegistrationEventTypes type = e.getType();
+		final short code = e.getSipCode();
+		final String phrase = e.getPhrase();
+		
+		switch(type){
+			case REGISTRATION_OK:
+				ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_green_16, "You are connected");
+				break;
+			
+			case UNREGISTRATION_OK:		
+				ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are disconnected");
+				break;
+				
+			case REGISTRATION_INPROGRESS:
+			case UNREGISTRATION_INPROGRESS:
+					ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_grey_16, String.format("Trying to %s...", (type == RegistrationEventTypes.REGISTRATION_INPROGRESS) ? "connect" : "disconnect"));
+				break;
+				
+			case REGISTRATION_NOK:
+			case UNREGISTRATION_NOK:
+			default:
+			{
+				Log.d(ServiceManager.TAG, String.format("Registration/unregistration failed. code=%d and phrase=%s", code, phrase));
+				break;
+			}
+		}
+		
+		return true;
 	}
 }

@@ -18,14 +18,27 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+package org.doubango.imsdroid.Services.Impl;
 
-package org.doubango.imsdroid.media;
+import org.doubango.imsdroid.Main;
 
-public enum MediaType {
-	Audio,
-	Video,
-	AudioVideo,
-	SMS,
-	Chat,
-	FileTransfer
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+
+public class ServiceManagerReceiver extends BroadcastReceiver 
+{
+	@Override
+	public void onReceive(Context context, Intent intent) 
+	{
+		 SharedPreferences settings = context.getSharedPreferences(Main.class.getCanonicalName(), 0);
+		 if(settings != null && settings.getBoolean("autostarts", true)){
+			 if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+				Intent i = new Intent(context, ServiceManager.class);
+				i.putExtra("autostarted", true);
+				context.startService(i);
+			}
+		 }
+	}
 }

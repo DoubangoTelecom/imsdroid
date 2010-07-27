@@ -26,6 +26,8 @@ public interface IScreenService  extends IService{
 	
 	boolean back();
 	
+	boolean bringToFront(int action, String[]... args);
+	boolean bringToFront(String[]... args);
 	boolean show(Class<? extends Screen> cls, String id);
 	boolean show(Class<? extends Screen> cls);
 	boolean show(String id);

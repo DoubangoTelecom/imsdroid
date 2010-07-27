@@ -45,14 +45,17 @@ public class ScreenService extends Service implements IScreenService {
 		//this.screens = new HashMap<String, Screen>();
 	}
 
+	@Override
 	public boolean start() {
 		return true;
 	}
 
+	@Override
 	public boolean stop() {
 		return true;
 	}
 	
+	@Override
 	public boolean back(){
 		String screen;
 		
@@ -75,14 +78,40 @@ public class ScreenService extends Service implements IScreenService {
 		screen = this.lastScreens[this.lastScreensIndex-1];
 		this.lastScreens[this.lastScreensIndex-1] = null;
 		this.lastScreensIndex--;
-		if(screen == null){
+		if(screen == null || !this.show(screen)){
 			return this.show(ScreenHome.class);
 		}
-		else{
-			return this.show(screen);
+		
+		return true;
+	}
+	
+	@Override
+	public boolean bringToFront(int action, String[]... args){
+		Intent intent = new Intent(ServiceManager.getAppContext(), Main.class);
+		try{
+			intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP  | Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.putExtra("action", action);
+			for(String[] arg : args){
+				if(arg.length != 2){
+					continue;
+				}
+				intent.putExtra(arg[0], arg[1]);
+			}
+			ServiceManager.getAppContext().startActivity(intent);
+			return true;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 	
+	@Override
+	public boolean bringToFront(String[]... args){
+		return this.bringToFront(Main.ACTION_NONE);
+	}
+	
+	@Override
 	public boolean show(Class<? extends Screen> cls, String id) {
 		Main mainActivity = ServiceManager.getMainActivity();
 		
@@ -108,10 +137,12 @@ public class ScreenService extends Service implements IScreenService {
 		return true;
 	}
 	
+	@Override
 	public boolean show(Class<? extends Screen> cls){
 		return this.show(cls, null);
 	}
 
+	@Override
 	public boolean show(String id) {
 		Screen screen = (Screen)ServiceManager.getMainActivity().getLocalActivityManager().getActivity(id);
 
@@ -124,7 +155,7 @@ public class ScreenService extends Service implements IScreenService {
 		}
 	}
 
-	public void runOnUiThread(Runnable r){
+	public void runOnUiThread(Runnable r){		
 		ServiceManager.getMainActivity().runOnUiThread(r);
 	}
 	

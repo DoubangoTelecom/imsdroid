@@ -46,12 +46,28 @@
 <activity android:name=".Screens.ScreenDialer"></activity>
 <activity android:name=".Screens.ScreenAV"></activity>
 
-<service android:name=".Services.Impl.ServiceManager" android:enabled="true"></service>
 <activity android:name=".Screens.ScreenContactEdit"></activity>
 
 <activity android:name=".Screens.ScreenCodecs"></activity>
 <activity android:name=".Screens.ScreenSMSCompose"></activity>
 <activity android:name=".Screens.ScreenSMSView"></activity>
+
+<service android:name=".Services.Impl.ServiceManager" android:enabled="true">
+	<intent-filter>
+		<action android:name="org.doubango.imsdroid.Services.Impl.ServiceManager">
+		</action>
+	</intent-filter>
+</service>
+<receiver android:name=".Services.Impl.ServiceManagerReceiver" android:enabled="true">
+<intent-filter>
+	<action android:name="android.intent.action.BOOT_COMPLETED">
+	</action>
+	<category android:name="android.intent.category.HOME">
+	</category>
+	</intent-filter>
+</receiver>
+
+
 </application>
 
     <uses-sdk android:minSdkVersion="3" />
@@ -67,8 +83,8 @@
 	<uses-permission android:name="android.permission.VIBRATE" ></uses-permission>
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" ></uses-permission>
-    
-	
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
+	<uses-permission android:name="android.permission.DISABLE_KEYGUARD"></uses-permission>
 	
 	
 	

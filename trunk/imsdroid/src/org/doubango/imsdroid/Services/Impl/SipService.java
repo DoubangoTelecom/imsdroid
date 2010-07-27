@@ -32,7 +32,6 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
 import org.doubango.imsdroid.Screens.ScreenAV;
-import org.doubango.imsdroid.Screens.ScreenNetwork;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Services.ISipService;
@@ -850,7 +849,7 @@ implements ISipService, tinyWRAPConstants {
 					ServiceManager.getScreenService().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							CustomDialog.show(ServiceManager.getMainActivity(), R.drawable.delete_48, "Failed to start the IMS stack", 
+							CustomDialog.show(ServiceManager.getAppContext(), R.drawable.delete_48, "Failed to start the IMS stack", 
 									String.format("\nPlease check your connection information. \nAdditional info:\n%s", phrase),
 											"OK", new DialogInterface.OnClickListener(){
 												@Override
@@ -890,19 +889,31 @@ implements ISipService, tinyWRAPConstants {
                     }
                     else if ((session = e.takeSessionOwnership()) != null){
                     	SipMessage message = e.getSipMessage();
-                    	if(message != null){                    		
-                    		final String from = message.getSipHeaderValue("f");
-                    		final MyAVSession avSession = MyAVSession.takeIncomingSession(this.sipService.sipStack, session);
-	                    		                    	
-	                    	ServiceManager.getScreenService().runOnUiThread(new Runnable(){
-								@Override
-								public void run() {
-									ScreenAV.receiveCall(avSession, from, MediaType.AudioVideo);
-								}
-	                    	});
+                    	if(message != null){
+                    		final MediaType mediaType;
+                    		switch(e.getMediaType()){
+                    			case twrap_media_audio:
+                    				mediaType = MediaType.Audio;
+                    				break;
+                    			case twrap_media_video:
+                    				mediaType = MediaType.Video;
+                    				break;
+                    			case twrap_media_audiovideo:
+                    				mediaType = MediaType.AudioVideo;
+                    				break;
+                    			default:
+                    				session.hangup();
+                        			session.delete();
+                        			return 0;
+                    		}
+                    		
+                    		final String fromUri = message.getSipHeaderValue("f");
+                    		final MyAVSession avSession = MyAVSession.takeIncomingSession(this.sipService.sipStack, session, mediaType);
+                    		avSession.setRemoteParty(fromUri);
+							ScreenAV.receiveCall(avSession);
 	                    	
 	                    	CallEventArgs eargs = new CallEventArgs(avSession.getId(), CallEventTypes.INCOMING, phrase);
-	                    	eargs.putExtra("from", from);
+	                    	eargs.putExtra("from", fromUri);
 	                    	this.sipService.onCallEvent(eargs);
                     	}
                     	else{
@@ -910,8 +921,14 @@ implements ISipService, tinyWRAPConstants {
                     	}
                     }
 					break;
-				case tsip_i_request:
 				case tsip_ao_request:
+					short code = e.getCode();
+					if(code == 180 && session!= null){
+						CallEventArgs eargs = new CallEventArgs(session.getId(), CallEventTypes.RINGING, phrase);
+                    	this.sipService.onCallEvent(eargs);
+					}				
+					break;
+				case tsip_i_request:
 				case tsip_o_ect_ok:
 				case tsip_o_ect_nok:
 				case tsip_i_ect:
