@@ -32,13 +32,13 @@ public class CallDialog {
 			ibPick.setOnClickListener(pickListener);
 		}
 		else{
-			ibPick.setVisibility(View.INVISIBLE);
+			ibPick.setVisibility(View.GONE);
 		}
 		if(hangListener != null){
 			ibHang.setOnClickListener(hangListener);
 		}
 		else{
-			ibHang.setVisibility(View.INVISIBLE);
+			ibHang.setVisibility(View.GONE);
 		}
 		
 		return layout;
