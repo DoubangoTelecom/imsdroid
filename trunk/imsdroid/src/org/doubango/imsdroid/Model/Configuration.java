@@ -75,7 +75,7 @@ public class Configuration {
 	public static final boolean DEFAULT_RCS_PARTIAL_PUB = false;
 	public static final boolean DEFAULT_RCS_PRESENCE = false;
 	public static final boolean DEFAULT_RCS_RLS = true;
-	public static final String DEFAULT_RCS_SMSC = "sip:smsc@open-ims.test";
+	public static final String DEFAULT_RCS_SMSC = "sip:+331000000000@open-ims.test";
 	public static final PresenceStatus DEFAULT_RCS_STATUS = PresenceStatus.Online;
 	
 	public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "Low";
