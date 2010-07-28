@@ -45,6 +45,6 @@ If you provide an invalid Uri the client will switch to text mode.<br />
 You can send a SMS (both text and binary) from the dialer, the address book or the history. <br />
 
 === Receiving SMS ===
-Incoming SMSs will be signaled by a sound and new icon will be added in the notification status bar. <br /> To read the SMS you can either click on the notification icon or go to the history screen. <br />
+Incoming SMSs will be signaled by a sound and new icon will be added in the notification status bar. <br /> To read the SMS you can either click on the notification icon or go to the history screen. <br /> If the received message is a binary SMS, then the Acknowledgment (RP-ACK) or error (RP-ERROR) message will be sent to the SIP URI present in the P-Asserted-Identity header as per 3GPP TS 24.341 section 5.3.2.4. The originator address will come from the TPDU encapsulated in the RP-DATA message.
 <br />
 For more technical information: [http://betelco.blogspot.com/2009/10/sms-over-3gpp-ims-network.html http://betelco.blogspot.com/2009/10/sms-over-3gpp-ims-network.html]
