@@ -42,7 +42,6 @@ ICallEventDispatcher
 	boolean unregister();
 	
 	boolean publish();
-	boolean sendSMS(byte[] content, String remoteUri, String contentType);
 	
 	boolean isRegistered();
 	

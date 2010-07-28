@@ -20,9 +20,9 @@
 */
 package org.doubango.imsdroid.Services.Impl;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
@@ -106,8 +106,6 @@ implements IRegistrationEventHandler
 	private static final int NOTIF_AVCALL_ID = 19833892;
 	private static final int NOTIF_SMS_ID = 19833893;
 	
-	private static ServiceManager instance;
-	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -116,13 +114,15 @@ implements IRegistrationEventHandler
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
-		ServiceManager.instance = this;
+		
 		if(ServiceManager.notifManager == null){
 			ServiceManager.notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-			// Display a notification about us starting.  We put an icon in the status bar.
-			ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are not connected");
 		}
+		
+		// Display a notification about us starting.  We put an icon in the status bar.
+		ServiceManager.showRegistartionNotif(R.drawable.bullet_ball_glass_red_16, "You are not connected");
+		
+		ServiceManager.sipService.addRegistrationEventHandler(this);
 	}
 	
 	@Override
@@ -140,14 +140,12 @@ implements IRegistrationEventHandler
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean("autostarts", true);
 		editor.commit();
-		
-		ServiceManager.sipService.addRegistrationEventHandler(this);
-	}
-
+	}	
+	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
+		
 		// Cancel the persistent notifications.
 		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_REGISTRATION_ID);
 		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
@@ -162,7 +160,7 @@ implements IRegistrationEventHandler
         // Set the icon, scrolling text and timestamp
         final Notification notification = new Notification(drawableId, "", System.currentTimeMillis());
         
-        Intent intent = new Intent(ServiceManager.instance, Main.class);
+        Intent intent = new Intent(IMSDroid.getContext(), Main.class);
     	intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP  | Intent.FLAG_ACTIVITY_NEW_TASK);
         
         switch(notifId){
@@ -177,8 +175,7 @@ implements IRegistrationEventHandler
         		break;
         	case NOTIF_SMS_ID:
         		notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        		intent.putExtra("notif-type", "newsms");
-        		intent.putExtra("SCREEN_ID", ScreenHistory.class.getCanonicalName());
+        		intent.putExtra("action", Main.ACTION_SHOW_HISTORY);
         		break;
         	case NOTIF_AVCALL_ID:
         		if(MyAVSession.getFirstId() != null){
@@ -191,10 +188,10 @@ implements IRegistrationEventHandler
        			break;
         }
         
-        PendingIntent contentIntent = PendingIntent.getActivity(ServiceManager.instance, notifId/*requestCode*/, intent, PendingIntent.FLAG_UPDATE_CURRENT);     
+        PendingIntent contentIntent = PendingIntent.getActivity(IMSDroid.getContext(), notifId/*requestCode*/, intent, PendingIntent.FLAG_UPDATE_CURRENT);     
 
         // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(ServiceManager.instance, ServiceManager.CONTENT_TITLE, tickerText, contentIntent);
+        notification.setLatestEventInfo(IMSDroid.getContext(), ServiceManager.CONTENT_TITLE, tickerText, contentIntent);
 
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
@@ -202,6 +199,7 @@ implements IRegistrationEventHandler
     }
     
     public static void showRegistartionNotif(int drawableId, String tickerText){
+    	Log.d(ServiceManager.TAG, "showRegistartionNotif");
     	ServiceManager.showNotification(NOTIF_REGISTRATION_ID, drawableId, tickerText);
     }
     
@@ -215,23 +213,7 @@ implements IRegistrationEventHandler
     
     public static void cancelAVCallNotif(){
     	ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
-    }
-    
-    public static Context getAppContext(){
-    	if(ServiceManager.instance != null){
-    		return ServiceManager.instance.getApplication().getApplicationContext();
-    	}
-    	else if(ServiceManager.mainActivity != null){
-    		return ServiceManager.mainActivity.getApplication().getApplicationContext();
-    	}
-    	else{
-    		return null;
-    	}
-    }
-    
-    public static ServiceManager getInstance(){
-    	return ServiceManager.instance;
-    }
+    }   
     
 	public static void setMainActivity(Main mainActivity){
 		ServiceManager.mainActivity = mainActivity;
@@ -251,11 +233,9 @@ implements IRegistrationEventHandler
 			return true;
 		}
 		
-		// starts android service
-		if(ServiceManager.getMainActivity() != null){
-			ServiceManager.getMainActivity().startService(
-				new Intent(getMainActivity(), ServiceManager.class));
-		}
+		// Start Android service
+		IMSDroid.getContext().startService(
+				new Intent(IMSDroid.getContext(), ServiceManager.class));
 		
 		boolean success = true;
 
@@ -287,9 +267,9 @@ implements IRegistrationEventHandler
 			return true;
 		}
 		
-		// stops android service
-		ServiceManager.getMainActivity().stopService(
-				new Intent(ServiceManager.getMainActivity(), ServiceManager.class));
+		// stops Android service
+		IMSDroid.getContext().stopService(
+				new Intent(IMSDroid.getContext(), ServiceManager.class));
 		
 		boolean success = true;
 
@@ -309,12 +289,13 @@ implements IRegistrationEventHandler
 			Log.e(ServiceManager.TAG, "Failed to stop services");
 		}
 		
+		ServiceManager.started = false;
 		return success;
 	}
 	
 	public static void vibrate(long milliseconds){
 		if(ServiceManager.vibrator == null){
-			ServiceManager.vibrator = (Vibrator)ServiceManager.getAppContext().getSystemService(Context.VIBRATOR_SERVICE);
+			ServiceManager.vibrator = (Vibrator)IMSDroid.getContext().getSystemService(Context.VIBRATOR_SERVICE);
 		}
 		ServiceManager.vibrator.vibrate(milliseconds);
 	}

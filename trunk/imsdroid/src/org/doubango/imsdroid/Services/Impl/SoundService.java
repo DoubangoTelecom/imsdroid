@@ -22,6 +22,7 @@ package org.doubango.imsdroid.Services.Impl;
 
 import java.io.IOException;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.ISoundService;
 
@@ -96,7 +97,7 @@ public class SoundService extends Service implements ISoundService {
 				this.dtmfPlayer.stop();
 				this.dtmfPlayer.reset();
 				
-				AssetFileDescriptor afd = ServiceManager.getAppContext().getResources().openRawResourceFd(rawId);
+				AssetFileDescriptor afd = IMSDroid.getContext().getResources().openRawResourceFd(rawId);
 				this.dtmfPlayer.setDataSource(afd.getFileDescriptor(),
 	                    afd.getStartOffset(),
 	                    afd.getLength());
@@ -130,7 +131,7 @@ public class SoundService extends Service implements ISoundService {
 		}
 		/* Horrible HACK */
 		if(this.ringTonePlayer == null){
-			if((this.ringTonePlayer  = MediaPlayer.create(ServiceManager.getAppContext(), R.raw.ringtone)) == null){
+			if((this.ringTonePlayer  = MediaPlayer.create(IMSDroid.getContext(), R.raw.ringtone)) == null){
 				return;
 			}
 			this.ringTonePlayer.setOnPreparedListener(new OnPreparedListener(){
@@ -158,7 +159,7 @@ public class SoundService extends Service implements ISoundService {
 		else{
 			this.ringTonePlayer.reset();
 			try {
-				AssetFileDescriptor afd = ServiceManager.getAppContext().getResources().openRawResourceFd(R.raw.ringtone);
+				AssetFileDescriptor afd = IMSDroid.getContext().getResources().openRawResourceFd(R.raw.ringtone);
 				this.ringTonePlayer.setDataSource(afd.getFileDescriptor(),
 	                    afd.getStartOffset(),
 	                    afd.getLength());
@@ -200,12 +201,12 @@ public class SoundService extends Service implements ISoundService {
 	@Override
 	public void playRingBackTone() {
 		if(this.ringBackTonePlayer == null){
-			this.ringBackTonePlayer  = MediaPlayer.create(ServiceManager.getAppContext(), R.raw.ringbacktone);
+			this.ringBackTonePlayer  = MediaPlayer.create(IMSDroid.getContext(), R.raw.ringbacktone);
 		}
 		else{
 			this.ringBackTonePlayer.reset();
 			try {
-				AssetFileDescriptor afd = ServiceManager.getAppContext().getResources().openRawResourceFd(R.raw.ringbacktone);
+				AssetFileDescriptor afd = IMSDroid.getContext().getResources().openRawResourceFd(R.raw.ringbacktone);
 				this.ringBackTonePlayer.setDataSource(afd.getFileDescriptor(),
 	                    afd.getStartOffset(),
 	                    afd.getLength());
@@ -266,12 +267,12 @@ public class SoundService extends Service implements ISoundService {
 	@Override
 	public void playNewSMS() {
 		if(this.smsPlayer == null){
-			this.smsPlayer  = MediaPlayer.create(ServiceManager.getAppContext(), R.raw.smsevent);
+			this.smsPlayer  = MediaPlayer.create(IMSDroid.getContext(), R.raw.smsevent);
 		}
 		else{
 			this.smsPlayer.reset();
 			try {
-				AssetFileDescriptor afd = ServiceManager.getAppContext().getResources().openRawResourceFd(R.raw.smsevent);
+				AssetFileDescriptor afd = IMSDroid.getContext().getResources().openRawResourceFd(R.raw.smsevent);
 				this.smsPlayer.setDataSource(afd.getFileDescriptor(),
 	                    afd.getStartOffset(),
 	                    afd.getLength());

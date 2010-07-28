@@ -40,13 +40,8 @@ public class ScreenDialer extends Screen {
 	private ImageButton ibChat;
 	private ImageButton ibMessage;
 	
-	
-	private final IScreenService screenService;
-	
 	public ScreenDialer() {
 		super(SCREEN_TYPE.DIALER_T, ScreenDialer.class.getCanonicalName());
-		
-		this.screenService = ServiceManager.getScreenService();
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {

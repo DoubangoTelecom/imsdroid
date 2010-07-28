@@ -27,6 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.doubango.imsdroid.CallDialog;
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
@@ -204,7 +205,7 @@ public class ScreenAV extends Screen {
         
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
         
-        PowerManager pm = (PowerManager) ServiceManager.getAppContext().getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 		this.wakeLock = pm == null ? null : pm.newWakeLock(PowerManager.ON_AFTER_RELEASE | PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, ScreenAV.TAG);
 		if(this.wakeLock != null && !this.wakeLock.isHeld()){
 			this.wakeLock.acquire();
@@ -647,7 +648,7 @@ public class ScreenAV extends Screen {
 		final AudioManager audioManager;
 		
 		public CallEventHandler(){
-			this.audioManager = (AudioManager)ServiceManager.getAppContext().getSystemService(Context.AUDIO_SERVICE);
+			this.audioManager = (AudioManager)IMSDroid.getContext().getSystemService(Context.AUDIO_SERVICE);
 		}
 		
 		public void init(){
