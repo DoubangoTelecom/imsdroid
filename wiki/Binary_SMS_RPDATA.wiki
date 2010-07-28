@@ -47,4 +47,4 @@ You can send a SMS (both text and binary) from the dialer, the address book or t
 === Receiving SMS ===
 Incoming SMSs will be signaled by a sound and new icon will be added in the notification status bar. <br /> To read the SMS you can either click on the notification icon or go to the history screen. <br />
 <br />
-For more information: [ http://betelco.blogspot.com/2009/10/sms-over-3gpp-ims-network.html http://betelco.blogspot.com/2009/10/sms-over-3gpp-ims-network.html]
+For more technical information: [http://betelco.blogspot.com/2009/10/sms-over-3gpp-ims-network.html http://betelco.blogspot.com/2009/10/sms-over-3gpp-ims-network.html]
