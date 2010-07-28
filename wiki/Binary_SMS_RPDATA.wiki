@@ -1,5 +1,7 @@
 #summary SMS Over IP (RP-DATA)
 
+<wiki:toc max_depth="3" />
+
 = Presentation =
 SMS stands for Short Message Service or Silent Messaging Service and is a communication service standardized in the GSM mobile communication system, using standardized communications protocols allowing the interchange of short text messages between mobile telephone devices.<br />
 <br />
