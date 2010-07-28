@@ -35,10 +35,16 @@ The implementation is based on [http://www.doubango.org/API/tinySMS/ tinySMS] pr
  * GSMA VoLTE V1.0.0 - [http://news.vzw.com/OneVoiceProfile.pdf 5.5 SMS over IP]
 
 === Configuration ===
-Before you start sending any SMS you should set your IP-SM-GW (IP-Short-Message-Gateway) using the Messaging screen (Options->Messaging). The default value is *sip:+331000000000@open-ims.test* as shown below.<br /><br />
+Before you start sending any binary SMS you should set your IP-SM-GW (IP-Short-Message-Gateway) using the Messaging screen (Options->Messaging). The default value is *sip:+331000000000@open-ims.test* as shown below.<br /><br />
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_messaging.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_messaging.png]
-<br />
+<br /> <br />
 The Uri of the IP-SM-GW must be a valid SIP URI with a telephone number as user info or a telephone number. Example of valid Uris: <br />
  * sip:+331000000000@open-ims.test, sip:331000000000@open-ims.test
  * tel:+331000000000
 If you provide an invalid Uri the client will switch to text mode.
+
+=== Sending SMS ===
+You can send a SMS (both text and binary) from the dialer, the address book or the history. <br />
+
+=== Receiving SMS ===
+Incoming SMSs will be signaled by a sound and new icon will be added in the notification status bar. <br /> To read the SMS you can either click on the notification icon or go to the history screen. <br />
