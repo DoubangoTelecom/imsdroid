@@ -20,6 +20,7 @@
 */
 package org.doubango.imsdroid.Services.Impl;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Services.INetworkService;
 
 import android.content.Context;
@@ -49,7 +50,7 @@ public class NetworkService  extends Service implements INetworkService {
 		}
 		
 		/* wifi */
-		if((this.wifiManager = (WifiManager) ServiceManager.getAppContext().getSystemService(Context.WIFI_SERVICE)) != null){
+		if((this.wifiManager = (WifiManager) IMSDroid.getContext().getSystemService(Context.WIFI_SERVICE)) != null){
 			this.wifiLock = this.wifiManager.createWifiLock(NetworkService.TAG);
 			final WifiInfo wifiInfo = this.wifiManager.getConnectionInfo();
 			if(wifiInfo != null){

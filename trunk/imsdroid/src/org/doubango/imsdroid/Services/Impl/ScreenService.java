@@ -20,6 +20,7 @@
 */
 package org.doubango.imsdroid.Services.Impl;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Screens.Screen;
@@ -87,7 +88,7 @@ public class ScreenService extends Service implements IScreenService {
 	
 	@Override
 	public boolean bringToFront(int action, String[]... args){
-		Intent intent = new Intent(ServiceManager.getAppContext(), Main.class);
+		Intent intent = new Intent(IMSDroid.getContext(), Main.class);
 		try{
 			intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP  | Intent.FLAG_ACTIVITY_NEW_TASK);
 			intent.putExtra("action", action);
@@ -97,7 +98,7 @@ public class ScreenService extends Service implements IScreenService {
 				}
 				intent.putExtra(arg[0], arg[1]);
 			}
-			ServiceManager.getAppContext().startActivity(intent);
+			IMSDroid.getContext().startActivity(intent);
 			return true;
 		}
 		catch (Exception e) {
@@ -155,8 +156,13 @@ public class ScreenService extends Service implements IScreenService {
 		}
 	}
 
-	public void runOnUiThread(Runnable r){		
-		ServiceManager.getMainActivity().runOnUiThread(r);
+	public void runOnUiThread(Runnable r){
+		if(ServiceManager.getMainActivity() != null){
+			ServiceManager.getMainActivity().runOnUiThread(r);
+		}
+		else{
+			Log.e(this.getClass().getCanonicalName(), "No Main activity");
+		}
 	}
 	
 	public boolean destroy(String id){

@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.doubango.imsdroid.CustomDialog;
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.HistorySMSEvent;
@@ -66,8 +67,9 @@ import org.doubango.tinyWRAP.MessagingSession;
 import org.doubango.tinyWRAP.OptionsEvent;
 import org.doubango.tinyWRAP.OptionsSession;
 import org.doubango.tinyWRAP.PublicationEvent;
-import org.doubango.tinyWRAP.RPData;
+import org.doubango.tinyWRAP.RPMessage;
 import org.doubango.tinyWRAP.RegistrationEvent;
+import org.doubango.tinyWRAP.SMSData;
 import org.doubango.tinyWRAP.SMSEncoder;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipMessage;
@@ -81,10 +83,12 @@ import org.doubango.tinyWRAP.tsip_invite_event_type_t;
 import org.doubango.tinyWRAP.tsip_message_event_type_t;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
 import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
+import org.doubango.tinyWRAP.twrap_sms_type_t;
 
 import android.content.DialogInterface;
 import android.os.ConditionVariable;
 import android.util.Log;
+import android.widget.Toast;
 
 public class SipService extends Service 
 implements ISipService, tinyWRAPConstants {
@@ -110,7 +114,7 @@ implements ISipService, tinyWRAPConstants {
 	private MySubscriptionSession subReg;
 	private MySubscriptionSession subWinfo;
 	private MySubscriptionSession subMwi;
-	private MySubscriptionSession subDebug;
+	//private MySubscriptionSession subDebug;
 	private MyPublicationSession pubPres;
 	private final CopyOnWriteArrayList<MySubscriptionSession> subPres;
 	
@@ -118,8 +122,6 @@ implements ISipService, tinyWRAPConstants {
 	private final DDebugCallback debugCallback;
 
 	private ConditionVariable condHack;
-	
-	private static int SMS_MR = 0;
 
 	public SipService() {
 		super();
@@ -424,50 +426,6 @@ implements ISipService, tinyWRAPConstants {
 				Configuration.DEFAULT_RCS_STATUS.toString()));
 		return this.pubPres.publish(status, freeText);
 	}
-
-	public boolean sendSMS(byte[] content, String remoteUri, String contentType){
-		if(!this.isRegistered() || content == null){
-			return false;
-		}
-		
-		final boolean ret;
-		final MessagingSession session = new MessagingSession(this.sipStack);
-		final boolean binarySMS = this.configurationService.getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.BINARY_SMS, Configuration.DEFAULT_RCS_BINARY_SMS);
-		final String SMSC = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.SMSC, Configuration.DEFAULT_RCS_SMSC);
-		final String SMSCPhoneNumber;
-		final String dstPhoneNumber;
-		
-		if(this.sipStack.getSigCompId() != null){
-			session.addSigCompCompartment(this.sipStack.getSigCompId());
-		}
-		
-		if(binarySMS && (SMSCPhoneNumber = UriUtils.getValidPhoneNumber(SMSC)) != null && (dstPhoneNumber = UriUtils.getValidPhoneNumber(remoteUri)) != null){
-			session.setToUri(SMSC);
-			session.addHeader("Content-Type", "application/vnd.3gpp.sms");
-			session.addHeader("Transfer-Encoding", "binary");
-			
-			RPData rpdata = SMSEncoder.encodeSubmit(++SipService.SMS_MR, SMSCPhoneNumber, dstPhoneNumber, new String(content));
-			long payloadLength = rpdata.getPayloadLength();
-			final ByteBuffer payload = ByteBuffer.allocateDirect((int)payloadLength);
-			payloadLength = rpdata.getPayload(payload, payload.capacity());
-			ret = session.send(payload, payloadLength);
-			
-			if(SipService.SMS_MR >= 255){
-				SipService.SMS_MR = 0;
-			}
-		}
-		else{
-			session.setToUri(remoteUri);
-			session.addHeader("Content-Type", contentType);
-			
-			final ByteBuffer payload = ByteBuffer.allocateDirect(content.length);
-			payload.put(content);
-			ret = session.send(payload, content.length);
-		}
-		session.delete();
-		
-		return ret;
-	}
 	
 	/* ===================== Add/Remove handlers ======================== */
 
@@ -651,18 +609,145 @@ implements ISipService, tinyWRAPConstants {
 					break;
 				case tsip_i_message:
 					final SipMessage message = e.getSipMessage();
+					MessagingSession session = e.getSession();
+					if (session == null){
+		             /* "Server-side-session" e.g. Initial MESSAGE sent by the remote party */
+		                session = e.takeSessionOwnership();
+					}
+					
+					if(session == null){
+						Log.e(SipService.TAG, "Failed to take session ownership");
+					}
+					
 					if(message == null){
+						session.reject();
+						session.delete();
 						return 0;
 					}
-					final String from = message.getSipHeaderValue("f");
-					/* final String contentType = message.getSipHeaderValue("c"); */
-					final byte[] content = message.getSipContent();
-					HistorySMSEvent event = new HistorySMSEvent(from);
-					event.setStatus(StatusType.Incoming);
-					event.setContent(new String(content));
-					ServiceManager.getHistoryService().addEvent(event);
-					ServiceManager.showSMSNotif(R.drawable.sms_into_16, "New SMS");
-					ServiceManager.getSoundService().playNewSMS();
+					
+					String from = message.getSipHeaderValue("f");
+					final String contentType = message.getSipHeaderValue("c");
+					final byte[] bytes = message.getSipContent();
+					byte[] content = null;
+					
+					if(bytes == null || bytes.length ==0){
+						Log.e(SipService.TAG, "Invalid MESSAGE");
+						session.reject();
+						session.delete();
+						return 0;
+					}
+					
+					session.accept();
+					session.delete();
+					
+					if(StringUtils.equals(contentType, ContentType.SMS_3GPP, true)){
+						/* ==== 3GPP SMSIP  === */
+						ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
+						buffer.put(bytes);
+						SMSData smsData = SMSEncoder.decode(buffer, buffer.capacity(), false);
+                        if (smsData != null){
+                            twrap_sms_type_t smsType = smsData.getType();
+                            if (smsType == twrap_sms_type_t.twrap_sms_type_rpdata){
+                            	/* === We have received a RP-DATA message === */
+                                long payLength = smsData.getPayloadLength();
+                                String SMSC = message.getSipHeaderValue("P-Asserted-Identity");
+                                String SMSCPhoneNumber;
+                                String origPhoneNumber = smsData.getOA();
+                                
+                                /* Destination address */
+                                if(origPhoneNumber != null){
+                                	from = UriUtils.makeValidSipUri(origPhoneNumber);
+                                }
+                                else if((origPhoneNumber = UriUtils.getValidPhoneNumber(from)) == null){
+                                	Log.e(SipService.TAG, "Invalid destination address");
+                                	return 0;
+                                }
+                                
+                                /* SMS Center 
+                                 * 3GPP TS 24.341 - 5.3.2.4	Sending a delivery report
+                                 * The address of the IP-SM-GW is received in the P-Asserted-Identity header in the SIP MESSAGE 
+                                 * request including the delivered short message.
+                                 * */
+                                if((SMSCPhoneNumber = UriUtils.getValidPhoneNumber(SMSC)) == null){
+                                	SMSC = ServiceManager.getConfigurationService().getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.SMSC, Configuration.DEFAULT_RCS_SMSC);
+                                	if((SMSCPhoneNumber = UriUtils.getValidPhoneNumber(SMSC)) == null){
+                                		Log.e(SipService.TAG, "Invalid IP-SM-GW address");
+                                		return 0;
+                                	}
+                                }
+                                
+                                if (payLength > 0) {
+                                    /* Send RP-ACK */
+                                    RPMessage rpACK = SMSEncoder.encodeACK(smsData.getMR(), SMSCPhoneNumber, origPhoneNumber, false);
+                                    if (rpACK != null){
+                                        long ack_len = rpACK.getPayloadLength();
+                                        if (ack_len > 0){
+                                        	buffer = ByteBuffer.allocateDirect((int)ack_len);
+                                            long len = rpACK.getPayload(buffer, buffer.capacity());
+
+                                            MessagingSession m = new MessagingSession(SipService.this.sipStack);
+                                            m.setToUri(SMSC);
+                                            m.addHeader("Content-Type", ContentType.SMS_3GPP);
+                                            m.addHeader("Transfer-Encoding", "binary");
+                                            m.send(buffer, len);
+                                            m.delete();
+                                        }
+                                        rpACK.delete();
+                                    }
+
+                                    /* Get ascii content */
+                                    buffer = ByteBuffer.allocateDirect((int)payLength);
+                                    content = new byte[(int)payLength];
+                                    smsData.getPayload(buffer, buffer.capacity());
+                                    buffer.get(content);
+                                }
+                                else{
+                                    /* Send RP-ERROR */
+                                    RPMessage rpError = SMSEncoder.encodeError(smsData.getMR(), SMSCPhoneNumber, origPhoneNumber, false);
+                                    if (rpError != null){
+                                        long err_len = rpError.getPayloadLength();
+                                        if (err_len > 0){
+                                        	buffer = ByteBuffer.allocateDirect((int)err_len);
+                                            long len = rpError.getPayload(buffer, buffer.capacity());
+
+                                            MessagingSession m = new MessagingSession(SipService.this.sipStack);
+                                            m.setToUri(SMSC);
+                                            m.addHeader("Content-Type", ContentType.SMS_3GPP);
+                                            m.addHeader("Transfer-Encoding", "binary");
+                                            m.send(buffer, len);
+                                            m.delete();
+                                        }
+                                        rpError.delete();
+                                    }
+                                }
+                            }
+                            else{
+                            	/* === We have received any non-RP-DATA message === */
+                            	if(smsType == twrap_sms_type_t.twrap_sms_type_ack){
+                            		/* Find message from the history (by MR) an update it's status */
+                            		Log.d(SipService.TAG, "RP-ACK");
+                            	}
+                            	else if(smsType == twrap_sms_type_t.twrap_sms_type_error){
+                            		/* Find message from the history (by MR) an update it's status */
+                            		Log.d(SipService.TAG, "RP-ERROR");
+                            	}
+                            }
+                        }
+					}
+					else{
+						/* ==== text/plain or any other  === */
+						content = bytes;
+					}
+					
+					/* Alert the user a,d add the message to the history */
+					if(content != null){
+						HistorySMSEvent event = new HistorySMSEvent(from);
+						event.setStatus(StatusType.Incoming);
+						event.setContent(new String(content));
+						ServiceManager.getHistoryService().addEvent(event);
+						ServiceManager.showSMSNotif(R.drawable.sms_into_16, "New SMS");
+						ServiceManager.getSoundService().playNewSMS();
+					}
 					
 					break;
 			}
@@ -849,13 +934,20 @@ implements ISipService, tinyWRAPConstants {
 					ServiceManager.getScreenService().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							CustomDialog.show(ServiceManager.getAppContext(), R.drawable.delete_48, "Failed to start the IMS stack", 
-									String.format("\nPlease check your connection information. \nAdditional info:\n%s", phrase),
-											"OK", new DialogInterface.OnClickListener(){
-												@Override
-												public void onClick(DialogInterface dialog, int which) {
-												}
-									}, null, null);
+							try{
+								// http://stackoverflow.com/questions/1561803/android-progressdialog-show-crashes-with-getapplicationcontext
+								CustomDialog.show(IMSDroid.getContext(), R.drawable.delete_48, "Failed to start the IMS stack", 
+										String.format("\nPlease check your connection information. \nAdditional info:\n%s", phrase),
+												"OK", new DialogInterface.OnClickListener(){
+													@Override
+													public void onClick(DialogInterface dialog, int which) {
+													}
+										}, null, null);
+							}
+							catch (Exception e) {
+								e.printStackTrace();
+								Toast.makeText(IMSDroid.getContext(), String.format("Please check your connection information. \nAdditional info:\n%s", phrase), Toast.LENGTH_LONG).show();
+							}
 						}
 					});
 										
@@ -992,11 +1084,11 @@ implements ISipService, tinyWRAPConstants {
 
 	/* ===================== Sip Session Preferences ======================== */
 	private class SipPrefrences {
-		private boolean rcs;
-		private boolean xcapdiff;
+		//private boolean rcs;
+		//private boolean xcapdiff;
 		private boolean xcap_enabled;
-		private boolean preslist;
-		private boolean deferredMsg;
+		//private boolean preslist;
+		//private boolean deferredMsg;
 		private boolean presence_enabled;
 		private boolean mwi;
 		private String impi;

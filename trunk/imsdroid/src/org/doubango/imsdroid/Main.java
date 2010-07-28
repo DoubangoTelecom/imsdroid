@@ -53,6 +53,7 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenPresence;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_TYPE;
@@ -107,6 +108,7 @@ implements IRegistrationEventHandler
     public static final int ACTION_NONE = 0;
     public static final int ACTION_SHOW_AVSCREEN = 1;
     public static final int ACTION_RESTORE_LAST_STATE = 2;
+    public static final int ACTION_SHOW_HISTORY = 3;
     
     public Main()
     {
@@ -122,15 +124,6 @@ implements IRegistrationEventHandler
     	
     	this.handler = new Handler();
     }
-    
-    private ServiceConnection connection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			// TODO Auto-generated method stub
-		}
-		public void onServiceDisconnected(ComponentName name) {
-			// TODO Auto-generated method stub
-		}
-    };
 
     /* ===================== Activity ========================*/
     
@@ -154,10 +147,6 @@ implements IRegistrationEventHandler
         	Log.e(this.getClass().getName(), "Failed to start services");
         	return; // Should exit
         }
-        
-        // bind to service manager
-        this.bindService(new Intent(this, ServiceManager.class),
-                this.connection, Context.BIND_AUTO_CREATE);
         
         // set values
         //this.rlTop.setVisibility(this.sipService.isRegistered() ? View.VISIBLE : View.INVISIBLE);
@@ -202,9 +191,6 @@ implements IRegistrationEventHandler
 	protected void onDestroy() {
         // remove event handlers : do it after stop() to continue to receive Sip events
         this.sipService.removeRegistrationEventHandler(this);
-        
-        // unbind to service manager
-        this.unbindService(this.connection);
         
         super.onDestroy();
 	}
@@ -393,6 +379,10 @@ implements IRegistrationEventHandler
 				if(id != null){
 					ServiceManager.getScreenService().show(ScreenAV.class, id);
 				}
+				break;
+				
+			case Main.ACTION_SHOW_HISTORY:
+				ServiceManager.getScreenService().show(ScreenHistory.class);
 				break;
 				
 			case Main.ACTION_RESTORE_LAST_STATE:

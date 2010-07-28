@@ -61,7 +61,6 @@ implements IRegistrationEventHandler
 	
 	private final IScreenService screenService;
 	private final ISipService sipService;
-	private final Handler handler;
 
 	public ScreenHome() {
 		super(SCREEN_TYPE.HOME_T, ScreenHome.class.getCanonicalName());
@@ -69,8 +68,6 @@ implements IRegistrationEventHandler
 		// Services
 		this.screenService = ServiceManager.getScreenService();
 		this.sipService = ServiceManager.getSipService();
-		
-		this.handler = new Handler();
 	}
 
 	@Override
@@ -215,7 +212,7 @@ implements IRegistrationEventHandler
 		switch(e.getType()){
 			case REGISTRATION_OK:
 			case UNREGISTRATION_OK:
-				this.handler.post(new Runnable() {
+				this.runOnUiThread(new Runnable() {
 					public void run() {
 						ScreenHome.this.adapter.setRegistered(ScreenHome.this.sipService.isRegistered());
 					}});
@@ -223,7 +220,7 @@ implements IRegistrationEventHandler
 				
 			case REGISTRATION_INPROGRESS:
 			case UNREGISTRATION_INPROGRESS:
-				this.handler.post(new Runnable() {
+				this.runOnUiThread(new Runnable() {
 					public void run() {
 						ScreenHome.this.adapter.setInprogress(true);
 				}});

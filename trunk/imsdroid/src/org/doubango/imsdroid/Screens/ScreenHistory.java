@@ -282,7 +282,8 @@ implements IHistoryEventHandler
 		private ScreenHistoryAdapter(List<HistoryEvent> items) {
 			this.items = items;
 			this.dateFormat = new SimpleDateFormat("yyyy MMM dd hh:mm aaa");
-			this.durationFormat = new SimpleDateFormat("hh:mm:ss");
+			//this.durationFormat = new SimpleDateFormat("hh:mm:ss");
+			this.durationFormat = new SimpleDateFormat("mm:ss");
 		}
 
 		private synchronized void update(List<HistoryEvent> items){
