@@ -19,6 +19,9 @@ Also know as PDU (Protocol Data Unit) mode, it is use to encode the payload of t
 The message length can be up to 160 characters where each character represent 7bits [160/7bits], [140/8bits] or [70/16bits]. By default, each character represent 7bits encoded as per *GSM 03.38*.<br />
 For IMS/LTE Networks, SMS message shall be encapsulated in RPDUs (Relay Protocol Data Unit) data string as defined in *3GPP TS 24.011*, section 7.3. The RPDU data is transferred from SM entity to SM entity using SIP MESSAGE requests. These SIP requests shall use the MIME type *"application/vnd.3gpp.sms"* for this purpose. <br />
 
+=== API Reference ===
+The implementation is based on [http://www.doubango.org/API/tinySMS/ tinySMS] project.
+
 === Technical Reference ===
  * 3GPP TS 23.038 - Alphabets and language-specific information
  * 3GPP TS 23.040 - Technical realization of Short Message Service (SMS)
@@ -27,3 +30,5 @@ For IMS/LTE Networks, SMS message shall be encapsulated in RPDUs (Relay Protocol
  * 3GPP TS 24.451 - Support of SMS and MMS over NGN IMS subsystem; Stage 3 [Endorsement of 3GPP TS 24.341 Release 7]
 
 === Implementation Reference ===
+ * GSMA RCS release 3 - [http://www.gsmworld.com/documents/Service_Realization_v1.0%281%29.pdf 10.2.2 SMS Service Over Broadband Access]
+ * 
