@@ -42,6 +42,7 @@ The Uri of the IP-SM-GW must be a valid SIP URI with a telephone number as user 
  * sip:+331000000000@open-ims.test, sip:331000000000@open-ims.test
  * tel:+331000000000
 If you provide an invalid Uri the client will switch to text mode.<br />
+
 === Sending SMS ===
 You can send a SMS (both text and binary) from the dialer, the address book or the history. <br />
 
