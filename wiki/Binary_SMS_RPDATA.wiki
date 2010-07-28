@@ -8,8 +8,6 @@ SMS stands for Short Message Service or Silent Messaging Service and is a commun
 <br />
 SMS technology has been specified by the ETSI in GSM 03.40 and 03.38 documents (3GPP TS 23.040 and 3GPP TS 23.038 respectively). These documents only describe how to use SMS over mobile networks (nothing for IP networks).<br />
 In real world there are two way to receive SMS messages over mobile networks: Binary (PDU) and Text mode. <br />
-In this post I will explain how to use SMS technology over IP within the IP Multimedia (IM) Core Network (CN) subsystem based on the Session Initiation Protocol (SIP) and SIP Events as defined in 3GPP TS 24.229.<br />
-Note: In the coming chapters, « SMS over IMS Network » and « SMS over IP Network » have the same meaning.<br />
 
 == Text mode ==
 The message payload is transferred « as is » into a SIP MESSAGE request (text/plain). By default this mode is disabled. To enable this mode, you should go to *Options->Messaging* and uncheck *Enable Binary SMS (RP-DATA)*<br />
