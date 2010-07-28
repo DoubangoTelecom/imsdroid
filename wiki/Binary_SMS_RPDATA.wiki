@@ -35,4 +35,4 @@ The implementation is based on [http://www.doubango.org/API/tinySMS/ tinySMS] pr
 
 === Configuration ===
 Before you start sending any SMS you should set your IP-SM-GW (IP-Short-Message-Gateway) using the Messaging screen (Options->Messaging). The default value is *sip:+331000000000@open-ims.test* as shown below.<br />
-[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_messaging.png Messaging Screen]
+[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_messaging.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_messaging.png]
