@@ -33,15 +33,15 @@
     <Contact_Info>
       <Contact_First_Name>Mamadou</Contact_First_Name>
       <Contact_Last_Name>Diop</Contact_Last_Name>
-      <Contact_Email>diopmamadou@doubango.oeg</Contact_Email>
-      <Author_Email>diopmamadou@doubango.oeg</Author_Email>
+      <Contact_Email>diopmamadou@doubango.org</Contact_Email>
+      <Author_Email>diopmamadou@doubango.org</Author_Email>
       <Author_First_Name>Mamadou</Author_First_Name>
       <Author_Last_Name>Diop</Author_Last_Name>
     </Contact_Info>
     <Support_Info>
-      <Sales_Email>diopmamadou@doubango.oeg</Sales_Email>
-      <Support_Email>diopmamadou@doubango.oeg</Support_Email>
-      <General_Email>diopmamadou@doubango.oeg</General_Email>
+      <Sales_Email>diopmamadou@doubango.org</Sales_Email>
+      <Support_Email>diopmamadou@doubango.org</Support_Email>
+      <General_Email>diopmamadou@doubango.org</General_Email>
       <Sales_Phone></Sales_Phone>
       <Support_Phone></Support_Phone>
       <General_Phone></General_Phone>
@@ -56,7 +56,7 @@
     <NewsFeed_Type>RSS 0.90</NewsFeed_Type>
     <NewsFeed_Language>English</NewsFeed_Language>
     <NewsFeed_Purpose>News</NewsFeed_Purpose>
-    <NewsFeed_Author_Email>diopmamadou@doubango.oeg</NewsFeed_Author_Email>
+    <NewsFeed_Author_Email>diopmamadou@doubango.org</NewsFeed_Author_Email>
     <NewsFeed_Author_First_Name>Mamadou</NewsFeed_Author_First_Name>
     <NewsFeed_Author_Last_Name>Diop</NewsFeed_Author_Last_Name>
     <NewsFeed_Feed_URL></NewsFeed_Feed_URL>
