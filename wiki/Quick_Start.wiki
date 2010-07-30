@@ -1,0 +1,25 @@
+#summary Getting Started
+#labels Featured,Phase-Requirements
+
+Before starting to use the client you should configure your identity and the network settings. This short guide explain how to do this.
+
+= Identity =
+At the home screen, go to *Options->Identity* to open the identity screen.<br />
+
+[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png]
+
+*Display Name:* Your nickname useless in this beta version.<br />
+
+*IMS Public Identity (IMPU):* As its name says, it’s your public visible identifier where you are willing to receive calls or any demands. An IMPU could be either a SIP or tel URI (e.g. tel:+33100000 or sip:bob@open-ims.test).<br />
+In IMS world, a user can have multiple IMPUs associated to its unique IMPI.<br />
+For those using IMSDroid as basic SIP client, the IMPU should coincide with their SIP URI (a.k.a SIP address).<br />
+
+*IMS Private Identity (IMPI):* The IMPI is a unique identifier assigned to a user (or UE) by the home network. It could be either a SIP URI (e.g. sip:bob@open-ims.test), a tel URI (e.g. tel:+33100000) or any alphanumeric string (e.g. bob@open-ims.test or bob). <br />
+For those using IMSDroid as a basic SIP client, the IMPI should coincide with their authentication name. If you don't know what is your IMPI, then fill the field with your SIP address.<br />
+
+*Password:* Your password.<br />
+
+*Realm:* The realm is the name of the domain to authenticate to. It should be a valid SIP URI (e.g. sip:open-ims.test). <br />
+
+*3GPP Early IMS Security:* If you are not using an IMS server you should use this option to disable some heavy IMS authentication procedures.<br />
+
