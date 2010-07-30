@@ -26,3 +26,11 @@ For those using IMSDroid as a basic SIP client, the IMPI should coincide with th
 At the home screen, go to *Options->Network* to open the *Network screen*. <br />
 
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png]
+
+*IP version:* In this beta version only IPv4 is supported.<br />
+
+*Proxy-CSCF Host:* This is the IP address or FQDN (Fully-Qualified Domain Name) of your SIP server or outbound proxy (e.g. 88.89.125.125 or example.com). <br />
+*Proxy-CSCF Port:* The port associated to the proxy host. Should be *5060*.<br />
+*Transport:* The transport type (TCP or UDP) to use.<br />
+*Proxy-CSCF Discovery:* Should be None.
+*Enable SigComp:* Will enable Signaling Compression. Only check if your server support this feature. Should not be checked. <br />
