@@ -68,6 +68,8 @@ To choose which audio/video codecs to enable/disable you should go to *Options->
 <tr align="center"><td>*Codecs Screen*</td></tr>
 </table>
 
+To have decent video quality, you should only check Theora or H.264 codecs. However, these codecs require at least a 600MHz processor. <br /> If you are using an old Android device (e.g. Android G1), then you should only select H.263 and H.263+. <br /> Of course the remote party should also support the same codecs. <br />
+
 ==Audio/Video call==
 You can place a call from the dialer, address book or the history screen. <br />
 
