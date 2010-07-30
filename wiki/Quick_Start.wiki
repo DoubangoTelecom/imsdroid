@@ -1,7 +1,7 @@
 #summary Getting Started
 #labels Featured,Phase-Requirements
 
-<wiki:toc max_depth="3" />
+<wiki:toc max_depth="4" />
 
 =SIP Configuration=
 
@@ -90,8 +90,8 @@ All incoming, outgoing and missed calls and message will be logged in the histor
 
 <table>
 <tr>
-<td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png]</td>
-<td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png]</td>
+<td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png]</td>
+<td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png]</td>
 </tr>
 <tr align="center">
 <td>*History Screen*</td>
@@ -102,8 +102,14 @@ All incoming, outgoing and missed calls and message will be logged in the histor
 The context menu is opened when you select an entry and make a long click. <br />
 
 ===From the Address Book===
-In this beta version the address book feature is not fully implemented. <br /> To add a new contact, open the contact screen by clicking on the contact item ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/eab2_48.png http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/eab2_48.png]) from the home screen.<br /> At the Contacts screen click on the Android 'menu' button to add a new contact. <br />
+In this beta version the address book feature is not fully implemented. <br /> To add a new contact, open the contact screen by clicking on the contact item ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/eab2_48.png]) from the home screen.<br /> At the Contacts screen click on the Android 'menu' button to add a new contact. <br />
 Audio/Video calls can be made as explained above (History Screen).<br />
 
 ===In Call Screen===
-Once the call is placed a new screen (In Call Screen) will be automatically opened and a notification icon will be added in the status bar ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_call_25.png]).
+Once the call is placed a new screen (In Call Screen) will be automatically opened and a notification icon will be added in the status bar ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_call_25.png]). As long as you are in call this icon will remain in the status bar. This icon will allow you to reopen to screen. The Audio stream will continue even if you leave this screen or the application but the video stream will be stopped (restarted when you come back). <br />
+
+<table>
+<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png]</td></tr>
+<tr align="center"><td>*Dialer Screen*</td></tr>
+</table>
+As you can remark, your preview image only contains a white box. It's because you have to explicitly start the outgoing video stream.<br /> This is done by clicking on the Android menu button and selecting [http://imsdroid.googlecode.com/svn/trunk/screenshots/video_start_48.png] item. <br /> [http://imsdroid.googlecode.com/svn/trunk/screenshots/video_stop_48.png] item will be used to stop the video. <br />
