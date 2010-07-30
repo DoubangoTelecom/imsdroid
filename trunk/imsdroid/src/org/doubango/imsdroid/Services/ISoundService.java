@@ -30,8 +30,8 @@ public interface ISoundService   extends IService {
 	void playRingBackTone();
 	void stopRingBackTone();
 	
-	void playNewSMS();
-	void stopNewSMS();
+	void playNewEvent();
+	void stopNewEvent();
 	
 	void playConnectionChanged(boolean connected);
 	void stopConnectionChanged(boolean connected);

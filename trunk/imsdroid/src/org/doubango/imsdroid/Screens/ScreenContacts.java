@@ -135,12 +135,7 @@ implements IContactsEventHandler
 	}
 	
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		return true;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean createOptionsMenu(Menu menu){
 		menu.add(0, ScreenContacts.MENU_NEW_CONTACT, 0, "New Contact").setIcon(R.drawable.user_add_48);
 		menu.add(0, ScreenContacts.MENU_NEW_GROUP, 0, "New Group").setIcon(R.drawable.group_add_48);
 		menu.add(0, ScreenContacts.MENU_REFRESH, 0, "Refresh").setIcon(R.drawable.user_refresh_48);
@@ -157,16 +152,16 @@ implements IContactsEventHandler
 				ScreenContactEdit.add();
 				break;
 			case ScreenContacts.MENU_NEW_GROUP:
-				Toast.makeText(this, "New Group", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "New Group", Toast.LENGTH_SHORT).show();
 				break;
 			case ScreenContacts.MENU_REFRESH:
-				Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
 				break;
 			case ScreenContacts.MENU_DELETE_CONTACT:
-				Toast.makeText(this, "Delete Contact", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "Delete Contact", Toast.LENGTH_SHORT).show();
 				break;
 			case ScreenContacts.MENU_DELETE_GROUP:
-				Toast.makeText(this, "Delete Group", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "Delete Group", Toast.LENGTH_SHORT).show();
 				break;
 		}
 		return true;

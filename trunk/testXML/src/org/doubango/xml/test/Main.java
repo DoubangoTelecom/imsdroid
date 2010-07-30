@@ -26,7 +26,7 @@ public class Main extends Activity {
         //TestXcapCaps.run();
         
         /* OMA xcap-directory */
-        //TestXcapDirectory.run();
+        TestXcapDirectory.run();
         
         /* rls-services */
         //TestRLS.run();
@@ -40,6 +40,6 @@ public class Main extends Activity {
         //TestContacts.run();
         
         /* Pidf */
-        TestPidf.run();
+        //TestPidf.run();
     }
 }

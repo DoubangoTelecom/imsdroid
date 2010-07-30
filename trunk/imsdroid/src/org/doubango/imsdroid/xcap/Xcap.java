@@ -68,6 +68,7 @@ public class Xcap {
 	public static final String XCAP_AUID_OMA_SHARED_GROUPS_DOC = "index";
 	
 	public enum State{
+		NONE,
 		GET_XCAP_CAPS,
 		GET_OMA_DIRECTORY,
 		GET_RESOURCE_LISTS,

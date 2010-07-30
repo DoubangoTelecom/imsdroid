@@ -289,9 +289,9 @@ implements ISipService, tinyWRAPConstants {
 		this.preferences.transport = this.configurationService.getString(
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.TRANSPORT,
 				Configuration.DEFAULT_TRANSPORT);
-		this.preferences.ipversion = this.configurationService.getString(
+		this.preferences.ipversion = "ipv4";/*this.configurationService.getString(
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
-				Configuration.DEFAULT_IP_VERSION);
+				Configuration.DEFAULT_IP_VERSION);*/
 
 		Log.i(this.getClass().getCanonicalName(), String.format(
 				"pcscf-host=%s, pcscf-port=%d, transport=%s, ipversion=%s",
@@ -335,7 +335,8 @@ implements ISipService, tinyWRAPConstants {
 
 		// Start the Stack
 		if (!this.sipStack.start()) {
-			Log.e(this.getClass().getCanonicalName(),
+			Toast.makeText(IMSDroid.getContext(), "Failed to start the SIP stack", Toast.LENGTH_LONG).show();
+			Log.e(SipService.TAG,
 					"Failed to start the SIP stack");
 			return false;
 		}
@@ -746,7 +747,7 @@ implements ISipService, tinyWRAPConstants {
 						event.setContent(new String(content));
 						ServiceManager.getHistoryService().addEvent(event);
 						ServiceManager.showSMSNotif(R.drawable.sms_into_16, "New SMS");
-						ServiceManager.getSoundService().playNewSMS();
+						ServiceManager.getSoundService().playNewEvent();
 					}
 					
 					break;

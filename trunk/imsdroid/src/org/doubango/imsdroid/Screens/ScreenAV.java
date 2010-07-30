@@ -105,7 +105,6 @@ public class ScreenAV extends Screen {
 	private ImageButton btDtmf_Star;
 		
 	private KeyguardLock keyguardLock;
-	private PowerManager.WakeLock wakeLock;
 	private final IScreenService screenService;
 	
 	private final static int MENU_PICKUP = 0;
@@ -202,14 +201,8 @@ public class ScreenAV extends Screen {
         this.btDtmf_9.setOnClickListener(this.dtmf_OnClickListener);
         this.btDtmf_Sharp.setOnClickListener(this.dtmf_OnClickListener);
         this.btDtmf_Star.setOnClickListener(this.dtmf_OnClickListener);
-        
+		
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-        
-        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-		this.wakeLock = pm == null ? null : pm.newWakeLock(PowerManager.ON_AFTER_RELEASE | PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, ScreenAV.TAG);
-		if(this.wakeLock != null && !this.wakeLock.isHeld()){
-			this.wakeLock.acquire();
-		}
 	}
 	
 	@Override
@@ -244,76 +237,9 @@ public class ScreenAV extends Screen {
         if(avSession != null){
         	// FIXME: cleanup
         	MyAVSession.getVideoProducer().setContext(null);
-        }
-        if(this.wakeLock != null && this.wakeLock.isHeld()){
-			this.wakeLock.release();
-		}    
+        } 
         
 		super.onDestroy();
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, ScreenAV.MENU_PICKUP, 0, "Answer").setIcon(R.drawable.phone_pick_up_48);
-		menu.add(0, ScreenAV.MENU_HANGUP, 0, "Hang-up").setIcon(R.drawable.phone_hang_up_48);
-		menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, "Hold").setIcon(R.drawable.phone_hold_48);
-		menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, "Send Video").setIcon(R.drawable.video_start_48);
-		menu.add(1, ScreenAV.MENU_SPEAKER, 0, "Speaker ON").setIcon(R.drawable.phone_speaker_48);
-		return true;
-	}
-	
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu){
-		if(this.avSession == null){
-			return true;
-		}
-		
-		final MenuItem itemPickUp = menu.findItem(ScreenAV.MENU_PICKUP);
-		final MenuItem itemHangUp = menu.findItem(ScreenAV.MENU_HANGUP);
-		final MenuItem itemHoldResume = menu.findItem(ScreenAV.MENU_HOLD_RESUME);
-		final MenuItem itemSendStopVideo = menu.findItem(ScreenAV.MENU_SEND_STOP_VIDEO);
-		final MenuItem itemSpeaker = menu.findItem(ScreenAV.MENU_SPEAKER);
-		
-		switch(this.avSession.getState()){
-			case CALL_INCOMING:
-				itemPickUp.setEnabled(true);
-				itemHangUp.setEnabled(true);
-				itemHoldResume.setEnabled(false);
-				itemSpeaker.setEnabled(false);
-				itemSendStopVideo.setEnabled(false);
-				break;
-			case CALL_INPROGRESS:
-				itemPickUp.setEnabled(false);
-				itemHangUp.setEnabled(true);
-				itemHoldResume.setEnabled(false);
-				itemSpeaker.setEnabled(false);
-				itemSendStopVideo.setEnabled(false);
-				break;
-			case INCALL:
-				itemPickUp.setEnabled(false);
-				itemHangUp.setEnabled(true);
-				itemHoldResume.setEnabled(true);
-				itemSpeaker.setEnabled(true);
-				itemSpeaker.setTitle(((AudioManager)getSystemService(Context.AUDIO_SERVICE)).isSpeakerphoneOn() ? "Speaker OFF" : "Speaker ON");
-				
-				if((this.avSession.getMediaType() == MediaType.AudioVideo || this.avSession.getMediaType() == MediaType.Video)){
-					itemSendStopVideo.setTitle(this.avSession.isSendingVideo()? "Stop Video" : "Send Video").setIcon(this.avSession.isSendingVideo()? R.drawable.video_stop_48 : R.drawable.video_start_48);
-					itemSendStopVideo.setEnabled(true);
-				}
-				else{
-					itemSendStopVideo.setEnabled(false);
-				}
-				itemHoldResume.setTitle(this.avSession.isLocalHeld()? "Resume" : "Hold").setIcon(this.avSession.isLocalHeld()? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
-				break;
-			case CALL_TERMINATED:
-				itemPickUp.setEnabled(false);
-				itemHangUp.setEnabled(false);
-				itemHoldResume.setEnabled(false);
-				itemSpeaker.setEnabled(false);
-				itemSendStopVideo.setEnabled(false);
-				break;
-		}
-		return true;
 	}
 	
 	@Override
@@ -361,6 +287,61 @@ public class ScreenAV extends Screen {
 	/* ===================== IScreen (Screen) ======================== */
 	@Override
 	public boolean haveMenu(){
+		return true;
+	}
+	
+	@Override
+	public boolean createOptionsMenu(Menu menu){
+		if(this.avSession == null){
+			return false;
+		}
+		
+		MenuItem itemPickUp = menu.add(0, ScreenAV.MENU_PICKUP, 0, "Answer").setIcon(R.drawable.phone_pick_up_48);
+		MenuItem itemHangUp = menu.add(0, ScreenAV.MENU_HANGUP, 0, "Hang-up").setIcon(R.drawable.phone_hang_up_48);
+		MenuItem itemHoldResume = menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, "Hold").setIcon(R.drawable.phone_hold_48);
+		MenuItem itemSendStopVideo = menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, "Send Video").setIcon(R.drawable.video_start_48);
+		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, "Speaker ON").setIcon(R.drawable.phone_speaker_48);
+		
+		switch(this.avSession.getState()){
+			case CALL_INCOMING:
+				itemPickUp.setEnabled(true);
+				itemHangUp.setEnabled(true);
+				itemHoldResume.setEnabled(false);
+				itemSpeaker.setEnabled(false);
+				itemSendStopVideo.setEnabled(false);
+				break;
+			case CALL_INPROGRESS:
+				itemPickUp.setEnabled(false);
+				itemHangUp.setEnabled(true);
+				itemHoldResume.setEnabled(false);
+				itemSpeaker.setEnabled(false);
+				itemSendStopVideo.setEnabled(false);
+				break;
+			case INCALL:
+				itemPickUp.setEnabled(false);
+				itemHangUp.setEnabled(true);
+				itemHoldResume.setEnabled(true);
+				itemSpeaker.setEnabled(true);
+				itemSpeaker.setTitle(((AudioManager)getSystemService(Context.AUDIO_SERVICE)).isSpeakerphoneOn() ? "Speaker OFF" : "Speaker ON");
+				
+				if((this.avSession.getMediaType() == MediaType.AudioVideo || this.avSession.getMediaType() == MediaType.Video)){
+					itemSendStopVideo.setTitle(this.avSession.isSendingVideo()? "Stop Video" : "Send Video").setIcon(this.avSession.isSendingVideo()? R.drawable.video_stop_48 : R.drawable.video_start_48);
+					itemSendStopVideo.setEnabled(true);
+				}
+				else{
+					itemSendStopVideo.setEnabled(false);
+				}
+				itemHoldResume.setTitle(this.avSession.isLocalHeld()? "Resume" : "Hold").setIcon(this.avSession.isLocalHeld()? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
+				break;
+			case CALL_TERMINATED:
+				itemPickUp.setEnabled(false);
+				itemHangUp.setEnabled(false);
+				itemHoldResume.setEnabled(false);
+				itemSpeaker.setEnabled(false);
+				itemSendStopVideo.setEnabled(false);
+				break;
+		}
+		
 		return true;
 	}
 	
@@ -610,11 +591,7 @@ public class ScreenAV extends Screen {
 							this.llVideoRemote.addView(remote_preview);
 						}
 					}
-					else{
-						if(this.wakeLock != null && this.wakeLock.isHeld()){
-							this.wakeLock.release();
-						}
-					}
+					
 					// Video producer
 					this.startStopVideo(this.avSession.isSendingVideo());
 				break;
@@ -646,9 +623,12 @@ public class ScreenAV extends Screen {
 		final static String TAG = CallEventHandler.class.getCanonicalName();
 		ScreenAV avScreen;
 		final AudioManager audioManager;
+		final PowerManager.WakeLock wakeLock;
 		
 		public CallEventHandler(){
 			this.audioManager = (AudioManager)IMSDroid.getContext().getSystemService(Context.AUDIO_SERVICE);
+			PowerManager pm = (PowerManager) IMSDroid.getContext().getSystemService(Context.POWER_SERVICE);
+			this.wakeLock = pm == null ? null : pm.newWakeLock(PowerManager.ON_AFTER_RELEASE | PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, CallEventHandler.TAG);
 		}
 		
 		public void init(){
@@ -679,6 +659,9 @@ public class ScreenAV extends Screen {
 							public void run() {
 								CallEventHandler.this.avScreen.updateState(CallState.CALL_INCOMING);
 							}});
+					}
+					if(this.wakeLock != null && !this.wakeLock.isHeld()){
+						this.wakeLock.acquire();
 					}
 					ServiceManager.vibrate(500);
 					ServiceManager.getSoundService().playRingTone();
@@ -730,13 +713,16 @@ public class ScreenAV extends Screen {
 					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
 						avSession.setState(CallState.INCALL);
 					}
-					
+					if(this.wakeLock != null && this.wakeLock.isHeld()){
+						this.wakeLock.release();
+					}
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
 								CallEventHandler.this.avScreen.updateState(CallState.INCALL);					
 							}});
 					}
+					
 					break;
 				case DISCONNECTED:
 					ServiceManager.getSoundService().stopRingBackTone();
@@ -753,6 +739,9 @@ public class ScreenAV extends Screen {
 								CallEventHandler.this.avScreen.updateState(CallState.CALL_TERMINATED);
 							}});
 					}
+					if(this.wakeLock != null && this.wakeLock.isHeld()){
+						this.wakeLock.release();
+					} 
 					ServiceManager.vibrate(100);
 					MyAVSession.releaseSession(e.getSessionId());
 					this.audioManager.setMode(AudioManager.MODE_NORMAL);

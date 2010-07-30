@@ -21,9 +21,12 @@
 
 package org.doubango.imsdroid.Screens;
 
+import android.view.Menu;
+
 
 public interface IScreen {
 	String getId();
 	String getScreenTitle();
 	boolean haveMenu();
+	boolean createOptionsMenu(Menu menu);
 }

@@ -51,13 +51,14 @@ public class Configuration {
 	public static final String DEFAULT_IMPU = "sip:johndoe@open-ims.test";
 	
 	public static final boolean DEFAULT_EARLY_IMS = false;
-	public static final String DEFAULT_IP_VERSION = "ipv4";
 	public static final String DEFAULT_PCSCF_DISCOVERY = "None";
 	public static final String DEFAULT_PCSCF_HOST = "127.0.0.1";
 	public static final int DEFAULT_PCSCF_PORT = 5060;
 	public static final String DEFAULT_REALM = "sip:open-ims.test";
 	public static final boolean DEFAULT_SIGCOMP = false;
 	public static final String DEFAULT_TRANSPORT = "udp";
+	public static final boolean DEFAULT_WIFI = true;
+	public static final boolean DEFAULT_3G = false;
 	
 	public static final boolean DEFAULT_GENERAL_FULL_SCREEN_VIDEO = true;
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
@@ -126,7 +127,7 @@ public class Configuration {
 		/* === VoLTE === */
 
 		/* === NETWORK === */
-		EARLY_IMS, IP_VERSION, PCSCF_DISCOVERY, PCSCF_HOST, PCSCF_PORT, REALM, SIGCOMP, TRANSPORT,
+		EARLY_IMS, IP_VERSION, PCSCF_DISCOVERY, PCSCF_HOST, PCSCF_PORT, REALM, SIGCOMP, THREE_3G, TRANSPORT, WIFI,
 
 		/* === QOS/QOE === */
 		PRECOND_BANDWIDTH, PRECOND_STRENGTH, PRECOND_TYPE, REFRESHER, SIP_CALLS_TIMEOUT, SIP_SESSIONS_TIMEOUT, SESSION_TIMERS,
