@@ -18,13 +18,23 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
-package org.doubango.imsdroid.Services;
+package org.doubango.imsdroid.Services.Impl;
 
-import org.doubango.imsdroid.Services.Impl.NetworkService.DNS_TYPE;
+import org.doubango.imsdroid.IMSDroid;
 
-public interface INetworkService  extends IService{
-	String getDnsServer(DNS_TYPE type);
-	String getLocalIP(boolean ipv6);
-	boolean acquire();
-	boolean release();
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
+
+public class ConnectionChangeReceiver extends BroadcastReceiver {
+
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		if(ServiceManager.getSipService().isRegistered()){
+			Toast.makeText(IMSDroid.getContext(), "IMSDroid: Connection information have changed", Toast.LENGTH_LONG).show();
+			ServiceManager.getSoundService().playNewEvent();
+		}
+	}
+
 }

@@ -60,7 +60,6 @@ public class ScreenHistory  extends Screen
 implements IHistoryEventHandler 
 {
 
-	private final IConfigurationService configurationService;
 	private final IHistoryService historytService;
 	private final IContactService contactService;
 	
@@ -84,7 +83,6 @@ implements IHistoryEventHandler
 		super(SCREEN_TYPE.HISTORY_T, ScreenHistory.class.getCanonicalName());
 		
 		// services
-		this.configurationService = ServiceManager.getConfigurationService();
 		this.historytService = ServiceManager.getHistoryService();
 		this.contactService = ServiceManager.getContactService();
 		
@@ -128,13 +126,7 @@ implements IHistoryEventHandler
 	}
 	
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		return true;
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		//menu.add(0, ScreenHistory.MENU_DELETE_EVENT, 0, "Delete Event").setIcon(R.drawable.delete_48);
+	public boolean createOptionsMenu(Menu menu){
 		menu.add(0, ScreenHistory.MENU_DELETE_ALLEVENTS, 0, "Delete All Events").setIcon(R.drawable.delete_list_48);
 		return true;
 	}

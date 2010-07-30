@@ -344,7 +344,6 @@ public class XcapService  extends Service implements IXcapService, IRegistration
 			}
 		}
 		catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

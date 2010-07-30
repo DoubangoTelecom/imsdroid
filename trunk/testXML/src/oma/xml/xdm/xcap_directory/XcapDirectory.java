@@ -21,14 +21,18 @@
 package oma.xml.xdm.xcap_directory;
 
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.doubango.imsdroid.utils.RFC3339Date;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
+import org.simpleframework.xml.core.Commit;
 
 @Root(name = "xcap-directory", strict = false)
 @Namespace(reference = "urn:oma:xml:xdm:xcap-directory")
@@ -85,9 +89,11 @@ public class XcapDirectory {
             @Attribute(required = true)
             protected String etag;
             @Attribute(name = "last-modified", required = false)
-            protected long lastModified;
+            protected String _lastModified;
             @Attribute(required = false)
             protected BigInteger size;
+            
+            private Date lastModified;
             
             public String getUri() {
                 return uri;
@@ -105,11 +111,25 @@ public class XcapDirectory {
                 this.etag = value;
             }
           
-            public long getLastModified() {
+            @Commit
+            public void commit() {
+            	if(this._lastModified != null){
+            		try {
+            			this.lastModified = RFC3339Date.parseRFC3339Date(this._lastModified);
+        			} catch (IndexOutOfBoundsException e) {
+        				e.printStackTrace();
+        			} catch (ParseException e) {
+        				e.printStackTrace();
+        			}
+        			this._lastModified = null;
+            	}
+            }
+            
+            public Date getLastModified() {
                 return lastModified;
             }
 
-            public void setLastModified(long value) {
+            public void setLastModified(Date value) {
                 this.lastModified = value;
             }
             

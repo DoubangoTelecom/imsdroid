@@ -39,14 +39,14 @@ public class ScreenNetwork extends Screen {
 
 	private final IConfigurationService configurationService;
 	
-	private Spinner spIPversion;
 	private EditText etProxyHost;
 	private EditText etProxyPort;
 	private Spinner spTransport;
 	private Spinner spProxyDiscovery;
 	private CheckBox cbSigComp;
+	private CheckBox cbWiFi;
+	private CheckBox cb3G;
 	
-	private final static String[] spinner_ipversion_items = new String[] {Configuration.DEFAULT_IP_VERSION/*, "IPv6"*/};
 	private final static String[] spinner_transport_items = new String[] {Configuration.DEFAULT_TRANSPORT.toUpperCase(), "TCP", /*"TLS", "SCTP"*/};
 	private final static String[] spinner_proxydiscovery_items = new String[] {Configuration.DEFAULT_PCSCF_DISCOVERY, Configuration.PCSCF_DISCOVERY_DNS/*, "DHCPv4/v6", "Both"*/};
 	
@@ -62,18 +62,16 @@ public class ScreenNetwork extends Screen {
         setContentView(R.layout.screen_network);
         
         // get controls
-        this.spIPversion = (Spinner)this.findViewById(R.id.screen_network_spinner_ipversion);
         this.etProxyHost = (EditText)this.findViewById(R.id.screen_network_editText_pcscf_host);
         this.etProxyPort = (EditText)this.findViewById(R.id.screen_network_editText_pcscf_port);
         this.spTransport = (Spinner)this.findViewById(R.id.screen_network_spinner_transport);
         this.spProxyDiscovery = (Spinner)this.findViewById(R.id.screen_network_spinner_pcscf_discovery);
         this.cbSigComp = (CheckBox)this.findViewById(R.id.screen_network_checkBox_sigcomp);
+        this.cbWiFi = (CheckBox)this.findViewById(R.id.screen_network_checkBox_wifi);
+        this.cb3G = (CheckBox)this.findViewById(R.id.screen_network_checkBox_3g);
         
         // spinners
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_ipversion_items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        this.spIPversion.setAdapter(adapter);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_transport_items);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_transport_items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         this.spTransport.setAdapter(adapter);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_proxydiscovery_items);
@@ -82,12 +80,6 @@ public class ScreenNetwork extends Screen {
 
         
         // load values from configuration file (Do it before adding UI listeners)
-		this.spIPversion.setSelection(this.getSpinnerIndex(
-				this.configurationService.getString(
-						CONFIGURATION_SECTION.NETWORK,
-						CONFIGURATION_ENTRY.IP_VERSION,
-						ScreenNetwork.spinner_ipversion_items[0]),
-				ScreenNetwork.spinner_ipversion_items));
         this.etProxyHost.setText(this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, Configuration.DEFAULT_PCSCF_HOST));
         this.etProxyPort.setText(this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, Integer.toString(Configuration.DEFAULT_PCSCF_PORT)));
         this.spTransport.setSelection(this.getSpinnerIndex(
@@ -104,20 +96,22 @@ public class ScreenNetwork extends Screen {
 				ScreenNetwork.spinner_proxydiscovery_items));
         this.cbSigComp.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, Configuration.DEFAULT_SIGCOMP));
         
+        this.cbWiFi.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.WIFI, Configuration.DEFAULT_WIFI));
+        this.cb3G.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.THREE_3G, Configuration.DEFAULT_3G));
+        
         // add listeners (for the configuration)
-        this.addConfigurationListener(this.spIPversion);
         this.addConfigurationListener(this.etProxyHost);
         this.addConfigurationListener(this.etProxyPort);
         this.addConfigurationListener(this.spTransport);
         this.addConfigurationListener(this.spProxyDiscovery);
         this.addConfigurationListener(this.cbSigComp);
+        this.addConfigurationListener(this.cbWiFi);
+        this.addConfigurationListener(this.cb3G);
 	}
 	
 	protected void onPause() {
 		if(this.computeConfiguration){
 			
-			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
-					ScreenNetwork.spinner_ipversion_items[this.spIPversion.getSelectedItemPosition()]);
 			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, 
 					this.etProxyHost.getText().toString());
 			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, 
@@ -128,6 +122,10 @@ public class ScreenNetwork extends Screen {
 					ScreenNetwork.spinner_proxydiscovery_items[this.spProxyDiscovery.getSelectedItemPosition()]);
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.SIGCOMP, 
 					this.cbSigComp.isChecked());
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.WIFI, 
+					this.cbWiFi.isChecked());
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.THREE_3G, 
+					this.cb3G.isChecked());
 			
 			// Compute
 			if(!this.configurationService.compute()){

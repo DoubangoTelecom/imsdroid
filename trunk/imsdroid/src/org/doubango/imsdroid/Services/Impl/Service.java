@@ -24,7 +24,7 @@ import org.doubango.imsdroid.Services.IService;
 
 public abstract class Service implements IService{
 
-	protected boolean started;
+	protected boolean acquired;
 	
 	protected Service(){
 	}

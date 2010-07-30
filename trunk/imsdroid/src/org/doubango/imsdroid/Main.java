@@ -67,15 +67,11 @@ import org.doubango.imsdroid.events.RegistrationEventTypes;
 import org.doubango.imsdroid.sip.PresenceStatus;
 
 import android.app.ActivityGroup;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -208,24 +204,30 @@ implements IRegistrationEventHandler
 					this.screenService.show(ScreenHome.class);
 					return true;
 				}
+				else{
+					return current.onKeyDown(keyCode, event);
+				}
 			}
 		}
 		return super.onKeyDown(keyCode, event);
 	}
     
-	@Override
+	//@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		return this.screenService.getCurrentScreen().onCreateOptionsMenu(menu);
+		if(this.screenService.getCurrentScreen().haveMenu()){
+			return this.screenService.getCurrentScreen().createOptionsMenu(menu);
+		}
+		
+		return false;
 	}
 
-	@Override
+	//@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
 		if(this.screenService.getCurrentScreen().haveMenu()){
-			return this.screenService.getCurrentScreen().onPrepareOptionsMenu(menu);
+			menu.clear();
+			return this.screenService.getCurrentScreen().createOptionsMenu(menu);
 		}
-		else{
-			return super.onPrepareOptionsMenu(menu);
-		}
+		return false;
 	}
 	
 	@Override
@@ -241,22 +243,6 @@ implements IRegistrationEventHandler
 		if(bundle != null){
 			this.handleAction(bundle);
 		}
-		
-		/*Bundle bundle = intent.getExtras();
-		String ID = null;
-		if(bundle != null){
-			ID = bundle.getString("SCREEN_ID");
-		}
-		
-		if(ID != null){
-			// FIXME
-			if(ID.equals(ScreenHistory.class.getCanonicalName())){
-				this.screenService.show(ScreenHistory.class);
-			}
-			else{
-				this.screenService.show(ID);
-			}
-		}*/
 		
 		//setIntent(intent);
 	}

@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
@@ -78,6 +79,11 @@ public abstract class Screen extends Activity implements IScreen {
 
 	@Override
 	public boolean haveMenu(){
+		return false;
+	}
+	
+	@Override
+	public boolean createOptionsMenu(Menu menu){
 		return false;
 	}
 	

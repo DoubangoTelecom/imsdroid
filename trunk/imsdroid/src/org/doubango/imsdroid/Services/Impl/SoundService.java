@@ -37,7 +37,7 @@ public class SoundService extends Service implements ISoundService {
 	private MediaPlayer dtmfPlayer;
 	private MediaPlayer ringTonePlayer;
 	private MediaPlayer ringBackTonePlayer;
-	private MediaPlayer smsPlayer;
+	private MediaPlayer eventPlayer;
 	private MediaPlayer connPlayer;
 	
 	private boolean ringTonePlayerPlayOnPrepared;
@@ -251,13 +251,13 @@ public class SoundService extends Service implements ISoundService {
 	}
 
 	@Override
-	public void stopNewSMS() {
-		if(this.smsPlayer == null){
+	public void stopNewEvent() {
+		if(this.eventPlayer == null){
 			return;
 		}
 		
 		try{
-			this.smsPlayer.stop();
+			this.eventPlayer.stop();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -265,19 +265,19 @@ public class SoundService extends Service implements ISoundService {
 	}
 	
 	@Override
-	public void playNewSMS() {
-		if(this.smsPlayer == null){
-			this.smsPlayer  = MediaPlayer.create(IMSDroid.getContext(), R.raw.smsevent);
+	public void playNewEvent() {
+		if(this.eventPlayer == null){
+			this.eventPlayer  = MediaPlayer.create(IMSDroid.getContext(), R.raw.smsevent);
 		}
 		else{
-			this.smsPlayer.reset();
+			this.eventPlayer.reset();
 			try {
 				AssetFileDescriptor afd = IMSDroid.getContext().getResources().openRawResourceFd(R.raw.smsevent);
-				this.smsPlayer.setDataSource(afd.getFileDescriptor(),
+				this.eventPlayer.setDataSource(afd.getFileDescriptor(),
 	                    afd.getStartOffset(),
 	                    afd.getLength());
 				afd.close();
-				this.smsPlayer.prepare();
+				this.eventPlayer.prepare();
 			} catch (IllegalStateException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -286,7 +286,7 @@ public class SoundService extends Service implements ISoundService {
 		}
 		
 		try{
-			this.smsPlayer.start();
+			this.eventPlayer.start();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
