@@ -10,7 +10,10 @@ Before starting to use the client you should configure your identity and the net
 == Identity ==
 At the home screen, go to *Options->Identity* to open the *Identity screen*.<br />
 
-[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png]
+<table>
+<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png]</td></tr>
+<tr align="center"><td>*Identity Screen*</td></tr>
+</table>
 
 *Display Name:* Your nickname. Useless in this beta version.<br />
 
@@ -29,7 +32,10 @@ For those using IMSDroid as a basic SIP client, the IMPI should coincide with th
 == Network Settings ==
 At the home screen, go to *Options->Network* to open the *Network screen*. <br />
 
-[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png]
+<table>
+<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png]</td></tr>
+<tr align="center"><td>*Network Screen*</td></tr>
+</table>
 
 *IP version:* In this beta version only IPv4 is supported.<br />
 
@@ -57,12 +63,15 @@ This beta version (v1.0.0) already supports both audio and video calls.
 ==Codecs==
 To choose which audio/video codecs to enable/disable you should go to *Options->Codecs* screen page as shown below. <br />
 
-[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png]
+<table>
+<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png]</td></tr>
+<tr align="center"><td>*Codecs Screen*</td></tr>
+</table>
 
 ==Audio/Video call==
 You can place a call from the dialer, address book or the history screen. <br />
 
-===Dialer===
+===From the Dialer===
 The dialer is accessible from the home screen ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/dialer_48.png http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/dialer_48.png]). <br /> The dialer screen is shown below. <br />
 You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e.g. 'sip:bob@open-ims.test'). If the SIP Uri is incomplete (e.g. 'bob') the application will automatically append the scheme ('sip:') and domain name('@open-ims.test') before placing the call. <br /> If you put a telephone number with 'tel:' prefix, the client will try to map it to a SIP URI using ENUM protocol. <br />
 
@@ -71,12 +80,12 @@ You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e
 <tr align="center"><td>*Dialer Screen*</td></tr>
 </table>
 
-From the Dialer screen you can cick on:<br />
-* [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_pick_up_48.png]  to make audio call. <br />
-* [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/user_monitor_48.png]  to make audio/video call. <br />
-* [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/message_48.png]  to send a SIP MESSAGE (Short IM). <br />
+From the Dialer screen you can click on:<br />
+[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_pick_up_48.png]  to make audio call. <br />
+[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/user_monitor_48.png]  to make audio/video call. <br />
+[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/message_48.png]  to send a SIP MESSAGE (Short IM). <br />
 
-===History==
+===From the History==
 All incoming, outgoing and missed calls and message will be logged in the history screen.<br /> To redial a number from the history screen, click on the history icon (http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/history_48.png) from the home screen. <br />
 
 <table>
@@ -91,3 +100,10 @@ All incoming, outgoing and missed calls and message will be logged in the histor
 </table>
 
 The context menu is opened when you select an entry and make a long click. <br />
+
+===From the Address Book===
+In this beta version the address book feature is not fully implemented. <br /> To add a new contact, open the contact screen by clicking on the contact item ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/eab2_48.png http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/eab2_48.png]) from the home screen.<br /> At the Contacts screen click on the Android 'menu' button to add a new contact. <br />
+Audio/Video calls can be made as explained above (History Screen).<br />
+
+===In Call Screen===
+Once the call is placed a new screen (In Call Screen) will be automatically opened and a notification icon will be added in the status bar ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_call_25.png]).
