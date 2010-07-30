@@ -1,5 +1,4 @@
 #summary SMS Over IP (RP-DATA)
-#labels Featured
 
 <wiki:toc max_depth="3" />
 
