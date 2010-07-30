@@ -3,9 +3,11 @@
 
 <wiki:toc max_depth="3" />
 
+=SIP Configuration=
+
 Before starting to use the client you should configure your identity and the network settings. This short guide explain how to do this.
 
-= Identity =
+== Identity ==
 At the home screen, go to *Options->Identity* to open the *Identity screen*.<br />
 
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png]
@@ -24,7 +26,7 @@ For those using IMSDroid as a basic SIP client, the IMPI should coincide with th
 
 *3GPP Early IMS Security:* If you are not using an IMS server you should use this option to disable some heavy IMS authentication procedures.<br />
 
-= Network Settings =
+== Network Settings ==
 At the home screen, go to *Options->Network* to open the *Network screen*. <br />
 
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png]
@@ -41,7 +43,7 @@ At the home screen, go to *Options->Network* to open the *Network screen*. <br /
 
 *Enable SigComp:* Will enable Signaling Compression. Only check if your server support this feature. Should not be checked. <br />
 
-= Connecting =
+== Connecting ==
 Return to the home screen and click on *Sign In* item to connect to your SIP server. <br />
 If the connection succeed, you will have new items in the home screen (see below) and a green notification icon will be added in the status bar. <br />
 
