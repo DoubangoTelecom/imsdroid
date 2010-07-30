@@ -4,7 +4,7 @@
 Before starting to use the client you should configure your identity and the network settings. This short guide explain how to do this.
 
 = Identity =
-At the home screen, go to *Options->Identity* to open the identity screen.<br />
+At the home screen, go to *Options->Identity* to open the *Identity screen*.<br />
 
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png]
 
@@ -21,3 +21,8 @@ For those using IMSDroid as a basic SIP client, the IMPI should coincide with th
 *Realm:* The realm is the name of the domain to authenticate to. It should be a valid SIP URI (e.g. sip:open-ims.test). <br />
 
 *3GPP Early IMS Security:* If you are not using an IMS server you should use this option to disable some heavy IMS authentication procedures.<br />
+
+= Network Settings =
+At the home screen, go to *Options->Network* to open the *Network screen*. <br />
+
+[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png]
