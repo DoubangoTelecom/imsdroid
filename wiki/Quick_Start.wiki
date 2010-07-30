@@ -73,12 +73,12 @@ You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e
 ===History==
 All incoming, outgoing and missed calls and message will be logged in the history screen.<br /> To redial a number from the history screen, click on the history icon (http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/history_48.png) from the home screen. <br />
 
-<table align="center">
+<table>
 <tr>
 <td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png]</td>
 <td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png]</td>
 </tr>
-<tr>
+<tr align="center">
 <td>History Screen</td>
 <td>History Screen with context menu</td>
 </tr>
