@@ -63,10 +63,25 @@ To choose which audio/video codecs to enable/disable you should go to *Options->
 You can place a call from the dialer, address book or the history screen. <br />
 ===Dialer===
 The dialer is accessible from the home screen ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/dialer_48.png http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/dialer_48.png]). <br /> The dialer screen is shown below. <br />
-You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e.g. 'sip:bob@open-ims.test'). If the SIP Uri is incomplete (e.g. 'bob') the application will automatically append the scheme ('sip:') and domain name('@open-ims.test') before placing the call. <br />
+You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e.g. 'sip:bob@open-ims.test'). If the SIP Uri is incomplete (e.g. 'bob') the application will automatically append the scheme ('sip:') and domain name('@open-ims.test') before placing the call. <br /> If you put a telephone number with 'tel:' prefix, the client will try to map it to a SIP URI using ENUM protocol. <br />
 
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png]
 
 [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_pick_up_48.png]  To make audio call. <br />
 [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/user_monitor_48.png]  To make audio/video call. <br />
 [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/message_48.png]  To send a SIP MESSAGE (Short IM). <br />
+===History==
+All incoming, outgoing and missed calls and message will be logged in the history screen.<br /> To redial a number from the history screen, click on the history icon (http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/history_48.png) from the home screen. <br />
+
+<table>
+<tr>
+<td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png]</td>
+<td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png]</td>
+</tr>
+<tr>
+<td>History Screen</td>
+<td>History Screen with context menu</td>
+</tr>
+</table>
+
+The context menu is opened when you select an entry and make a long click. <br />
