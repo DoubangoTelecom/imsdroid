@@ -68,7 +68,7 @@ You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e
 
 <table>
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png]</td></tr>
-<tr align="center"><td>Dialer Screen</td></tr>
+<tr align="center"><td>*Dialer Screen*</td></tr>
 </table>
 
 [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_pick_up_48.png]  To make audio call. <br />
@@ -84,8 +84,8 @@ All incoming, outgoing and missed calls and message will be logged in the histor
 <td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png]</td>
 </tr>
 <tr align="center">
-<td>History Screen</td>
-<td>History Screen with context menu</td>
+<td>*History Screen*</td>
+<td>*History Screen with context menu*</td>
 </tr>
 </table>
 
