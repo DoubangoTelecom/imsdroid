@@ -120,7 +120,7 @@ As you can remark, your preview image only contains a white box. It's because yo
 <td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_av_fd.png]</td>
 </tr>
 <tr align="center">
-<td>*IN Call Screen with context menu*</td>
-<td>*IN Call Screen with full-duplex video*</td>
+<td>*In Call Screen with context menu*</td>
+<td>*In Call Screen with full-duplex video*</td>
 </tr>
 </table>
