@@ -71,9 +71,10 @@ You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e
 <tr align="center"><td>*Dialer Screen*</td></tr>
 </table>
 
-[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_pick_up_48.png]  To make audio call. <br />
-[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/user_monitor_48.png]  To make audio/video call. <br />
-[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/message_48.png]  To send a SIP MESSAGE (Short IM). <br />
+From the Dialer screen you can cick on:<br />
+* [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_pick_up_48.png]  to make audio call. <br />
+* [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/user_monitor_48.png]  to make audio/video call. <br />
+* [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/message_48.png]  to send a SIP MESSAGE (Short IM). <br />
 
 ===History==
 All incoming, outgoing and missed calls and message will be logged in the history screen.<br /> To redial a number from the history screen, click on the history icon (http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/history_48.png) from the home screen. <br />
