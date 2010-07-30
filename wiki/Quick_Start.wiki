@@ -1,6 +1,8 @@
 #summary Getting Started
 #labels Featured,Phase-Requirements
 
+<wiki:toc max_depth="3" />
+
 Before starting to use the client you should configure your identity and the network settings. This short guide explain how to do this.
 
 = Identity =
