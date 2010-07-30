@@ -63,7 +63,7 @@ To choose which audio/video codecs to enable/disable you should go to *Options->
 You can place a call from the dialer, address book or the history screen. <br />
 ===Dialer===
 The dialer is accessible from the home screen ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/dialer_48.png http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/dialer_48.png]). <br /> The dialer screen is shown below. <br />
-You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e.g. 'sip:bob@open-ims.test'). If the SIP Uri is incomplete (e.g. 'bob') the application will automatically append the scheme ('sip:') and domain name('@open-ims.test') before placing the call. <br /> If you put a telephone number with 'tel:' prefix, the client will try to map it to a SIP URI using ENUM protocol. <br />
+You can enter any phone number (e.g. '+33100000000 begin_of_the_skype_highlighting              +33100000000      end_of_the_skype_highlighting' or '0600000000'), SIP URI (e.g. 'sip:bob@open-ims.test'). If the SIP Uri is incomplete (e.g. 'bob') the application will automatically append the scheme ('sip:') and domain name('@open-ims.test') before placing the call. <br /> If you put a telephone number with 'tel:' prefix, the client will try to map it to a SIP URI using ENUM protocol. <br />
 
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png]
 
@@ -73,7 +73,7 @@ You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e
 ===History==
 All incoming, outgoing and missed calls and message will be logged in the history screen.<br /> To redial a number from the history screen, click on the history icon (http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/history_48.png) from the home screen. <br />
 
-<table>
+<table aline="center">
 <tr>
 <td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history.png]</td>
 <td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_history_ctx.png]</td>
