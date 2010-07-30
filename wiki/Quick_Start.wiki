@@ -43,6 +43,6 @@ At the home screen, go to *Options->Network* to open the *Network screen*. <br /
 Return to the home screen and click on *Sign In* item to connect to your SIP server. <br />
 If the connection succeed, you will have new items in the home screen (see below) and a green notification icon will be added in the status bar. <br />
 
-[http://code.google.com/p/imsdroid/source/browse/trunk/screenshots/home.png http://code.google.com/p/imsdroid/source/browse/trunk/screenshots/home.png]
+[http://imsdroid.googlecode.com/svn/trunk/screenshots/home.png http://imsdroid.googlecode.com/svn/trunk/screenshots/home.png]
 
 To be continued ....
