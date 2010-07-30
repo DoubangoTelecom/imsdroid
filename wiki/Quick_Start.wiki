@@ -109,7 +109,7 @@ In this beta version the address book feature is not fully implemented. <br /> T
 Audio/Video calls can be made as explained above (History Screen).<br />
 
 ===In Call Screen===
-Once the call is placed a new screen (In Call Screen) will be automatically opened and a notification icon will be added in the status bar ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_call_25.png]). As long as you are in call this icon will remain in the status bar. This icon will allow you to reopen to screen. The Audio stream will continue even if you leave this screen or the application but the video stream will be stopped (restarted when you come back). <br />
+Once the call is placed a new screen (In Call Screen) will be automatically opened and a notification icon will be added in the status bar ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_call_25.png]). As long as you are in call this icon will remain in the status bar. This icon will allow you to reopen the 'In Call Screen'. The Audio stream will continue even if you leave this screen or the application but the video stream will be stopped (restarted when you come back). <br />
 
 <table>
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_av.png]</td></tr>
