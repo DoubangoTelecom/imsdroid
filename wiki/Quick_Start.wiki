@@ -37,7 +37,9 @@ At the home screen, go to *Options->Network* to open the *Network screen*. <br /
 <tr align="center"><td>*Network Screen*</td></tr>
 </table>
 
-*IP version:* In this beta version only IPv4 is supported.<br />
+*Enable WiFi:* To enable WiFi.<br />
+
+*Enable 3G/2.G:* To enable 3G (e.g. UMTS) and 2.5G (e.g. EDGE) networks.<br />
 
 *Proxy-CSCF Host:* This is the IP address or FQDN (Fully-Qualified Domain Name) of your SIP server or outbound proxy (e.g. 88.89.125.125 or example.com). <br />
 
