@@ -112,4 +112,4 @@ Once the call is placed a new screen (In Call Screen) will be automatically open
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_dialer.png]</td></tr>
 <tr align="center"><td>*Dialer Screen*</td></tr>
 </table>
-As you can remark, your preview image only contains a white box. It's because you have to explicitly start the outgoing video stream.<br /> This is done by clicking on the Android menu button and selecting [http://imsdroid.googlecode.com/svn/trunk/screenshots/video_start_48.png] item. <br /> [http://imsdroid.googlecode.com/svn/trunk/screenshots/video_stop_48.png] item will be used to stop the video. <br />
+As you can remark, your preview image only contains a white box. It's because you have to explicitly start the outgoing video stream.<br /> This is done by clicking on the Android menu button and selecting [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/video_start_48.png] item. <br /> [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/video_stop_48.png] item will be used to stop the video. <br />
