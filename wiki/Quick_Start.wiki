@@ -58,9 +58,9 @@ If the connection succeed, you will have new items in the home screen (see below
 [http://imsdroid.googlecode.com/svn/trunk/screenshots/home.png http://imsdroid.googlecode.com/svn/trunk/screenshots/home.png]
 
 =Voice/Video Call=
-This beta version (v1.0.0) already supports both audio and video calls.
-* Supported Audio Codecs: AMR-NB, GSM, PCMA, PCMU, Speex-NB <br />
-* Supported Video codecs: H264, Theora, H.263, H.263-1998, H.261 <br />
+This beta version (v1.0.0) already supports both audio and video calls.<br />
+ * Supported Audio Codecs: AMR-NB, GSM, PCMA, PCMU, Speex-NB <br />
+ * Supported Video codecs: H264, Theora, H.263, H.263-1998, H.261 <br />
 
 ==Codecs==
 To choose which audio/video codecs to enable/disable you should go to *Options->Codecs* screen page as shown below. <br />
