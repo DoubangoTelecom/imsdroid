@@ -129,3 +129,5 @@ As you can remark, your preview image only contains a white box. It's because yo
 <td>*In Call Screen with full-duplex video*</td>
 </tr>
 </table>
+
+*Do not hesitate to post a comment.*
