@@ -3,9 +3,19 @@
 
 To have an overview of configuration you should first look at the [Quick_Start Quick Start Guide]. <br />
 
- * From the home screen, click on the Options item([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) then Identity ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png]) and configure the screen as shown below.
+ * From the home screen, click on the Options item([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) then Identity ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png]) and configure the screen as shown below:
 
 <table>
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/pbxes/screen_identity.png]</td></tr>
 <tr align="center"><td>*Identity Screen*</td></tr>
 </table>
+
+
+ * From the home screen, click on the Options item([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) then Network ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/network_48.png]) and configure the screen as shown below:
+
+<table>
+<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/pbxes/screen_network.png]</td></tr>
+<tr align="center"><td>*Network Screen*</td></tr>
+</table>
+
+ * Returns to the home screen and click on the "Sign In" item ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/sign_in_48.png]) to register. <br />
