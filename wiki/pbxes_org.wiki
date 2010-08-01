@@ -3,7 +3,7 @@
 
 To have an overview of configuration you should first look at the [Quick_Start Quick Start Guide]. <br />
 
- * From the home screen, go to [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png] -> [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png] and configure the screen as shown below.
+ * From the home screen, click on the Options item([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) then Identity ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png]) and configure the screen as shown below.
 
 <table>
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_av.png]</td></tr>
