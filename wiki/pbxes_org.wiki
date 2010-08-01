@@ -1,14 +1,11 @@
 #summary Setup for pbxes.org
-#labels pbxes
+#labels pbxes.org
 
-= Introduction =
+To have an overview of configuration you should first look at the [Quick_Start Quick Start Guide]. <br />
 
-Add your content here.
+ * From the home screen, go to [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png] -> [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png] and configure the screen as shown below.
 
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+<table>
+<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_av.png]</td></tr>
+<tr align="center"><td>*Identity Screen*</td></tr>
+</table>
