@@ -15,6 +15,6 @@ Of course you should replace 'mamadou-4000' with your own user name and don't fo
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/pbxes/screen_network.png]</td></tr>
 <tr align="center"><td>*Network Screen*</td></tr>
 </table>
-You should check "Enable 3G/2.5" if you are using 3G (e.g. UMTS) or 2.5 (e.g. EDGE) networks.<br />
+You should check *"Enable 3G/2.5"* if you are using 3G (e.g. UMTS) or 2.5 (e.g. EDGE) networks.<br />
 
  * Returns to the home screen and click on the "Sign In" item ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/sign_in_48.png]) to register. <br />
