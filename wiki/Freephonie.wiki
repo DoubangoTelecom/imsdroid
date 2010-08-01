@@ -8,7 +8,7 @@ To have an overview of configuration you should first look at the [Quick_Start Q
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/freephonie/screen_identity.png]</td></tr>
 <tr align="center"><td>*Identity Screen*</td></tr>
 </table>
-*IMPORTANT:* You MUST check "3GPP Early IMS Security". <br />
+*IMPORTANT: You MUST check "3GPP Early IMS Security".* <br />
 Of course you should replace '09...' with your own phone number and don't forget to enter your password. <br />
 
  * From the home screen, click on the Options item([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) then Network ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/network_48.png]) and configure the screen as shown below:
