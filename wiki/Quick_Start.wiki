@@ -6,6 +6,10 @@
 =SIP Configuration=
 
 Before starting to use the client you should configure your identity and the network settings. This short guide explain how to do this.
+If you are *pbxes.org* user: [http://code.google.com/p/imsdroid/wiki/pbxes_org http://code.google.com/p/imsdroid/wiki/pbxes_org]<br />
+If you are *sip2sip.info* user: [http://code.google.com/p/imsdroid/wiki/sip2sip_info http://code.google.com/p/imsdroid/wiki/sip2sip_info]<br />
+If you are *Freephonie* user: [http://code.google.com/p/imsdroid/wiki/Freephonie http://code.google.com/p/imsdroid/wiki/Freephonie]<br />
+
 
 == Identity ==
 At the home screen, go to *Options->Identity* to open the *Identity screen*.<br />
