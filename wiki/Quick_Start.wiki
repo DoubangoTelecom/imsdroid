@@ -7,10 +7,10 @@
 
 Before starting to use the client you should configure your identity and the network settings. This short guide explain how to do this. <br />
 If you don't have enough time and:
+ * is a *Freephonie* user: [http://code.google.com/p/imsdroid/wiki/Freephonie http://code.google.com/p/imsdroid/wiki/Freephonie]<br />
+ * is a *iptel.org* user: [http://code.google.com/p/imsdroid/wiki/iptel_org http://code.google.com/p/imsdroid/wiki/iptel_org]<br />
  * is a *pbxes.org* user: [http://code.google.com/p/imsdroid/wiki/pbxes_org http://code.google.com/p/imsdroid/wiki/pbxes_org]<br />
  * is a *sip2sip.info* user: [http://code.google.com/p/imsdroid/wiki/sip2sip_info http://code.google.com/p/imsdroid/wiki/sip2sip_info]<br />
- * is a *Freephonie* user: [http://code.google.com/p/imsdroid/wiki/Freephonie http://code.google.com/p/imsdroid/wiki/Freephonie]<br />
-
 
 == Identity ==
 At the home screen, go to *Options->Identity* to open the *Identity screen*.<br />
