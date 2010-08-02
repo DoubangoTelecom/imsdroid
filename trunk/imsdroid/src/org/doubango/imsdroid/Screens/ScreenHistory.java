@@ -29,7 +29,6 @@ import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.Model.HistoryEvent;
 import org.doubango.imsdroid.Model.HistorySMSEvent;
-import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;

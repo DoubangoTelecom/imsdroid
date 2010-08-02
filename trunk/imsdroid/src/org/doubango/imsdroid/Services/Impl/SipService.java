@@ -803,24 +803,26 @@ implements ISipService, tinyWRAPConstants {
 		public int OnDialogEvent(DialogEvent e){
 			final String phrase = e.getPhrase();
 			final short code = e.getCode();
-			SipSession session = e.getBaseSession();
+			final SipSession session = e.getBaseSession();
 			
 			if(session == null){
 				return 0;
 			}
+			
+			final long id = session.getId();
 			
 			Log.d(SipService.TAG, String.format("OnDialogEvent (%s)", phrase));
 			
 			switch(code){
 				case tsip_event_code_dialog_connecting:
 					// Registration
-					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){							
+					if((this.sipService.regSession != null) && (id == this.sipService.regSession.getId())){							
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.REGISTRATION_INPROGRESS, code, phrase));
 					}
 					// Audio/Video Calls
-					if(MyAVSession.getSession(session.getId()) != null){
-						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.INPROGRESS, phrase)); 
+					if(MyAVSession.getSession(id) != null){
+						this.sipService.onCallEvent(new CallEventArgs(id, CallEventTypes.INPROGRESS, phrase)); 
 					}
 					// Subscription
 					// Publication
@@ -829,7 +831,7 @@ implements ISipService, tinyWRAPConstants {
 					
 				case tsip_event_code_dialog_connected:
 					// Registration
-					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){
+					if((this.sipService.regSession != null) && (id == this.sipService.regSession.getId())){
 						this.sipService.regSession.setConnected(true);
 						new Thread(new Runnable(){
 							public void run() {
@@ -841,18 +843,18 @@ implements ISipService, tinyWRAPConstants {
 									RegistrationEventTypes.REGISTRATION_OK, code, phrase));
 					}
 					// Presence Publication
-					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							
+					else if((this.sipService.pubPres != null) && (id == this.sipService.pubPres.getId())){							
 						this.sipService.pubPres.setConnected(true);
 					}
 					// Audio/Video Calls
-					else if(MyAVSession.getSession(session.getId()) != null){
-						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.CONNECTED, phrase)); 
+					else if(MyAVSession.getSession(id) != null){
+						this.sipService.onCallEvent(new CallEventArgs(id, CallEventTypes.CONNECTED, phrase)); 
 					}
 					// Publication
 					// Subscription
 					else{
 						for(MySubscriptionSession s : this.sipService.subPres){
-							if(s.getId() == session.getId()){
+							if(s.getId() == id){
 								s.setConnected(true);
 								SubscriptionEventArgs eargs = new SubscriptionEventArgs(SubscriptionEventTypes.SUBSCRIPTION_OK, 
 										code, phrase, null, "null");
@@ -866,9 +868,13 @@ implements ISipService, tinyWRAPConstants {
 					
 				case tsip_event_code_dialog_terminating:
 					// Registration
-					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){						
+					if((this.sipService.regSession != null) && (id == this.sipService.regSession.getId())){						
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.UNREGISTRATION_INPROGRESS, code, phrase));
+					}
+					// Call
+					if(MyAVSession.getSession(id) != null){
+						this.sipService.onCallEvent(new CallEventArgs(id, CallEventTypes.TERMWAIT, phrase)); 
 					}
 					// Subscription
 					// Publication
@@ -876,7 +882,7 @@ implements ISipService, tinyWRAPConstants {
 					break;
 				
 				case tsip_event_code_dialog_terminated:
-					if((this.sipService.regSession != null) && (session.getId() == this.sipService.regSession.getId())){
+					if((this.sipService.regSession != null) && (id == this.sipService.regSession.getId())){
 						this.sipService.regSession.setConnected(false);
 						this.sipService.onRegistrationEvent(new RegistrationEventArgs(
 									RegistrationEventTypes.UNREGISTRATION_OK, code, phrase));
@@ -890,18 +896,18 @@ implements ISipService, tinyWRAPConstants {
 						}).start();
 					}
 					// Presence Publication
-					else if((this.sipService.pubPres != null) && (session.getId() == this.sipService.pubPres.getId())){							
+					else if((this.sipService.pubPres != null) && (id == this.sipService.pubPres.getId())){							
 						this.sipService.pubPres.setConnected(false);
 					}
 					// Audio/Video Calls
 					if(MyAVSession.getSession(session.getId()) != null){
-						this.sipService.onCallEvent(new CallEventArgs(session.getId(), CallEventTypes.DISCONNECTED, phrase)); 
+						this.sipService.onCallEvent(new CallEventArgs(id, CallEventTypes.DISCONNECTED, phrase)); 
 					}
 					// Publication
 					// Subscription
 					else{
 						for(MySubscriptionSession s : this.sipService.subPres){
-							if(s.getId() == session.getId()){
+							if(s.getId() == id){
 								SubscriptionEventArgs eargs = new SubscriptionEventArgs(SubscriptionEventTypes.UNSUBSCRIPTION_OK, 
 										code, phrase, null, "null");
 								s.setConnected(false);
