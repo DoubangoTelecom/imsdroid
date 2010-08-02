@@ -645,14 +645,16 @@ public class ScreenAV extends Screen {
 		@Override
 		public boolean onCallEvent(Object sender, CallEventArgs e) {
 			final String phrase = e.getPhrase();
-			MyAVSession avSession;
+			final MyAVSession avSession;
+			
+			if((avSession = MyAVSession.getSession(e.getSessionId())) == null){
+				return false;
+			}
 			
 			switch(e.getType()){
 				case INCOMING:
 					ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "Incoming call");
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setState(CallState.CALL_INCOMING);
-					}
+					avSession.setState(CallState.CALL_INCOMING);
 					
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
@@ -668,9 +670,8 @@ public class ScreenAV extends Screen {
 					break;
 				case INPROGRESS:
 					ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "Outgoing Call");
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setState(CallState.CALL_INPROGRESS);
-					}
+					avSession.setState(CallState.CALL_INPROGRESS);
+					
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {		
@@ -682,7 +683,7 @@ public class ScreenAV extends Screen {
 					ServiceManager.getSoundService().playRingBackTone();
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
-							public void run() {								
+							public void run() {
 								CallEventHandler.this.avScreen.tvInfo.setText(phrase);
 								CallEventHandler.this.avScreen.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
 							}});
@@ -710,9 +711,8 @@ public class ScreenAV extends Screen {
 					this.audioManager.setMode(AudioManager.MODE_IN_CALL);
 					this.audioManager.setSpeakerphoneOn(false);
 					
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setState(CallState.INCALL);
-					}
+					avSession.setState(CallState.INCALL);
+					
 					if(this.wakeLock != null && this.wakeLock.isHeld()){
 						this.wakeLock.release();
 					}
@@ -725,13 +725,17 @@ public class ScreenAV extends Screen {
 					
 					break;
 				case DISCONNECTED:
+				case TERMWAIT:
 					ServiceManager.getSoundService().stopRingBackTone();
 					ServiceManager.getSoundService().stopRingTone();
 					ServiceManager.cancelAVCallNotif();
 					
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setState(CallState.CALL_TERMINATED);
+					if(avSession.getState() == CallState.CALL_TERMINATED){
+						// already terminated by termwait
+						break;
 					}
+					avSession.setState(CallState.CALL_TERMINATED);
+					
 					
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
@@ -747,9 +751,8 @@ public class ScreenAV extends Screen {
 					this.audioManager.setMode(AudioManager.MODE_NORMAL);
 					break;
 				case LOCAL_HOLD_OK:
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setLocalHold(true);
-					}
+					avSession.setLocalHold(true);
+					
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
@@ -766,9 +769,8 @@ public class ScreenAV extends Screen {
 					}
 					break;
 				case LOCAL_RESUME_OK:
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setLocalHold(false);
-					}
+					avSession.setLocalHold(false);
+					
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
@@ -785,9 +787,8 @@ public class ScreenAV extends Screen {
 					}
 					break;
 				case REMOTE_HOLD:
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setRemoteHold(true);
-					}
+					avSession.setRemoteHold(true);
+					
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
@@ -796,9 +797,8 @@ public class ScreenAV extends Screen {
 					}
 					break;
 				case REMOTE_RESUME:
-					if((avSession = MyAVSession.getSession(e.getSessionId())) != null){
-						avSession.setRemoteHold(false);
-					}
+					avSession.setRemoteHold(false);
+					
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {

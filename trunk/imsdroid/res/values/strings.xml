@@ -3,7 +3,7 @@
     <string name="hello">Hello World, Main!</string>
     <string name="app_name">IMSDroid</string>
 	<string name="Version">1.0.180</string>
-	<string name="doubango_revision">466</string>
+	<string name="doubango_revision">470</string>
 	<string name="spinner_ipversion">Select IP version</string>
 	<string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>
 	<string name="spinner_transport">Select Network Transport</string>
