@@ -11,5 +11,6 @@ IMSDroid uses the following Third Party Libraries: <br />
  * [http://downloads.xiph.org/releases/vorbis/libvorbis-1.2.3.tar.gz libvorbis] (1.2.3) under BSD-style license
  * [https://sourceforge.net/projects/opencore-amr/ opencore-amr] (2009-09-18 ) under [http://www.apache.org/licenses/LICENSE-2.0.html Apache License 2.0]
  * [http://www.speex.org/ Speex] under the [http://www.xiph.org/licenses/bsd/speex/ revised BSD] license 
+ * [http://www.ilbcfreeware.org/ iLBC] under [http://www.ilbcfreeware.org/documentation/gips_iLBClicense.pdf Global IP Solutions iLBC Public License]
  * [http://www.broadcom.com/support/broadvoice/ BroadVoice® Speech Codec] under [http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License 2.1]
  * [http://simple.sourceforge.net/ Simple XML] (2.3.4) under  [http://www.apache.org/licenses/LICENSE-2.0.html Apache License 2.0].
