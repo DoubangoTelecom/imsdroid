@@ -1,4 +1,4 @@
-#summary Ekiga.net
+#summary Setup for Ekiga.net
 #labels ekiga.net
 
 The client will not work with *ekiga.net* until they have fixed Bug 624751 (https://bugzilla.gnome.org/show_bug.cgi?id=624751).
