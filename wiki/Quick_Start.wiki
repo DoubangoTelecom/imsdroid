@@ -136,7 +136,7 @@ As you can remark, your preview image only contains a white box. It's because yo
 </table>
 ===Video Quality===
 The application can decode any video size (SQCIF, QCIF, CIF, 4CIF, ...). <br />
-By default, it will encode/send QCIF video for performance reasons. To allow high quality video (CIF and above), go to Options ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> QoS/QoE ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/qos_qoe_48.png]) and change *Bandwidth* value from *Low* and *Medium* or *High*. <br /> CIF video encoding requires at least a 600MHz processor.<br />
+By default, it will encode/send QCIF video for performance reasons. To allow high quality video (CIF and above), go to Options ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> QoS/QoE ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/qos_qoe_48.png]) and change *Bandwidth* value from *Low* to *Medium* or *High*. <br /> CIF video encoding requires at least a 600MHz processor.<br />
  * SQCIF=128x96 (Bandwidth value should be equal to *Low* or higher)
  * QCIF=176x144 (Bandwidth value should be equal to *Low* or higher)
  * CIF=352x288 (Bandwidth value should be equal to *Medium* or higher)
