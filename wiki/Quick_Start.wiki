@@ -13,7 +13,7 @@ If you don't have enough time and:
  * is a *sip2sip.info* user: [http://code.google.com/p/imsdroid/wiki/sip2sip_info http://code.google.com/p/imsdroid/wiki/sip2sip_info]<br />
 
 == Identity ==
-At the home screen, go to *Options ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> Identity ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png])* to open the *Identity screen*.<br />
+At the home screen, go to Options ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> Identity ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png]) to open the *Identity screen*.<br />
 
 <table>
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png]</td></tr>
@@ -35,7 +35,7 @@ For those using IMSDroid as a basic SIP client, the IMPI should coincide with th
 *3GPP Early IMS Security:* If you are not using an IMS server you should use this option to disable some heavy IMS authentication procedures.<br />
 
 == Network Settings ==
-At the home screen, go to *Options ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> Network([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/network_48.png])* to open the *Network screen*. <br />
+At the home screen, go to Options ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> Network([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/network_48.png]) to open the *Network screen*. <br />
 
 <table>
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_network.png]</td></tr>
@@ -68,7 +68,7 @@ This beta version (v1.0.0) already supports both audio and video calls.<br />
  * Supported Video codecs: H264, Theora, H.263, H.263-1998, H.261 <br />
 
 ==Codecs==
-To choose which audio/video codecs to enable/disable you should go to *Options->Codecs* screen page as shown below. <br />
+To choose which audio/video codecs to enable/disable you should go to Options([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> Codecs([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/codecs_48.png]) screen page as shown below. <br />
 
 <table>
 <tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png]</td></tr>
