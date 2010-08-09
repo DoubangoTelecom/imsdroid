@@ -1,6 +1,8 @@
 #summary Release notes
 #labels Featured,Phase-Design
 
+<wiki:toc max_depth="2" />
+
 ==1.0.234==
  * Allow decoding any video size
  * Add support for high (CIF) and low (SQCIF) video encoding. QCIF was already supported in previous versions.
