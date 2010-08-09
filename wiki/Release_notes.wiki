@@ -4,7 +4,7 @@
 ==1.0.234==
  * Allow decoding any video size
  * Add support for high (CIF) and low (SQCIF) video encoding. QCIF was already supported in previous versions.
- * Resolve issue 12, issue 17 
+ * Resolve issue 12, 17 
 
 ==1.0.214==
  
