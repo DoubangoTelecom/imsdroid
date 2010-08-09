@@ -71,7 +71,7 @@ This beta version (v1.0.0) already supports both audio and video calls.<br />
 To choose which audio/video codecs to enable/disable you should go to *Options->Codecs* screen page as shown below. <br />
 
 <table>
-<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png]</td></tr>
+<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_codecs.png]</td></tr>
 <tr align="center"><td>*Codecs Screen*</td></tr>
 </table>
 
