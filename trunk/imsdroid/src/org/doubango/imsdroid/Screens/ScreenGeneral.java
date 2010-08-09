@@ -21,6 +21,7 @@
 
 package org.doubango.imsdroid.Screens;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
@@ -70,12 +71,12 @@ public class ScreenGeneral  extends Screen {
         this.etEnumDomain = (EditText)this.findViewById(R.id.screen_general_editText_enum_domain);
         
         // Audio Playback levels
-        ArrayAdapter<AudioPlayBackLevel> adapter = new ArrayAdapter<AudioPlayBackLevel>(this, android.R.layout.simple_spinner_item, this.audioPlaybackLevels);
+        ArrayAdapter<AudioPlayBackLevel> adapter = new ArrayAdapter<AudioPlayBackLevel>(this, android.R.layout.simple_spinner_item, ScreenGeneral.audioPlaybackLevels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         this.spAudioPlaybackLevel.setAdapter(adapter);
         
         this.cbFullScreenVideo.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FULL_SCREEN_VIDEO, Configuration.DEFAULT_GENERAL_FULL_SCREEN_VIDEO));
-        SharedPreferences settings = getSharedPreferences(Main.class.getCanonicalName(), 0);
+        SharedPreferences settings = getSharedPreferences(IMSDroid.getContext().getPackageName(), 0);
         this.cbAutoStart.setChecked((settings != null && settings.getBoolean("autostarts", Configuration.DEFAULT_GENERAL_AUTOSTART)));
         this.spAudioPlaybackLevel.setSelection(this.getSpinnerIndex(
 				this.configurationService.getFloat(
@@ -85,7 +86,8 @@ public class ScreenGeneral  extends Screen {
         this.etEnumDomain.setText(this.configurationService.getString(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.ENUM_DOMAIN, Configuration.DEFAULT_GENERAL_ENUM_DOMAIN));
         
         this.addConfigurationListener(this.cbFullScreenVideo);
-        this.addConfigurationListener(this.cbFullScreenVideo);
+        this.addConfigurationListener(this.cbAutoStart);
+        this.addConfigurationListener(this.etEnumDomain);
         this.addConfigurationListener(this.spAudioPlaybackLevel);
 	}
 	
@@ -96,7 +98,7 @@ public class ScreenGeneral  extends Screen {
 			this.configurationService.setFloat(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.AUDIO_PLAY_LEVEL, ((AudioPlayBackLevel)this.spAudioPlaybackLevel.getSelectedItem()).value);
 			this.configurationService.setString(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.ENUM_DOMAIN, this.etEnumDomain.getText().toString());
 			
-			SharedPreferences settings = getSharedPreferences(Main.class.getCanonicalName(), 0);
+			SharedPreferences settings = getSharedPreferences(IMSDroid.getContext().getPackageName(), 0);
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putBoolean("autostarts", this.cbAutoStart.isChecked());
 			editor.commit();

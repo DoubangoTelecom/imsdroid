@@ -20,7 +20,8 @@
 */
 package org.doubango.imsdroid.Services.Impl;
 
-import org.doubango.imsdroid.Main;
+import org.doubango.imsdroid.IMSDroid;
+import org.doubango.imsdroid.Model.Configuration;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,8 +33,8 @@ public class ServiceManagerReceiver extends BroadcastReceiver
 	@Override
 	public void onReceive(Context context, Intent intent) 
 	{
-		 SharedPreferences settings = context.getSharedPreferences(Main.class.getCanonicalName(), 0);
-		 if(settings != null && settings.getBoolean("autostarts", true)){
+		 SharedPreferences settings = context.getSharedPreferences(IMSDroid.getContext().getPackageName(), 0);
+		 if(settings != null && settings.getBoolean("autostarts", Configuration.DEFAULT_GENERAL_AUTOSTART)){
 			 if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 				Intent i = new Intent(context, ServiceManager.class);
 				i.putExtra("autostarted", true);

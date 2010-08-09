@@ -63,7 +63,7 @@ public class ScreenQoS  extends Screen {
 		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_e2e, "End2End")
 		};
 	
-	private final static String[] spinner_precond_bandwidth_items = new String[] {Configuration.DEFAULT_QOS_PRECOND_BANDWIDTH, "Low", "Medium", "High"};
+	private final static String[] spinner_precond_bandwidth_items = new String[] {Configuration.DEFAULT_QOS_PRECOND_BANDWIDTH, "Medium", "High"};
 	
 	private final IConfigurationService configurationService;
 	private static final String TAG = ScreenQoS.class.getCanonicalName();

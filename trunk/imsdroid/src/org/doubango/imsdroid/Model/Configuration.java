@@ -27,6 +27,7 @@ import java.util.List;
 import org.doubango.imsdroid.sip.PresenceStatus;
 import org.doubango.imsdroid.utils.StringUtils;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
+import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 import org.simpleframework.xml.ElementList;
@@ -154,19 +155,6 @@ public class Configuration {
 		this.sections = new ArrayList<ConfigurationSection>();
 	}
 
-//	public boolean addSection(String name) {
-//		if (!StringUtils.isNullOrEmpty(name)) {
-//			ConfigurationSection section = new ConfigurationSection(name);
-//			if (this.sections.contains(section)) {
-//				return false;
-//			} else {
-//				this.sections.add(section);
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-
 	public boolean setEntry(String sectionName, String entryKey, String entryValue) {
 		if(StringUtils.isNullOrEmpty(sectionName) || StringUtils.isNullOrEmpty(entryKey)) {
 			return false;
@@ -196,5 +184,18 @@ public class Configuration {
 			}
 		}
 		return null;
+	}
+	
+	// FIXME: Because of compatibility with previous version
+	public static tmedia_bandwidth_level_t getBandwidthLevel(String level){
+		if(StringUtils.equals(level, "Medium", true)){
+			return tmedia_bandwidth_level_t.tmedia_bl_medium;
+		}
+		if(StringUtils.equals(level, "High", true)){
+			return tmedia_bandwidth_level_t.tmedia_bl_hight;
+		}
+		else{
+			return tmedia_bandwidth_level_t.tmedia_bl_low;
+		}
 	}
 }

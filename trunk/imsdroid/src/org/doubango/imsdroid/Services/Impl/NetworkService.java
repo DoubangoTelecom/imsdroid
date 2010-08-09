@@ -140,7 +140,7 @@ public class NetworkService  extends Service implements INetworkService {
 			if(this.wifiManager.isWifiEnabled()){
 				this.wifiLock = this.wifiManager.createWifiLock(NetworkService.TAG);
 				final WifiInfo wifiInfo = this.wifiManager.getConnectionInfo();
-				if(wifiInfo != null){
+				if(wifiInfo != null && this.wifiLock != null){
 					final DetailedState detailedState = WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState());
 					if(detailedState == DetailedState.CONNECTED 
 							|| detailedState == DetailedState.CONNECTING || detailedState == DetailedState.OBTAINING_IPADDR){

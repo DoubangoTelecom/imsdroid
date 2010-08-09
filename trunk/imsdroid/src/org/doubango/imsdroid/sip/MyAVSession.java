@@ -36,10 +36,13 @@ import org.doubango.imsdroid.media.AudioProducer;
 import org.doubango.imsdroid.media.MediaType;
 import org.doubango.imsdroid.media.VideoConsumer;
 import org.doubango.imsdroid.media.VideoProducer;
+import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.SipSession;
+import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
+import org.doubango.tinyWRAP.twrap_media_type_t;
 
 public class MyAVSession  extends MySipSession{
 
@@ -190,7 +193,7 @@ public class MyAVSession  extends MySipSession{
 				CONFIGURATION_SECTION.QOS,
 				CONFIGURATION_ENTRY.PRECOND_STRENGTH,
 				Configuration.DEFAULT_QOS_PRECOND_STRENGTH)));
-		this.session.addHeader("Supported", "precondition");
+		// this.session.addHeader("Supported", "precondition"); -> already added by doubango
 		
 		/* 3GPP TS 24.173
 		*
@@ -301,13 +304,38 @@ public class MyAVSession  extends MySipSession{
 	}
 	
 	public boolean makeAudioCall(String remoteUri){
+		boolean ret;
+		String level = ServiceManager.getConfigurationService().getString(
+				CONFIGURATION_SECTION.QOS,
+				CONFIGURATION_ENTRY.PRECOND_BANDWIDTH,
+				Configuration.DEFAULT_QOS_PRECOND_BANDWIDTH);
+		tmedia_bandwidth_level_t bl = Configuration.getBandwidthLevel(level);
+		
 		this.setRemoteParty(remoteUri);
-		return this.session.callAudio(remoteUri);
+		ActionConfig config = new ActionConfig();
+		config.setMediaInt(twrap_media_type_t.twrap_media_audio, "bandwidth-level", bl.swigValue());
+		ret = this.session.callAudio(remoteUri, config);
+		config.delete();
+		
+		return ret;
 	}
 	
-	public boolean makeVideoCall(String remoteUri){	
+	public boolean makeVideoCall(String remoteUri){
+		// FIXME: add Video special features
+		boolean ret;
+		String level = ServiceManager.getConfigurationService().getString(
+				CONFIGURATION_SECTION.QOS,
+				CONFIGURATION_ENTRY.PRECOND_BANDWIDTH,
+				Configuration.DEFAULT_QOS_PRECOND_BANDWIDTH);
+		tmedia_bandwidth_level_t bl = Configuration.getBandwidthLevel(level);
+		
 		this.setRemoteParty(remoteUri);
-		return this.session.callAudioVideo(remoteUri);
+		ActionConfig config = new ActionConfig();
+		config.setMediaInt(twrap_media_type_t.twrap_media_audiovideo, "bandwidth-level", bl.swigValue());
+		ret = this.session.callAudioVideo(remoteUri, config);
+		config.delete();
+		
+		return ret;
 	}
 	
 	public boolean sendDTMF(int number){		
