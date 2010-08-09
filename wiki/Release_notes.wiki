@@ -4,12 +4,6 @@
 ==1.0.234==
  * Allow decoding any video size
  * Add support for high (CIF) and low (SQCIF) video encoding. QCIF was already supported in previous versions.
- * Resolve issue 12, 17 
+ * Resolve issue 12, issue 17, issue 18, issue 19, issue 26 and issue 27.
 
-==1.0.214==
- 
-
-- Begin Adding support for GSMA RCS Content Sharing (MSRP)
-- Add support for arbitrary Video Size decoding
-- Add support for CIF and SQCIF video encoding (Depends on the bandwidth config)
-- Resolve Issues: 12, 17, 18, 19, 26 and 27.
+==1.0.214 (First Beta version)==
