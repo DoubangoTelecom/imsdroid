@@ -23,10 +23,14 @@ package org.doubango.imsdroid;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 public class IMSDroid extends Application {
 
     private static IMSDroid instance;
+    private static PackageManager packageManager;
+    private static String packageName;
 
     public IMSDroid() {
     	IMSDroid.instance = this;
@@ -34,5 +38,35 @@ public class IMSDroid extends Application {
 
     public static Context getContext() {
         return IMSDroid.instance;
+    }
+    
+    @Override
+	public void onCreate() {
+		super.onCreate();
+		
+		IMSDroid.packageManager = IMSDroid.instance.getPackageManager();    		
+		IMSDroid.packageName = IMSDroid.instance.getPackageName();
+	}
+    
+	public static int getVersionCode(){
+    	if(IMSDroid.packageManager != null){
+    		try {
+				return IMSDroid.packageManager.getPackageInfo(IMSDroid.packageName, 0).versionCode;
+			} catch (NameNotFoundException e) {
+				e.printStackTrace();
+			}
+    	}
+    	return 0;
+    }
+    
+    public static String getVersionName(){
+    	if(IMSDroid.packageManager != null){
+    		try {
+				return IMSDroid.packageManager.getPackageInfo(IMSDroid.packageName, 0).versionName;
+			} catch (NameNotFoundException e) {
+				e.printStackTrace();
+			}
+    	}
+    	return "0.0";
     }
 }

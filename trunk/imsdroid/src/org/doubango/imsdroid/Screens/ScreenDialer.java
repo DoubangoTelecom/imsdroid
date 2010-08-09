@@ -22,8 +22,6 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.media.MediaType;
 
 import android.os.Bundle;
@@ -67,14 +65,14 @@ public class ScreenDialer extends Screen {
 	private OnClickListener ibAudioCall_OnClickListener = new OnClickListener(){
 		@Override
 		public void onClick(View v) {
-			ScreenAV.makeCall(ScreenDialer.this.etAddress.getText().toString(), MediaType.Audio);
+			ScreenAV.makeCall(ScreenDialer.this.etAddress.getText().toString().trim(), MediaType.Audio);
 		}
 	};
 	
 	private OnClickListener ibVideoCall_OnClickListener = new OnClickListener(){
 		@Override
 		public void onClick(View v) {
-			ScreenAV.makeCall(ScreenDialer.this.etAddress.getText().toString(), MediaType.AudioVideo);
+			ScreenAV.makeCall(ScreenDialer.this.etAddress.getText().toString().trim(), MediaType.AudioVideo);
 		}
 	};
 	
@@ -87,7 +85,7 @@ public class ScreenDialer extends Screen {
 	private OnClickListener ibMessage_OnClickListener = new OnClickListener(){
 		@Override
 		public void onClick(View v) {
-			ScreenSMSCompose.sendSMS(ScreenDialer.this.etAddress.getText().toString());
+			ScreenSMSCompose.sendSMS(ScreenDialer.this.etAddress.getText().toString().trim());
 		}
 	};
 	

@@ -20,7 +20,7 @@
 */
 package org.doubango.imsdroid.Services.Impl;
 
-import org.doubango.imsdroid.Main;
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Services.IStorageService;
 
 public class StorageService  extends Service implements IStorageService{
@@ -28,7 +28,7 @@ public class StorageService  extends Service implements IStorageService{
 	private final String currentDir;
 	
 	public StorageService(){
-		this.currentDir = String.format("/data/data/%s", Main.class.getPackage().getName());
+		this.currentDir = String.format("/data/data/%s", IMSDroid.getContext().getPackageName());
 	}
 	
 	public boolean start() {

@@ -42,6 +42,9 @@ import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MyAVSession.CallState;
 import org.doubango.imsdroid.utils.UriUtils;
+import org.doubango.tinyWRAP.ActionConfig;
+import org.doubango.tinyWRAP.MsrpSession;
+import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
@@ -377,6 +380,17 @@ public class ScreenAV extends Screen {
 		MyAVSession avSession = MyAVSession.createOutgoingSession(ServiceManager.getSipService().getStack(), mediaType);
 		avSession.setRemoteParty(remoteUri); // HACK
 		ServiceManager.getScreenService().show(ScreenAV.class, new Long(avSession.getId()).toString());
+		
+		/*ActionConfig actionConfig = new ActionConfig();
+        actionConfig
+            .setMediaString(twrap_media_type_t.twrap_media_file, "file-path", String.format("%s/%s", ServiceManager.getStorageService().getCurrentDir(), "avatar.png"))
+            .setMediaString(twrap_media_type_t.twrap_media_file, "accept-types", "application/octet-stream")
+            .setMediaString(twrap_media_type_t.twrap_media_file, "file-disposition", "attachment")
+            .setMediaString(twrap_media_type_t.twrap_media_file, "file-icon", "cid:test@doubango.org");
+        MsrpSession msrpSession = new MsrpSession(ServiceManager.getSipService().getStack());
+        msrpSession.callMsrp(remoteUri, actionConfig);
+        actionConfig.delete();
+        return true;*/
 		
 		switch(mediaType){
 			case AudioVideo:

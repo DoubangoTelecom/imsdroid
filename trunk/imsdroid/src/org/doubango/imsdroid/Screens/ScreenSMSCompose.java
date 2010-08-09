@@ -143,7 +143,7 @@ public class ScreenSMSCompose  extends Screen {
 		if(binarySMS && (SMSCPhoneNumber = UriUtils.getValidPhoneNumber(SMSC)) != null && (dstPhoneNumber = UriUtils.getValidPhoneNumber(remoteUri)) != null){
 			session.setToUri(SMSC);
 			session.addHeader("Content-Type", ContentType.SMS_3GPP);
-			session.addHeader("Transfer-Encoding", "binary");
+			session.addHeader("Content-Transfer-Encoding", "binary");
 			
 			RPMessage rpMessage;
 			if(ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.HACK_SMS, false)){

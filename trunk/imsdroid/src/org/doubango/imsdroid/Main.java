@@ -106,6 +106,8 @@ implements IRegistrationEventHandler
     public static final int ACTION_RESTORE_LAST_STATE = 2;
     public static final int ACTION_SHOW_HISTORY = 3;
     
+    private static String TAG = Main.class.getCanonicalName();
+    
     public Main()
     {
     	super();
@@ -140,7 +142,7 @@ implements IRegistrationEventHandler
         
         // starts our services (will do nothing if already started)
         if(!ServiceManager.start()){
-        	Log.e(this.getClass().getName(), "Failed to start services");
+        	Log.e(Main.TAG, "Failed to start services");
         	return; // Should exit
         }
         

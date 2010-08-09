@@ -689,7 +689,7 @@ implements ISipService, tinyWRAPConstants {
                                             MessagingSession m = new MessagingSession(SipService.this.sipStack);
                                             m.setToUri(SMSC);
                                             m.addHeader("Content-Type", ContentType.SMS_3GPP);
-                                            m.addHeader("Transfer-Encoding", "binary");
+                                            m.addHeader("Content-Transfer-Encoding", "binary");
                                             m.send(buffer, len);
                                             m.delete();
                                         }

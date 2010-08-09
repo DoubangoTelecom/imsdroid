@@ -187,7 +187,7 @@ public class ScreenSecurity extends Screen {
 			intent.setDataAndType(directory, "vnd.android.cursor.dir/*");
 			//intent.setDataAndType(directory, "file://");
 			intent.putExtra("browser_list_layout", "2");
-			intent.putExtra("explorer_title", "ça ne marche pas");
+			intent.putExtra("explorer_title", "ca ne marche pas");
 			startActivityForResult(intent, 666);*/
 			
 			//intent.setDataAndType(startDir, "vnd.android.cursor.dir/*");
