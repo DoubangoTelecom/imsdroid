@@ -9,7 +9,7 @@ IMSDroid contains only one native library (*tinyWRAP.so*) written in C++ as a wr
 To build *tinyWRAP* you have to build all doubango's libraries (ANSI-C).<br /> 
 *tinyWRAP* depends on:
  * *tinySAK* (Swiss Army Knife): Utilities functions (SHA-1, MD5, HMAC, String, List, Timers, Thread, Mutex, Semaphore, ...)
- * *tinyNET*: Networking (DNS, DHCPv4/v6, STUN, TURN, ICE, ENUM, Sockets, ...)
+ * *tinyNET*: Networking (DNS Stack, DHCPv4/v6 Stacks, STUN, TURN, ICE, ENUM, Sockets, ...)
  * *tinyHTTP*: HTTP stack (CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE, ...)
  * *tinyXCAP*: XCAP stack (AUID manager, URL generator) without XML parser (See Java code for parsers)
  * *tinyIPSec*: IPSec SA manager. Useless for Android but you MUST have it
