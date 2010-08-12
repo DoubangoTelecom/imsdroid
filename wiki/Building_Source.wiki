@@ -2,7 +2,7 @@
 #labels Phase-Implementation
 
 == Building Java Code ==
-To build the java code you only need Eclipse and Android SDK (v3 or later). 
+To build the java code you only need Eclipse and Android SDK. 
 
 == Building Native libraries ==
 IMSDroid contains only one native library (*tinyWRAP.so*) written in C++ as a wrapper for [http://www.doubango.org/ doubango] project. The JNI files are generated using [http://www.swig.org/ SWIG].<br />
