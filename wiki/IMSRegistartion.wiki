@@ -1,2 +1,0 @@
-#summary IMS Registration (SIP account configuration)
-
