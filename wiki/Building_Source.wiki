@@ -6,7 +6,7 @@ To build the java code you only need Eclipse and Android SDK.
 
 == Building Native libraries ==
 IMSDroid contains only one native library (*tinyWRAP.so*) written in C++ as a wrapper for [http://www.doubango.org/ doubango] project. The JNI files are generated using [http://www.swig.org/ SWIG].<br />
-To build tinyWRAP you have to build all doubango's libraries (ANSI-C).<br /> 
+To build *tinyWRAP* you have to build all doubango's libraries (ANSI-C).<br /> 
 *tinyWRAP* depends on:
  * *tinySAK* (Swiss Army Knife): Utilities functions (SHA-1, MD5, HMAC, String, List, Timers, Thread, Mutex, Semaphore, ...)
  * *tinyNET*: Networking (DNS, DHCPv4/v6, STUN, TURN, ICE, ENUM, Sockets, ...)
