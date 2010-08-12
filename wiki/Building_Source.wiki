@@ -40,7 +40,7 @@ svn checkout http://doubango.googlecode.com/svn/trunk/ doubango-read-only
 {{{ 
 export PATH=$ANDROID_NDK_ROOT\build\prebuilt\$(HOST)\arm-eabi-4.2.1\bin:$PATH
 }}} 
-where *$HOST* is equal to *darwin-x86* on MAC OS X, *windows* on Windows XP/Vista/7 and *linux-x86* on Unix-like systems. We also assume that *$(ANDROID_GCC_VER)* is equal to *4.2.1*.<br />
+where *$HOST* is equal to *darwin-x86* on MAC OS X, *windows* on Windows XP/Vista/7 and *linux-x86* on Unix-like systems. We assume that *$(ANDROID_GCC_VER)* is equal to *4.2.1*.<br />
  # Set your custom *$(CFLAGS)* flags to change the default behavior. Example:
 {{{
 export CFLAGS="-g3 –O0 –DDEBUG_LEVEL=DEBUG_LEVEL_INFO"
