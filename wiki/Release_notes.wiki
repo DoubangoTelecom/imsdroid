@@ -3,6 +3,13 @@
 
 <wiki:toc max_depth="2" />
 
+==1.0.263==
+ * Add support for GSMA Content Sharing (PRD IR. 79)
+ * Rebuild FFmpeg with all ARM optimizations
+ * Rebuild Speex with ARM5E optimizations
+ * Resolve issue 31
+ * Fix bugs
+
 ==1.0.234==
  * Allow decoding any video size
  * Add support for high (CIF) and low (SQCIF) video encoding. QCIF was already supported in previous versions.
