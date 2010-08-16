@@ -143,7 +143,7 @@ public class VideoProducer {
 		public void run() {
 			Log.d(VideoProducer.TAG, "Video Sender ===== START");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DEFAULT);
 			
 			byte[] data;
 			final int capacity = VideoProducer.this.frame.capacity();
