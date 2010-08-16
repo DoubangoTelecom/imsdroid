@@ -15,7 +15,7 @@
 <EditText android:layout_height="wrap_content" android:layout_below="@+id/screen_presence_textView_freetext" android:id="@+id/screen_presence_editText_freetext" android:text="Hello world" android:layout_marginRight="5px" android:layout_width="fill_parent"></EditText>
 
 <TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_presence_editText_freetext" android:id="@+id/screen_presence_textView_avatar" android:text="Avatar" android:layout_width="fill_parent"></TextView>
-<ImageView android:id="@+id/screen_presence_imageView" android:layout_below="@+id/screen_presence_textView_avatar" android:layout_height="60px" android:layout_width="40px" android:src="@drawable/android_48"></ImageView>
+<ImageView android:id="@+id/screen_presence_imageView" android:layout_below="@+id/screen_presence_textView_avatar" android:layout_height="60px" android:layout_width="40px" android:src="@drawable/avatar_48"></ImageView>
 
 
 

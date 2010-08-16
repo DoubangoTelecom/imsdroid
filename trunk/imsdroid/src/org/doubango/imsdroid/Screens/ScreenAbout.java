@@ -21,7 +21,6 @@ public class ScreenAbout extends Screen {
         TextView textView = (TextView)this.findViewById(R.id.screen_about_textView_copyright);
         String copyright = this.getString(R.string.copyright);
 		textView.setText(String.format(copyright,
-					IMSDroid.getVersionCode(), IMSDroid.getVersionName(),
-					this.getString(R.string.doubango_revision)));
+				IMSDroid.getVersionName(), this.getString(R.string.doubango_revision)));
 	}
 }

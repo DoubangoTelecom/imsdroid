@@ -44,7 +44,7 @@ import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
-public class MyAVSession  extends MySipSession{
+public class MyAVSession  extends MyInviteSession{
 
 	private static HashMap<Long, MyAVSession> sessions;
 	
@@ -56,13 +56,13 @@ public class MyAVSession  extends MySipSession{
 	private boolean sendingVideo;
 	private boolean remoteHold;
 	private boolean localHold;
-	private HistoryAVCallEvent historyEvent;
+	private final HistoryAVCallEvent historyEvent;
 	
 	private static AudioConsumer __audioConsumer;
 	private static AudioProducer __audioProducer;
 	private static VideoProducer __videoProducer;
 	private static VideoConsumer __videoConsumer;
-	private static ScreenAV.CallEventHandler __callEventHandler;
+	private static ScreenAV.AVInviteEventHandler __callEventHandler;
 	
 	public enum CallState{
 		NONE,
@@ -82,14 +82,12 @@ public class MyAVSession  extends MySipSession{
 		__videoProducer = new VideoProducer();
 		__videoConsumer = new VideoConsumer();
 		
-		__callEventHandler = new ScreenAV.CallEventHandler();
+		__callEventHandler = new ScreenAV.AVInviteEventHandler();
 		
 		__audioConsumer.setActive();
 		__audioProducer.setActive();
 		__videoProducer.setActive();
 		__videoConsumer.setActive();
-		
-		__callEventHandler.init();
 	}
 	
 	public static VideoProducer getVideoProducer(){
@@ -100,7 +98,7 @@ public class MyAVSession  extends MySipSession{
 		return MyAVSession.__videoConsumer;
 	}
 	
-	public static ScreenAV.CallEventHandler getCallEventHandler(){
+	public static ScreenAV.AVInviteEventHandler getCallEventHandler(){
 		return MyAVSession.__callEventHandler;
 	}
 	
@@ -133,8 +131,9 @@ public class MyAVSession  extends MySipSession{
 	public static void releaseSession(MyAVSession session){
 		if(session != null){
 			synchronized(MyAVSession.sessions){
+				long id = session.getId();
 				session.delete();
-				MyAVSession.sessions.remove(session.getId());
+				MyAVSession.sessions.remove(id);
 			}
 		}
 	}

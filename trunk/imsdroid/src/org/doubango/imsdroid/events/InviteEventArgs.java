@@ -18,10 +18,32 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
-
 package org.doubango.imsdroid.events;
 
-public interface ICallEventDispatcher /*extends IEventDispatcher<ICallEventHandler>*/{
-	boolean addCallEventHandler(ICallEventHandler handler);
-	boolean removeCallEventHandler(ICallEventHandler handler);
+
+public class InviteEventArgs extends EventArgs {
+	
+	private final InviteEventTypes type;
+	private final long id;
+	private final String phrase;
+	
+	public InviteEventArgs(long id, InviteEventTypes type, String phrase){
+		super();
+		
+		this.type = type;
+		this.id = id;
+		this.phrase = phrase;
+	}
+	
+	public InviteEventTypes getType(){
+		return this.type;
+	}
+	
+	public long getSessionId(){
+		return this.id;
+	}
+	
+	public String getPhrase(){
+		return this.phrase;
+	}
 }

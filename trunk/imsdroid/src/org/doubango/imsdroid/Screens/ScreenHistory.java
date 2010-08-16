@@ -21,13 +21,16 @@
 
 package org.doubango.imsdroid.Screens;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.Model.HistoryEvent;
+import org.doubango.imsdroid.Model.HistoryMsrpEvent;
 import org.doubango.imsdroid.Model.HistorySMSEvent;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
@@ -38,6 +41,8 @@ import org.doubango.imsdroid.media.MediaType;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.ContextMenu;
@@ -62,6 +67,9 @@ implements IHistoryEventHandler
 	private final IHistoryService historytService;
 	private final IContactService contactService;
 	
+	private static final int SELECT_CONTENT = 1;
+	private String fixmeRemoteParty;
+	
 	private final Handler handler;
 	
 	private GridView gridView;
@@ -72,11 +80,12 @@ implements IHistoryEventHandler
 	
 	private final static int MENU_VOICE_CALL = 10;
 	private final static int MENU_VISIO_CALL = 11;
-	private final static int MENU_SEND_MESSAGE = 12;
+	//private final static int MENU_SEND_MESSAGE = 12;
 	private final static int MENU_SEND_SMS = 13;
 	private final static int MENU_SEND_FILE = 14;
 	private final static int MENU_START_CHAT = 15;
 	private final static int MENU_CONFERENCE = 16;
+	private final static int MENU_SHARE_CONTENT = 17;
 	
 	public ScreenHistory() {
 		super(SCREEN_TYPE.HISTORY_T, ScreenHistory.class.getCanonicalName());
@@ -167,8 +176,7 @@ implements IHistoryEventHandler
 		menu.add(0, ScreenHistory.MENU_SEND_SMS, Menu.NONE, "Send SMS");
 		//menu.add(0, ScreenHistory.MENU_SEND_FILE, Menu.NONE, "Send File");
 		//menu.add(0, ScreenHistory.MENU_START_CHAT, Menu.NONE, "Start Chat");
-		//menu.add(0, ScreenHistory.MENU_CONFERENCE, Menu.NONE, "Start Conference");
-		
+		menu.add(0, ScreenHistory.MENU_SHARE_CONTENT, Menu.NONE, "Share Content");
 		menu.add(1, ScreenHistory.MENU_DELETE_EVENT, Menu.NONE, "Delete Event");
 	}
 	
@@ -187,9 +195,12 @@ implements IHistoryEventHandler
 			case ScreenHistory.MENU_VISIO_CALL:
 				ScreenAV.makeCall(event.getRemoteParty(), MediaType.AudioVideo);
 				return true;
-			//case ScreenHistory.MENU_SEND_MESSAGE:
-			//	Toast.makeText(this, "Send Short Message: " + event.getRemotePrty(), Toast.LENGTH_SHORT).show();
-			//	return true;
+			case ScreenHistory.MENU_SHARE_CONTENT:
+				 this.fixmeRemoteParty = event.getRemoteParty();
+				 Intent intent = new Intent();
+				 intent.setType("*/*").addCategory(Intent.CATEGORY_OPENABLE).setAction(Intent.ACTION_GET_CONTENT);
+				 startActivityForResult(Intent.createChooser(intent, "Select content"), ScreenHistory.SELECT_CONTENT);
+				return true;
 			case ScreenHistory.MENU_SEND_SMS:
 				ScreenSMSCompose.sendSMS(event.getRemoteParty());
 				return true;
@@ -226,12 +237,37 @@ implements IHistoryEventHandler
 		}
 	}
 	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    if (resultCode == RESULT_OK) {
+	        if (requestCode == ScreenHistory.SELECT_CONTENT && this.fixmeRemoteParty != null) {
+	            Uri selectedContentUri = data.getData();
+	            String selectedContentPath = this.getPath(selectedContentUri);
+	            ScreenFileTransferView.ShareContent(this.fixmeRemoteParty, selectedContentPath, true);
+	        }
+	    }
+	}
+	
 	private OnItemClickListener gridView_OnItemClickListener = new OnItemClickListener(){
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			final HistoryEvent event = ScreenHistory.this.adapter.getEvent(position);
-			if(event != null && event.getMediaType() == MediaType.SMS && event instanceof HistorySMSEvent){
-				ScreenSMSView.showSMS((HistorySMSEvent)event);
+			if(event != null){
+				if(event.getMediaType() == MediaType.SMS && event instanceof HistorySMSEvent){
+					ScreenSMSView.showSMS((HistorySMSEvent)event);
+				}
+				else if(event.getMediaType() == MediaType.FileTransfer && event instanceof HistoryMsrpEvent){
+					try{
+						HistoryMsrpEvent msrpEvent = (HistoryMsrpEvent)event;
+						Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
+						myIntent.setDataAndType(Uri.fromFile(new File(msrpEvent.getFilePath())), "*/*");
+						startActivity(myIntent); 
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+						Toast.makeText(IMSDroid.getContext(), String.format("Failed to open the file"), Toast.LENGTH_SHORT).show();
+					}
+				}
 			}
 		}
 	};
@@ -314,52 +350,75 @@ implements IHistoryEventHandler
 
 			ImageView imageView = (ImageView) view.findViewById(R.id.screen_history_item_imageView);
 			TextView tvRemoteUri = (TextView) view.findViewById(R.id.screen_history_item_textView_remote);
-			TextView tvDate = (TextView) view.findViewById(R.id.screen_history_item_textView_date);
-			TextView tvDuration = (TextView) view.findViewById(R.id.screen_history_item_textView_duration);
+			TextView tvInfo = (TextView) view.findViewById(R.id.screen_history_item_textView_info);
 			
-			switch(event.getStatus()){
-				case Outgoing:
-					switch(event.getMediaType()){
-						case Audio:
-						case AudioVideo:
-							imageView.setImageResource(R.drawable.call_outgoing_45);
-						break;
-						case SMS:
-							imageView.setImageResource(R.drawable.sms_out_45);
-						break;
-					}
-					break;
-				case Incoming:
-					switch(event.getMediaType()){
-						case Audio:
-						case AudioVideo:
-							imageView.setImageResource(R.drawable.call_incoming_45);
-							break;
-						case SMS:
-							imageView.setImageResource(R.drawable.sms_into_45);
-						break;
-					}
-					break;
-				case Failed:
-					switch(event.getMediaType()){
-						case Audio:
-						case AudioVideo:
-							break;
-						case SMS:
-							imageView.setImageResource(R.drawable.sms_error_45);
+			final String date = this.dateFormat.format(new Date(event.getStartTime()));
+			
+			switch(event.getMediaType()){
+				case Audio:
+				case AudioVideo:
+					{
+						final String duration = this.durationFormat.format(new Date(event.getEndTime() - event.getStartTime()));
+						tvInfo.setText(String.format("%s (%s)", date, duration));
+						switch(event.getStatus()){
+							case Outgoing:
+								imageView.setImageResource(R.drawable.call_outgoing_45);
+								break;
+							case Incoming:
+								imageView.setImageResource(R.drawable.call_incoming_45);
+								break;
+							case Failed:
+							case Missed:
+								imageView.setImageResource(R.drawable.call_missed_45);
+								break;
+						}
 						break;
 					}
-					break;
-				case Missed:
-					switch(event.getMediaType()){
-						case Audio:
-						case AudioVideo:
-							imageView.setImageResource(R.drawable.call_missed_45);
-							break;
-						case SMS:
+				case SMS:
+					{
+						tvInfo.setText(String.format("%s", date));
+						switch(event.getStatus()){
+							case Outgoing:
+								imageView.setImageResource(R.drawable.sms_out_45);
+								break;
+							case Incoming:
+								imageView.setImageResource(R.drawable.sms_into_45);
+								break;
+							case Failed:
+							case Missed:
+								imageView.setImageResource(R.drawable.sms_error_45);
+								break;
+						}
 						break;
 					}
-					break;
+				case FileTransfer:
+					{
+						boolean isOK = false;
+						final HistoryMsrpEvent eventFile = (HistoryMsrpEvent)event;
+						final String filePath = eventFile.getFilePath();
+						final File file;
+						if(filePath != null && (file = new File(filePath)).exists()){
+							isOK = true;
+							tvInfo.setText(String.format("%s (%s)", date, file.getName()));
+						}
+						else{
+							tvInfo.setText("Error: File does not exist");
+						}
+						
+						switch(event.getStatus()){
+							case Outgoing:
+								imageView.setImageResource(isOK ? R.drawable.document_up_48 : R.drawable.document_error_48);
+								break;
+							case Incoming:
+								imageView.setImageResource(isOK ? R.drawable.document_down_48 : R.drawable.document_error_48);
+								break;
+							case Failed:
+							case Missed:
+								imageView.setImageResource(R.drawable.document_error_48);
+								break;
+						}
+						break;
+					}
 			}
 			
 			final String remoteParty = event.getRemoteParty();
@@ -373,10 +432,6 @@ implements IHistoryEventHandler
 				}
 			}
 			
-			tvDate.setText(this.dateFormat.format(new Date(event.getStartTime())));
-			
-			final Date dateDuration = new Date(event.getEndTime() - event.getStartTime());
-			tvDuration.setText(String.format("(%s)", this.durationFormat.format(dateDuration)));
 
 			return view;
 		}

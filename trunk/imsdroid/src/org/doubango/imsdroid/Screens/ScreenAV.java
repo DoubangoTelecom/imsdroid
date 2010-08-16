@@ -35,21 +35,20 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
-import org.doubango.imsdroid.events.CallEventArgs;
-import org.doubango.imsdroid.events.ICallEventHandler;
+import org.doubango.imsdroid.events.IInviteEventHandler;
+import org.doubango.imsdroid.events.InviteEventArgs;
 import org.doubango.imsdroid.media.MediaType;
 import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MyAVSession.CallState;
 import org.doubango.imsdroid.utils.UriUtils;
-import org.doubango.tinyWRAP.ActionConfig;
-import org.doubango.tinyWRAP.MsrpSession;
-import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -110,11 +109,14 @@ public class ScreenAV extends Screen {
 	private KeyguardLock keyguardLock;
 	private final IScreenService screenService;
 	
+	private static final int SELECT_CONTENT = 1;
+	
 	private final static int MENU_PICKUP = 0;
 	private final static int MENU_HANGUP= 1;
 	private final static int MENU_HOLD_RESUME = 2;
 	private final static int MENU_SEND_STOP_VIDEO = 3;
-	private final static int MENU_SPEAKER = 4;
+	private final static int MENU_SHARE_CONTENT = 4;
+	private final static int MENU_SPEAKER = 5;
 	
 	static {
 		//ScreenAV.__timerFormat = new SimpleDateFormat("HH:mm:ss");
@@ -279,6 +281,12 @@ public class ScreenAV extends Screen {
 				}
 				break;
 				
+			case ScreenAV.MENU_SHARE_CONTENT:
+				 Intent intent = new Intent();
+				 intent.setType("*/*").addCategory(Intent.CATEGORY_OPENABLE).setAction(Intent.ACTION_GET_CONTENT);
+				 startActivityForResult(Intent.createChooser(intent, "Select content"), ScreenAV.SELECT_CONTENT);
+				break;
+				
 			case ScreenAV.MENU_SPEAKER:
 				AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 				am.setSpeakerphoneOn(!am.isSpeakerphoneOn());
@@ -287,6 +295,20 @@ public class ScreenAV extends Screen {
 		return true;
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    if (resultCode == RESULT_OK) {
+	        if (requestCode == ScreenAV.SELECT_CONTENT && this.remoteUri != null) {
+	            Uri selectedContentUri = data.getData();
+	            String selectedContentPath = this.getPath(selectedContentUri);
+	            if(ScreenFileTransferView.ShareContent(this.remoteUri, selectedContentPath, false)){
+	            	ServiceManager.showContShareNotif(R.drawable.image_gallery_25, "Content Sharing");
+	        		ServiceManager.getSoundService().playNewEvent();
+	            }
+	        }
+	    }
+	}
+	
 	/* ===================== IScreen (Screen) ======================== */
 	@Override
 	public boolean haveMenu(){
@@ -303,6 +325,7 @@ public class ScreenAV extends Screen {
 		MenuItem itemHangUp = menu.add(0, ScreenAV.MENU_HANGUP, 0, "Hang-up").setIcon(R.drawable.phone_hang_up_48);
 		MenuItem itemHoldResume = menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, "Hold").setIcon(R.drawable.phone_hold_48);
 		MenuItem itemSendStopVideo = menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, "Send Video").setIcon(R.drawable.video_start_48);
+		MenuItem itemShareContent = menu.add(1, ScreenAV.MENU_SHARE_CONTENT, 0, "Share Content").setIcon(R.drawable.image_gallery_48);
 		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, "Speaker ON").setIcon(R.drawable.phone_speaker_48);
 		
 		switch(this.avSession.getState()){
@@ -312,6 +335,7 @@ public class ScreenAV extends Screen {
 				itemHoldResume.setEnabled(false);
 				itemSpeaker.setEnabled(false);
 				itemSendStopVideo.setEnabled(false);
+				itemShareContent.setEnabled(false);
 				break;
 			case CALL_INPROGRESS:
 				itemPickUp.setEnabled(false);
@@ -319,6 +343,7 @@ public class ScreenAV extends Screen {
 				itemHoldResume.setEnabled(false);
 				itemSpeaker.setEnabled(false);
 				itemSendStopVideo.setEnabled(false);
+				itemShareContent.setEnabled(false);
 				break;
 			case INCALL:
 				itemPickUp.setEnabled(false);
@@ -334,6 +359,7 @@ public class ScreenAV extends Screen {
 				else{
 					itemSendStopVideo.setEnabled(false);
 				}
+				itemShareContent.setEnabled(true);
 				itemHoldResume.setTitle(this.avSession.isLocalHeld()? "Resume" : "Hold").setIcon(this.avSession.isLocalHeld()? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
 				break;
 			case CALL_TERMINATED:
@@ -342,6 +368,7 @@ public class ScreenAV extends Screen {
 				itemHoldResume.setEnabled(false);
 				itemSpeaker.setEnabled(false);
 				itemSendStopVideo.setEnabled(false);
+				itemShareContent.setEnabled(false);
 				break;
 		}
 		
@@ -379,18 +406,7 @@ public class ScreenAV extends Screen {
 		
 		MyAVSession avSession = MyAVSession.createOutgoingSession(ServiceManager.getSipService().getStack(), mediaType);
 		avSession.setRemoteParty(remoteUri); // HACK
-		ServiceManager.getScreenService().show(ScreenAV.class, new Long(avSession.getId()).toString());
-		
-		/*ActionConfig actionConfig = new ActionConfig();
-        actionConfig
-            .setMediaString(twrap_media_type_t.twrap_media_file, "file-path", String.format("%s/%s", ServiceManager.getStorageService().getCurrentDir(), "avatar.png"))
-            .setMediaString(twrap_media_type_t.twrap_media_file, "accept-types", "application/octet-stream")
-            .setMediaString(twrap_media_type_t.twrap_media_file, "file-disposition", "attachment")
-            .setMediaString(twrap_media_type_t.twrap_media_file, "file-icon", "cid:test@doubango.org");
-        MsrpSession msrpSession = new MsrpSession(ServiceManager.getSipService().getStack());
-        msrpSession.callMsrp(remoteUri, actionConfig);
-        actionConfig.delete();
-        return true;*/
+		ServiceManager.getScreenService().show(ScreenAV.class, new Long(avSession.getId()).toString());	
 		
 		switch(mediaType){
 			case AudioVideo:
@@ -632,24 +648,25 @@ public class ScreenAV extends Screen {
 	
 	
 	/* ============================ Static Call Event Handler =========================*/
-	public static class CallEventHandler implements ICallEventHandler
+	public static class AVInviteEventHandler implements IInviteEventHandler
 	{
-		final static String TAG = CallEventHandler.class.getCanonicalName();
+		final static String TAG = AVInviteEventHandler.class.getCanonicalName();
 		ScreenAV avScreen;
 		final AudioManager audioManager;
 		final PowerManager.WakeLock wakeLock;
 		
-		public CallEventHandler(){
+		public AVInviteEventHandler(){
+			ServiceManager.getSipService().addInviteEventHandler(this);
+			
 			this.audioManager = (AudioManager)IMSDroid.getContext().getSystemService(Context.AUDIO_SERVICE);
 			PowerManager pm = (PowerManager) IMSDroid.getContext().getSystemService(Context.POWER_SERVICE);
-			this.wakeLock = pm == null ? null : pm.newWakeLock(PowerManager.ON_AFTER_RELEASE | PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, CallEventHandler.TAG);
+			this.wakeLock = pm == null ? null : pm.newWakeLock(PowerManager.ON_AFTER_RELEASE | PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, AVInviteEventHandler.TAG);
 		}
 		
-		public void init(){
-			ServiceManager.getSipService().addCallEventHandler(this);
-		}
-		void deinit(){
-			ServiceManager.getSipService().removeCallEventHandler(this);
+		@Override
+		protected void finalize() throws Throwable {
+			ServiceManager.getSipService().removeInviteEventHandler(this);
+			super.finalize();
 		}
 		
 		void setAvScreen(ScreenAV avScreen){
@@ -657,7 +674,20 @@ public class ScreenAV extends Screen {
 		}
 		
 		@Override
-		public boolean onCallEvent(Object sender, CallEventArgs e) {
+		public long getId(){
+			if(this.avScreen != null && this.avScreen.avSession != null){
+				return this.avScreen.avSession.getId();
+			}
+			return -1;
+		}
+		
+		@Override
+		public boolean canHandle(long id){
+			return (MyAVSession.getSession(id) != null);
+		}
+		
+		@Override
+		public boolean onInviteEvent(Object sender, InviteEventArgs e) {
 			final String phrase = e.getPhrase();
 			final MyAVSession avSession;
 			
@@ -673,7 +703,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.updateState(CallState.CALL_INCOMING);
+								AVInviteEventHandler.this.avScreen.updateState(CallState.CALL_INCOMING);
 							}});
 					}
 					if(this.wakeLock != null && !this.wakeLock.isHeld()){
@@ -689,7 +719,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {		
-								CallEventHandler.this.avScreen.updateState(CallState.CALL_INPROGRESS);
+								AVInviteEventHandler.this.avScreen.updateState(CallState.CALL_INPROGRESS);
 							}});
 					}
 					break;
@@ -698,8 +728,8 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.tvInfo.setText(phrase);
-								CallEventHandler.this.avScreen.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
+								AVInviteEventHandler.this.avScreen.tvInfo.setText(phrase);
+								AVInviteEventHandler.this.avScreen.ivState.setImageResource(R.drawable.bullet_ball_glass_grey_16);
 							}});
 					}
 					break;
@@ -713,7 +743,7 @@ public class ScreenAV extends Screen {
 								ServiceManager.getSoundService().stopRingTone();
 								
 								// Notification
-								CallEventHandler.this.avScreen.tvInfo.setText(phrase);
+								AVInviteEventHandler.this.avScreen.tvInfo.setText(phrase);
 							}});
 					}
 					break;
@@ -733,7 +763,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.updateState(CallState.INCALL);					
+								AVInviteEventHandler.this.avScreen.updateState(CallState.INCALL);					
 							}});
 					}
 					
@@ -754,7 +784,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.updateState(CallState.CALL_TERMINATED);
+								AVInviteEventHandler.this.avScreen.updateState(CallState.CALL_TERMINATED);
 							}});
 					}
 					if(this.wakeLock != null && this.wakeLock.isHeld()){
@@ -770,7 +800,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.tvInfo.setText("Call placed on hold");
+								AVInviteEventHandler.this.avScreen.tvInfo.setText("Call placed on hold");
 							}});
 					}
 					break;
@@ -778,7 +808,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.tvInfo.setText("Failed to place remote party on hold");
+								AVInviteEventHandler.this.avScreen.tvInfo.setText("Failed to place remote party on hold");
 							}});
 					}
 					break;
@@ -788,7 +818,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.tvInfo.setText("Call taken off hold");
+								AVInviteEventHandler.this.avScreen.tvInfo.setText("Call taken off hold");
 							}});
 					}
 					break;
@@ -796,7 +826,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.tvInfo.setText("Failed to unhold call");
+								AVInviteEventHandler.this.avScreen.tvInfo.setText("Failed to unhold call");
 							}});
 					}
 					break;
@@ -806,7 +836,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.tvInfo.setText("Placed on hold by remote party");
+								AVInviteEventHandler.this.avScreen.tvInfo.setText("Placed on hold by remote party");
 							}});
 					}
 					break;
@@ -816,7 +846,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								CallEventHandler.this.avScreen.tvInfo.setText("Taken off hold by remote party");
+								AVInviteEventHandler.this.avScreen.tvInfo.setText("Taken off hold by remote party");
 							}});
 					}
 					break;

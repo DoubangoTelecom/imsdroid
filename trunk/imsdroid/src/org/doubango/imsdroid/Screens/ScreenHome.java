@@ -36,7 +36,6 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,7 +98,7 @@ implements IRegistrationEventHandler
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.history_48), "History", ScreenHistory.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
-				getResources(), R.drawable.document_up_48), "File Transfer", ScreenFileTransferQueue.class));
+				getResources(), R.drawable.image_gallery_48), "Content Sharing", ScreenFileTransferQueue.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.chat_48), "Chat", ScreenChatQueue.class));
 		

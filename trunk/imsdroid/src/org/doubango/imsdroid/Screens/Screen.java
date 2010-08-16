@@ -25,6 +25,9 @@ import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.utils.StringUtils;
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -42,7 +45,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 public abstract class Screen extends Activity implements IScreen {
 	public static enum SCREEN_TYPE {
 		// Well-Known
-		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CODECS_T, CONTACT_EDIT_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, DIALER_T, FILE_TRANSFER_QUEUE_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
+		ABOUT_T, AUTHORIZATIONS_T, CHAT_QUEUE_T, CODECS_T, CONTACT_EDIT_T, CONTACT_VIEW_T, CONTACTS_T, CONTACTS_OPTIONS_T, DIALER_T, FILE_TRANSFER_QUEUE_T, FILE_TRANSFER_VIEW_T, GENERAL_T, HISTORY_T, HOME_T, IDENTITY_T, MESSAGING_T, MSRP_INC_T, NATT_T, NETWORK_T, OPTIONS_T, PRESENCE_T, QOS_T,
 		REGISTRATIONS_T, SECURITY_T, SMS_COMPOSE_T, SMS_VIEW_T,
 		// All others
 		AV_T
@@ -148,4 +151,15 @@ public abstract class Screen extends Activity implements IScreen {
 		}
 		return 0;
 	}
+	
+	// http://stackoverflow.com/questions/2169649/open-an-image-in-androids-built-in-gallery-app-programmatically
+	protected String getPath(Uri uri) {
+	    String[] projection = { MediaStore.Images.Media.DATA };
+	    Cursor cursor = managedQuery(uri, projection, null, null, null);
+	    int column_index = cursor
+	            .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+	    cursor.moveToFirst();
+	    return cursor.getString(column_index);
+	}
+
 }

@@ -30,6 +30,7 @@ import org.doubango.imsdroid.Services.IScreenService;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.LinearLayout;
 
 public class ScreenService extends Service implements IScreenService {
@@ -114,28 +115,32 @@ public class ScreenService extends Service implements IScreenService {
 	
 	@Override
 	public boolean show(Class<? extends Screen> cls, String id) {
-		Main mainActivity = ServiceManager.getMainActivity();
+		final Main mainActivity = ServiceManager.getMainActivity();
 		
 		String screen_id = (id == null) ? cls.getCanonicalName() : id;
 		Intent intent = new Intent(mainActivity, cls);
 		intent.putExtra("id", screen_id);
-		View view = mainActivity.getLocalActivityManager().startActivity(screen_id, intent).getDecorView();
-		
-		LinearLayout layout = (LinearLayout) mainActivity.findViewById(R.id.main_linearLayout_principal);
-		layout.removeAllViews();
-		layout.addView(view);
-		
-		// title
-		//mainActivity.setScreenTitle(screen.getScreenTitle());
-		
-		// add to stack
-		this.lastScreens[(++this.lastScreensIndex % this.lastScreens.length)] = screen_id;
-		this.lastScreensIndex %= this.lastScreens.length;
-		
-		// update current screen
-		//this.currentScreen = screen_id;
-		
-		return true;
+		final Window window = mainActivity.getLocalActivityManager().startActivity(screen_id, intent);
+		if(window != null){
+			View view = mainActivity.getLocalActivityManager().startActivity(screen_id, intent).getDecorView();
+			
+			LinearLayout layout = (LinearLayout) mainActivity.findViewById(R.id.main_linearLayout_principal);
+			layout.removeAllViews();
+			layout.addView(view);
+			
+			// title
+			//mainActivity.setScreenTitle(screen.getScreenTitle());
+			
+			// add to stack
+			this.lastScreens[(++this.lastScreensIndex % this.lastScreens.length)] = screen_id;
+			this.lastScreensIndex %= this.lastScreens.length;
+			
+			// update current screen
+			//this.currentScreen = screen_id;
+			
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
