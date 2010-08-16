@@ -62,8 +62,8 @@ public class MySipStack extends SipStack {
 		this.addHeader("Allow", "INVITE, ACK, CANCEL, BYE, MESSAGE, OPTIONS, NOTIFY, PRACK, UPDATE, REFER");
 		this.addHeader("Privacy", "none");
 		this.addHeader("P-Access-Network-Info", "ADSL;utran-cell-id-3gpp=00000000");
-		this.addHeader("User-Agent", String.format("IM-client/OMA1.0 IMSDroid/v%d.%s (doubango r%s)", 
-				IMSDroid.getVersionCode(), IMSDroid.getVersionName(), 
+		this.addHeader("User-Agent", String.format("IM-client/OMA1.0 IMSDroid/v%s (doubango r%s)", 
+				IMSDroid.getVersionName(), 
 				IMSDroid.getContext().getString(R.string.doubango_revision)));
 	}
 

@@ -8,40 +8,39 @@
 
 package org.doubango.tinyWRAP;
 
-public enum twrap_media_type_t {
-  twrap_media_none,
-  twrap_media_audio,
-  twrap_media_video,
-  twrap_media_audiovideo,
-  twrap_media_msrp;
+public enum tmsrp_request_type_t {
+  tmsrp_NONE(0),
+  tmsrp_SEND,
+  tmsrp_REPORT,
+  tmsrp_AUTH;
 
   public final int swigValue() {
     return swigValue;
   }
 
-  public static twrap_media_type_t swigToEnum(int swigValue) {
-    twrap_media_type_t[] swigValues = twrap_media_type_t.class.getEnumConstants();
+  public static tmsrp_request_type_t swigToEnum(int swigValue) {
+    tmsrp_request_type_t[] swigValues = tmsrp_request_type_t.class.getEnumConstants();
     if (swigValue < swigValues.length && swigValue >= 0 && swigValues[swigValue].swigValue == swigValue)
       return swigValues[swigValue];
-    for (twrap_media_type_t swigEnum : swigValues)
+    for (tmsrp_request_type_t swigEnum : swigValues)
       if (swigEnum.swigValue == swigValue)
         return swigEnum;
-    throw new IllegalArgumentException("No enum " + twrap_media_type_t.class + " with value " + swigValue);
+    throw new IllegalArgumentException("No enum " + tmsrp_request_type_t.class + " with value " + swigValue);
   }
 
   @SuppressWarnings("unused")
-  private twrap_media_type_t() {
+  private tmsrp_request_type_t() {
     this.swigValue = SwigNext.next++;
   }
 
   @SuppressWarnings("unused")
-  private twrap_media_type_t(int swigValue) {
+  private tmsrp_request_type_t(int swigValue) {
     this.swigValue = swigValue;
     SwigNext.next = swigValue+1;
   }
 
   @SuppressWarnings("unused")
-  private twrap_media_type_t(twrap_media_type_t swigEnum) {
+  private tmsrp_request_type_t(tmsrp_request_type_t swigEnum) {
     this.swigValue = swigEnum.swigValue;
     SwigNext.next = this.swigValue+1;
   }

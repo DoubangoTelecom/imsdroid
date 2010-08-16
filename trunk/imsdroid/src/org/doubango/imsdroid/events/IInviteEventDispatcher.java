@@ -21,6 +21,7 @@
 
 package org.doubango.imsdroid.events;
 
-public interface ICallEventHandler /* extends IEventHandler<CallEventArgs> */{
-	boolean onCallEvent(Object sender, CallEventArgs e);
+public interface IInviteEventDispatcher /*extends IEventDispatcher<IInviteEventHandler>*/{
+	boolean addInviteEventHandler(IInviteEventHandler handler);
+	boolean removeInviteEventHandler(IInviteEventHandler handler);
 }

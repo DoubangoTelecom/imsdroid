@@ -53,8 +53,10 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Screens.ScreenHome;
+import org.doubango.imsdroid.Screens.ScreenMsrpInc;
 import org.doubango.imsdroid.Screens.ScreenPresence;
 import org.doubango.imsdroid.Screens.Screen.SCREEN_TYPE;
 import org.doubango.imsdroid.Services.IConfigurationService;
@@ -105,6 +107,8 @@ implements IRegistrationEventHandler
     public static final int ACTION_SHOW_AVSCREEN = 1;
     public static final int ACTION_RESTORE_LAST_STATE = 2;
     public static final int ACTION_SHOW_HISTORY = 3;
+    public static final int ACTION_SHOW_MSRP_INC_SCREEN = 4;
+    public static final int ACTION_SHOW_CONTSHARE_SCREEN = 5;
     
     private static String TAG = Main.class.getCanonicalName();
     
@@ -361,11 +365,19 @@ implements IRegistrationEventHandler
 	
 	/* ===================== Private functions ======================== */
 	private void handleAction(Bundle bundle){
+		final String id;
 		switch(bundle.getInt("action", Main.ACTION_NONE)){
 			case Main.ACTION_SHOW_AVSCREEN:
-				String id = bundle.getString("session-id");
+				id = bundle.getString("session-id");
 				if(id != null){
 					ServiceManager.getScreenService().show(ScreenAV.class, id);
+				}
+				break;
+				
+			case ACTION_SHOW_MSRP_INC_SCREEN:
+				id = bundle.getString("session-id");
+				if(id != null){
+					ServiceManager.getScreenService().show(ScreenMsrpInc.class, id);
 				}
 				break;
 				
@@ -373,15 +385,19 @@ implements IRegistrationEventHandler
 				ServiceManager.getScreenService().show(ScreenHistory.class);
 				break;
 				
+			case Main.ACTION_SHOW_CONTSHARE_SCREEN:
+				ServiceManager.getScreenService().show(ScreenFileTransferQueue.class);
+				break;
+				
 			case Main.ACTION_RESTORE_LAST_STATE:
-				String screenId = bundle.getString("screen-id");
+				id = bundle.getString("screen-id");
 				Screen.SCREEN_TYPE screenType = Screen.SCREEN_TYPE.valueOf(bundle.getString("screen-type"));
 				switch(screenType){
 					case AV_T:
-						ServiceManager.getScreenService().show(ScreenAV.class, screenId);
+						ServiceManager.getScreenService().show(ScreenAV.class, id);
 						break;
 					default:
-						if(!ServiceManager.getScreenService().show(screenId)){
+						if(!ServiceManager.getScreenService().show(id)){
 							ServiceManager.getScreenService().show(ScreenHome.class);
 						}
 						break;

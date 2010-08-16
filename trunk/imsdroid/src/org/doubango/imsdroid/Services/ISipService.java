@@ -20,7 +20,7 @@
 */
 package org.doubango.imsdroid.Services;
 
-import org.doubango.imsdroid.events.ICallEventDispatcher;
+import org.doubango.imsdroid.events.IInviteEventDispatcher;
 import org.doubango.imsdroid.events.IRegistrationEventDispatcher;
 import org.doubango.imsdroid.events.ISubscriptionEventDispatcher;
 import org.doubango.imsdroid.sip.MySipStack;
@@ -30,7 +30,7 @@ import org.doubango.imsdroid.sip.MySubscriptionSession.EVENT_PACKAGE_TYPE;
 public interface ISipService  extends IService, 
 IRegistrationEventDispatcher, 
 ISubscriptionEventDispatcher,
-ICallEventDispatcher
+IInviteEventDispatcher
 {
 	MySipStack getStack();
 	

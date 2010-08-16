@@ -130,6 +130,12 @@ public class NetworkService  extends Service implements INetworkService {
 		
 		 ConnectivityManager connectivityManager = (ConnectivityManager) IMSDroid.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 		 NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+		 
+		 if(networkInfo == null){
+			 Toast.makeText(IMSDroid.getContext(), "Failed to get Network information", Toast.LENGTH_LONG).show();
+			 return false;
+		 }
+		 
 		 int netType = networkInfo.getType();
 		 int netSubType = networkInfo.getSubtype();
 		 

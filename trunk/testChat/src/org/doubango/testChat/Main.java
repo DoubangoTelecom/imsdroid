@@ -20,16 +20,11 @@ public class Main extends Activity {
         setContentView(R.layout.main);
         
         this.items =  new ChatAdapterItem[]{
-        		new ChatAdapterItem(true, "Salut comment tu vas?Salut comment tu vas?Salut comment tu vas?Sa" +
-        				"lut comment tu vas?Salut comment tu vas?" +
-        				"Salut comment tu vas?Salut comment " +
-        				"Salut comment tu vas?" +
-        				"Salut comment tu vas?" +
-        				"Salut comment tu vas?tu vas?"),
-        		new ChatAdapterItem(true, "Cool"),
-        		new ChatAdapterItem(false, "Bonjour"),
-        		new ChatAdapterItem(false, "Hello world"),
-        		new ChatAdapterItem(true, "Heho")
+        		new ChatAdapterItem(true, "Bonjour, Comment tu vas?"),
+        		new ChatAdapterItem(true, "Ca va bien, et toi? Tu raconte quoi?"),
+        		new ChatAdapterItem(false, "Rien de 9"),
+        		new ChatAdapterItem(false, "OK. A 2min"),
+        		new ChatAdapterItem(true, "A+")
         };
         
      // gridView

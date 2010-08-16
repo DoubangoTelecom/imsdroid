@@ -18,36 +18,11 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
-package org.doubango.imsdroid.Services.Impl;
 
-import org.doubango.imsdroid.IMSDroid;
-import org.doubango.imsdroid.Services.IStorageService;
+package org.doubango.imsdroid.events;
 
-public class StorageService  extends Service implements IStorageService{
-
-	private final String currentDir;
-	private final String contentShareDir;
-	
-	public StorageService(){
-		this.currentDir = String.format("/data/data/%s", IMSDroid.getContext().getPackageName());
-		this.contentShareDir = "/sdcard/IMSDroid";
-	}
-	
-	public boolean start() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
-	public boolean stop() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
-	public String getCurrentDir(){
-		return this.currentDir;
-	}
-	
-	public String getContentShareDir(){
-		return this.contentShareDir;
-	}
+public interface IInviteEventHandler /* extends IEventHandler<InviteEventArgs> */{
+	boolean onInviteEvent(Object sender, InviteEventArgs e);
+	boolean canHandle(long id);
+	long getId();
 }

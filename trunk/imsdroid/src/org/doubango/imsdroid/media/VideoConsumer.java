@@ -56,7 +56,7 @@ public class VideoConsumer {
 	private Bitmap bitmap;
 	private Preview preview;
 	private boolean fullScreen;
-	private boolean fullScreenHonored;
+	//private boolean fullScreenHonored;
 	
 	private final MyProxyVideoConsumer videoConsumer;
 	

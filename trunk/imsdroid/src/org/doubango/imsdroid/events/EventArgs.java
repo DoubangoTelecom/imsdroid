@@ -34,7 +34,8 @@ public class EventArgs {
 		return this.extra.get(key);
 	}
 	
-	public void putExtra(String key, Object value){
+	public EventArgs putExtra(String key, Object value){
 		this.extra.put(key, value);
+		return this;
 	}
 }

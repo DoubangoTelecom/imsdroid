@@ -105,6 +105,7 @@ implements IRegistrationEventHandler
 	private static final int NOTIF_REGISTRATION_ID = 19833891;
 	private static final int NOTIF_AVCALL_ID = 19833892;
 	private static final int NOTIF_SMS_ID = 19833893;
+	private static final int NOTIF_CONTSHARE_ID = 19833894;
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -177,6 +178,10 @@ implements IRegistrationEventHandler
         		notification.flags |= Notification.FLAG_AUTO_CANCEL;
         		intent.putExtra("action", Main.ACTION_SHOW_HISTORY);
         		break;
+        	case NOTIF_CONTSHARE_ID:
+        		//notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        		intent.putExtra("action", Main.ACTION_SHOW_CONTSHARE_SCREEN);
+        		break;
         	case NOTIF_AVCALL_ID:
         		if(MyAVSession.getFirstId() != null){
         			intent.putExtra("action", Main.ACTION_SHOW_AVSCREEN);
@@ -211,9 +216,17 @@ implements IRegistrationEventHandler
     	ServiceManager.showNotification(NOTIF_SMS_ID, drawableId, tickerText);
     }
     
+    public static void showContShareNotif(int drawableId, String tickerText){
+    	ServiceManager.showNotification(NOTIF_CONTSHARE_ID, drawableId, tickerText);
+    }
+    
     public static void cancelAVCallNotif(){
     	ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
-    }   
+    }
+    
+    public static void cancelContShareNotif(){
+    	ServiceManager.notifManager.cancel(ServiceManager.NOTIF_CONTSHARE_ID);
+    }
     
 	public static void setMainActivity(Main mainActivity){
 		ServiceManager.mainActivity = mainActivity;
@@ -284,6 +297,7 @@ implements IRegistrationEventHandler
 		success &= ServiceManager.xcapService.stop();
 
 		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_REGISTRATION_ID);
+		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
 		
 		if(!success){
 			Log.e(ServiceManager.TAG, "Failed to stop services");

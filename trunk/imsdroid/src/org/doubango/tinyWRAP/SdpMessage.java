@@ -8,16 +8,16 @@
 
 package org.doubango.tinyWRAP;
 
-public class MsrpEvent {
+public class SdpMessage {
   private long swigCPtr;
   protected boolean swigCMemOwn;
 
-  protected MsrpEvent(long cPtr, boolean cMemoryOwn) {
+  protected SdpMessage(long cPtr, boolean cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = cPtr;
   }
 
-  protected static long getCPtr(MsrpEvent obj) {
+  protected static long getCPtr(SdpMessage obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
@@ -28,23 +28,25 @@ public class MsrpEvent {
   public synchronized void delete() {
     if(swigCPtr != 0 && swigCMemOwn) {
       swigCMemOwn = false;
-      tinyWRAPJNI.delete_MsrpEvent(swigCPtr);
+      tinyWRAPJNI.delete_SdpMessage(swigCPtr);
     }
     swigCPtr = 0;
   }
 
-  public tmsrp_event_type_t getType() {
-    return tmsrp_event_type_t.swigToEnum(tinyWRAPJNI.MsrpEvent_getType(swigCPtr, this));
+  public SdpMessage() {
+    this(tinyWRAPJNI.new_SdpMessage(), true);
   }
 
-  public MsrpSession getSipSession() {
-    long cPtr = tinyWRAPJNI.MsrpEvent_getSipSession(swigCPtr, this);
-    return (cPtr == 0) ? null : new MsrpSession(cPtr, false);
+  public String getSdpHeaderValue(String media, char name, long index) {
+    return tinyWRAPJNI.SdpMessage_getSdpHeaderValue__SWIG_0(swigCPtr, this, media, name, index);
   }
 
-  public MsrpMessage getMessage() {
-    long cPtr = tinyWRAPJNI.MsrpEvent_getMessage(swigCPtr, this);
-    return (cPtr == 0) ? null : new MsrpMessage(cPtr, false);
+  public String getSdpHeaderValue(String media, char name) {
+    return tinyWRAPJNI.SdpMessage_getSdpHeaderValue__SWIG_1(swigCPtr, this, media, name);
+  }
+
+  public String getSdpHeaderAValue(String media, String attributeName) {
+    return tinyWRAPJNI.SdpMessage_getSdpHeaderAValue(swigCPtr, this, media, attributeName);
   }
 
 }

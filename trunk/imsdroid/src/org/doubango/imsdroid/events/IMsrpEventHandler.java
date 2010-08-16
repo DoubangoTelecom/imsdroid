@@ -18,20 +18,10 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+
 package org.doubango.imsdroid.events;
 
-public enum CallEventTypes {
-	INCOMING,
-	INPROGRESS,
-	RINGING,
-	EARLY_MEDIA,
-	CONNECTED,
-	TERMWAIT,
-	DISCONNECTED,
-	LOCAL_HOLD_OK,
-	LOCAL_HOLD_NOK,
-	LOCAL_RESUME_OK,
-	LOCAL_RESUME_NOK,
-	REMOTE_HOLD,
-	REMOTE_RESUME
+public interface IMsrpEventHandler /* extends IEventHandler<MsrpEventArgs> */{
+	boolean onMsrpEvent(Object sender, MsrpEventArgs e);
+	boolean canHandle(long id);
 }

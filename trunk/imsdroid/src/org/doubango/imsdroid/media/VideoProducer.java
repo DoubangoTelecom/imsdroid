@@ -68,6 +68,8 @@ public class VideoProducer {
 		this.width = VideoProducer.WIDTH;
 		this.height = VideoProducer.HEIGHT;
 		this.fps = VideoProducer.FPS;
+		
+		
 	}
 	
 	public void setActive(){
@@ -125,7 +127,7 @@ public class VideoProducer {
 	}
 	
 	private synchronized int prepare(int width, int height, int fps){
-		Log.d(VideoProducer.TAG, "prepare()");
+		Log.d(VideoProducer.TAG, String.format("prepare(%d, %d, %d)", width, height, fps));
 		this.width = width;
 		this.height = height;
 		this.fps = fps;
@@ -139,11 +141,12 @@ public class VideoProducer {
 	private Runnable runnableSender = new Runnable(){
 		@Override
 		public void run() {
-			Log.d(VideoProducer.TAG, "Sender ===== START");
+			Log.d(VideoProducer.TAG, "Video Sender ===== START");
 			
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
 			
 			byte[] data;
+			final int capacity = VideoProducer.this.frame.capacity();
 			while(VideoProducer.this.running){
 				try {
 					VideoProducer.this.semaphore.acquire();
@@ -164,7 +167,7 @@ public class VideoProducer {
 				if(data != null){
 					try{
 						VideoProducer.this.frame.put(data);
-						VideoProducer.this.videoProducer.push(VideoProducer.this.frame, data.length);
+						VideoProducer.this.videoProducer.push(VideoProducer.this.frame, capacity);
 						VideoProducer.this.frame.rewind();
 					}
 					catch(BufferOverflowException e){
@@ -176,7 +179,7 @@ public class VideoProducer {
 			
 			VideoProducer.this.buffers.clear();
 			
-			Log.d(VideoProducer.TAG, "Sender ===== STOP");
+			Log.d(VideoProducer.TAG, "Video Sender ===== STOP");
 		}
 	};
 	
@@ -261,6 +264,7 @@ public class VideoProducer {
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			if(this.camera != null){
 				this.camera.stopPreview();
+				this.camera.setPreviewCallback(null);
 				this.camera.release();
 				this.camera = null;
 			}

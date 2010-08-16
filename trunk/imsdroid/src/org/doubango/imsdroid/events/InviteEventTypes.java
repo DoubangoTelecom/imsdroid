@@ -20,30 +20,18 @@
 */
 package org.doubango.imsdroid.events;
 
-
-public class CallEventArgs extends EventArgs {
-	
-	private final CallEventTypes type;
-	private final long id;
-	private final String phrase;
-	
-	public CallEventArgs(long id, CallEventTypes type, String phrase){
-		super();
-		
-		this.type = type;
-		this.id = id;
-		this.phrase = phrase;
-	}
-	
-	public CallEventTypes getType(){
-		return this.type;
-	}
-	
-	public long getSessionId(){
-		return this.id;
-	}
-	
-	public String getPhrase(){
-		return this.phrase;
-	}
+public enum InviteEventTypes {
+	INCOMING,
+	INPROGRESS,
+	RINGING,
+	EARLY_MEDIA,
+	CONNECTED,
+	TERMWAIT,
+	DISCONNECTED,
+	LOCAL_HOLD_OK,
+	LOCAL_HOLD_NOK,
+	LOCAL_RESUME_OK,
+	LOCAL_RESUME_NOK,
+	REMOTE_HOLD,
+	REMOTE_RESUME
 }

@@ -40,4 +40,13 @@ public class StringUtils {
 			return ((s1 == null && s2 == null)? true : false);
 		}
 	}
+	
+	public static String unquote(String s, String quote){
+		if(!StringUtils.isNullOrEmpty(s) && !StringUtils.isNullOrEmpty(quote)){
+			if(s.startsWith(quote) && s.endsWith(quote)){
+				return s.substring(1, s.length()-quote.length());
+			}
+		}
+		return s;
+	}
 }
