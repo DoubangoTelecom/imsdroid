@@ -1,6 +1,8 @@
 #summary Building IMSDroid
 #labels Phase-Implementation,Featured
 
+<wiki:toc max_depth="3" />
+
 == Building Java Code ==
 To build the java code you only need Eclipse and Android SDK. 
 
