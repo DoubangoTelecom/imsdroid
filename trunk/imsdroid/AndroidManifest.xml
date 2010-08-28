@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.doubango.imsdroid"
-      android:versionName="1.0.263" android:versionCode="263">
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:persistent="true" android:name=".IMSDroid" android:debuggable="false">
+      android:versionName="1.0.264" android:versionCode="264">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:persistent="true" android:name=".IMSDroid" android:debuggable="true">
         <activity android:name=".Main"
                   android:label="@string/app_name" android:launchMode="singleTop">
             <intent-filter>
@@ -24,13 +24,13 @@
 <activity android:name=".Screens.ScreenQoS"></activity>
 <activity android:name=".Screens.ScreenNatt"></activity>
 <activity android:name=".Screens.ScreenSecurity">
-	<intent-filter>
-		<action android:name="android.intent.action.VIEW" />
-		<category android:name="android.intent.category.BROWSABLE" />
-		<category android:name="android.intent.category.OPENABLE" />
-		<category android:name="android.intent.category.DEFAULT" />
-		<data android:scheme="file" android:mimeType="*/*" />
-	</intent-filter>
+<!--	<intent-filter>-->
+<!--		<action android:name="android.intent.action.VIEW" />-->
+<!--		<category android:name="android.intent.category.BROWSABLE" />-->
+<!--		<category android:name="android.intent.category.OPENABLE" />-->
+<!--		<category android:name="android.intent.category.DEFAULT" />-->
+<!--		<data android:scheme="file" android:mimeType="*/*" />-->
+<!--	</intent-filter>-->
 
 </activity>
 <activity android:name=".Screens.ScreenContacts"></activity>
@@ -93,6 +93,8 @@
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" ></uses-permission>
     <uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
 	<uses-permission android:name="android.permission.DISABLE_KEYGUARD"></uses-permission>
+	<uses-permission android:name="android.permission.READ_CONTACTS"/>
+	<uses-permission android:name="android.permission.WRITE_CONTACTS"/>
 	
 	
 	

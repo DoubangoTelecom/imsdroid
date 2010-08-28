@@ -30,19 +30,19 @@ import ietf.params.xml.ns.pidf.data_model.Person;
 import ietf.params.xml.ns.pidf.rpid.Activities;
 import ietf.params.xml.ns.pidf.rpid.Activities.activity;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import oma.xml.prs.pidf.oma_pres.OverridingWillingness;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Model.AddressBook;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Group;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Model.Group.Contact;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.events.ContactsEventArgs;
 import org.doubango.imsdroid.events.ContactsEventTypes;
@@ -62,6 +62,12 @@ import org.doubango.imsdroid.utils.StringUtils;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
+import android.provider.Contacts;
+import android.provider.Contacts.People;
 import android.util.Log;
 
 public class ContactService  extends Service implements IContactService, IRegistrationEventHandler, ISubscriptionEventHandler, IXcapEventHandler{
@@ -71,8 +77,8 @@ public class ContactService  extends Service implements IContactService, IRegist
 	// Event Handlers
 	private final CopyOnWriteArrayList<IContactsEventHandler> contactsEventHandlers;
 	
-	private final static String CONTACTS_FILE = "contacts.xml";
-	private File contacts_file;
+	//private final static String CONTACTS_FILE = "contacts.xml";
+	//private File contacts_file;
 	private AddressBook addressBook;
 	private final Serializer serializer;
 	
@@ -80,6 +86,7 @@ public class ContactService  extends Service implements IContactService, IRegist
 	private boolean presence;
 	private boolean rls;
 	private boolean loadingContacts;
+	private ContentObserver localContactObserver;
 	
 	public ContactService(){
 		super();
@@ -91,17 +98,17 @@ public class ContactService  extends Service implements IContactService, IRegist
 	
 	public boolean start() {
 		// Creates configuration file if does not exist
-		this.contacts_file = new File(String.format("%s/%s", ServiceManager.getStorageService().getCurrentDir(), ContactService.CONTACTS_FILE));
+		/*this.contacts_file = new File(String.format("%s/%s", ServiceManager.getStorageService().getCurrentDir(), ContactService.CONTACTS_FILE));
 		if(!this.contacts_file.exists()){
 			try {
 				this.contacts_file.createNewFile();
-				this.compute(); /* to create an empty but valid document */
+				this.compute(); // to create an empty but valid document
 			} catch (IOException e) {
 				e.printStackTrace();
 				this.contacts_file = null;
 				return false;
 			}
-		}
+		}*/
 		
 		// add event handlers
 		ServiceManager.getSipService().addRegistrationEventHandler(this);
@@ -115,6 +122,11 @@ public class ContactService  extends Service implements IContactService, IRegist
 		ServiceManager.getSipService().removeRegistrationEventHandler(this);
 		ServiceManager.getSipService().removeSubscriptionEventHandler(this);
 		ServiceManager.getXcapService().removeXcapEventHandler(this);
+		
+		if(this.localContactObserver != null){
+			IMSDroid.getContext().getContentResolver().unregisterContentObserver(this.localContactObserver);
+			this.localContactObserver = null;
+		}
 		return true;
 	}
 
@@ -129,11 +141,11 @@ public class ContactService  extends Service implements IContactService, IRegist
 				new Thread(new Runnable(){
 					@Override
 					public void run() {
-						ContactService.this.compute();
-						ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACT_ADDED));
-						if(ContactService.this.presence){
-							
-						}
+						//ContactService.this.compute();
+						//ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACT_ADDED));
+						//if(ContactService.this.presence){
+						//	
+						//}
 					}
 				}).start();
 			}
@@ -181,9 +193,9 @@ public class ContactService  extends Service implements IContactService, IRegist
 			// Wait for XcapService Events
 		}
 		else{
-			if(this.contacts_file == null){
+			/*if(this.contacts_file == null){
 				return false;
-			}
+			}*/
 			new Thread(this.loadLocalContacts).start();
 		}
 		
@@ -242,6 +254,10 @@ public class ContactService  extends Service implements IContactService, IRegist
 			case UNREGISTRATION_OK:
 				this.addressBook.clear();
 				ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACTS_LOADED));
+				if(this.localContactObserver != null){
+					IMSDroid.getContext().getContentResolver().unregisterContentObserver(this.localContactObserver);
+					this.localContactObserver = null;
+				}
 				break;
 			case REGISTRATION_NOK:
 			case REGISTRATION_INPROGRESS:
@@ -402,6 +418,74 @@ public class ContactService  extends Service implements IContactService, IRegist
 			
 			try {
 				Log.d(ContactService.TAG, "Loading contacts (local)");
+				ContactService.this.addressBook.clear();
+				
+				if (ContactService.this.addressBook.getGroup("rcs") == null) {
+					ContactService.this.addressBook.addGroup("rcs", "Social buddies");
+				}
+				String[] projection = new String[] { People.DISPLAY_NAME, People.NUMBER };
+				Uri contacts =  People.CONTENT_URI;
+				Cursor managedCursor = ServiceManager.getMainActivity().managedQuery(contacts,
+                        projection, // Which columns to return 
+                        null,       // Which rows to return (all rows)
+                        null,       // Selection arguments (none)
+                        // Put the results in ascending order by name
+                        People.DISPLAY_NAME + " ASC");
+				
+				final String realm = ServiceManager.getConfigurationService().getString(
+						CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.REALM,
+						Configuration.DEFAULT_REALM);
+				String displayName;				
+				String phone;
+				while (managedCursor.moveToNext()) {
+					phone = managedCursor.getString(managedCursor .getColumnIndex(People.NUMBER));
+					if(phone != null){
+						displayName = managedCursor.getString(managedCursor.getColumnIndex(People.DISPLAY_NAME));
+						ContactService.this.addressBook.addContact(new Contact(String.format("sip:%s@%s", phone, realm),
+								displayName, "rcs"));
+					}
+				}
+				Log.d(ContactService.TAG, "Contacts loaded(local)");
+
+				// Register for changes
+				if(ContactService.this.localContactObserver == null){
+					ContactService.this.localContactObserver = new ContentObserver(new Handler()) {
+
+						@Override
+						public void onChange(boolean selfChange) {
+							super.onChange(selfChange);
+							ContactService.this.loadContacts();
+						}
+					};
+					IMSDroid.getContext().getContentResolver().registerContentObserver(Contacts.CONTENT_URI, true, ContactService.this.localContactObserver);
+				}
+				
+				if (ContactService.this.presence) {
+					Log.d(ContactService.TAG, "Subscribing to presence(local)");
+					Group group = ContactService.this.addressBook
+							.getGroup("rcs");
+					if (group != null) {
+						for (Group.Contact contact : group.getContacts()) {
+							MySubscriptionSession session = ServiceManager
+									.getSipService().createPresenceSession(
+											contact.getUri(),
+											EVENT_PACKAGE_TYPE.PRESENCE);
+							session.subscribe();
+						}
+					}
+				}
+			} catch (Exception e) {
+				Log.e(ContactService.TAG, "Failed to load contacts(local)");
+				e.printStackTrace();
+			}
+			ContactService.this.loadingContacts = false;
+			ContactService.this.onContactsEvent(new ContactsEventArgs(
+					ContactsEventTypes.CONTACTS_LOADED));
+		}
+			
+			
+			/*try {
+				Log.d(ContactService.TAG, "Loading contacts (local)");
 				ContactService.this.addressBook = ContactService.this.serializer.read(AddressBook.class, ContactService.this.contacts_file);
 				if(ContactService.this.addressBook.getGroup("rcs") == null){
 					ContactService.this.addressBook.addGroup("rcs", "Social buddies");
@@ -424,10 +508,12 @@ public class ContactService  extends Service implements IContactService, IRegist
 			}
 			ContactService.this.loadingContacts = false;
 			ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACTS_LOADED));
-		}
+		}*/
 	};
 	
-	private boolean compute(){
+	
+	
+	/*private boolean compute(){
 		if(this.contacts_file == null){
 			return false;
 		}
@@ -439,5 +525,5 @@ public class ContactService  extends Service implements IContactService, IRegist
 			return false;
 		}
 		return true;
-	}	
+	}*/
 }

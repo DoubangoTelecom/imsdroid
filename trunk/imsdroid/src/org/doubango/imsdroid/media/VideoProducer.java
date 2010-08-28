@@ -245,8 +245,16 @@ public class VideoProducer {
 				 */
 				parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 				parameters.setPreviewFrameRate(this.fps);
-				parameters.setPictureSize(this.width, this.height);
 				this.camera.setParameters(parameters);
+				
+				try{
+					parameters.setPictureSize(this.width, this.height);
+					this.camera.setParameters(parameters);
+				}
+				catch(Exception e){
+					// FFMpeg converter will resize the video stream
+					e.printStackTrace();
+				}
 
 				// layout(0, 0, this.width, this.height);
 
@@ -273,8 +281,6 @@ public class VideoProducer {
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			if(this.camera != null){
 				Camera.Parameters parameters = camera.getParameters();
-				// parameters.setPreviewSize(w, h);
-				// layout(0, 0, this.width, this.height);
 				parameters.setPreviewSize(this.width, this.height);
 				this.camera.setParameters(parameters);
 				this.camera.startPreview();

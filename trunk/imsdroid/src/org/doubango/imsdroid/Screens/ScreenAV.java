@@ -47,6 +47,10 @@ import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -105,7 +109,8 @@ public class ScreenAV extends Screen {
 	private ImageButton btDtmf_9;
 	private ImageButton btDtmf_Sharp;
 	private ImageButton btDtmf_Star;
-		
+	
+	private ProxSensor proxSensor;
 	private KeyguardLock keyguardLock;
 	private final IScreenService screenService;
 	
@@ -221,6 +226,28 @@ public class ScreenAV extends Screen {
 			}
 			this.keyguardLock.disableKeyguard();
 		}
+		
+		if(this.proxSensor == null){
+			this.proxSensor = new ProxSensor(this);
+		}
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		if(this.proxSensor != null){
+			this.proxSensor.stop();
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if(this.proxSensor != null){
+			this.proxSensor.start();
+		}
 	}
 
 	@Override
@@ -297,6 +324,8 @@ public class ScreenAV extends Screen {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		
 	    if (resultCode == RESULT_OK) {
 	        if (requestCode == ScreenAV.SELECT_CONTENT && this.remoteUri != null) {
 	            Uri selectedContentUri = data.getData();
@@ -853,6 +882,54 @@ public class ScreenAV extends Screen {
 			}
 			
 			return true;
+		}
+	}
+	
+	/* ============================ Proximity sensor =========================*/
+	static class ProxSensor implements SensorEventListener
+	{
+		private SensorManager sensorManager;
+		private Sensor proxSensor;
+		private ScreenAV avScreen;
+		private float maxRange;
+		
+		ProxSensor(ScreenAV avScreen){
+			this.avScreen = avScreen;
+			this.sensorManager = (SensorManager)avScreen.getSystemService(Context.SENSOR_SERVICE);
+		}
+		
+		void start(){
+			if(this.sensorManager != null && this.proxSensor == null){
+				if((this.proxSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)) != null){
+					this.maxRange = this.proxSensor.getMaximumRange();
+					this.sensorManager.registerListener(this, this.proxSensor, SensorManager.SENSOR_DELAY_UI);
+				}
+			}
+		}
+		
+		void stop(){
+			if(this.sensorManager != null && this.proxSensor != null){
+				this.sensorManager.unregisterListener(this);
+				this.proxSensor = null;
+			}
+		}
+
+		@Override
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onSensorChanged(SensorEvent event) {
+			if(event.values != null && event.values.length >0){
+				if(event.values[0] < this.maxRange){
+					
+				}
+				else{
+					
+				}
+			}
 		}
 	}
 }

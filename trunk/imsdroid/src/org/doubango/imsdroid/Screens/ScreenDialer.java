@@ -25,8 +25,10 @@ import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.media.MediaType;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Contacts.People;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -39,8 +41,11 @@ public class ScreenDialer extends Screen {
 	private ImageButton ibVideoCall;
 	private ImageButton ibShare;
 	private ImageButton ibMessage;
+	private ImageButton ibContact;
 	
 	private static final int SELECT_CONTENT = 1;
+	private static final int SELECT_CONTACT = 2;
+	
 	private String fixmeRemoteParty;
 	
 	public ScreenDialer() {
@@ -57,12 +62,14 @@ public class ScreenDialer extends Screen {
         this.ibVideoCall = (ImageButton)this.findViewById(R.id.screen_dialer_imageButton_Video);
         this.ibShare = (ImageButton)this.findViewById(R.id.screen_dialer_imageButton_share);
         this.ibMessage = (ImageButton)this.findViewById(R.id.screen_dialer_imageButton_IM);
+        this.ibContact = (ImageButton)this.findViewById(R.id.screen_dialer_imageButton_contact);
         
         
         this.ibAudioCall.setOnClickListener(this.ibAudioCall_OnClickListener);
         this.ibVideoCall.setOnClickListener(this.ibVideoCall_OnClickListener);
         this.ibShare.setOnClickListener(this.ibShare_OnClickListener);
         this.ibMessage.setOnClickListener(this.ibMessage_OnClickListener);
+        this.ibContact.setOnClickListener(this.ibContact_OnClickListener);
 	}
 	
 	
@@ -102,15 +109,41 @@ public class ScreenDialer extends Screen {
 			ScreenSMSCompose.sendSMS(ScreenDialer.this.etAddress.getText().toString().trim());
 		}
 	};
+	
+	private OnClickListener ibContact_OnClickListener = new OnClickListener(){
+		@Override
+		public void onClick(View v) {
+			startActivityForResult(new Intent(Intent.ACTION_PICK, People.CONTENT_URI), 
+					ScreenDialer.SELECT_CONTACT);
+			
+		}
+	};
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	    if (resultCode == RESULT_OK) {
-	        if (requestCode == ScreenDialer.SELECT_CONTENT && this.fixmeRemoteParty != null) {
-	            Uri selectedContentUri = data.getData();
-	            String selectedContentPath = this.getPath(selectedContentUri);
-	            ScreenFileTransferView.ShareContent(this.fixmeRemoteParty, selectedContentPath, true);
-	        }
-	    }
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (resultCode == RESULT_OK) {
+			switch(requestCode){
+				case ScreenDialer.SELECT_CONTENT:
+					if (this.fixmeRemoteParty != null) {
+			            Uri selectedContentUri = data.getData();
+			            String selectedContentPath = this.getPath(selectedContentUri);
+			            ScreenFileTransferView.ShareContent(this.fixmeRemoteParty, selectedContentPath, true);
+			        }
+					break;
+					
+				case ScreenDialer.SELECT_CONTACT:
+					Uri contactData = data.getData();
+			        Cursor cursor =  managedQuery(contactData, null, null, null, null);
+			        if (cursor.moveToFirst()) {
+			          String phoneId = cursor.getString(cursor.getColumnIndexOrThrow(People.NUMBER));
+			          if(phoneId != null){
+			        	  this.etAddress.setText(phoneId);
+			          }
+			        }
+					break;
+			}
+		}
 	}
 }

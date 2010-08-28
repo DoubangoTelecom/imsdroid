@@ -117,14 +117,19 @@ public class Group implements Comparable<Group> {
 		private PresenceStatus status;
 		private Bitmap avatarImage;
 		
-		public Contact(String uri, String displayName){
+		public Contact(String uri, String displayName, String group){
 			this.uri = uri;
 			this.displayName = displayName;
 			this.status = PresenceStatus.Offline;
+			this.group = group;
+		}
+		
+		public Contact(String uri, String displayName){
+			this(uri, displayName, null);
 		}
 
 		public Contact(){
-			this(null, null);
+			this(null, null, null);
 		}
 		
 		public String getUri(){
