@@ -3,11 +3,11 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
-<EditText android:layout_height="wrap_content" android:id="@+id/screen_dialer_editText_Address" android:layout_width="fill_parent" android:layout_marginTop="10px" android:focusableInTouchMode="true"></EditText>
 
 
 
-<RelativeLayout android:layout_height="wrap_content" android:id="@+id/screen_dialer_relativeLayout_bottom" android:layout_below="@+id/screen_dialer_editText_Address" android:layout_width="fill_parent" android:gravity="center" android:layout_marginTop="10px">
+
+<LinearLayout android:layout_height="wrap_content" android:id="@+id/screen_dialer_linearLayout_top" android:layout_width="fill_parent" android:layout_marginTop="10px" android:weightSum="3" android:padding="5px"><EditText android:layout_height="wrap_content" android:id="@+id/screen_dialer_editText_Address" android:focusableInTouchMode="true" android:layout_width="wrap_content" android:layout_weight="3" android:layout_marginRight="5px"></EditText><ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_dialer_imageButton_contact" android:src="@drawable/avatar_24"></ImageButton></LinearLayout><RelativeLayout android:layout_height="wrap_content" android:id="@+id/screen_dialer_relativeLayout_bottom" android:layout_width="fill_parent" android:gravity="center" android:layout_below="@+id/screen_dialer_linearLayout_top" android:layout_marginTop="20px">
 
 <ImageButton android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/screen_dialer_editText_Address" android:id="@+id/screen_dialer_imageButton_Audio" android:src="@drawable/phone_pick_up_48"></ImageButton>
 <ImageButton android:layout_toRightOf="@+id/screen_dialer_imageButton_Audio" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/screen_dialer_editText_Address" android:id="@+id/screen_dialer_imageButton_Video" android:src="@drawable/user_monitor_48"></ImageButton>
@@ -16,6 +16,8 @@
 
 
 </RelativeLayout>
+
+
 
 
 

@@ -35,8 +35,13 @@ import org.doubango.imsdroid.events.ContactsEventArgs;
 import org.doubango.imsdroid.events.IContactsEventHandler;
 import org.doubango.imsdroid.media.MediaType;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Contacts.People;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -71,6 +76,8 @@ implements IContactsEventHandler
 	
 	private String currentGroup = "rcs";
 	
+	private static final int SELECT_CONTENT = 1;
+	
 	private final static int MENU_NEW_CONTACT = 0;
 	private final static int MENU_NEW_GROUP = 1;
 	private final static int MENU_REFRESH = 2;
@@ -79,12 +86,13 @@ implements IContactsEventHandler
 	
 	private final static int MENU_VOICE_CALL = 10;
 	private final static int MENU_VISIO_CALL = 11;
-	private final static int MENU_SEND_MESSAGE = 12;
+	private final static int MENU_SHARE_CONTENT = 12;
 	private final static int MENU_SEND_SMS = 13;
 	private final static int MENU_SEND_FILE = 14;
 	private final static int MENU_START_CHAT = 15;
 	private final static int MENU_CONFERENCE = 16;
 	
+	private String fixmeRemoteParty;
 	
 	public ScreenContacts() {
 		super(SCREEN_TYPE.CONTACTS_T, ScreenContacts.class.getCanonicalName());
@@ -121,8 +129,41 @@ implements IContactsEventHandler
 		
 		// add event handler
 		this.contactService.addContactsEventHandler(this);
+		
+		
+		// Form an array specifying which columns to return. 
+		/*String[] projection = new String[] {
+		                             //People._ID,
+		                             //People._COUNT,
+		                             People.DISPLAY_NAME,
+		                             People.NUMBER
+		                          };
+
+		// Get the base URI for the People table in the Contacts content provider.
+		Uri contacts =  People.CONTENT_URI;
+
+		// Make the query. 
+		Cursor managedCursor = managedQuery(contacts,
+		                         projection, // Which columns to return 
+		                         null,       // Which rows to return (all rows)
+		                         null,       // Selection arguments (none)
+		                         // Put the results in ascending order by name
+		                         People.DISPLAY_NAME + " ASC");
+		
+		while (managedCursor.moveToNext()) {
+
+			String displayName = managedCursor.getString(managedCursor
+					.getColumnIndex(People.DISPLAY_NAME));
+			Log.d("CONTACTS", displayName);
+			
+			String phone = managedCursor.getString(managedCursor
+					.getColumnIndex(People.NUMBER));
+			Log.d("CONTACTS", phone!=null?phone:"---");
+		}*/
+
 	}
 
+	
 	
 	@Override
 	protected void onResume() {
@@ -136,11 +177,11 @@ implements IContactsEventHandler
 	
 	@Override
 	public boolean createOptionsMenu(Menu menu){
-		menu.add(0, ScreenContacts.MENU_NEW_CONTACT, 0, "New Contact").setIcon(R.drawable.user_add_48);
-		menu.add(0, ScreenContacts.MENU_NEW_GROUP, 0, "New Group").setIcon(R.drawable.group_add_48);
+		//menu.add(0, ScreenContacts.MENU_NEW_CONTACT, 0, "New Contact").setIcon(R.drawable.user_add_48);
+		//menu.add(0, ScreenContacts.MENU_NEW_GROUP, 0, "New Group").setIcon(R.drawable.group_add_48);
 		menu.add(0, ScreenContacts.MENU_REFRESH, 0, "Refresh").setIcon(R.drawable.user_refresh_48);
-		menu.add(1, ScreenContacts.MENU_DELETE_CONTACT, 0, "Delete Contact").setIcon(R.drawable.user_delete_48);
-		menu.add(1, ScreenContacts.MENU_DELETE_GROUP, 0, "Delete Group").setIcon(R.drawable.group_delete_48);
+		//menu.add(1, ScreenContacts.MENU_DELETE_CONTACT, 0, "Delete Contact").setIcon(R.drawable.user_delete_48);
+		//menu.add(1, ScreenContacts.MENU_DELETE_GROUP, 0, "Delete Group").setIcon(R.drawable.group_delete_48);
 		return true;
 	}
 	
@@ -149,13 +190,13 @@ implements IContactsEventHandler
 		
 		switch(item.getItemId()){
 			case ScreenContacts.MENU_NEW_CONTACT:
-				ScreenContactEdit.add();
+				//ScreenContactEdit.add();
 				break;
 			case ScreenContacts.MENU_NEW_GROUP:
 				//Toast.makeText(this, "New Group", Toast.LENGTH_SHORT).show();
 				break;
 			case ScreenContacts.MENU_REFRESH:
-				//Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+				this.contactService.loadContacts();
 				break;
 			case ScreenContacts.MENU_DELETE_CONTACT:
 				//Toast.makeText(this, "Delete Contact", Toast.LENGTH_SHORT).show();
@@ -173,7 +214,7 @@ implements IContactsEventHandler
 		
 		menu.add(0, ScreenContacts.MENU_VOICE_CALL, 0, "Make Voice Call");
 		menu.add(0, ScreenContacts.MENU_VISIO_CALL, 0, "Make Visio Call");
-		//menu.add(0, ScreenContacts.MENU_SEND_MESSAGE, 0, "Send Short Message");
+		menu.add(0, ScreenContacts.MENU_SHARE_CONTENT, 0, "Share Content");
 		menu.add(0, ScreenContacts.MENU_SEND_SMS, 0, "Send SMS");
 		//menu.add(0, ScreenContacts.MENU_SEND_FILE, 0, "Send File");
 		//menu.add(0, ScreenContacts.MENU_START_CHAT, 0, "Start Chat");
@@ -195,9 +236,14 @@ implements IContactsEventHandler
 			case ScreenContacts.MENU_VISIO_CALL:
 				ScreenAV.makeCall(contact.getUri(), MediaType.AudioVideo);
 				return true;
-//			case ScreenContacts.MENU_SEND_MESSAGE:
-//				Toast.makeText(this, "Send Short Message: " + contact.getUri(), Toast.LENGTH_SHORT).show();
-//				return true;
+			case ScreenContacts.MENU_SHARE_CONTENT:
+				Intent intent = new Intent();
+				intent.setType("*/*")
+				.addCategory(Intent.CATEGORY_OPENABLE)
+				.setAction(Intent.ACTION_GET_CONTENT);
+				this.fixmeRemoteParty = contact.getUri();
+				startActivityForResult(Intent.createChooser(intent, "Select content"), ScreenContacts.SELECT_CONTENT);
+				return true;
 			case ScreenContacts.MENU_SEND_SMS:
 				ScreenSMSCompose.sendSMS(contact.getUri());
 				return true;
@@ -235,6 +281,23 @@ implements IContactsEventHandler
 		this.contactService.removeContactsEventHandler(this);
 		
 		super.onDestroy();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (resultCode == RESULT_OK) {
+			switch(requestCode){
+				case ScreenContacts.SELECT_CONTENT:
+					if (this.fixmeRemoteParty != null) {
+			            Uri selectedContentUri = data.getData();
+			            String selectedContentPath = this.getPath(selectedContentUri);
+			            ScreenFileTransferView.ShareContent(this.fixmeRemoteParty, selectedContentPath, true);
+			        }
+					break;
+			}
+		}
 	}
 
 	/* ===================== UI Events ======================== */
@@ -368,6 +431,9 @@ implements IContactsEventHandler
 			}
 			if(contact.getUri() != null){
 				tvUri.setText(contact.getUri());
+			}
+			else{
+				tvUri.setText("");
 			}
 			
 			if(contact.getDisplayName() != null){
