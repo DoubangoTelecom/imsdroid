@@ -3,6 +3,13 @@
 
 <wiki:toc max_depth="2" />
 
+==1.0.271==
+ * Fix issues
+ * Improve video quality and decrease CPU usage for H263-1998
+ * Load contacts from Android native address book
+ * Allow calling native contact from dialer screen
+ * Build native libraries using latest NDK (version r4b)
+
 ==1.0.263==
  * Add support for GSMA Content Sharing (PRD IR. 79)
  * Rebuild FFmpeg with all ARM optimizations
