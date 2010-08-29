@@ -129,50 +129,17 @@ implements IContactsEventHandler
 		
 		// add event handler
 		this.contactService.addContactsEventHandler(this);
-		
-		
-		// Form an array specifying which columns to return. 
-		/*String[] projection = new String[] {
-		                             //People._ID,
-		                             //People._COUNT,
-		                             People.DISPLAY_NAME,
-		                             People.NUMBER
-		                          };
-
-		// Get the base URI for the People table in the Contacts content provider.
-		Uri contacts =  People.CONTENT_URI;
-
-		// Make the query. 
-		Cursor managedCursor = managedQuery(contacts,
-		                         projection, // Which columns to return 
-		                         null,       // Which rows to return (all rows)
-		                         null,       // Selection arguments (none)
-		                         // Put the results in ascending order by name
-		                         People.DISPLAY_NAME + " ASC");
-		
-		while (managedCursor.moveToNext()) {
-
-			String displayName = managedCursor.getString(managedCursor
-					.getColumnIndex(People.DISPLAY_NAME));
-			Log.d("CONTACTS", displayName);
-			
-			String phone = managedCursor.getString(managedCursor
-					.getColumnIndex(People.NUMBER));
-			Log.d("CONTACTS", phone!=null?phone:"---");
-		}*/
-
 	}
 
 	
 	
 	@Override
 	protected void onResume() {
-
+		super.onResume();
+		
 		if(this.contactService.isLoadingContacts()){
 			Toast.makeText(this, "Loading contacts...", Toast.LENGTH_SHORT).show();
-		}
-		
-		super.onResume();
+		}	
 	}
 	
 	@Override
