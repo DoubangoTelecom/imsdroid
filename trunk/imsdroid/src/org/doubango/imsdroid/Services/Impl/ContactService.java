@@ -479,24 +479,29 @@ public class ContactService  extends Service implements IContactService, IRegist
 	private void registerForLocalChanges(){
 		try{
 			if(this.localContactObserver == null && this.localContactObserverLooper == null){
-				Looper.prepare();
-				this.localContactObserverLooper = Looper.myLooper();
-				final Handler handler = new Handler();
-				handler.post(new Runnable() {
+				new Thread(new Runnable() { // avoid locking calling thread
 					@Override
 					public void run() {
-						ContactService.this.localContactObserver = new ContentObserver(handler) {
+						Looper.prepare();
+						ContactService.this.localContactObserverLooper = Looper.myLooper();
+						final Handler handler = new Handler();
+						handler.post(new Runnable() { // Observer thread. Will allow us to get notifications even if the application is on background
 							@Override
-							public void onChange(boolean selfChange) {
-								super.onChange(selfChange);
-								ContactService.this.loadContacts();
+							public void run() {
+								ContactService.this.localContactObserver = new ContentObserver(handler) {
+									@Override
+									public void onChange(boolean selfChange) {
+										super.onChange(selfChange);
+										ContactService.this.loadContacts();
+									}
+								};
+								IMSDroid.getContext().getContentResolver().registerContentObserver(Contacts.CONTENT_URI, true, ContactService.this.localContactObserver);
 							}
-						};
-						IMSDroid.getContext().getContentResolver().registerContentObserver(Contacts.CONTENT_URI, true, ContactService.this.localContactObserver);
+						});
+						Looper.loop();// loop() until quit() is called
+						Log.d(ContactService.TAG, "Observer Looper exited");
 					}
-				});
-				Looper.loop();
-				Log.d(ContactService.TAG, "Observer Looper exited");
+				}).start();
 			}
 		}
 		catch(Exception e){
