@@ -155,7 +155,7 @@ By default, it will encode/send QCIF video for performance reasons. To allow hig
  * CIF=352x288 (Bandwidth value should be equal to *Medium* or higher)
 
 =Content Sharing=
-This feature allow you to share any content. A content could be a picture, video, vcard, ...<br />. You can share a content from these screens: Dialer, Contacts, History and In Call. <br />
+This feature allow you to share any content. A content could be a picture, video, vcard, ...<br /> You can share a content from these screens: Dialer, Contacts, History and In Call. <br />
 At any time you can see the pending transfers by selecting [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/image_gallery_25.png] from the home screen or status bar. <br /> You can select an item from the list to get more information about the transfer. <br />
 
 <table>
