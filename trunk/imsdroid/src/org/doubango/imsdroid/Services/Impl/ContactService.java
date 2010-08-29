@@ -66,6 +66,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
 import android.util.Log;
@@ -87,6 +88,7 @@ public class ContactService  extends Service implements IContactService, IRegist
 	private boolean rls;
 	private boolean loadingContacts;
 	private ContentObserver localContactObserver;
+	private Looper localContactObserverLooper;
 	
 	public ContactService(){
 		super();
@@ -123,10 +125,8 @@ public class ContactService  extends Service implements IContactService, IRegist
 		ServiceManager.getSipService().removeSubscriptionEventHandler(this);
 		ServiceManager.getXcapService().removeXcapEventHandler(this);
 		
-		if(this.localContactObserver != null){
-			IMSDroid.getContext().getContentResolver().unregisterContentObserver(this.localContactObserver);
-			this.localContactObserver = null;
-		}
+		this.unregisterForLocalChanges();
+		
 		return true;
 	}
 
@@ -254,10 +254,7 @@ public class ContactService  extends Service implements IContactService, IRegist
 			case UNREGISTRATION_OK:
 				this.addressBook.clear();
 				ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACTS_LOADED));
-				if(this.localContactObserver != null){
-					IMSDroid.getContext().getContentResolver().unregisterContentObserver(this.localContactObserver);
-					this.localContactObserver = null;
-				}
+				this.unregisterForLocalChanges();
 				break;
 			case REGISTRATION_NOK:
 			case REGISTRATION_INPROGRESS:
@@ -445,20 +442,6 @@ public class ContactService  extends Service implements IContactService, IRegist
 								displayName, "rcs"));
 					}
 				}
-				Log.d(ContactService.TAG, "Contacts loaded(local)");
-
-				// Register for changes
-				if(ContactService.this.localContactObserver == null){
-					ContactService.this.localContactObserver = new ContentObserver(new Handler()) {
-
-						@Override
-						public void onChange(boolean selfChange) {
-							super.onChange(selfChange);
-							ContactService.this.loadContacts();
-						}
-					};
-					IMSDroid.getContext().getContentResolver().registerContentObserver(Contacts.CONTENT_URI, true, ContactService.this.localContactObserver);
-				}
 				
 				if (ContactService.this.presence) {
 					Log.d(ContactService.TAG, "Subscribing to presence(local)");
@@ -474,44 +457,68 @@ public class ContactService  extends Service implements IContactService, IRegist
 						}
 					}
 				}
+				
+				// Register for changes if not already done
+				if(ContactService.this.localContactObserver == null){
+					ContactService.this.registerForLocalChanges();
+				}
 			} catch (Exception e) {
 				Log.e(ContactService.TAG, "Failed to load contacts(local)");
 				e.printStackTrace();
 			}
+			
 			ContactService.this.loadingContacts = false;
 			ContactService.this.onContactsEvent(new ContactsEventArgs(
 					ContactsEventTypes.CONTACTS_LOADED));
+			
+			Log.d(ContactService.TAG, "Contacts loaded(local)");
 		}
-			
-			
-			/*try {
-				Log.d(ContactService.TAG, "Loading contacts (local)");
-				ContactService.this.addressBook = ContactService.this.serializer.read(AddressBook.class, ContactService.this.contacts_file);
-				if(ContactService.this.addressBook.getGroup("rcs") == null){
-					ContactService.this.addressBook.addGroup("rcs", "Social buddies");
-				}
-				Log.d(ContactService.TAG, "Contacts loaded(local)");
-				
-				if(ContactService.this.presence){
-					Log.d(ContactService.TAG, "Subscribing to presence(local)");
-					Group group = ContactService.this.addressBook.getGroup("rcs");
-					if(group != null){
-						for(Group.Contact contact : group.getContacts()){
-							MySubscriptionSession session = ServiceManager.getSipService().createPresenceSession(contact.getUri(), EVENT_PACKAGE_TYPE.PRESENCE);
-							session.subscribe();
-						}
-					}
-				}
-			} catch (Exception e) {
-				Log.e(ContactService.TAG, "Failed to load contacts(local)");
-				e.printStackTrace();
-			}
-			ContactService.this.loadingContacts = false;
-			ContactService.this.onContactsEvent(new ContactsEventArgs(ContactsEventTypes.CONTACTS_LOADED));
-		}*/
 	};
 	
 	
+	private void registerForLocalChanges(){
+		try{
+			if(this.localContactObserver == null && this.localContactObserverLooper == null){
+				Looper.prepare();
+				this.localContactObserverLooper = Looper.myLooper();
+				final Handler handler = new Handler();
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						ContactService.this.localContactObserver = new ContentObserver(handler) {
+							@Override
+							public void onChange(boolean selfChange) {
+								super.onChange(selfChange);
+								ContactService.this.loadContacts();
+							}
+						};
+						IMSDroid.getContext().getContentResolver().registerContentObserver(Contacts.CONTENT_URI, true, ContactService.this.localContactObserver);
+					}
+				});
+				Looper.loop();
+				Log.d(ContactService.TAG, "Observer Looper exited");
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	private void unregisterForLocalChanges(){
+		try{
+			if(this.localContactObserver != null){
+				IMSDroid.getContext().getContentResolver().unregisterContentObserver(this.localContactObserver);
+				this.localContactObserver = null;
+			}
+			if(this.localContactObserverLooper != null){
+				this.localContactObserverLooper.quit();
+				this.localContactObserverLooper = null;
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	
 	/*private boolean compute(){
 		if(this.contacts_file == null){
