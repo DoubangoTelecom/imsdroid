@@ -3,6 +3,10 @@
 
 <wiki:toc max_depth="2" />
 
+==1.0.279==
+ * Fix issue 39, issue 43 and issue 52.
+ * Change H.264 packetization as per RFC 3984
+
 ==1.0.271==
  * Fix issues
  * Improve video quality and decrease CPU usage for H263-1998
