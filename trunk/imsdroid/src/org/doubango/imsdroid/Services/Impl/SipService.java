@@ -700,6 +700,7 @@ implements ISipService, tinyWRAPConstants {
                                             m.setToUri(SMSC);
                                             m.addHeader("Content-Type", ContentType.SMS_3GPP);
                                             m.addHeader("Content-Transfer-Encoding", "binary");
+                                            m.addCaps("+g.3gpp.smsip");
                                             m.send(buffer, len);
                                             m.delete();
                                         }
@@ -725,6 +726,7 @@ implements ISipService, tinyWRAPConstants {
                                             m.setToUri(SMSC);
                                             m.addHeader("Content-Type", ContentType.SMS_3GPP);
                                             m.addHeader("Transfer-Encoding", "binary");
+                                            m.addCaps("+g.3gpp.smsip");
                                             m.send(buffer, len);
                                             m.delete();
                                         }
