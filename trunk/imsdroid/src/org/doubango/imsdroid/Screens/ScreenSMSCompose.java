@@ -144,6 +144,7 @@ public class ScreenSMSCompose  extends Screen {
 			session.setToUri(SMSC);
 			session.addHeader("Content-Type", ContentType.SMS_3GPP);
 			session.addHeader("Content-Transfer-Encoding", "binary");
+			session.addCaps("+g.3gpp.smsip");
 			
 			RPMessage rpMessage;
 			if(ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.HACK_SMS, false)){

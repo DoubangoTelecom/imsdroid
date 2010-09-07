@@ -922,13 +922,21 @@ public class ScreenAV extends Screen {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			if(event.values != null && event.values.length >0){
-				if(event.values[0] < this.maxRange){
-					
+			try{ // Keep it until we get a phone supporting this feature
+				if(this.avScreen == null || this.avScreen.keyguardLock == null){
+					return;
 				}
-				else{
-					
+				if(event.values != null && event.values.length >0){
+					if(event.values[0] < this.maxRange){
+						this.avScreen.keyguardLock.reenableKeyguard();
+					}
+					else{
+						this.avScreen.keyguardLock.disableKeyguard();
+					}
 				}
+			}
+			catch(Exception e){
+				e.printStackTrace();
 			}
 		}
 	}
