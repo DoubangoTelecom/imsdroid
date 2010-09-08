@@ -3,6 +3,10 @@
 
 <wiki:toc max_depth="4" />
 
+=SIP Account=
+If you are a newbie and don't have a SIP account I recommend using sip2sip.info.<br />
+To create an account: [https://mdns.sipthor.net/register_sip_account.phtml].<br />
+
 =SIP Configuration=
 
 Before starting to use the client you should configure your identity and the network settings. This short guide explain how to do this. <br />
