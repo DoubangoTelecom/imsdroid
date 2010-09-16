@@ -3,6 +3,13 @@
 
 <wiki:toc max_depth="2" />
 
+==1.0.285==
+ * Add support for Front Facing Camera for HTC EVO 4G, Samsung Epic 4G and Samsung Galaxy S.
+ * Suppress H264 delay (issue 60)
+ * Force IDR frames before PPS and SPS (issue 48 and issue 58)
+ * Fix issue 59
+ * Decrease Video CPU usage for both Theora and H264
+
 ==1.0.279==
  * Fix issue 43 and issue 52.
  * Change H.264 packetization as per RFC 3984
