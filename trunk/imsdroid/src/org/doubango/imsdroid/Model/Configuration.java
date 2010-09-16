@@ -114,9 +114,9 @@ public class Configuration {
 			tdav_codec_id_t.tdav_codec_id_speex_nb.swigValue() |
 			
 			tdav_codec_id_t.tdav_codec_id_theora.swigValue() |
-			//tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue() |
-			tdav_codec_id_t.tdav_codec_id_h263.swigValue() |
-			tdav_codec_id_t.tdav_codec_id_h263p.swigValue();
+			tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_h263p.swigValue() |
+			tdav_codec_id_t.tdav_codec_id_h263.swigValue();
 	
 	public static enum CONFIGURATION_ENTRY {
 		/* === IDENTITY === */

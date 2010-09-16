@@ -21,6 +21,7 @@
 
 package org.doubango.imsdroid.media;
 
+import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -234,7 +235,12 @@ public class VideoProducer {
 
 		public void surfaceCreated(SurfaceHolder holder) {
 			try {
-				this.camera = Camera.open();
+				if(FFC.isAvailable()){
+					this.camera = FFC.getCamera();
+				}
+				if(this.camera == null){
+					this.camera = Camera.open();
+				}
 				
 				Camera.Parameters parameters = camera.getParameters();
 				
@@ -245,6 +251,7 @@ public class VideoProducer {
 				 */
 				parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 				parameters.setPreviewFrameRate(this.fps);
+				parameters.set("camera-id", 2);
 				this.camera.setParameters(parameters);
 				
 				try{
@@ -253,7 +260,7 @@ public class VideoProducer {
 				}
 				catch(Exception e){
 					// FFMpeg converter will resize the video stream
-					e.printStackTrace();
+					Log.d(VideoProducer.TAG, e.toString());
 				}
 
 				// layout(0, 0, this.width, this.height);
@@ -316,6 +323,59 @@ public class VideoProducer {
 		@Override
 		public int stop() {
 			return this.producer.stop();
+		}
+	}
+	
+	/* ==================================================*/
+	static class FFC{
+		private final String className;
+		private final String methodName;
+		
+		private static int ffc_index = -1;
+		static FFC FFC_VALUES[] = {
+			new FFC("android.hardware.HtcFrontFacingCamera", "getCamera"),
+			// Sprint: HTC EVO 4G and Samsung Epic 4G
+			// DO not forget to change the manifest if you are using OS 1.6 and later
+			new FFC("com.sprint.hardware.twinCamDevice.FrontFacingCamera", "getFrontFacingCamera"),
+			// To be continued...
+			// Default: Used for test reflection
+			//--new FFC("android.hardware.Camera", "open"),
+		};
+		
+		static{
+			int index = 0;
+			for(FFC ffc: FFC.FFC_VALUES){
+				try{
+					Class.forName(ffc.className).getDeclaredMethod(ffc.methodName);
+					FFC.ffc_index = index;
+					break;
+				}
+				catch(Exception e){
+					Log.d(VideoProducer.TAG, e.toString());
+				}
+				
+				++index;
+			}
+		}
+		
+		private FFC(String className, String methodName){
+			this.className = className;
+			this.methodName = methodName;
+		}
+		
+		static boolean isAvailable(){
+			return (FFC.ffc_index != -1);
+		}
+		
+		static Camera getCamera(){
+			try{
+				Method method = Class.forName(FFC.FFC_VALUES[FFC.ffc_index].className).getDeclaredMethod(FFC.FFC_VALUES[FFC.ffc_index].methodName);
+				return (Camera)method.invoke(null);
+			}
+			catch(Exception e){
+				Log.d(VideoProducer.TAG, e.toString());
+			}
+			return null;
 		}
 	}
 }
