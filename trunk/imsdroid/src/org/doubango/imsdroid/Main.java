@@ -43,6 +43,8 @@
  * Android FFMPeg: http://oo-androidnews.blogspot.com/2010/02/ffmpeg-and-androidmk.html
  * 					http://groups.google.com/group/android-ndk/browse_thread/thread/f25d5c7f519bf0c5
  * 
+ * front camera (Sprint): https://docs.google.com/View?id=dhtsnvs6_57d2hpqtgr
+ * 
  */
 package org.doubango.imsdroid;
 
