@@ -251,7 +251,7 @@ public class VideoProducer {
 				 */
 				parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 				parameters.setPreviewFrameRate(this.fps);
-				parameters.set("camera-id", 2);
+				parameters.set("camera-id", 2); // Samsung Galaxy S, Epic 4G, ...
 				this.camera.setParameters(parameters);
 				
 				try{
@@ -337,6 +337,8 @@ public class VideoProducer {
 			// Sprint: HTC EVO 4G and Samsung Epic 4G
 			// DO not forget to change the manifest if you are using OS 1.6 and later
 			new FFC("com.sprint.hardware.twinCamDevice.FrontFacingCamera", "getFrontFacingCamera"),
+			// Huawei U8230
+            new FFC("android.hardware.CameraSlave", "open"),
 			// To be continued...
 			// Default: Used for test reflection
 			//--new FFC("android.hardware.Camera", "open"),
