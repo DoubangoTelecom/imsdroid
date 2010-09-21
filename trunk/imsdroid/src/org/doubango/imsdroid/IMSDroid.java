@@ -21,16 +21,21 @@
 
 package org.doubango.imsdroid;
 
+import org.doubango.imsdroid.utils.StringUtils;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class IMSDroid extends Application {
 
     private static IMSDroid instance;
     private static PackageManager packageManager;
     private static String packageName;
+    private static String deviceURN;
 
     public IMSDroid() {
     	IMSDroid.instance = this;
@@ -68,5 +73,25 @@ public class IMSDroid extends Application {
 			}
     	}
     	return "0.0";
+    }
+    
+    public static String getDeviceURN(){
+    	if(StringUtils.isNullOrEmpty(IMSDroid.deviceURN)){
+	    	try{
+		    	TelephonyManager telephonyMgr = (TelephonyManager) IMSDroid.getContext().getSystemService(Context.TELEPHONY_SERVICE);
+		        String msisdn = telephonyMgr.getLine1Number();
+		        if(msisdn == null){
+		        	IMSDroid.deviceURN = String.format("urn:imei:%s", telephonyMgr.getDeviceId());
+		        }
+		        else{
+		        	IMSDroid.deviceURN = String.format("urn:tel:%s", msisdn);
+		        }
+	    	}
+	    	catch(Exception e){
+	    		Log.d("org.doubango.imsdroid", e.toString());
+	    		IMSDroid.deviceURN = "urn:uuid:3ca50bcb-7a67-44f1-afd0-994a55f930f4";
+	    	}
+    	}
+    	return IMSDroid.deviceURN;
     }
 }

@@ -32,8 +32,6 @@ import oma.xml.prs.pidf.oma_pres.NetworkAvailability;
 
 import org.doubango.imsdroid.utils.RFC3339Date;
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;

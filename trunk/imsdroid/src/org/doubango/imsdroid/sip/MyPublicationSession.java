@@ -20,6 +20,7 @@
 */
 package org.doubango.imsdroid.sip;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.utils.ContentType;
 import org.doubango.tinyWRAP.PublicationSession;
 import org.doubango.tinyWRAP.SipSession;
@@ -56,6 +57,7 @@ public class MyPublicationSession  extends MySipSession{
 			        "<op:active />" +
 			      "</op:network>" +
 			    "</op:network-availability>" +
+			    "<pdm:deviceID>%s</pdm:deviceID>" +
 			  "</pdm:device>" +
 			"</presence>";
 	
@@ -108,7 +110,7 @@ public class MyPublicationSession  extends MySipSession{
 		}
 		
 		String payload = String.format(MyPublicationSession.PUBLISH_PAYLOAD, 
-				this.getFromUri(), basic, activity, note, basic);
+				this.getFromUri(), basic, activity, note, basic, IMSDroid.getDeviceURN());
 		return this.session.Publish(payload.getBytes());
 	}
 	
