@@ -173,5 +173,6 @@ At any time you can see the pending transfers by selecting [http://imsdroid.goog
 </tr>
 </table>
 
+
 =Calling iPhone/iPod Touch devices=
 If you are an iOS developer there is the aplha version of idoubs (http://code.google.com/p/idoubs/) which allows face2face chat with iPhone/iPod Touch devices. <br/>
