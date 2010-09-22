@@ -321,7 +321,8 @@ implements ISipService, tinyWRAPConstants {
 			Log.e(this.getClass().getCanonicalName(), "Failed to set the local IP");
 			return false;
 		}
-
+		Log.i(SipService.TAG, String.format("Local IP=%s", this.preferences.localIP));
+		
 		// Whether to use DNS NAPTR+SRV for the Proxy-CSCF discovery (even if the DNS requests are sent only when the stack starts,
 		// should be done after setProxyCSCF())
 		String discoverType = this.configurationService.getString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_DISCOVERY, Configuration.PCSCF_DISCOVERY_NONE);

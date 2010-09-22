@@ -133,6 +133,7 @@ public class NetworkService  extends Service implements INetworkService {
 		 
 		 if(networkInfo == null){
 			 Toast.makeText(IMSDroid.getContext(), "Failed to get Network information", Toast.LENGTH_LONG).show();
+			 Log.d(NetworkService.TAG, "Failed to get Network information");
 			 return false;
 		 }
 		 
@@ -157,6 +158,7 @@ public class NetworkService  extends Service implements INetworkService {
 			}
 			else{
 				Toast.makeText(IMSDroid.getContext(), "WiFi not enabled", Toast.LENGTH_LONG).show();
+				Log.d(NetworkService.TAG, "WiFi not enabled");
 			}
 		}
 		else if(use3G && (netType == ConnectivityManager.TYPE_MOBILE)){
@@ -171,6 +173,7 @@ public class NetworkService  extends Service implements INetworkService {
 
 		if(!connected){
 			Toast.makeText(IMSDroid.getContext(), "No active network", Toast.LENGTH_LONG).show();
+			Log.d(NetworkService.TAG, "No active network");
 			return false;
 		}
 		
