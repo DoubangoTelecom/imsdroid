@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import org.doubango.tinyWRAP.ProxyVideoProducer;
@@ -59,7 +60,7 @@ public class VideoProducer {
 	private ByteBuffer frame;
 	private Preview preview;
 	private boolean running;
-	boolean skipFrames = false;
+	private boolean skipFrames = false;
 	
 	public VideoProducer(){
 		this.videoProducer = new MyProxyVideoProducer(this);
@@ -84,14 +85,37 @@ public class VideoProducer {
 		}
 	}
 	
+	private void addCallbackBuffer(Camera camera, byte[] buffer) {
+		try {
+			APILevel8.addCallbackBufferMethod.invoke(camera, buffer);
+		} catch (Exception e) {
+			Log.e(VideoProducer.TAG, e.toString());
+		}
+	}
+	
+	private void setPreviewCallbackWithBuffer(Camera camera, PreviewCallback callback) {
+		try {
+			APILevel8.setPreviewCallbackWithBufferMethod.invoke(camera, callback);
+		} catch (Exception e) {
+			Log.e(VideoProducer.TAG, e.toString());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<Camera.Size> getSupportedPreviewSizes(Camera.Parameters params){
+		List<Camera.Size> list = null;
+		try {
+			list = (List<Camera.Size>)APILevel5.getSupportedPreviewSizesMethod.invoke(params);
+		} catch (Exception e) {
+			Log.e(VideoProducer.TAG, e.toString());
+		}
+		return list;
+	}
+	
 	// Must be done in the UI thread
 	public final View startPreview(){
 		if(this.preview == null){
-			this.preview = new Preview(
-					this.context,
-					this.previewCallback,
-					this.width,
-					this.height, this.fps);
+			this.preview = new Preview(this);
 		}
 		return this.preview;
 	}
@@ -186,6 +210,10 @@ public class VideoProducer {
 	
 	private PreviewCallback previewCallback = new PreviewCallback() {
   	  public void onPreviewFrame(byte[] _data, Camera _camera) {
+	  		if(APILevel8.isAvailable()){
+				VideoProducer.this.addCallbackBuffer(_camera, _data);
+			}
+	  		
 			if (VideoProducer.this.videoProducer != null) {	
 				if(VideoProducer.this.skipFrames){
 					//Log.d(VideoProducer.TAG, "Frame skipped");
@@ -214,19 +242,12 @@ public class VideoProducer {
 		private SurfaceHolder holder;
 		private Camera camera;
 		
-		private final PreviewCallback callback;
-		private final int width;
-		private final int height;
-		private final int fps;
+		private final VideoProducer producer;
 
-		Preview(Context context, PreviewCallback callback, int width, int height, int fps) {
-			super(context);
-
-			this.callback = callback;
-			this.width = width;
-			this.height = height;
-			this.fps = fps;
+		Preview(VideoProducer _producer) {
+			super(_producer.context);
 			
+			this.producer = _producer;
 			this.holder = getHolder();
 			this.holder.addCallback(this);
 			
@@ -250,12 +271,12 @@ public class VideoProducer {
 				 * This is the default format for camera preview images, when not otherwise set with setPreviewFormat(int). 
 				 */
 				parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
-				parameters.setPreviewFrameRate(this.fps);
+				parameters.setPreviewFrameRate(this.producer.fps);
 				parameters.set("camera-id", 2); // Samsung Galaxy S, Epic 4G, ...
 				this.camera.setParameters(parameters);
 				
 				try{
-					parameters.setPictureSize(this.width, this.height);
+					parameters.setPictureSize(this.producer.width, this.producer.height);
 					this.camera.setParameters(parameters);
 				}
 				catch(Exception e){
@@ -263,10 +284,15 @@ public class VideoProducer {
 					Log.d(VideoProducer.TAG, e.toString());
 				}
 
-				// layout(0, 0, this.width, this.height);
-
 				this.camera.setPreviewDisplay(holder);
-				this.camera.setPreviewCallback(this.callback);
+				
+				if(APILevel8.isAvailable()){
+					this.producer.setPreviewCallbackWithBuffer(this.camera, this.producer.previewCallback);
+				}
+				else{
+					this.camera.setPreviewCallback(this.producer.previewCallback);
+				}
+				
 			} catch (Exception exception) {
 				if(this.camera != null){
 					this.camera.release();
@@ -278,8 +304,14 @@ public class VideoProducer {
 
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			if(this.camera != null){
+				// stop preview
 				this.camera.stopPreview();
-				this.camera.setPreviewCallback(null);
+				if(APILevel8.isAvailable()){
+					this.producer.setPreviewCallbackWithBuffer(this.camera, null);
+				}
+				else{
+					this.camera.setPreviewCallback(null);
+				}
 				this.camera.release();
 				this.camera = null;
 			}
@@ -287,9 +319,25 @@ public class VideoProducer {
 
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			if(this.camera != null){
-				Camera.Parameters parameters = camera.getParameters();
-				parameters.setPreviewSize(this.width, this.height);
+				Camera.Parameters parameters = this.camera.getParameters();
+				parameters.setPreviewSize(this.producer.width, this.producer.height);
 				this.camera.setParameters(parameters);
+				
+				/*if(APILevel5.isAvailable()){
+					List<Camera.Size> list = this.producer.getSupportedPreviewSizes(parameters);
+					if(list != null){
+						for(Camera.Size size : list){
+							Log.d(VideoProducer.TAG, "size="+size.toString());
+						}
+					}
+				}*/
+				
+				if(APILevel8.isAvailable()){	
+					for(int i=0; i<4; i++){
+						this.producer.addCallbackBuffer(this.camera, new byte[this.producer.frame.capacity()]);
+					}
+				}
+				
 				this.camera.startPreview();
 			}
 		}
@@ -323,6 +371,56 @@ public class VideoProducer {
 		@Override
 		public int stop() {
 			return this.producer.stop();
+		}
+	}
+	
+	
+	
+	
+	/* ==================================================*/
+	static class APILevel8{
+		static Method addCallbackBufferMethod = null;
+		static Method setPreviewCallbackWithBufferMethod = null;
+		static boolean isOK = false;
+		
+		static {
+			try {
+				APILevel8.addCallbackBufferMethod = Class.forName(
+						"android.hardware.Camera").getMethod("addCallbackBuffer",
+						byte[].class);
+				APILevel8.setPreviewCallbackWithBufferMethod = Class.forName(
+						"android.hardware.Camera").getMethod(
+						"setPreviewCallbackWithBuffer", PreviewCallback.class);
+				
+				APILevel8.isOK = true;
+			} catch (Exception e) {
+				Log.d(VideoProducer.TAG, e.toString());
+			}
+		}
+		
+		static boolean isAvailable(){
+			return APILevel8.isOK;
+		}
+	}
+	
+	/* ==================================================*/
+	static class APILevel5{
+		static boolean hasAPILeve5Functions = false;
+		static Method getSupportedPreviewSizesMethod = null;
+		static boolean isOK = false;
+		
+		static {
+			try {
+				APILevel5.getSupportedPreviewSizesMethod = Camera.Parameters.class.getDeclaredMethod("getSupportedPreviewSizes");
+				
+				APILevel5.isOK = true;
+			} catch (Exception e) {
+				Log.d(VideoProducer.TAG, e.toString());
+			}
+		}
+		
+		static boolean isAvailable(){
+			return APILevel5.isOK;
 		}
 	}
 	
