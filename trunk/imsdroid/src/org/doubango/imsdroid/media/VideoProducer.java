@@ -298,7 +298,7 @@ public class VideoProducer {
 					this.camera.release();
 					this.camera = null;
 				}
-				exception.printStackTrace();
+				Log.e(VideoProducer.TAG, exception.toString());
 			}
 		}
 
@@ -319,9 +319,14 @@ public class VideoProducer {
 
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			if(this.camera != null){
+				try{
 				Camera.Parameters parameters = this.camera.getParameters();
 				parameters.setPreviewSize(this.producer.width, this.producer.height);
 				this.camera.setParameters(parameters);
+				}
+				catch(Exception e){
+					Log.e(VideoProducer.TAG, e.toString());
+				}
 				
 				/*if(APILevel5.isAvailable()){
 					List<Camera.Size> list = this.producer.getSupportedPreviewSizes(parameters);
