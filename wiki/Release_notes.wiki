@@ -4,7 +4,7 @@
 <wiki:toc max_depth="2" />
 
 ==1.0.292==
- * Fix issue 55, issue 63, issue 64 and issue 65
+ * Fix issue 55, issue 63, issue 64, issue 61 and issue 65
  * Improve video performance by using API Level 8 functions
 
 ==1.0.285==
