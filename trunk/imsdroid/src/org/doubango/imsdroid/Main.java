@@ -72,13 +72,12 @@ import org.doubango.imsdroid.events.RegistrationEventTypes;
 import org.doubango.imsdroid.sip.PresenceStatus;
 
 import android.app.ActivityGroup;
-import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;

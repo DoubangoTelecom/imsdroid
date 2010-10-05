@@ -50,6 +50,9 @@ public class NetworkService  extends Service implements INetworkService {
 	private WifiLock wifiLock;
 	private boolean acquired;
 	
+	// Will be added in froyo SDK
+	private static int ConnectivityManager_TYPE_WIMAX = 6;
+	
 	public static enum DNS_TYPE {
 		DNS_1, DNS_2, DNS_3, DNS_4
 	}
@@ -140,6 +143,8 @@ public class NetworkService  extends Service implements INetworkService {
 		 int netType = networkInfo.getType();
 		 int netSubType = networkInfo.getSubtype();
 		 
+		 Log.d(NetworkService.TAG, String.format("netType=%d and netSubType=%d", netType, netSubType));
+		 
 		 boolean useWifi = ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.WIFI, Configuration.DEFAULT_WIFI);
 		 boolean use3G = ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.THREE_3G, Configuration.DEFAULT_3G);
 		
@@ -161,12 +166,13 @@ public class NetworkService  extends Service implements INetworkService {
 				Log.d(NetworkService.TAG, "WiFi not enabled");
 			}
 		}
-		else if(use3G && (netType == ConnectivityManager.TYPE_MOBILE)){
-			if((netSubType >= TelephonyManager.NETWORK_TYPE_UMTS) ||
+		else if(use3G && (netType == ConnectivityManager_TYPE_WIMAX)){
+			if(		(netSubType == TelephonyManager.NETWORK_TYPE_UMTS) ||
+					(netSubType == TelephonyManager.NETWORK_TYPE_UMTS) ||
 				    (netSubType == TelephonyManager.NETWORK_TYPE_GPRS) ||
 				    (netSubType == TelephonyManager.NETWORK_TYPE_EDGE)
 				    ){
-				Toast.makeText(IMSDroid.getContext(), "Using 3G/2.5G network", Toast.LENGTH_SHORT).show();
+				Toast.makeText(IMSDroid.getContext(), "Using 3G/4G/2.5G network", Toast.LENGTH_SHORT).show();
 				connected = true;
 			}
 		}

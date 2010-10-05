@@ -53,6 +53,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -763,7 +764,9 @@ public class ScreenAV extends Screen {
 					}
 					break;
 				case EARLY_MEDIA:
-					this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+					if (Integer.parseInt(Build.VERSION.SDK) < 5){
+						this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+					}
 					this.audioManager.setSpeakerphoneOn(false);
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
@@ -781,7 +784,9 @@ public class ScreenAV extends Screen {
 					ServiceManager.getSoundService().stopRingTone();
 					ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "In Call");
 					
-					this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+					if (Integer.parseInt(Build.VERSION.SDK) < 5){
+						this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+					}
 					this.audioManager.setSpeakerphoneOn(false);
 					
 					avSession.setState(CallState.INCALL);
