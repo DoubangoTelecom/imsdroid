@@ -3,7 +3,7 @@
 
 <wiki:toc max_depth="2" />
 
-==1.0.296==
+==1.0.298==
  * Fix issue 53 and issue 70
 
 ==1.0.292==
