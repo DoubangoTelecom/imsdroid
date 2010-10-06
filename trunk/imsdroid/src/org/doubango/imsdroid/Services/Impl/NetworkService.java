@@ -166,12 +166,12 @@ public class NetworkService  extends Service implements INetworkService {
 				Log.d(NetworkService.TAG, "WiFi not enabled");
 			}
 		}
-		else if(use3G && (netType == ConnectivityManager.TYPE_MOBILE || netSubType == ConnectivityManager_TYPE_WIMAX)){
+		else if(use3G && (netType == ConnectivityManager.TYPE_MOBILE || netType == ConnectivityManager_TYPE_WIMAX)){
 			if(		(netSubType >= TelephonyManager.NETWORK_TYPE_UMTS) || // HACK
 				    (netSubType == TelephonyManager.NETWORK_TYPE_GPRS) ||
 				    (netSubType == TelephonyManager.NETWORK_TYPE_EDGE)
 				    ){
-				Toast.makeText(IMSDroid.getContext(), "Using 3G/4G/2.5G network", Toast.LENGTH_SHORT).show();
+				Toast.makeText(IMSDroid.getContext(), "Using 2.5G (or later) network", Toast.LENGTH_SHORT).show();
 				connected = true;
 			}
 		}
