@@ -166,9 +166,8 @@ public class NetworkService  extends Service implements INetworkService {
 				Log.d(NetworkService.TAG, "WiFi not enabled");
 			}
 		}
-		else if(use3G && (netType == ConnectivityManager_TYPE_WIMAX)){
-			if(		(netSubType == TelephonyManager.NETWORK_TYPE_UMTS) ||
-					(netSubType == TelephonyManager.NETWORK_TYPE_UMTS) ||
+		else if(use3G && (netType == ConnectivityManager.TYPE_MOBILE || netSubType == ConnectivityManager_TYPE_WIMAX)){
+			if(		(netSubType >= TelephonyManager.NETWORK_TYPE_UMTS) || // HACK
 				    (netSubType == TelephonyManager.NETWORK_TYPE_GPRS) ||
 				    (netSubType == TelephonyManager.NETWORK_TYPE_EDGE)
 				    ){
