@@ -101,7 +101,7 @@ public class VideoProducer {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private List<Camera.Size> getSupportedPreviewSizes(Camera.Parameters params){
 		List<Camera.Size> list = null;
 		try {
@@ -263,7 +263,10 @@ public class VideoProducer {
 					this.camera = Camera.open();
 				}
 				
-				Camera.Parameters parameters = camera.getParameters();
+				// Switch to Front Facing Camera
+				FFC.switchToFFC(this.camera);
+				
+				Camera.Parameters parameters = this.camera.getParameters();
 				
 				/*
 				 * http://developer.android.com/reference/android/graphics/ImageFormat.html#NV21
@@ -272,7 +275,6 @@ public class VideoProducer {
 				 */
 				parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 				parameters.setPreviewFrameRate(this.producer.fps);
-				parameters.set("camera-id", 2); // Samsung Galaxy S, Epic 4G, ...
 				this.camera.setParameters(parameters);
 				
 				try{
@@ -320,9 +322,9 @@ public class VideoProducer {
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			if(this.camera != null){
 				try{
-				Camera.Parameters parameters = this.camera.getParameters();
-				parameters.setPreviewSize(this.producer.width, this.producer.height);
-				this.camera.setParameters(parameters);
+					Camera.Parameters parameters = this.camera.getParameters();
+					parameters.setPreviewSize(this.producer.width, this.producer.height);
+					this.camera.setParameters(parameters);
 				}
 				catch(Exception e){
 					Log.e(VideoProducer.TAG, e.toString());
@@ -338,7 +340,7 @@ public class VideoProducer {
 				}*/
 				
 				if(APILevel8.isAvailable()){	
-					for(int i=0; i<4; i++){
+					for(int i=0; i<3; i++){
 						this.producer.addCallbackBuffer(this.camera, new byte[this.producer.frame.capacity()]);
 					}
 				}
@@ -434,6 +436,7 @@ public class VideoProducer {
 		private final String className;
 		private final String methodName;
 		
+		private static Method DualCameraSwitchMethod;
 		private static int ffc_index = -1;
 		static FFC FFC_VALUES[] = {
 			new FFC("android.hardware.HtcFrontFacingCamera", "getCamera"),
@@ -448,6 +451,10 @@ public class VideoProducer {
 		};
 		
 		static{
+			
+			//
+			//
+			//
 			int index = 0;
 			for(FFC ffc: FFC.FFC_VALUES){
 				try{
@@ -456,10 +463,20 @@ public class VideoProducer {
 					break;
 				}
 				catch(Exception e){
-					Log.d(VideoProducer.TAG, e.toString());
+					Log.e(VideoProducer.TAG, e.toString());
 				}
 				
 				++index;
+			}
+			
+			//
+			//
+			//
+			try{
+				FFC.DualCameraSwitchMethod = Class.forName("android.hardware.Camera").getMethod("DualCameraSwitch",int.class);
+			}
+			catch(Exception e){
+				Log.e(VideoProducer.TAG, e.toString());
 			}
 		}
 		
@@ -478,9 +495,26 @@ public class VideoProducer {
 				return (Camera)method.invoke(null);
 			}
 			catch(Exception e){
-				Log.d(VideoProducer.TAG, e.toString());
+				Log.e(VideoProducer.TAG, e.toString());
 			}
 			return null;
+		}
+		
+		static void switchToFFC(Camera camera){
+			try{
+				if(FFC.DualCameraSwitchMethod == null){ // Samsung Galaxy S, Epic 4G, ...
+					Camera.Parameters parameters = camera.getParameters();
+					parameters.set("camera-id", 2);
+					camera.setParameters(parameters);
+				}
+				else{ // Dell Streak, ...
+					FFC.DualCameraSwitchMethod.invoke(camera, (int)1);
+				}
+			}
+			catch(Exception e){
+				Log.e(VideoProducer.TAG, e.toString());
+			}
+		
 		}
 	}
 }
