@@ -45,6 +45,25 @@ public class TestXcapDirectory {
 				    "<folder auid=\"org.openmobilealliance.access-rules\"/>" +
 				    "<folder auid=\"org.openmobilealliance.groups\"/>" +
 				"</xcap-directory>";
+			
+	private static final String TEST3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<xcap-directory xmlns=\"urn:oma:xml:xdm:xcap-directory\">"
+			+ "<folder auid=\"resource-lists\">"
+			+ "<entry etag=\"76695\" uri=\"http://10.173.159.53:7077/xcap-ap-service/resource-lists/users/test@cims.aupm.ete.ericsson.se/index\"/>"
+			+ "</folder>"
+			+ "<folder auid=\"org.openmobilealliance.pres-content\">"
+			+ "<entry etag=\"666\" uri=\"http://10.173.159.53:7077/xcap-ap-service/org.openmobilealliance.pres-content/users/sip:test@test/oma_status-icon/preseImage\"/>"
+			+ "</folder>"
+			+ "<folder auid=\"rls-services\">"
+			+ "<entry etag=\"33742\" uri=\"http://10.173.159.53:7077/xcap-ap-service/rls-services/users/sip:test@test/index\"/>"
+			+ "</folder>"
+			+ "<folder auid=\"org.openmobilealliance.pres-rules\">"
+			+ "<entry etag=\"94255\" uri=\"http://10.173.159.53:7077/xcap-ap-service/org.openmobilealliance.pres-rules/users/test@test/pres-rules\"/>"
+			+ "</folder>"
+			+ "<folder auid=\"simservs.ngn.etsi.org\">"
+			+ "<error-code>404 Not Found</error-code>"
+			+ "</folder>"
+			+ "</xcap-directory>";
 
 		public static boolean run() {
 
@@ -69,6 +88,20 @@ public class TestXcapDirectory {
 				Log.d(TestXcapDirectory.TAG, "NNNN-test2: success");
 			} catch (Exception e) {
 				Log.e(TestXcapDirectory.TAG, "YYYY-test2: failed");
+				e.printStackTrace();
+				success = false;
+			}
+			
+			Log.d(TestXcapDirectory.TAG, "running test3...");
+			try {
+				@SuppressWarnings("unused")
+				XcapDirectory xcap_dir = serializer.read(XcapDirectory.class, TestXcapDirectory.TEST3);
+				for(XcapDirectory.Folder folder : xcap_dir.folder){
+					Log.d(TestXcapDirectory.TAG, "auid=" +folder.auid);
+				}
+				Log.d(TestXcapDirectory.TAG, "NNNN-test3: success");
+			} catch (Exception e) {
+				Log.e(TestXcapDirectory.TAG, "YYYY-test3: failed");
 				e.printStackTrace();
 				success = false;
 			}
