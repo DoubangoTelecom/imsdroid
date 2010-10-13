@@ -58,6 +58,7 @@ public class Configuration {
 	public static final String DEFAULT_REALM = "sip:open-ims.test";
 	public static final boolean DEFAULT_SIGCOMP = false;
 	public static final String DEFAULT_TRANSPORT = "udp";
+	public static final String DEFAULT_IP_VERSION = "ipv4";
 	public static final boolean DEFAULT_WIFI = true;
 	public static final boolean DEFAULT_3G = false;
 	
