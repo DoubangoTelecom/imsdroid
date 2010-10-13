@@ -4,7 +4,7 @@
 <wiki:toc max_depth="2" />
 
 ==1.0.302==
- * Fix issue 75(Add support for IPv6)
+ * Fix issue 75 (Add support for IPv6)
  * Add support for Front Facing Camera on Dell Streak
 
 ==1.0.298==
