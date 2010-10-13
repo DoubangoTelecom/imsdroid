@@ -297,9 +297,9 @@ implements ISipService, tinyWRAPConstants {
 		this.preferences.transport = this.configurationService.getString(
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.TRANSPORT,
 				Configuration.DEFAULT_TRANSPORT);
-		this.preferences.ipversion = "ipv4";/*this.configurationService.getString(
+		this.preferences.ipversion = this.configurationService.getString(
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
-				Configuration.DEFAULT_IP_VERSION);*/
+				Configuration.DEFAULT_IP_VERSION);
 
 		Log.i(this.getClass().getCanonicalName(), String.format(
 				"pcscf-host=%s, pcscf-port=%d, transport=%s, ipversion=%s",

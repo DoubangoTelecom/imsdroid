@@ -320,7 +320,7 @@ public class VideoProducer {
 		}
 
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-			if(this.camera != null){
+			if(this.camera != null && this.producer != null && this.producer.frame != null){
 				try{
 					Camera.Parameters parameters = this.camera.getParameters();
 					parameters.setPreviewSize(this.producer.width, this.producer.height);

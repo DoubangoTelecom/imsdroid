@@ -20,9 +20,15 @@
 */
 package org.doubango.imsdroid.Services.Impl;
 
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 import org.doubango.imsdroid.IMSDroid;
@@ -106,13 +112,19 @@ public class NetworkService  extends Service implements INetworkService {
 	}
 	@Override
 	public String getLocalIP(boolean ipv6) {
+		//
+		// From Interfaces
+		//
 	    try {
 	        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
 	            NetworkInterface intf = en.nextElement();
 	            for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 	                InetAddress inetAddress = enumIpAddr.nextElement();
+	                Log.d(NetworkService.TAG, inetAddress.getHostAddress().toString());
 	                if (!inetAddress.isLoopbackAddress()) {
-	                   return inetAddress.getHostAddress().toString();
+	                	if(((inetAddress instanceof Inet4Address) && !ipv6) || ((inetAddress instanceof Inet6Address) && ipv6)){
+	                		return inetAddress.getHostAddress().toString();
+	                	}
 	                }
 	            }
 	        }
@@ -120,6 +132,19 @@ public class NetworkService  extends Service implements INetworkService {
 	        Log.e(NetworkService.TAG, ex.toString());
 	    }
 	    
+	    //
+	    // Hack
+	    //
+	    try {    	
+			java.net.Socket socket = new java.net.Socket(ipv6 ? "ipv6.google.com": "google.com", 80);
+			Log.d(NetworkService.TAG, socket.getLocalAddress().getHostAddress());
+			return socket.getLocalAddress().getHostAddress();
+		} catch (UnknownHostException e) {
+			Log.e(NetworkService.TAG, e.toString());
+		} catch (IOException e) {
+			Log.e(NetworkService.TAG, e.toString());
+		}
+		
 	    return null;
 	}
 	

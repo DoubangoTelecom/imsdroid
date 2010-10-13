@@ -33,6 +33,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 
 public class ScreenNetwork extends Screen {
@@ -46,6 +47,8 @@ public class ScreenNetwork extends Screen {
 	private CheckBox cbSigComp;
 	private CheckBox cbWiFi;
 	private CheckBox cb3G;
+	private RadioButton rbIPv4;
+	private RadioButton rbIPv6;
 	
 	private final static String[] spinner_transport_items = new String[] {Configuration.DEFAULT_TRANSPORT.toUpperCase(), "TCP", /*"TLS", "SCTP"*/};
 	private final static String[] spinner_proxydiscovery_items = new String[] {Configuration.DEFAULT_PCSCF_DISCOVERY, Configuration.PCSCF_DISCOVERY_DNS/*, "DHCPv4/v6", "Both"*/};
@@ -69,6 +72,8 @@ public class ScreenNetwork extends Screen {
         this.cbSigComp = (CheckBox)this.findViewById(R.id.screen_network_checkBox_sigcomp);
         this.cbWiFi = (CheckBox)this.findViewById(R.id.screen_network_checkBox_wifi);
         this.cb3G = (CheckBox)this.findViewById(R.id.screen_network_checkBox_3g);
+        this.rbIPv4 = (RadioButton)this.findViewById(R.id.screen_network_radioButton_ipv4);
+        this.rbIPv6 = (RadioButton)this.findViewById(R.id.screen_network_radioButton_ipv6);
         
         // spinners
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_transport_items);
@@ -98,6 +103,10 @@ public class ScreenNetwork extends Screen {
         
         this.cbWiFi.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.WIFI, Configuration.DEFAULT_WIFI));
         this.cb3G.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.THREE_3G, Configuration.DEFAULT_3G));
+        this.rbIPv4.setChecked(this.configurationService.getString(
+				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
+				Configuration.DEFAULT_IP_VERSION).equalsIgnoreCase("ipv4"));
+        this.rbIPv6.setChecked(!this.rbIPv4.isChecked());
         
         // add listeners (for the configuration)
         this.addConfigurationListener(this.etProxyHost);
@@ -107,6 +116,8 @@ public class ScreenNetwork extends Screen {
         this.addConfigurationListener(this.cbSigComp);
         this.addConfigurationListener(this.cbWiFi);
         this.addConfigurationListener(this.cb3G);
+        this.addConfigurationListener(this.rbIPv4);
+        this.addConfigurationListener(this.rbIPv6);
 	}
 	
 	protected void onPause() {
@@ -126,6 +137,8 @@ public class ScreenNetwork extends Screen {
 					this.cbWiFi.isChecked());
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.THREE_3G, 
 					this.cb3G.isChecked());
+			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION, 
+					this.rbIPv4.isChecked()?"ipv4":"ipv6");
 			
 			// Compute
 			if(!this.configurationService.compute()){
