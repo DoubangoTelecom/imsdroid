@@ -15,7 +15,7 @@
  * Improve video performance by using API Level 8 functions
 
 ==1.0.285==
- * Add support for Front Facing Camera for HTC EVO 4G, Samsung Epic 4G and Samsung Galaxy S.
+ * Add support for Front Facing Camera for Huawei u8230, HTC EVO 4G, Samsung Epic 4G and Samsung Galaxy S.
  * Suppress H264 delay (issue 60)
  * Force IDR frames before PPS and SPS (issue 48 and issue 58)
  * Fix issue 59
