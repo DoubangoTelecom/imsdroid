@@ -35,10 +35,9 @@ import android.util.Log;
 
 public class AudioConsumer{
 	
-	private static String TAG = AudioConsumer.class.getCanonicalName();
-	private static int factor = 10;
-	private static int streamType = AudioManager.STREAM_VOICE_CALL;
-	//private static int streamType = AudioManager.STREAM_MUSIC;
+	private static final String TAG = AudioConsumer.class.getCanonicalName();
+	private static final int factor = 2;
+	private static final int streamType = AudioManager.STREAM_VOICE_CALL;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
@@ -61,12 +60,12 @@ public class AudioConsumer{
 		
 		int minBufferSize = AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		this.shorts_per_notif = (rate * ptime)/1000;
-		this.bufferSize = minBufferSize + (this.shorts_per_notif - (minBufferSize % this.shorts_per_notif));
+		this.bufferSize = ((minBufferSize + (this.shorts_per_notif - (minBufferSize % this.shorts_per_notif))) * AudioConsumer.factor);
 		this.chunck = ByteBuffer.allocateDirect(this.shorts_per_notif*2);
 		
 		this.track = new AudioTrack(AudioConsumer.streamType,
 				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,
-				(this.bufferSize * AudioConsumer.factor), AudioTrack.MODE_STREAM);
+				this.bufferSize, AudioTrack.MODE_STREAM);
 		if(this.track.getState() == AudioTrack.STATE_INITIALIZED){
 			float audioPlaybackLevel = ServiceManager.getConfigurationService().getFloat(
 					CONFIGURATION_SECTION.GENERAL,
@@ -113,13 +112,14 @@ public class AudioConsumer{
 	private Runnable runnablePlayer = new Runnable(){
 		@Override
 		public void run() {
-			Log.d(AudioConsumer.TAG, "Audio Player ===== START");
+			Log.d(AudioConsumer.TAG, "===== Audio Player ===== START");
 			
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
-			AudioConsumer.this.track.play();
-			final byte[] bytes = new byte[AudioConsumer.this.chunck.capacity()];
-			final byte[] silence = new byte[bytes.length];
+			boolean playing = false;
+			int writtenBytes = 0;
+			final byte[] audioBytes = new byte[AudioConsumer.this.chunck.capacity()];
+			final byte[] silenceBytes = new byte[audioBytes.length];
 			
 			while(AudioConsumer.this.running){				
 				if(AudioConsumer.this.track == null){
@@ -127,13 +127,21 @@ public class AudioConsumer{
 				}
 				
 				/* get sound data from the jitter buffer */
-				final long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, bytes.length);				
+				final long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, audioBytes.length);				
 				if(sizeInBytes >0){ // Otherwise it's silence
-					AudioConsumer.this.chunck.get(bytes);
-					AudioConsumer.this.track.write(bytes, 0, bytes.length);
+					AudioConsumer.this.chunck.get(audioBytes);
+					/* writtenBytes +=*/ AudioConsumer.this.track.write(audioBytes, 0, audioBytes.length);
+					writtenBytes += audioBytes.length;
 				}
 				else{
-					AudioConsumer.this.track.write(silence, 0, silence.length);
+					AudioConsumer.this.track.write(silenceBytes, 0, silenceBytes.length);
+					writtenBytes += silenceBytes.length;
+				}
+				
+				if(!playing && writtenBytes>= AudioConsumer.this.bufferSize){
+					Log.d(AudioConsumer.TAG, "===== Audio Player ===== PLAY");
+					playing = true;
+					AudioConsumer.this.track.play();
 				}
 				
 				AudioConsumer.this.chunck.rewind();
@@ -146,7 +154,7 @@ public class AudioConsumer{
 				
 				System.gc();
 			}
-			Log.d(AudioConsumer.TAG, "Audio Player ===== STOP");
+			Log.d(AudioConsumer.TAG, "===== Audio Player ===== STOP");
 		}
 	};
 	

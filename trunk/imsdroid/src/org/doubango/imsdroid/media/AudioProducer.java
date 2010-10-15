@@ -31,8 +31,8 @@ import android.util.Log;
 
 public class AudioProducer {
 
-	private static String TAG = AudioProducer.class.getCanonicalName();
-	private static int factor = 10;
+	private final static String TAG = AudioProducer.class.getCanonicalName();
+	private final static int factor = 10;
 	
 	private int bufferSize;
 	private int shorts_per_notif;
@@ -53,12 +53,12 @@ public class AudioProducer {
 	private synchronized int prepare(int ptime, int rate) {
 		int minBufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		this.shorts_per_notif = (rate * ptime)/1000;
-		this.bufferSize = minBufferSize + (this.shorts_per_notif - (minBufferSize % this.shorts_per_notif));
+		this.bufferSize = (minBufferSize + (this.shorts_per_notif - (minBufferSize % this.shorts_per_notif))) * AudioProducer.factor;
 		this.chunck = ByteBuffer.allocateDirect(this.shorts_per_notif*2);
 		
 		this.recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
 				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-				AudioFormat.ENCODING_PCM_16BIT, (this.bufferSize * AudioProducer.factor));
+				AudioFormat.ENCODING_PCM_16BIT, this.bufferSize);
 		if(this.recorder.getState() == AudioRecord.STATE_INITIALIZED){
 			return 0;
 		}
