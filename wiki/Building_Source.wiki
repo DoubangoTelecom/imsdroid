@@ -59,3 +59,42 @@ cd $(DOUBANGO_HOME)/android-projects
 ../bindings/java/android/buildAll.sh
 }}}
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
+
+=== Building libtinyWRAP.so with G729AB ===
+Starting IMSDroid revision 311 and doubango revision 498 we fully support G.729 annex A and B (CNG and VAD).<br />
+<br />
+G.729 should only used for experimental purpose. G.729 includes patents from several companies and is licensed by Sipro Lab Telecom. <br />
+Sipro Lab Telecom is the authorized Intellectual Property Licensing Administrator for G.729 technology and patent pool.<br />
+In a number of countries, the use of G.729 may require a license fee and/or royalty fee.
+<br />
+Because of the licensing issue the application is not built with G.729.<br />
+To build tinyWRAP with G.729AB support:
+ # Go into $(DOUBANGO_HOME) directory
+{{{
+cd $(DOUBANGO_HOME)
+}}}
+ # Checkout the ARM optimized version of G729AB into */cygdrive/c/tmp*
+{{{
+svn checkout http://g729.googlecode.com/svn/trunk/ /cygdrive/c/tmp/g729b
+}}}
+ # Copy G729AB files into doubango project
+{{{
+cp -f /cygdrive/c/tmp/g729b/* $(DOUBANGO_HOME)/g729b
+}}}
+ # Build and install G729AB library
+{{{
+cd $(DOUBANGO_HOME)/android-projects
+make PROJECT=g729b BT=static install
+}}}
+For cleanup
+{{{
+make PROJECT=g729b BT=static clean
+}}}
+ # Build tinyWRAP with G29AB
+{{{
+../bindings/java/android/buildAll.sh G729=yes
+}}}
+
+The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
+
+Et voilà
