@@ -73,7 +73,8 @@ public class UriUtils {
 				if(realm.contains(":")){
 					realm = realm.substring(realm.indexOf(":")+1);
 				}
-				return String.format("sip:%s@%s", uri, realm);
+				// FIXME: Should be done by doubango
+				return String.format("sip:%s@%s", uri.replace("(", "").replace(")", "").replace("-", ""), realm);
 			}
 		}
 	}

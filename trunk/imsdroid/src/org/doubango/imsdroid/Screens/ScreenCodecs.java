@@ -20,6 +20,8 @@
 */
 package org.doubango.imsdroid.Screens;
 
+import java.util.ArrayList;
+
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
@@ -42,7 +44,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class ScreenCodecs  extends Screen{
 
-	private ScreenCodecsItem[] items;
+	private ArrayList<ScreenCodecsItem> items;
 	private GridView gridView;
 	private ScreenCodecsAdapter adapter;
 	
@@ -63,25 +65,40 @@ public class ScreenCodecs  extends Screen{
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_codecs);
         
-        this.items =  new ScreenCodecsItem[]{
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_amr_nb_oa.swigValue(), "AMR-NB-OA", "AMR Narrow Band Octet Aligned (8 KHz)"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_amr_nb_be.swigValue(), "AMR-NB-BE", "AMR Narrow Band Bandwidth Efficient (8 KHz)"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_gsm.swigValue(), "GSM", "GSM (8 KHz)"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_pcma.swigValue(), "PCMA", "PCMA (8 KHz)"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_pcmu.swigValue(), "PCMU", "PCMU (8 KHz)"),
-        		//new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_ilbc.swigValue(), "iLBC", "internet Low Bitrate Codec (8 KHz)"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_nb.swigValue(), "Speex-NB", "Speex Narrow Band (8 KHz)"),
-        		
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_theora.swigValue(), "Theora", "Theora"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue(), "H264-BP10", "H.264 Base Profile 1.0"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp20.swigValue(), "H264-BP20", "H.264 Base Profile 2.0"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp30.swigValue(), "H264-BP30", "H.264 Base Profile 3.0"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263.swigValue(),"H.263", "H.263"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263p.swigValue(), "H.263+", "H.263-1998"),
-        		new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263pp.swigValue(), "H.263++", "H.263-2000"),
-        		//new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h261.swigValue(), "H.261", "H.261"),
-        		
-        };        
+        this.items = new ArrayList<ScreenCodecsItem>();
+        
+        //
+        // Audio Codecs
+        //
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_pcma.swigValue(), "PCMA", "PCMA (8 KHz)"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_pcmu.swigValue(), "PCMU", "PCMU (8 KHz)"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_gsm.swigValue(), "GSM", "GSM (8 KHz)"));
+        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_amr_nb_oa)){
+        	this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_amr_nb_oa.swigValue(), "AMR-NB-OA", "AMR Narrow Band Octet Aligned (8 KHz)"));
+        }
+        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_amr_nb_be)){
+        	this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_amr_nb_be.swigValue(), "AMR-NB-BE", "AMR Narrow Band Bandwidth Efficient (8 KHz)"));
+        }
+        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_ilbc)){
+        	this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_ilbc.swigValue(), "iLBC", "internet Low Bitrate Codec (8 KHz)"));
+        }
+        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_speex_nb)){
+        	this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_nb.swigValue(), "Speex-NB", "Speex Narrow Band (8 KHz)"));
+        }
+        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g729ab)){
+        	this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_g729ab.swigValue(), "G.729", "G729 Annex A/B (8 KHz)"));
+        }
+        
+        //
+        // Video COdecs
+        //
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_theora.swigValue(), "Theora", "Theora"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue(), "H264-BP10", "H.264 Base Profile 1.0"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp20.swigValue(), "H264-BP20", "H.264 Base Profile 2.0"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp30.swigValue(), "H264-BP30", "H.264 Base Profile 3.0"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263.swigValue(),"H.263", "H.263"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263p.swigValue(), "H.263+", "H.263-1998"));
+        this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263pp.swigValue(), "H.263++", "H.263-2000"));
         
         // gridView
 		this.gridView = (GridView) this.findViewById(R.id.screen_codecs_gridView);
@@ -111,7 +128,7 @@ public class ScreenCodecs  extends Screen{
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			final ScreenCodecsItem item;
-			if ((ScreenCodecs.this.items.length > position) && ((item = ScreenCodecs.this.items[position]) != null)) {
+			if ((ScreenCodecs.this.items.size() > position) && ((item = ScreenCodecs.this.items.get(position)) != null)) {
 				if((ScreenCodecs.this.codecs & item.id) == item.id){
 					ScreenCodecs.this.codecs &= ~item.id;
 				}
@@ -148,7 +165,7 @@ public class ScreenCodecs  extends Screen{
 		}
 
 		public int getCount() {
-			return ScreenCodecs.this.items.length;
+			return ScreenCodecs.this.items.size();
 		}
 
 		public Object getItem(int position) {
@@ -171,7 +188,7 @@ public class ScreenCodecs  extends Screen{
 				view = getLayoutInflater().inflate(R.layout.screen_codecs_item, null);
 			}
 			
-			if ((ScreenCodecs.this.items.length <= position) || ((item = ScreenCodecs.this.items[position]) == null)) {
+			if ((ScreenCodecs.this.items.size() <= position) || ((item = ScreenCodecs.this.items.get(position)) == null)) {
 				return view;
 			}
 			

@@ -36,7 +36,7 @@ import android.util.Log;
 public class AudioConsumer{
 	
 	private static final String TAG = AudioConsumer.class.getCanonicalName();
-	private static final int factor = 2;
+	private static final int factor = 3;
 	private static final int streamType = AudioManager.STREAM_VOICE_CALL;
 	
 	private int bufferSize;
