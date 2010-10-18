@@ -49,7 +49,7 @@ export CFLAGS="–Os –DDEBUG_LEVEL=DEBUG_LEVEL_ERROR"
 }}}
 You can off course set any valid GCC *$(CFLAGS)* flags.
 
-=== Building libtinyWRAP.so ===
+=== Building libtinyWRAP.so without G729AB ===
  # Go to the android-projects root directory:
 {{{
 cd $(DOUBANGO_HOME)/android-projects
@@ -85,10 +85,8 @@ cp -f /cygdrive/c/tmp/g729b/* $(DOUBANGO_HOME)/g729b
 {{{
 cd $(DOUBANGO_HOME)/android-projects
 make PROJECT=g729b BT=static install
-}}}
-For cleanup
-{{{
-make PROJECT=g729b BT=static clean
+#For cleanup
+#make PROJECT=g729b BT=static clean
 }}}
  # Build tinyWRAP with G29AB
 {{{
