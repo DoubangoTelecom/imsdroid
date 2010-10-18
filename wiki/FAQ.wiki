@@ -13,6 +13,8 @@
 ===Is iLBC supported?===
 ===Is AMR supported?===
 ===Could I have G.729 codec?===
+G729AB is know supported. Because of licensing issue you have to rebuild the source code. <br />
+For more information: http://code.google.com/p/imsdroid/wiki/Building_Source#Building_libtinyWRAP.so_with_G729AB
 ===Could I have EVRC codec?===
 ===Could I make and receive calls on the emulator?===
 ===How to call E.164 (e.g. tel:+33100000000) numbers?===
