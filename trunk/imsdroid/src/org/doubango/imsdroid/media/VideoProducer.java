@@ -28,6 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+import org.doubango.imsdroid.Model.Configuration;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
 import org.doubango.tinyWRAP.tmedia_chroma_t;
 
@@ -61,6 +65,7 @@ public class VideoProducer {
 	private Preview preview;
 	private boolean running;
 	private boolean skipFrames = false;
+	
 	
 	public VideoProducer(){
 		this.videoProducer = new MyProxyVideoProducer(this);
@@ -256,15 +261,20 @@ public class VideoProducer {
 
 		public void surfaceCreated(SurfaceHolder holder) {
 			try {
-				if(FFC.isAvailable()){
-					this.camera = FFC.getCamera();
+				boolean useFFC = ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FFC, Configuration.DEFAULT_GENERAL_FFC);
+				Log.d(VideoProducer.TAG, useFFC ? "Using FFC" : "Not using FFC");
+				
+				if(useFFC && FFC.isAvailable()){
+					this.camera = FFC.getCamera(); // Get FFC
 				}
 				if(this.camera == null){
 					this.camera = Camera.open();
 				}
 				
 				// Switch to Front Facing Camera
-				FFC.switchToFFC(this.camera);
+				if(useFFC){
+					FFC.switchToFFC(this.camera);
+				}
 				
 				Camera.Parameters parameters = this.camera.getParameters();
 				
@@ -275,6 +285,7 @@ public class VideoProducer {
 				 */
 				parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 				parameters.setPreviewFrameRate(this.producer.fps);
+				// parameters.set("rotation", degree)
 				this.camera.setParameters(parameters);
 				
 				try{
