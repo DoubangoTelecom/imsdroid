@@ -87,7 +87,6 @@ public class ScreenAV extends Screen {
 	private final Timer timerInCall;
 	private final Timer timerSuicide;
 	
-	
 	private ViewFlipper fvFlipper;
 	private ImageView ivDialer;
 	private LinearLayout llVideoLocal;

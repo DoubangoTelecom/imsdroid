@@ -33,7 +33,6 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
 import org.doubango.imsdroid.Screens.ScreenAV;
-import org.doubango.imsdroid.Screens.ScreenFileTransferView;
 import org.doubango.imsdroid.Screens.ScreenMsrpInc;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.INetworkService;
@@ -77,7 +76,6 @@ import org.doubango.tinyWRAP.RPMessage;
 import org.doubango.tinyWRAP.RegistrationEvent;
 import org.doubango.tinyWRAP.SMSData;
 import org.doubango.tinyWRAP.SMSEncoder;
-import org.doubango.tinyWRAP.SdpMessage;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
@@ -222,7 +220,7 @@ implements ISipService, tinyWRAPConstants {
 				CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPU,
 				Configuration.DEFAULT_IMPU);
 
-		Log.i(this.getClass().getCanonicalName(), String.format(
+		Log.i(SipService.TAG, String.format(
 				"realm=%s, impu=%s, impi=%s", this.preferences.realm, this.preferences.impu, this.preferences.impi));
 
 		if (this.sipStack == null) {
@@ -268,6 +266,7 @@ implements ISipService, tinyWRAPConstants {
 
 		// Set STUN information
 		if(this.configurationService.getBoolean(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.USE_STUN, Configuration.DEFAULT_NATT_USE_STUN)){			
+			Log.i(SipService.TAG, "STUN=yes");
 			if(this.configurationService.getBoolean(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.STUN_DISCO, Configuration.DEFAULT_NATT_STUN_DISCO)){
 				String domain = this.preferences.realm.substring(this.preferences.realm.indexOf(':')+1);
 				int []port = new int[1];
@@ -275,15 +274,18 @@ implements ISipService, tinyWRAPConstants {
 				if(server == null){
 					ServiceManager.getScreenService().setProgressInfoText("STUN discovery has failed");
 				}
+				Log.i(SipService.TAG, String.format("STUN1 - server=%s and port=%d", server, port[0]));
 				this.sipStack.setSTUNServer(server, port[0]);// Needed event if null
 			}
 			else{
 				String server = this.configurationService.getString(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.STUN_SERVER, Configuration.DEFAULT_NATT_STUN_SERVER);
 				int port = this.configurationService.getInt(CONFIGURATION_SECTION.NATT, CONFIGURATION_ENTRY.STUN_PORT, Configuration.DEFAULT_NATT_STUN_PORT);
+				Log.i(SipService.TAG, String.format("STUN2 - server=%s and port=%d", server, port));
 				this.sipStack.setSTUNServer(server, port);
 			}
 		}
 		else{
+			Log.i(SipService.TAG, "STUN=no");
 			this.sipStack.setSTUNServer(null, 0);
 		}
 		
