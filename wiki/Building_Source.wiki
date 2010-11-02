@@ -49,7 +49,10 @@ export CFLAGS="–Os –DDEBUG_LEVEL=DEBUG_LEVEL_ERROR"
 }}}
 You can off course set any valid GCC *$(CFLAGS)* flags. <br />
 Example of doubango's specific flags: 
- * *-DTNET_HAVE_OPENSSL_H=1*: Enable support for __TLS__ (You MUST have *OpenSSL*).
+ * *-DTNET_HAVE_OPENSSL_H=1*: Enable support for __TLS__ (You MUST have *OpenSSL*)
+ * *-DJB_HISTORY_SIZE=500*: Set audio jitter buffer size to 500 frames
+ * *-DFLIP_DECODED_PICT=1*: Flip the decode video frames
+ * ...
 
 === Building libtinyWRAP.so without G729AB ===
  # Go to the android-projects root directory:
