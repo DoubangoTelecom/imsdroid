@@ -47,8 +47,9 @@ export PATH=$ANDROID_NDK_ROOT\build\prebuilt\$(HOST)\arm-eabi-4.2.1\bin:$PATH
 {{{
 export CFLAGS="–Os –DDEBUG_LEVEL=DEBUG_LEVEL_ERROR"
 }}}
-You can off course set any valid GCC *$(CFLAGS)* flags.
-Example: Add *-DTNET_HAVE_OPENSSL_H=1* to *$(CFLAGS)* flags to enable support for TLS (Must have *OpenSSL*).
+You can off course set any valid GCC *$(CFLAGS)* flags. <br />
+Example of doubango's specific flags: 
+ * *-DTNET_HAVE_OPENSSL_H=1*: Enable support for __TLS__ (You MUST have *OpenSSL*).
 
 === Building libtinyWRAP.so without G729AB ===
  # Go to the android-projects root directory:
