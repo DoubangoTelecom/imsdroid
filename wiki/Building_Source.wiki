@@ -8,7 +8,7 @@ To build the java code you only need Eclipse and Android SDK.
 
 == Building Native libraries ==
 IMSDroid contains only one native library (*tinyWRAP.so*) written in C++ as a wrapper for [http://www.doubango.org/ doubango] project. The JNI files are generated using [http://www.swig.org/ SWIG].<br />
-To build *tinyWRAP* you have to build all doubango's libraries (ANSI-C).<br /> 
+To build *tinyWRAP* you have to build all [http://www.doubango.org/ doubango]'s libraries (ANSI-C).<br /> 
 *tinyWRAP* depends on:
  * *tinySAK* (Swiss Army Knife): Utilities functions (SHA-1, MD5, HMAC, String, List, Timers, Thread, Mutex, Semaphore, ...)
  * *tinyNET*: Networking (DNS, DHCPv4/v6, STUN, TURN, ICE, ENUM, Sockets, ...)
@@ -48,6 +48,7 @@ export PATH=$ANDROID_NDK_ROOT\build\prebuilt\$(HOST)\arm-eabi-4.2.1\bin:$PATH
 export CFLAGS="–Os –DDEBUG_LEVEL=DEBUG_LEVEL_ERROR"
 }}}
 You can off course set any valid GCC *$(CFLAGS)* flags.
+Example: Add *-DTNET_HAVE_OPENSSL_H=1* to *$(CFLAGS)* flags to enable support for TLS (Must have *OpenSSL*).
 
 === Building libtinyWRAP.so without G729AB ===
  # Go to the android-projects root directory:
@@ -77,7 +78,7 @@ cd $(DOUBANGO_HOME)
 {{{
 svn checkout http://g729.googlecode.com/svn/trunk/ /cygdrive/c/tmp/g729b
 }}}
- # Copy G729AB files into doubango project
+ # Copy G729AB files into [http://www.doubango.org/ doubango] project
 {{{
 cp -f /cygdrive/c/tmp/g729b/* $(DOUBANGO_HOME)/g729b
 }}}
@@ -94,5 +95,6 @@ make PROJECT=g729b BT=static install
 }}}
 
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
+
 
 Et voilà
