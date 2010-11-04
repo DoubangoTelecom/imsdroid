@@ -5,7 +5,7 @@
 
 <RelativeLayout android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/main_relativeLayout">
 
-<RelativeLayout android:id="@+id/main_relativeLayout_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@color/main_relativeLayout_top_color" android:gravity="top">
+<RelativeLayout android:id="@+id/main_relativeLayout_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@color/main_relativeLayout_top_color" android:gravity="top" android:visibility="visible">
 
 <RelativeLayout android:layout_height="wrap_content" android:id="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content">
 	<ImageView android:id="@+id/main_imageView_avatar" android:layout_height="48px" android:scaleType="fitXY" android:layout_width="48px" android:src="@drawable/avatar_48"></ImageView>
@@ -21,12 +21,12 @@
 
 </RelativeLayout>
 
-<LinearLayout android:minHeight="20px" android:id="@+id/main_linearLayout_principal" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="16px" android:layout_below="@+id/main_relativeLayout_top" android:gravity="top|fill_vertical|fill_horizontal">
+<LinearLayout android:minHeight="20px" android:id="@+id/main_linearLayout_principal" android:layout_width="fill_parent" android:layout_below="@+id/main_relativeLayout_top" android:gravity="top|fill_vertical|fill_horizontal" android:layout_height="fill_parent" android:layout_marginBottom="16px">
 
 
 </LinearLayout>
 
-<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_alignBottom="@+id/main_linearLayout_principal" android:layout_alignParentBottom="true" android:minHeight="16px" android:id="@+id/main_linearLayout_bottom">
+<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_alignParentBottom="true" android:id="@+id/main_linearLayout_bottom" android:visibility="visible" android:layout_alignBottom="@+id/main_linearLayout_principal" android:minHeight="16px">
 
 
 

@@ -139,7 +139,7 @@ public class ScreenAV extends Screen {
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        setContentView(R.layout.screen_av);       
+        setContentView(R.layout.screen_av);
         
         // retrieve id
         this.id = getIntent().getStringExtra("id");
@@ -171,9 +171,12 @@ public class ScreenAV extends Screen {
         this.btDtmf_Sharp = (ImageButton)this.findViewById(R.id.screen_av_imageButton_sharp);
         this.btDtmf_Star = (ImageButton)this.findViewById(R.id.screen_av_imageButton_star);
         
+        // Hide video preview
+        this.llVideoLocal.setVisibility(View.GONE);
+        
         if(this.avSession != null){
         	this.remoteUri = this.avSession.getRemoteParty();
-        	this.tvRemoteUri.setText(String.format("In call with %s since:", UriUtils.getDisplayName(this.remoteUri)));
+        	this.tvRemoteUri.setText(String.format("%s", UriUtils.getDisplayName(this.remoteUri)));
         	
         	MyAVSession.getVideoProducer().setContext(this);
 			MyAVSession.getVideoConsumer().setContext(this);
@@ -565,6 +568,7 @@ public class ScreenAV extends Screen {
 				this.llVideoLocal.addView(local_preview);
 			}
 		}
+		this.llVideoLocal.setVisibility(start ? View.VISIBLE : View.GONE);
 	}
 	
 	private void updateState(CallState state){

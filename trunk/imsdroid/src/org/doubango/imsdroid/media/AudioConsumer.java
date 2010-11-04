@@ -121,19 +121,19 @@ public class AudioConsumer{
 			final byte[] audioBytes = new byte[AudioConsumer.this.chunck.capacity()];
 			final byte[] silenceBytes = new byte[audioBytes.length];
 			
-			while(AudioConsumer.this.running){				
+			while(AudioConsumer.this.running){
 				if(AudioConsumer.this.track == null){
 					break;
 				}
 				
 				/* get sound data from the jitter buffer */
 				final long sizeInBytes = AudioConsumer.this.proxyAudioConsumer.pull(AudioConsumer.this.chunck, audioBytes.length);				
-				if(sizeInBytes >0){ // Otherwise it's silence
+				if(sizeInBytes >0){ 
 					AudioConsumer.this.chunck.get(audioBytes);
 					/* writtenBytes +=*/ AudioConsumer.this.track.write(audioBytes, 0, audioBytes.length);
 					writtenBytes += audioBytes.length;
 				}
-				else{
+				else{ // silence
 					AudioConsumer.this.track.write(silenceBytes, 0, silenceBytes.length);
 					writtenBytes += silenceBytes.length;
 				}

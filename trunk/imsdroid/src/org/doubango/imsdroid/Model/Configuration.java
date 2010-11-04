@@ -83,8 +83,8 @@ public class Configuration {
 	public static final PresenceStatus DEFAULT_RCS_STATUS = PresenceStatus.Online;
 	
 	public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "Low";
-	public static final String DEFAULT_QOS_PRECOND_STRENGTH = tmedia_qos_strength_t.tmedia_qos_strength_optional.toString();
-	public static final String DEFAULT_QOS_PRECOND_TYPE = tmedia_qos_stype_t.tmedia_qos_stype_segmented.toString();
+	public static final String DEFAULT_QOS_PRECOND_STRENGTH = tmedia_qos_strength_t.tmedia_qos_strength_none.toString();
+	public static final String DEFAULT_QOS_PRECOND_TYPE = tmedia_qos_stype_t.tmedia_qos_stype_none.toString();
 	public static final String DEFAULT_QOS_REFRESHER = "none";
 	public static final int DEFAULT_QOS_SIP_SESSIONS_TIMEOUT = 600000;
 	public static final int DEFAULT_QOS_SIP_CALLS_TIMEOUT = 3600;

@@ -83,15 +83,15 @@ public class ScreenIdentity  extends Screen {
 	protected void onPause() {
 		if(this.computeConfiguration){
 			this.ConfigurationService.setString(CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.DISPLAY_NAME, 
-				this.etDisplayName.getText().toString());
+				this.etDisplayName.getText().toString().trim());
 			this.ConfigurationService.setString(CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPU, 
-				this.etIMPU.getText().toString());
+				this.etIMPU.getText().toString().trim());
 			this.ConfigurationService.setString(CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.IMPI, 
-				this.etIMPI.getText().toString());
+				this.etIMPI.getText().toString().trim());
 			this.ConfigurationService.setString(CONFIGURATION_SECTION.IDENTITY, CONFIGURATION_ENTRY.PASSWORD, 
-				this.etPassword.getText().toString());
+				this.etPassword.getText().toString().trim());
 			this.ConfigurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.REALM, 
-				this.etRealm.getText().toString());
+				this.etRealm.getText().toString().trim());
 			this.ConfigurationService.setBoolean(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.EARLY_IMS, 
 					this.cbEarlyIMS.isChecked());
 			

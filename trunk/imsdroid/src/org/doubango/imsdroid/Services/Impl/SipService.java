@@ -221,7 +221,7 @@ implements ISipService, tinyWRAPConstants {
 				Configuration.DEFAULT_IMPU);
 
 		Log.i(SipService.TAG, String.format(
-				"realm=%s, impu=%s, impi=%s", this.preferences.realm, this.preferences.impu, this.preferences.impi));
+				"realm='%s', impu='%s', impi='%s'", this.preferences.realm, this.preferences.impu, this.preferences.impi));
 
 		if (this.sipStack == null) {
 			this.sipStack = new MySipStack(this.sipCallback, this.preferences.realm, this.preferences.impi, this.preferences.impu);	
@@ -304,7 +304,7 @@ implements ISipService, tinyWRAPConstants {
 				Configuration.DEFAULT_IP_VERSION);
 
 		Log.i(this.getClass().getCanonicalName(), String.format(
-				"pcscf-host=%s, pcscf-port=%d, transport=%s, ipversion=%s",
+				"pcscf-host='%s', pcscf-port='%d', transport='%s', ipversion='%s'",
 				this.preferences.pcscf_host, this.preferences.pcscf_port, this.preferences.transport, this.preferences.ipversion));
 
 		if (!this.sipStack.setProxyCSCF(this.preferences.pcscf_host, this.preferences.pcscf_port, this.preferences.transport,
@@ -323,7 +323,7 @@ implements ISipService, tinyWRAPConstants {
 			Log.e(this.getClass().getCanonicalName(), "Failed to set the local IP");
 			return false;
 		}
-		Log.i(SipService.TAG, String.format("Local IP=%s", this.preferences.localIP));
+		Log.i(SipService.TAG, String.format("Local IP='%s'", this.preferences.localIP));
 		
 		// Whether to use DNS NAPTR+SRV for the Proxy-CSCF discovery (even if the DNS requests are sent only when the stack starts,
 		// should be done after setProxyCSCF())
@@ -525,28 +525,35 @@ implements ISipService, tinyWRAPConstants {
 		
 		Log.d(SipService.TAG, "Doing post registration operations");
 		
+		// Get default identity
+		String defaultIdentity = this.sipStack.getPreferredIdentity();
+		if(StringUtils.isNullOrEmpty(defaultIdentity)){
+			defaultIdentity = this.preferences.impu;
+		}
+		Log.i(SipService.TAG, String.format("Default Identity='%s', IMPU='%s'", defaultIdentity, this.preferences.impu));
+		
 		/*
 		 * 3GPP TS 24.229 5.1.1.3 Subscription to registration-state event package
 		 * Upon receipt of a 2xx response to the initial registration, the UE shall subscribe to the reg event package for the public
 		 * user identity registered at the user's registrar (S-CSCF) as described in RFC 3680 [43].
 		 */
 		if(this.subReg == null){
-			this.subReg = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.REG);
+			this.subReg = new MySubscriptionSession(this.sipStack, defaultIdentity, EVENT_PACKAGE_TYPE.REG);
 		}
 		else{
-			this.subReg.setToUri(this.preferences.impu);
-			this.subReg.setFromUri(this.preferences.impu);
+			this.subReg.setToUri(defaultIdentity);
+			this.subReg.setFromUri(defaultIdentity);
 		}
 		this.subReg.subscribe();		
 		
 		// Message Waiting Indication
 		if(this.preferences.mwi){
 			if(this.subMwi == null){
-				this.subMwi = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.MESSAGE_SUMMARY); 
+				this.subMwi = new MySubscriptionSession(this.sipStack, defaultIdentity, EVENT_PACKAGE_TYPE.MESSAGE_SUMMARY); 
 			}
 			else{
-				this.subMwi.setToUri(this.preferences.impu);
-				this.subMwi.setFromUri(this.preferences.impu);
+				this.subMwi.setToUri(defaultIdentity);
+				this.subMwi.setFromUri(defaultIdentity);
 				this.subMwi.setSigCompId(this.sipStack.getSigCompId());
 			}
 			this.subMwi.subscribe();
@@ -558,11 +565,11 @@ implements ISipService, tinyWRAPConstants {
 			if(this.preferences.xcap_enabled){
 				// "watcher-info"
 				if(this.subWinfo == null){
-					this.subWinfo = new MySubscriptionSession(this.sipStack, this.preferences.impu, EVENT_PACKAGE_TYPE.WINFO); 
+					this.subWinfo = new MySubscriptionSession(this.sipStack, defaultIdentity, EVENT_PACKAGE_TYPE.WINFO); 
 				}
 				else{
-					this.subWinfo.setToUri(this.preferences.impu);
-					this.subWinfo.setFromUri(this.preferences.impu);
+					this.subWinfo.setToUri(defaultIdentity);
+					this.subWinfo.setFromUri(defaultIdentity);
 					this.subMwi.setSigCompId(this.sipStack.getSigCompId());
 				}
 				this.subWinfo.subscribe();
@@ -574,11 +581,11 @@ implements ISipService, tinyWRAPConstants {
 			
 			// Publish presence
 			if(this.pubPres == null){
-				this.pubPres = new MyPublicationSession(this.sipStack, this.preferences.impu);
+				this.pubPres = new MyPublicationSession(this.sipStack, defaultIdentity);
 			}
 			else{
-				this.pubPres.setFromUri(this.preferences.impu);
-				this.pubPres.setToUri(this.preferences.impu);
+				this.pubPres.setFromUri(defaultIdentity);
+				this.pubPres.setToUri(defaultIdentity);
 				this.subMwi.setSigCompId(this.sipStack.getSigCompId());
 			}
 			
