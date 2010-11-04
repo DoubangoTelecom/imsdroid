@@ -107,6 +107,7 @@ public class VideoConsumer {
 		return 0;
 	}
 	
+	
 	public synchronized int start() {
 		Log.d(VideoConsumer.TAG, "start()");
 		if(this.context != null){
@@ -136,6 +137,7 @@ public class VideoConsumer {
 				canvas.drawBitmap(this.bitmap, 0, 0, null);
 			}
 			
+			
 			/*canvas.drawBitmap(this.bitmap, 0, 0, null);
 			if(this.fullScreen && !this.fullScreenHonored){
 				Log.e(VideoConsumer.TAG, "Honoring Full-Screen");
@@ -147,7 +149,7 @@ public class VideoConsumer {
 			this.preview.holder.unlockCanvasAndPost(canvas);
 		}
 		else{
-			Log.e(VideoConsumer.TAG, "Invalid canvas");
+			Log.w(VideoConsumer.TAG, "Invalid canvas");
 		}
 		
 		

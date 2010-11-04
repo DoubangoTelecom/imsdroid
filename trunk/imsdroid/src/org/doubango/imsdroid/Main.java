@@ -86,6 +86,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class Main extends ActivityGroup
@@ -97,7 +99,8 @@ implements IRegistrationEventHandler
     
     private volatile String progressInfoText = "";
     
-    //private RelativeLayout rlTop;
+    private RelativeLayout rlTop;
+    private LinearLayout llBottom;
     private TextView tvTitle;
     private TextView tvDisplayName;
     private TextView tvFreeText;
@@ -140,7 +143,8 @@ implements IRegistrationEventHandler
         setContentView(R.layout.main);
         
         // Gets controls
-        //this.rlTop = (RelativeLayout)this.findViewById(R.id.main_relativeLayout_top);
+        this.rlTop = (RelativeLayout)this.findViewById(R.id.main_relativeLayout_top);
+        this.llBottom = (LinearLayout)this.findViewById(R.id.main_linearLayout_bottom);
         this.tvTitle = (TextView)this.findViewById(R.id.main_textView_title);
         this.tvDisplayName = (TextView)this.findViewById(R.id.main_textView_displayname);
         this.tvFreeText = (TextView)this.findViewById(R.id.main_textView_freetext);
@@ -296,6 +300,14 @@ implements IRegistrationEventHandler
 	
 	public void setStatus(int drawableId){
 		this.ivStatus.setImageResource(drawableId);
+	}
+	
+	public void setTopBarVisibility(int visibility){
+		this.rlTop.setVisibility(visibility);
+	}
+	
+	public void setBottomBarVisibility(int visibility){
+		this.llBottom.setVisibility(visibility);
 	}
 	
 	public void exit(){

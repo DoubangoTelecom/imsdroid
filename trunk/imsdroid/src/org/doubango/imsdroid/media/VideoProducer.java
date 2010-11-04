@@ -215,11 +215,15 @@ public class VideoProducer {
 	
 	private PreviewCallback previewCallback = new PreviewCallback() {
   	  public void onPreviewFrame(byte[] _data, Camera _camera) {
+  		  	VideoProducer.this.frame.put(_data);
+  		  	VideoProducer.this.videoProducer.push(VideoProducer.this.frame, VideoProducer.this.frame.capacity());
+			VideoProducer.this.frame.rewind();
+		
 	  		if(APILevel8.isAvailable()){
 				VideoProducer.this.addCallbackBuffer(_camera, _data);
 			}
 	  		
-			if (VideoProducer.this.videoProducer != null) {	
+			/*if (VideoProducer.this.videoProducer != null) {	
 				if(VideoProducer.this.skipFrames){
 					//Log.d(VideoProducer.TAG, "Frame skipped");
 					synchronized (VideoProducer.this.buffers) {
@@ -238,7 +242,7 @@ public class VideoProducer {
 					VideoProducer.this.buffers.add(_data);
 				}
 				VideoProducer.this.semaphore.release();
-			}
+			}*/
 		}
   	};
 	
@@ -351,7 +355,7 @@ public class VideoProducer {
 				}*/
 				
 				if(APILevel8.isAvailable()){	
-					for(int i=0; i<3; i++){
+					for(int i=0; i<1; i++){
 						this.producer.addCallbackBuffer(this.camera, new byte[this.producer.frame.capacity()]);
 					}
 				}

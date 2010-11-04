@@ -124,9 +124,9 @@ public class ScreenNetwork extends Screen {
 		if(this.computeConfiguration){
 			
 			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_HOST, 
-					this.etProxyHost.getText().toString());
+					this.etProxyHost.getText().toString().trim());
 			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_PORT, 
-					this.etProxyPort.getText().toString());
+					this.etProxyPort.getText().toString().trim());
 			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.TRANSPORT, 
 					ScreenNetwork.spinner_transport_items[this.spTransport.getSelectedItemPosition()]);
 			this.configurationService.setString(CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.PCSCF_DISCOVERY, 

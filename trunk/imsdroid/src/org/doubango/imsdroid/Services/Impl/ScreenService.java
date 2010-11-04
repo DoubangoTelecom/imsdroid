@@ -24,6 +24,7 @@ import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Screens.Screen;
+import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Services.IScreenService;
 
@@ -138,6 +139,15 @@ public class ScreenService extends Service implements IScreenService {
 			// update current screen
 			//this.currentScreen = screen_id;
 			
+			if(cls == ScreenAV.class){
+				//mainActivity.setBottomBarVisibility(View.GONE);
+				mainActivity.setTopBarVisibility(View.GONE);
+			}
+			else{
+				//mainActivity.setBottomBarVisibility( View.VISIBLE);
+				mainActivity.setTopBarVisibility(View.VISIBLE);
+			}
+			
 			return true;
 		}
 		return false;
@@ -150,7 +160,7 @@ public class ScreenService extends Service implements IScreenService {
 
 	@Override
 	public boolean show(String id) {
-		Screen screen = (Screen)ServiceManager.getMainActivity().getLocalActivityManager().getActivity(id);
+		final  Screen screen = (Screen)ServiceManager.getMainActivity().getLocalActivityManager().getActivity(id);
 
 		if (screen == null) {
 			Log.e(this.getClass().getCanonicalName(), String.format(
