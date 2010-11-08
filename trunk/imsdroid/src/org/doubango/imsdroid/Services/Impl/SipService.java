@@ -230,15 +230,15 @@ implements ISipService, tinyWRAPConstants {
 	        		CONFIGURATION_ENTRY.CODECS, Configuration.DEFAULT_MEDIA_CODECS));
 		} else {
 			if (!this.sipStack.setRealm(this.preferences.realm)) {
-				Log.e(this.getClass().getCanonicalName(), "Failed to set realm");
+				Log.e(SipService.TAG, "Failed to set realm");
 				return false;
 			}
 			if (!this.sipStack.setIMPI(this.preferences.impi)) {
-				Log.e(this.getClass().getCanonicalName(), "Failed to set IMPI");
+				Log.e(SipService.TAG, "Failed to set IMPI");
 				return false;
 			}
 			if (!this.sipStack.setIMPU(this.preferences.impu)) {
-				Log.e(this.getClass().getCanonicalName(), "Failed to set IMPU");
+				Log.e(SipService.TAG, "Failed to set IMPU");
 				return false;
 			}
 		}
@@ -260,7 +260,7 @@ implements ISipService, tinyWRAPConstants {
 		
 		// Check stack validity
 		if (!this.sipStack.isValid()) {
-			Log.e(this.getClass().getCanonicalName(), "Trying to use invalid stack");
+			Log.e(SipService.TAG, "Trying to use invalid stack");
 			return false;
 		}
 
@@ -303,13 +303,13 @@ implements ISipService, tinyWRAPConstants {
 				CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.IP_VERSION,
 				Configuration.DEFAULT_IP_VERSION);
 
-		Log.i(this.getClass().getCanonicalName(), String.format(
+		Log.i(SipService.TAG, String.format(
 				"pcscf-host='%s', pcscf-port='%d', transport='%s', ipversion='%s'",
 				this.preferences.pcscf_host, this.preferences.pcscf_port, this.preferences.transport, this.preferences.ipversion));
 
 		if (!this.sipStack.setProxyCSCF(this.preferences.pcscf_host, this.preferences.pcscf_port, this.preferences.transport,
 				this.preferences.ipversion)) {
-			Log.e(this.getClass().getCanonicalName(), "Failed to set Proxy-CSCF parameters");
+			Log.e(SipService.TAG, "Failed to set Proxy-CSCF parameters");
 			return false;
 		}
 
@@ -320,7 +320,7 @@ implements ISipService, tinyWRAPConstants {
 			this.preferences.localIP = ipv6 ? "::" : "10.0.2.15"; /* Probably on the emulator */
 		}
 		if (!this.sipStack.setLocalIP(this.preferences.localIP)) {
-			Log.e(this.getClass().getCanonicalName(), "Failed to set the local IP");
+			Log.e(SipService.TAG, "Failed to set the local IP");
 			return false;
 		}
 		Log.i(SipService.TAG, String.format("Local IP='%s'", this.preferences.localIP));
@@ -418,7 +418,7 @@ implements ISipService, tinyWRAPConstants {
 				}
 			}).start();
 		}
-		Log.d(this.getClass().getCanonicalName(), "Already unregistered");
+		Log.d(SipService.TAG, "Already unregistered");
 		return true;
 	}
 	

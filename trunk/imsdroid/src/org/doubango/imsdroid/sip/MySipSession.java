@@ -79,7 +79,7 @@ public abstract class MySipSession implements Comparable<MySipSession>{
 	}
 	
 	public boolean setToUri(String toUri){
-		boolean ret = this.getSession().setToUri(fromUri);
+		boolean ret = this.getSession().setToUri(toUri);
 		this.toUri = toUri;
 		return ret;
 	}
