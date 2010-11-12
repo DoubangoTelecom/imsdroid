@@ -17,6 +17,11 @@
 * with this program; if not, write to the Free Software Foundation, Inc., 
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
+*
+* 	@author Mamadou Diop <diopmamadou(at)doubango.org>
+* 	@author Alex Vishnev
+* 		- Add support for rotation
+* 		- Camera toggle
 */
 
 package org.doubango.imsdroid.Screens;
@@ -42,6 +47,8 @@ import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MyAVSession.CallState;
 import org.doubango.imsdroid.utils.UriUtils;
+import org.doubango.imsdroid.media.VideoProducer;
+import android.view.OrientationEventListener;
 
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
@@ -82,10 +89,12 @@ public class ScreenAV extends Screen {
 	private String remoteUri;
 	
 	private MyAVSession avSession;
+	private static int countBlankPacket=0;
 	
 	private long startTime;
 	private final Timer timerInCall;
 	private final Timer timerSuicide;
+	private final Timer timerBlankPacket;
 	
 	private ViewFlipper fvFlipper;
 	private ImageView ivDialer;
@@ -123,6 +132,7 @@ public class ScreenAV extends Screen {
 	private final static int MENU_SHARE_CONTENT = 4;
 	private final static int MENU_SPEAKER = 5;
 	
+	
 	static {
 		//ScreenAV.__timerFormat = new SimpleDateFormat("HH:mm:ss");
 		ScreenAV.__timerFormat = new SimpleDateFormat("mm:ss");
@@ -133,6 +143,7 @@ public class ScreenAV extends Screen {
 		
 		this.timerInCall = new Timer();
 		this.timerSuicide = new Timer();
+		this.timerBlankPacket = new Timer();
 		
 		this.screenService = ServiceManager.getScreenService();
 	}	
@@ -140,7 +151,7 @@ public class ScreenAV extends Screen {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_av);
-        
+        OrientationEventListener mListener;
         // retrieve id
         this.id = getIntent().getStringExtra("id");
         this.avSession = MyAVSession.getSession(Long.parseLong(this.id));
@@ -216,6 +227,53 @@ public class ScreenAV extends Screen {
         this.btDtmf_Star.setOnClickListener(this.dtmf_OnClickListener);
 		
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+        mListener = new OrientationEventListener(IMSDroid.getContext(), SensorManager.SENSOR_DELAY_NORMAL) {
+        @Override
+        public void onOrientationChanged(int orient)
+        {
+        	//Log.d(ScreenAV.TAG,"Received Screen Orientation Change "+String.valueOf(orient));^M
+        	try { 
+					boolean flipVideo = ServiceManager.getConfigurationService().getBoolean(
+									CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.VIDEO_FLIP, Configuration.DEFAULT_GENERAL_FLIP_VIDEO);
+					
+					VideoProducer vid = MyAVSession.getVideoProducer();
+					if (vid != null) {
+						if ((orient > 0) && (orient < 50)) {
+							if (flipVideo) {
+								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(90);
+							} 
+							else {
+								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+							}
+						} 
+						else if ((orient > 50) && (orient < 120)) {
+							MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+						} 
+						else if ((orient > 120) && (orient < 200)) {
+							MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+						} 
+						else if ((orient > 200) && (orient < 290)) {
+							MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+						} 
+						else if ((orient > 270) && (orient < 360)) {
+							if (flipVideo) {
+								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(90);
+							} 
+							else {
+								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+							}
+						}
+					}
+				} catch (NullPointerException e) {
+					Log.d(ScreenAV.TAG, "Can't set Camera Parameters");
+				}
+        }
+     };
+     
+		if (mListener.canDetectOrientation()) {
+			Log.d(ScreenAV.TAG, "Can detect orientation");
+			mListener.enable();
+		}
 	}
 	
 	@Override
@@ -268,6 +326,7 @@ public class ScreenAV extends Screen {
 		
 		this.timerInCall.cancel();
 		this.timerSuicide.cancel();
+		this.cancelBlankPacket();
         
         if(avSession != null){
         	// FIXME: cleanup
@@ -282,8 +341,18 @@ public class ScreenAV extends Screen {
 		
 		switch(item.getItemId()){
 			case ScreenAV.MENU_PICKUP:
-				if(this.avSession != null){					
-					this.avSession.acceptCall();
+				if (this.avSession.getState() == CallState.INCALL)
+				{
+					Log.d(ScreenAV.TAG,"Toggle Camera");
+					//switch cameras
+					if (MyAVSession.getVideoProducer() != null)
+						MyAVSession.getVideoProducer().toggleCamera(this.llVideoLocal);
+
+				}
+				else {
+					if(this.avSession != null){					
+						this.avSession.acceptCall();
+					}
 				}
 				break;
 				
@@ -378,7 +447,9 @@ public class ScreenAV extends Screen {
 				itemShareContent.setEnabled(false);
 				break;
 			case INCALL:
-				itemPickUp.setEnabled(false);
+				itemPickUp.setIcon(R.drawable.dialer_48);
+				itemPickUp.setEnabled(true);
+				//itemPickUp.setEnabled(false);
 				itemHangUp.setEnabled(true);
 				itemHoldResume.setEnabled(true);
 				itemSpeaker.setEnabled(true);
@@ -450,7 +521,6 @@ public class ScreenAV extends Screen {
 	}
 	
 	public static boolean receiveCall(MyAVSession avSession){
-		
 		ServiceManager.getScreenService().bringToFront(Main.ACTION_SHOW_AVSCREEN,
 				new String[] {"session-id", new Long(avSession.getId()).toString()}
 		);
@@ -467,6 +537,28 @@ public class ScreenAV extends Screen {
 				}});
 		}
 	};
+	
+	private TimerTask timerTaskBlankPacket = new TimerTask(){
+		@Override
+		public void run() {	
+			Log.d(ScreenAV.TAG,"Resending Blank Packet "+String.valueOf(ScreenAV.countBlankPacket));
+			if (ScreenAV.countBlankPacket < 3) {
+				if (MyAVSession.getVideoProducer() != null) {
+					MyAVSession.getVideoProducer().pushBlankPacket();
+					ScreenAV.countBlankPacket++;
+				}
+			}
+			else {
+				this.cancel();
+				ScreenAV.countBlankPacket=0;
+			}
+		}
+	};
+	
+	private void cancelBlankPacket(){
+		this.timerBlankPacket.cancel();
+		ScreenAV.countBlankPacket=0;
+	}
 	
 	private TimerTask timerTaskSuicide = new TimerTask(){
 		@Override
@@ -559,6 +651,7 @@ public class ScreenAV extends Screen {
 		
 		this.llVideoLocal.removeAllViews();
 		if(start){
+			this.timerBlankPacket.cancel();
 			final View local_preview = MyAVSession.getVideoProducer().startPreview();
 			if(local_preview != null){
 				final ViewParent viewParent = local_preview.getParent();
@@ -616,6 +709,8 @@ public class ScreenAV extends Screen {
 											@Override
 											public void onClick(View v) {
 												ScreenAV.this.avSession.acceptCall();
+												MyAVSession.getVideoProducer().pushBlankPacket();
+												//ScreenAV.this.timerBlankPacket.schedule(ScreenAV.this.timerResendBlankPacket, 500, 500);
 											}
 										}, new OnClickListener() {
 											@Override
@@ -666,6 +761,7 @@ public class ScreenAV extends Screen {
 					/* schedule suicide */
 					this.timerSuicide.schedule(this.timerTaskSuicide, new Date(new Date().getTime() + 1500));
 					this.timerTaskInCall.cancel();
+					this.timerBlankPacket.cancel();
 				break;
 		}
 		
@@ -684,7 +780,7 @@ public class ScreenAV extends Screen {
 	public static class AVInviteEventHandler implements IInviteEventHandler
 	{
 		final static String TAG = AVInviteEventHandler.class.getCanonicalName();
-		ScreenAV avScreen;
+		private ScreenAV avScreen;
 		final AudioManager audioManager;
 		final PowerManager.WakeLock wakeLock;
 		
@@ -798,6 +894,11 @@ public class ScreenAV extends Screen {
 						this.wakeLock.release();
 					}
 					if(this.avScreen != null){
+						// Send blank packets to open NAT pinhole
+						if(this.avScreen.avSession != null && this.avScreen.avSession.getMediaType() == MediaType.AudioVideo || this.avScreen.avSession.getMediaType() == MediaType.Video){
+							this.avScreen.timerBlankPacket.schedule(this.avScreen.timerTaskBlankPacket, 0, 250);
+						}
+						// Update screen state
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
 								AVInviteEventHandler.this.avScreen.updateState(CallState.INCALL);					

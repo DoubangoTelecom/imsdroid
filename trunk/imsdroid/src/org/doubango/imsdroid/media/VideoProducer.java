@@ -17,17 +17,19 @@
 * with this program; if not, write to the Free Software Foundation, Inc., 
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
+* 	@author Mamadou Diop <diopmamadou(at)doubango.org>
+* 	@author Alex Vishnev 
+* 		- Add support for rotation
+* 		- Camera toggle
 */
 
 package org.doubango.imsdroid.media;
 
 import java.lang.reflect.Method;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
@@ -43,6 +45,9 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.LinearLayout;
 
 public class VideoProducer {
 	
@@ -51,11 +56,9 @@ public class VideoProducer {
 	private static int WIDTH = 176;
 	private static int HEIGHT = 144;
 	private static int FPS = 15;
-	private static float MAX_DELAY = 0.5f;
+	private static final int CALLABACK_BUFFERS_COUNT = 1;
 	
 	private final MyProxyVideoProducer videoProducer;
-	private final ArrayList<byte[]> buffers;
-	private final Semaphore semaphore;
 	
 	private Context context;
 	private int width;
@@ -63,26 +66,62 @@ public class VideoProducer {
 	private int fps;
 	private ByteBuffer frame;
 	private Preview preview;
+	private Camera camera;
+	@SuppressWarnings("unused")
 	private boolean running;
-	private boolean skipFrames = false;
+	private boolean toggle;
 	
 	
 	public VideoProducer(){
 		this.videoProducer = new MyProxyVideoProducer(this);
-		this.buffers = new ArrayList<byte[]>();
-		this.semaphore = new Semaphore(0);
 		
 		this.width = VideoProducer.WIDTH;
 		this.height = VideoProducer.HEIGHT;
 		this.fps = VideoProducer.FPS;
-		
-		
+		this.toggle = false;
 	}
 	
 	public void setActive(){
 		this.videoProducer.setActivate(true);
 	}
 	
+	public ProxyVideoProducer getProxyVideoProducer(){
+		return this.videoProducer;
+	}
+	
+	public Camera getCamera(){
+		return this.camera;
+	}
+	
+	public void pushBlankPacket(){
+		if(this.videoProducer != null && this.frame != null){
+			ByteBuffer buffer = ByteBuffer.allocateDirect(this.frame.capacity());
+			this.videoProducer.push(buffer, buffer.capacity());
+		}
+	}
+	
+	public void setCamera(Camera cam) {
+		this.camera = cam;
+	}
+	
+	public void toggleCamera(LinearLayout llVideoLocal)
+	{
+		if (this.preview != null) {
+			this.toggle = !this.toggle;
+			this.reset();
+			this.start();
+			final View local_preview = startPreview();
+			if(local_preview != null){
+				final ViewParent viewParent = local_preview.getParent();
+				if(viewParent != null && viewParent instanceof ViewGroup){
+					((ViewGroup)(viewParent)).removeView(local_preview);
+				}
+				llVideoLocal.addView(local_preview);
+				llVideoLocal.setVisibility(View.VISIBLE);
+			}
+		}
+	
+	}
 	public void setContext(Context context){
 		this.context = context;
 		if(this.context == null){
@@ -105,6 +144,14 @@ public class VideoProducer {
 			Log.e(VideoProducer.TAG, e.toString());
 		}
 	}
+	
+	private void setDisplayOrientation(Camera camera, int degrees) {
+		try {
+			APILevel8.setDisplayOrientationMethod.invoke(camera, degrees);
+		} catch (Exception e) {
+			Log.e(VideoProducer.TAG, e.toString());
+		}
+	}
 
 	@SuppressWarnings({ "unchecked", "unused" })
 	private List<Camera.Size> getSupportedPreviewSizes(Camera.Parameters params){
@@ -122,6 +169,11 @@ public class VideoProducer {
 		if(this.preview == null){
 			this.preview = new Preview(this);
 		}
+		else {
+			this.preview.setVisibility(View.VISIBLE);
+			this.preview.getHolder().setSizeFromLayout();
+			this.preview.bringToFront();
+		}
 		return this.preview;
 	}
 	
@@ -135,7 +187,6 @@ public class VideoProducer {
 		if(this.context != null){
 			
 			this.running = true;
-			new Thread(this.runnableSender).start();
 			return 0;
 		}
 		else{
@@ -146,12 +197,19 @@ public class VideoProducer {
 	
 	private synchronized int stop() {
 		Log.d(VideoProducer.TAG, "stop()");
-		
 		this.preview = null;
 		this.context = null;
 		
 		this.running = false;
-		this.semaphore.release();
+		
+		return 0;
+	}
+	
+	private synchronized int reset() {
+		Log.d(VideoProducer.TAG, "reset()");
+				
+	    this.preview.setVisibility(View.INVISIBLE);
+		this.running = false;
 		
 		return 0;
 	}
@@ -168,51 +226,6 @@ public class VideoProducer {
 		return 0;
 	}
 	
-	private Runnable runnableSender = new Runnable(){
-		@Override
-		public void run() {
-			Log.d(VideoProducer.TAG, "Video Sender ===== START");
-			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DEFAULT);
-			
-			byte[] data;
-			final int capacity = VideoProducer.this.frame.capacity();
-			while(VideoProducer.this.running){
-				try {
-					VideoProducer.this.semaphore.acquire();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					break;
-				}
-				
-				synchronized (VideoProducer.this.buffers) {			
-					if(!VideoProducer.this.buffers.isEmpty()){
-						data = VideoProducer.this.buffers.remove(0);
-					}
-					else{
-						continue;
-					}
-				}
-				
-				if(data != null){
-					try{
-						VideoProducer.this.frame.put(data);
-						VideoProducer.this.videoProducer.push(VideoProducer.this.frame, capacity);
-						VideoProducer.this.frame.rewind();
-					}
-					catch(BufferOverflowException e){
-						e.printStackTrace();
-						break;
-					}				
-				}
-			}
-			
-			VideoProducer.this.buffers.clear();
-			
-			Log.d(VideoProducer.TAG, "Video Sender ===== STOP");
-		}
-	};
-	
 	private PreviewCallback previewCallback = new PreviewCallback() {
   	  public void onPreviewFrame(byte[] _data, Camera _camera) {
   		  	VideoProducer.this.frame.put(_data);
@@ -222,27 +235,6 @@ public class VideoProducer {
 	  		if(APILevel8.isAvailable()){
 				VideoProducer.this.addCallbackBuffer(_camera, _data);
 			}
-	  		
-			/*if (VideoProducer.this.videoProducer != null) {	
-				if(VideoProducer.this.skipFrames){
-					//Log.d(VideoProducer.TAG, "Frame skipped");
-					synchronized (VideoProducer.this.buffers) {
-						if (VideoProducer.this.buffers.size() == 0) {
-							VideoProducer.this.skipFrames = false;
-						}
-					}
-					return;
-				}
-				else if (VideoProducer.this.buffers.size() >= VideoProducer.this.fps * VideoProducer.MAX_DELAY) {
-					//Log.d(VideoProducer.TAG, "....Too Many Frames");
-					VideoProducer.this.skipFrames = true;
-				}
-				
-				synchronized (VideoProducer.this.buffers) {
-					VideoProducer.this.buffers.add(_data);
-				}
-				VideoProducer.this.semaphore.release();
-			}*/
 		}
   	};
 	
@@ -265,21 +257,23 @@ public class VideoProducer {
 
 		public void surfaceCreated(SurfaceHolder holder) {
 			try {
-				boolean useFFC = ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FFC, Configuration.DEFAULT_GENERAL_FFC);
+				final boolean useFFC = ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FFC, Configuration.DEFAULT_GENERAL_FFC);
 				Log.d(VideoProducer.TAG, useFFC ? "Using FFC" : "Not using FFC");
-				
-				if(useFFC && FFC.isAvailable()){
-					this.camera = FFC.getCamera(); // Get FFC
+				if (!this.producer.toggle) {
+					if(useFFC && FFC.isAvailable()){
+						this.camera = FFC.getCamera(); // Get FFC camera
+					}
+					if(this.camera == null){
+						this.camera = Camera.open();
+					}
+					// Switch to Front Facing Camera
+					if(useFFC){
+						FFC.switchToFFC(this.camera);
+					}
 				}
-				if(this.camera == null){
+				else {
 					this.camera = Camera.open();
 				}
-				
-				// Switch to Front Facing Camera
-				if(useFFC){
-					FFC.switchToFFC(this.camera);
-				}
-				
 				Camera.Parameters parameters = this.camera.getParameters();
 				
 				/*
@@ -320,8 +314,10 @@ public class VideoProducer {
 		}
 
 		public void surfaceDestroyed(SurfaceHolder holder) {
+			Log.d(VideoProducer.TAG,"Destroy Preview");
 			if(this.camera != null){
 				// stop preview
+				Log.d(VideoProducer.TAG,"Close Camera");
 				this.camera.stopPreview();
 				if(APILevel8.isAvailable()){
 					this.producer.setPreviewCallbackWithBuffer(this.camera, null);
@@ -335,6 +331,7 @@ public class VideoProducer {
 		}
 
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+			Log.d(VideoProducer.TAG,"Surface Changed Callback");
 			if(this.camera != null && this.producer != null && this.producer.frame != null){
 				try{
 					Camera.Parameters parameters = this.camera.getParameters();
@@ -344,18 +341,22 @@ public class VideoProducer {
 				catch(Exception e){
 					Log.e(VideoProducer.TAG, e.toString());
 				}
-				
-				/*if(APILevel5.isAvailable()){
-					List<Camera.Size> list = this.producer.getSupportedPreviewSizes(parameters);
-					if(list != null){
-						for(Camera.Size size : list){
-							Log.d(VideoProducer.TAG, "size="+size.toString());
-						}
+												
+				android.content.res.Configuration conf = IMSDroid.getContext().getResources().getConfiguration();
+				if(APILevel8.isAvailable()){
+					// Camera Orientation
+					switch(conf.orientation){
+						case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
+							this.producer.setDisplayOrientation(this.camera, 0);
+							Log.d(VideoProducer.TAG, "Orientation=landscape");
+							break;
+						case android.content.res.Configuration.ORIENTATION_PORTRAIT:
+							this.producer.setDisplayOrientation(this.camera, 90);
+							Log.d(VideoProducer.TAG, "Orientation=portrait");
+							break;
 					}
-				}*/
-				
-				if(APILevel8.isAvailable()){	
-					for(int i=0; i<1; i++){
+					// Callback Buffers
+					for(int i=0; i<VideoProducer.CALLABACK_BUFFERS_COUNT; i++){
 						this.producer.addCallbackBuffer(this.camera, new byte[this.producer.frame.capacity()]);
 					}
 				}
@@ -403,16 +404,17 @@ public class VideoProducer {
 	static class APILevel8{
 		static Method addCallbackBufferMethod = null;
 		static Method setPreviewCallbackWithBufferMethod = null;
+		static Method setDisplayOrientationMethod = null;
 		static boolean isOK = false;
 		
 		static {
 			try {
-				APILevel8.addCallbackBufferMethod = Class.forName(
-						"android.hardware.Camera").getMethod("addCallbackBuffer",
-						byte[].class);
-				APILevel8.setPreviewCallbackWithBufferMethod = Class.forName(
-						"android.hardware.Camera").getMethod(
+				APILevel8.addCallbackBufferMethod = Camera.class.getMethod(
+						"addCallbackBuffer", byte[].class);
+				APILevel8.setPreviewCallbackWithBufferMethod = Camera.class.getMethod(
 						"setPreviewCallbackWithBuffer", PreviewCallback.class);
+				APILevel8.setDisplayOrientationMethod = Camera.class.getMethod(
+						"setDisplayOrientation", int.class);
 				
 				APILevel8.isOK = true;
 			} catch (Exception e) {

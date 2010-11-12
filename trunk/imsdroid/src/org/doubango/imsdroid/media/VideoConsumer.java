@@ -17,6 +17,10 @@
 * with this program; if not, write to the Free Software Foundation, Inc., 
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
+* 	@author Mamadou Diop <diopmamadou(at)doubango.org>
+* 	@author Alex Vishnev 
+* 		- Add support for rotation
+* 		- Camera toggle
 */
 
 package org.doubango.imsdroid.media;
@@ -132,6 +136,20 @@ public class VideoConsumer {
 		if (canvas != null){		
 			if(this.fullScreen){
 				canvas.drawBitmap(this.bitmap, null, this.preview.rect, null);
+				
+				/*Matrix mat = new Matrix();
+				//WindowManager mWinMgr = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+				//int displayWidth = mWinMgr.getDefaultDisplay().getWidth();
+				//int displayHeight = mWinMgr.getDefaultDisplay().getHeight();
+				//Log.d(VideoConsumer.TAG,"Display Width "+String.valueOf(displayWidth) + " Display Height"+String.valueOf(displayHeight));
+				//Log.d(VideoConsumer.TAG,"Video Width "+String.valueOf(this.width) + " Video Height"+String.valueOf(this.height));
+				if ((this.width == 176) && (this.height == 144)){
+					mat.postScale((float)3.4, (float) 3.5);
+				}
+				else if ((this.width == 352) && (this.height == 288)){
+					mat.postScale((float)1.75, (float) 1.7);
+				}
+				canvas.drawBitmap(this.bitmap, mat, null);*/
 			}
 			else{
 				canvas.drawBitmap(this.bitmap, 0, 0, null);
