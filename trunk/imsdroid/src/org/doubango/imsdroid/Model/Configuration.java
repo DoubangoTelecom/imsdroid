@@ -64,6 +64,7 @@ public class Configuration {
 	
 	public static final boolean DEFAULT_GENERAL_FULL_SCREEN_VIDEO = true;
 	public static final boolean DEFAULT_GENERAL_FFC = true;
+	public static final boolean DEFAULT_GENERAL_FLIP_VIDEO = false;
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
 	public static final float DEFAULT_GENERAL_AUDIO_PLAY_LEVEL = 0.25f;
 	public static final String DEFAULT_GENERAL_ENUM_DOMAIN = "e164.org";
@@ -125,7 +126,7 @@ public class Configuration {
 		DISPLAY_NAME, IMPI, IMPU, PASSWORD,
 
 		/* === GENERAL === */
-		FULL_SCREEN_VIDEO, FFC, AUDIO_PLAY_LEVEL, ENUM_DOMAIN,
+		FULL_SCREEN_VIDEO, FFC, VIDEO_FLIP, AUDIO_PLAY_LEVEL, ENUM_DOMAIN,
 
 		/* === VoLTE === */
 

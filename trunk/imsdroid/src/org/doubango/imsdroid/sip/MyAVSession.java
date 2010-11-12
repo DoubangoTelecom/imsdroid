@@ -201,12 +201,12 @@ public class MyAVSession  extends MyInviteSession{
 		* The URN is registered at http://www.3gpp.com/Uniform-Resource-Name-URN-list.html.
 		* Summary of the URN: This URN indicates that the device supports the IMS Multimedia Telephony Communication Service.
 		*
-		* Contact: <sip:impu@doubango.org;gr=urn:uuid:xxx;comp=sigcomp>;+g.3gpp.icsi-ref="urn%3Aurn-7%3gpp-service.ims.icsi.mmtel"
-		* Accept-Contact: *;+g.3gpp.icsi-ref="urn%3Aurn-7%3gpp-service.ims.icsi.mmtel"
+		* Contact: <sip:impu@doubango.org;gr=urn:uuid:xxx;comp=sigcomp>;+g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel"
+		* Accept-Contact: *;+g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel"
 		* P-Preferred-Service: urn:urn-7:3gpp-service.ims.icsi.mmtel
 		*/		
-		this.session.addCaps("+g.3gpp.icsi-ref", "\"urn%3Aurn-7%3gpp-service.ims.icsi.mmtel\"");
-		this.session.addHeader("Accept-Contact", "*;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3gpp-service.ims.icsi.mmtel\"");
+		this.session.addCaps("+g.3gpp.icsi-ref", "\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
+		this.session.addHeader("Accept-Contact", "*;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
 		this.session.addHeader("P-Preferred-Service", "urn:urn-7:3gpp-service.ims.icsi.mmtel");
 	}
 	

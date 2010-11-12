@@ -42,6 +42,7 @@ public class ScreenGeneral  extends Screen {
 	private Spinner spAudioPlaybackLevel;
 	private CheckBox cbFullScreenVideo;
 	private CheckBox cbFFC;
+	private CheckBox cbVflip;
 	private CheckBox cbAutoStart;
 	private EditText etEnumDomain;
 	
@@ -67,6 +68,7 @@ public class ScreenGeneral  extends Screen {
         
         this.cbFullScreenVideo = (CheckBox)this.findViewById(R.id.screen_general_checkBox_fullscreen);
         this.cbFFC = (CheckBox)this.findViewById(R.id.screen_general_checkBox_ffc);
+        this.cbVflip = (CheckBox)this.findViewById(R.id.screen_general_checkBox_videoflip);
         this.cbAutoStart = (CheckBox)this.findViewById(R.id.screen_general_checkBox_autoStart);
         this.spAudioPlaybackLevel = (Spinner)this.findViewById(R.id.screen_general_spinner_playback_level);
         this.etEnumDomain = (EditText)this.findViewById(R.id.screen_general_editText_enum_domain);
@@ -78,6 +80,7 @@ public class ScreenGeneral  extends Screen {
         
         this.cbFullScreenVideo.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FULL_SCREEN_VIDEO, Configuration.DEFAULT_GENERAL_FULL_SCREEN_VIDEO));
         this.cbFFC.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FFC, Configuration.DEFAULT_GENERAL_FFC));
+        this.cbVflip.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.VIDEO_FLIP, Configuration.DEFAULT_GENERAL_FLIP_VIDEO));
         SharedPreferences settings = getSharedPreferences(IMSDroid.getContext().getPackageName(), 0);
         this.cbAutoStart.setChecked((settings != null && settings.getBoolean("autostarts", Configuration.DEFAULT_GENERAL_AUTOSTART)));
         this.spAudioPlaybackLevel.setSelection(this.getSpinnerIndex(
@@ -89,6 +92,7 @@ public class ScreenGeneral  extends Screen {
         
         this.addConfigurationListener(this.cbFullScreenVideo);
         this.addConfigurationListener(this.cbFFC);
+        this.addConfigurationListener(this.cbVflip);
         this.addConfigurationListener(this.cbAutoStart);
         this.addConfigurationListener(this.etEnumDomain);
         this.addConfigurationListener(this.spAudioPlaybackLevel);
@@ -99,6 +103,7 @@ public class ScreenGeneral  extends Screen {
 			
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FULL_SCREEN_VIDEO, this.cbFullScreenVideo.isChecked());
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FFC, this.cbFFC.isChecked());
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.VIDEO_FLIP, this.cbVflip.isChecked());
 			this.configurationService.setFloat(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.AUDIO_PLAY_LEVEL, ((AudioPlayBackLevel)this.spAudioPlaybackLevel.getSelectedItem()).value);
 			this.configurationService.setString(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.ENUM_DOMAIN, this.etEnumDomain.getText().toString());
 			
