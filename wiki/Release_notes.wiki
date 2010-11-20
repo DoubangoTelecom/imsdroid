@@ -4,7 +4,8 @@
 <wiki:toc max_depth="2" />
 
 ==1.0.320==
- * Fix issue 81, issue 84, issue 89 and issue 91
+ * Fix issue 8, issue 81, issue 84, issue 89 and issue 91
+ * Add support for G.729
  * Redesign video producer for better performances
 
 ==1.0.302==
