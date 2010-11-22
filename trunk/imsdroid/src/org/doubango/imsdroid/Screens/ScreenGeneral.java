@@ -52,7 +52,7 @@ public class ScreenGeneral  extends Screen {
 	private final static AudioPlayBackLevel[] audioPlaybackLevels =  new AudioPlayBackLevel[]{
 					new AudioPlayBackLevel(0.25f, "Low"),
 					new AudioPlayBackLevel(0.50f, "Medium"),
-					new AudioPlayBackLevel(0.75f, "Hight"),
+					new AudioPlayBackLevel(0.75f, "High"),
 					new AudioPlayBackLevel(1.0f, "Maximum"),
 			};
 	

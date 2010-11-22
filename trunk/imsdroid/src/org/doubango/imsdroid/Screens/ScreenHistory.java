@@ -79,7 +79,7 @@ implements IHistoryEventHandler
 	private final static int MENU_DELETE_ALLEVENTS = 2;
 	
 	private final static int MENU_VOICE_CALL = 10;
-	private final static int MENU_VISIO_CALL = 11;
+	private final static int MENU_VIDEO_CALL = 11;
 	//private final static int MENU_SEND_MESSAGE = 12;
 	private final static int MENU_SEND_SMS = 13;
 	private final static int MENU_SEND_FILE = 14;
@@ -171,7 +171,7 @@ implements IHistoryEventHandler
 		super.onCreateContextMenu(menu, v, menuInfo);
 		
 		menu.add(0, ScreenHistory.MENU_VOICE_CALL, Menu.NONE, "Make Voice Call");
-		menu.add(0, ScreenHistory.MENU_VISIO_CALL, Menu.NONE, "Make Visio Call");
+		menu.add(0, ScreenHistory.MENU_VIDEO_CALL, Menu.NONE, "Make Video Call");
 		//menu.add(0, ScreenHistory.MENU_SEND_MESSAGE, Menu.NONE, "Send Short Message");
 		menu.add(0, ScreenHistory.MENU_SEND_SMS, Menu.NONE, "Send SMS");
 		//menu.add(0, ScreenHistory.MENU_SEND_FILE, Menu.NONE, "Send File");
@@ -192,7 +192,7 @@ implements IHistoryEventHandler
 			case ScreenHistory.MENU_VOICE_CALL:
 				ScreenAV.makeCall(event.getRemoteParty(), MediaType.Audio);
 				return true;
-			case ScreenHistory.MENU_VISIO_CALL:
+			case ScreenHistory.MENU_VIDEO_CALL:
 				ScreenAV.makeCall(event.getRemoteParty(), MediaType.AudioVideo);
 				return true;
 			case ScreenHistory.MENU_SHARE_CONTENT:
