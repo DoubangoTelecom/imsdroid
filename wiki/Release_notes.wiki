@@ -4,7 +4,7 @@
 <wiki:toc max_depth="2" />
 
 ==1.1.327==
- * Fix issue 56, issue 84, issue 96, issue 100, issue 86 and issue 108
+ * Fix issue 21, issue 56, issue 84, issue 96, issue 100, issue 86 and issue 108
  * Add support for iLBC
  * Add support for up to VGA video sizeo
  * Bundle apk (Both ARMv5te and ARMv7-a with cortex-a8)
