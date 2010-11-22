@@ -66,7 +66,7 @@ cd $(DOUBANGO_HOME)/android-projects
 # For neon optimizations
 #../bindings/java/android/buildAll.sh NEON=yes
 }}}
-You can add *NEON=yes* to enable neon optimization for armv7-a processors. You MUST use at least NDK r4b.<br />
+You can add *NEON=yes* to enable neon optimization for armv7-a processors. You MUST use at least [http://developer.android.com/sdk/ndk/index.html NDK r4b].<br />
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
 The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *imsdroid\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
 
@@ -107,7 +107,7 @@ make PROJECT=g729b BT=static install
 #../bindings/java/android/buildAll.sh G729=yes NEON=yes
 }}}
 
-You can add *NEON=yes* to enable neon optimization for armv7-a processors. You MUST use at least NDK r4b.<br />
+You can add *NEON=yes* to enable neon optimization for armv7-a processors. You MUST use at least [http://developer.android.com/sdk/ndk/index.html NDK r4b].<br />
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
 The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *imsdroid\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
 
