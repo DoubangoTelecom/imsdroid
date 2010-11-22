@@ -82,7 +82,7 @@ implements IContactsEventHandler
 	private final static int MENU_DELETE_GROUP = 4;
 	
 	private final static int MENU_VOICE_CALL = 10;
-	private final static int MENU_VISIO_CALL = 11;
+	private final static int MENU_VIDEO_CALL = 11;
 	private final static int MENU_SHARE_CONTENT = 12;
 	private final static int MENU_SEND_SMS = 13;
 	private final static int MENU_SEND_FILE = 14;
@@ -177,7 +177,7 @@ implements IContactsEventHandler
 		super.onCreateContextMenu(menu, v, menuInfo);
 		
 		menu.add(0, ScreenContacts.MENU_VOICE_CALL, 0, "Make Voice Call");
-		menu.add(0, ScreenContacts.MENU_VISIO_CALL, 0, "Make Visio Call");
+		menu.add(0, ScreenContacts.MENU_VIDEO_CALL, 0, "Make Video Call");
 		menu.add(0, ScreenContacts.MENU_SHARE_CONTENT, 0, "Share Content");
 		menu.add(0, ScreenContacts.MENU_SEND_SMS, 0, "Send SMS");
 		//menu.add(0, ScreenContacts.MENU_SEND_FILE, 0, "Send File");
@@ -197,7 +197,7 @@ implements IContactsEventHandler
 			case ScreenContacts.MENU_VOICE_CALL:
 				ScreenAV.makeCall(contact.getUri(), MediaType.Audio);
 				break;
-			case ScreenContacts.MENU_VISIO_CALL:
+			case ScreenContacts.MENU_VIDEO_CALL:
 				ScreenAV.makeCall(contact.getUri(), MediaType.AudioVideo);
 				return true;
 			case ScreenContacts.MENU_SHARE_CONTENT:
