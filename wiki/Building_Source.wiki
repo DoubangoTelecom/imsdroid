@@ -63,7 +63,9 @@ cd $(DOUBANGO_HOME)/android-projects
 {{{
 ../bindings/java/android/buildAll.sh
 }}}
+You can add *NEON=yes* to enable neon optimization for armv7-a processors.<br />
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
+The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *imsdroid\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
 
 === Building libtinyWRAP.so with G729AB ===
 Starting IMSDroid revision 311 and [http://www.doubango.org/ doubango] revision 498 we fully support G.729 annex A and B (CNG and VAD).<br />
@@ -98,7 +100,9 @@ make PROJECT=g729b BT=static install
 ../bindings/java/android/buildAll.sh G729=yes
 }}}
 
+You can add *NEON=yes* to enable neon optimization for armv7-a processors.<br />
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
+The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *imsdroid\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
 
 
 Et voilà
