@@ -103,16 +103,19 @@ public class MyAVSession  extends MyInviteSession{
 	}
 	
 	public static MyAVSession takeIncomingSession(MySipStack sipStack, CallSession session, MediaType mediaType){
-		MyAVSession avSession = new MyAVSession(sipStack, session, mediaType, CallState.CALL_INCOMING);
-		MyAVSession.sessions.put(avSession.getId(), avSession);
-		return avSession;
+		synchronized(MyAVSession.sessions){
+			MyAVSession avSession = new MyAVSession(sipStack, session, mediaType, CallState.CALL_INCOMING);
+			MyAVSession.sessions.put(avSession.getId(), avSession);
+			return avSession;
+		}
 	}
 	
 	public static MyAVSession createOutgoingSession(MySipStack sipStack, MediaType mediaType){
-		MyAVSession avSession = new MyAVSession(sipStack, null, mediaType, CallState.CALL_INPROGRESS);
-		MyAVSession.sessions.put(avSession.getId(), avSession);
-		
-		return avSession;
+		synchronized(MyAVSession.sessions){
+			MyAVSession avSession = new MyAVSession(sipStack, null, mediaType, CallState.CALL_INPROGRESS);
+			MyAVSession.sessions.put(avSession.getId(), avSession);
+			return avSession;
+		}	
 	}
 	
 	public static MyAVSession getSession(long id){

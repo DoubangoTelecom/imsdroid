@@ -36,12 +36,9 @@ import org.doubango.imsdroid.events.IContactsEventHandler;
 import org.doubango.imsdroid.media.MediaType;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Contacts.People;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;

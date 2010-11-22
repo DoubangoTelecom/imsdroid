@@ -898,7 +898,7 @@ implements ISipService, tinyWRAPConstants {
 									RegistrationEventTypes.UNREGISTRATION_INPROGRESS, code, phrase));
 					}
 					// Audio/Video/Msrp Calls
-					if(MyAVSession.getSession(id) != null || MyMsrpSession.getSession(id) != null){
+					else if(MyAVSession.getSession(id) != null || MyMsrpSession.getSession(id) != null){
 						this.sipService.onInviteEvent(new InviteEventArgs(id, InviteEventTypes.TERMWAIT, phrase)); 
 					}
 					// Subscription

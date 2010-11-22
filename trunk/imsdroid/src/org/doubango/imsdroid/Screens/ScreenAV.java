@@ -152,6 +152,7 @@ public class ScreenAV extends Screen {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_av);
         OrientationEventListener mListener;
+        
         // retrieve id
         this.id = getIntent().getStringExtra("id");
         this.avSession = MyAVSession.getSession(Long.parseLong(this.id));
@@ -341,8 +342,7 @@ public class ScreenAV extends Screen {
 		
 		switch(item.getItemId()){
 			case ScreenAV.MENU_PICKUP:
-				if (this.avSession.getState() == CallState.INCALL)
-				{
+				if (this.avSession.getState() == CallState.INCALL){
 					Log.d(ScreenAV.TAG,"Toggle Camera");
 					//switch cameras
 					if (MyAVSession.getVideoProducer() != null)
@@ -665,6 +665,10 @@ public class ScreenAV extends Screen {
 	}
 	
 	private void updateState(CallState state){
+		this.updateState(state, null);
+	}
+	
+	private void updateState(CallState state, String phrase){
 		if(this.avSession== null){
 			return;
 		}
@@ -709,8 +713,6 @@ public class ScreenAV extends Screen {
 											@Override
 											public void onClick(View v) {
 												ScreenAV.this.avSession.acceptCall();
-												MyAVSession.getVideoProducer().pushBlankPacket();
-												//ScreenAV.this.timerBlankPacket.schedule(ScreenAV.this.timerResendBlankPacket, 500, 500);
 											}
 										}, new OnClickListener() {
 											@Override
@@ -755,7 +757,7 @@ public class ScreenAV extends Screen {
 				break;
 				
 			case CALL_TERMINATED:
-					ScreenAV.this.tvInfo.setText("Call Terminated");
+					ScreenAV.this.tvInfo.setText(phrase == null ? "Call Terminated" : phrase);
 					ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_red_16);
 					
 					/* schedule suicide */
@@ -922,7 +924,7 @@ public class ScreenAV extends Screen {
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
-								AVInviteEventHandler.this.avScreen.updateState(CallState.CALL_TERMINATED);
+								AVInviteEventHandler.this.avScreen.updateState(CallState.CALL_TERMINATED, phrase);
 							}});
 					}
 					if(this.wakeLock != null && this.wakeLock.isHeld()){

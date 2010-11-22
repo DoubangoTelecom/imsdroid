@@ -10,10 +10,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Model.HistoryMsrpEvent;
 import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
-import org.doubango.imsdroid.Screens.ScreenAV.AVInviteEventHandler;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.events.EventHandler;
 import org.doubango.imsdroid.events.IInviteEventHandler;
@@ -36,8 +34,6 @@ import org.doubango.tinyWRAP.tmsrp_event_type_t;
 import org.doubango.tinyWRAP.tmsrp_request_type_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
-import android.content.Context;
-import android.os.PowerManager;
 import android.util.Log;
 
 public class MyMsrpSession extends MyInviteSession implements IMsrpEventDispatcher{
