@@ -62,6 +62,7 @@ cd $(DOUBANGO_HOME)/android-projects
  # Build all projects:
 {{{
 ../bindings/java/android/buildAll.sh
+#../bindings/java/android/buildAll.sh NEON=yes
 }}}
 You can add *NEON=yes* to enable neon optimization for armv7-a processors.<br />
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
@@ -98,6 +99,7 @@ make PROJECT=g729b BT=static install
  # Build tinyWRAP with G29AB
 {{{
 ../bindings/java/android/buildAll.sh G729=yes
+#../bindings/java/android/buildAll.sh G729=yes NEON=yes
 }}}
 
 You can add *NEON=yes* to enable neon optimization for armv7-a processors.<br />
