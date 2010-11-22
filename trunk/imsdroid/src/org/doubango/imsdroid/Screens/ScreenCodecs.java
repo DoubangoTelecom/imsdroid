@@ -90,7 +90,7 @@ public class ScreenCodecs  extends Screen{
         }
         
         //
-        // Video COdecs
+        // Video Codecs
         //
         this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_theora.swigValue(), "Theora", "Theora"));
         this.items.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue(), "H264-BP10", "H.264 Base Profile 1.0"));

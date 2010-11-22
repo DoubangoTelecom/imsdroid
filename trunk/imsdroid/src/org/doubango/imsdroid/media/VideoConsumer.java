@@ -123,11 +123,15 @@ public class VideoConsumer {
 		}
 	}
 	
+	//int hack = 0;
+	
 	public int consume(ProxyVideoFrame _frame){		
 		if(this.preview == null || this.preview.holder == null || this.bitmap == null){
 			Log.e(VideoConsumer.TAG, "Invalid state");
 			return -1;
 		}
+		
+		//if(hack++%2 == 0) return 0;
 		
 		_frame.getContent(this.frame, this.frame.capacity());
 		this.bitmap.copyPixelsFromBuffer(this.frame);
@@ -167,7 +171,7 @@ public class VideoConsumer {
 			this.preview.holder.unlockCanvasAndPost(canvas);
 		}
 		else{
-			Log.w(VideoConsumer.TAG, "Invalid canvas");
+			Log.d(VideoConsumer.TAG, "Invalid canvas");
 		}
 		
 		

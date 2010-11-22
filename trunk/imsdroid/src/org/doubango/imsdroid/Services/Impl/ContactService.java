@@ -62,6 +62,7 @@ import org.doubango.imsdroid.utils.StringUtils;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import android.content.ContentUris;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -69,6 +70,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
+import android.provider.Contacts.People.Phones;
 import android.util.Log;
 
 public class ContactService  extends Service implements IContactService, IRegistrationEventHandler, ISubscriptionEventHandler, IXcapEventHandler{
@@ -416,6 +418,28 @@ public class ContactService  extends Service implements IContactService, IRegist
 			try {
 				Log.d(ContactService.TAG, "Loading contacts (local)");
 				ContactService.this.addressBook.clear();
+				
+				
+				String[] projectionp = new String[]{
+		                People.NAME,
+		                People.NUMBER
+		             };
+
+		        Cursor c = IMSDroid.getContext().getContentResolver().query(People.CONTENT_URI, projectionp, null, null, People.NAME + " ASC");
+		        c.moveToFirst();
+		        int nameCol = c.getColumnIndex(People.NAME);
+		        int numCol = c.getColumnIndex(People.NUMBER);
+
+		        int nContacts = c.getCount();
+		        do{
+		        	String numr = c.getString(numCol);
+		        	int t = 0;
+		        	t++;
+		            //Do something
+		        } while(c.moveToNext());
+				
+				
+				
 				
 				if (ContactService.this.addressBook.getGroup("rcs") == null) {
 					ContactService.this.addressBook.addGroup("rcs", "Social buddies");

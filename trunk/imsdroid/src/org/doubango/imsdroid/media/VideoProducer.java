@@ -56,7 +56,7 @@ public class VideoProducer {
 	private static int WIDTH = 176;
 	private static int HEIGHT = 144;
 	private static int FPS = 15;
-	private static final int CALLABACK_BUFFERS_COUNT = 1;
+	private static final int CALLABACK_BUFFERS_COUNT = 3;
 	
 	private final MyProxyVideoProducer videoProducer;
 	
@@ -104,8 +104,7 @@ public class VideoProducer {
 		this.camera = cam;
 	}
 	
-	public void toggleCamera(LinearLayout llVideoLocal)
-	{
+	public void toggleCamera(LinearLayout llVideoLocal){
 		if (this.preview != null) {
 			this.toggle = !this.toggle;
 			this.reset();
@@ -131,7 +130,7 @@ public class VideoProducer {
 	
 	private void addCallbackBuffer(Camera camera, byte[] buffer) {
 		try {
-			APILevel8.addCallbackBufferMethod.invoke(camera, buffer);
+			APILevel7.addCallbackBufferMethod.invoke(camera, buffer);
 		} catch (Exception e) {
 			Log.e(VideoProducer.TAG, e.toString());
 		}
@@ -139,7 +138,7 @@ public class VideoProducer {
 	
 	private void setPreviewCallbackWithBuffer(Camera camera, PreviewCallback callback) {
 		try {
-			APILevel8.setPreviewCallbackWithBufferMethod.invoke(camera, callback);
+			APILevel7.setPreviewCallbackWithBufferMethod.invoke(camera, callback);
 		} catch (Exception e) {
 			Log.e(VideoProducer.TAG, e.toString());
 		}
@@ -147,7 +146,8 @@ public class VideoProducer {
 	
 	private void setDisplayOrientation(Camera camera, int degrees) {
 		try {
-			APILevel8.setDisplayOrientationMethod.invoke(camera, degrees);
+			if(APILevel8.setDisplayOrientationMethod != null)
+				APILevel8.setDisplayOrientationMethod.invoke(camera, degrees);
 		} catch (Exception e) {
 			Log.e(VideoProducer.TAG, e.toString());
 		}
@@ -232,7 +232,7 @@ public class VideoProducer {
   		  	VideoProducer.this.videoProducer.push(VideoProducer.this.frame, VideoProducer.this.frame.capacity());
 			VideoProducer.this.frame.rewind();
 		
-	  		if(APILevel8.isAvailable()){
+	  		if(APILevel7.isAvailable()){
 				VideoProducer.this.addCallbackBuffer(_camera, _data);
 			}
 		}
@@ -297,7 +297,7 @@ public class VideoProducer {
 
 				this.camera.setPreviewDisplay(holder);
 				
-				if(APILevel8.isAvailable()){
+				if(APILevel7.isAvailable()){
 					this.producer.setPreviewCallbackWithBuffer(this.camera, this.producer.previewCallback);
 				}
 				else{
@@ -319,7 +319,7 @@ public class VideoProducer {
 				// stop preview
 				Log.d(VideoProducer.TAG,"Close Camera");
 				this.camera.stopPreview();
-				if(APILevel8.isAvailable()){
+				if(APILevel7.isAvailable()){
 					this.producer.setPreviewCallbackWithBuffer(this.camera, null);
 				}
 				else{
@@ -343,7 +343,7 @@ public class VideoProducer {
 				}
 												
 				android.content.res.Configuration conf = IMSDroid.getContext().getResources().getConfiguration();
-				if(APILevel8.isAvailable()){
+				if(APILevel7.isAvailable()){
 					// Camera Orientation
 					switch(conf.orientation){
 						case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
@@ -402,17 +402,11 @@ public class VideoProducer {
 	
 	/* ==================================================*/
 	static class APILevel8{
-		static Method addCallbackBufferMethod = null;
-		static Method setPreviewCallbackWithBufferMethod = null;
 		static Method setDisplayOrientationMethod = null;
 		static boolean isOK = false;
 		
 		static {
 			try {
-				APILevel8.addCallbackBufferMethod = Camera.class.getMethod(
-						"addCallbackBuffer", byte[].class);
-				APILevel8.setPreviewCallbackWithBufferMethod = Camera.class.getMethod(
-						"setPreviewCallbackWithBuffer", PreviewCallback.class);
 				APILevel8.setDisplayOrientationMethod = Camera.class.getMethod(
 						"setDisplayOrientation", int.class);
 				
@@ -428,8 +422,33 @@ public class VideoProducer {
 	}
 	
 	/* ==================================================*/
+	static class APILevel7{
+		static Method addCallbackBufferMethod = null;
+		static Method setPreviewCallbackWithBufferMethod = null;
+		static boolean isOK = false;
+		
+		static {
+			try {
+				// According to http://developer.android.com/reference/android/hardware/Camera.html both addCallbackBuffer and setPreviewCallbackWithBuffer
+				// are only available starting API level 8. But it's not true as these functions exist in API level 7 but are hidden.
+				APILevel7.addCallbackBufferMethod = Camera.class.getMethod(
+						"addCallbackBuffer", byte[].class);
+				APILevel7.setPreviewCallbackWithBufferMethod = Camera.class.getMethod(
+						"setPreviewCallbackWithBuffer", PreviewCallback.class);
+				
+				APILevel7.isOK = true;
+			} catch (Exception e) {
+				Log.d(VideoProducer.TAG, e.toString());
+			}
+		}
+		
+		static boolean isAvailable(){
+			return APILevel7.isOK;
+		}
+	}
+	
+	/* ==================================================*/
 	static class APILevel5{
-		static boolean hasAPILeve5Functions = false;
 		static Method getSupportedPreviewSizesMethod = null;
 		static boolean isOK = false;
 		
@@ -480,7 +499,7 @@ public class VideoProducer {
 					break;
 				}
 				catch(Exception e){
-					Log.e(VideoProducer.TAG, e.toString());
+					Log.d(VideoProducer.TAG, e.toString());
 				}
 				
 				++index;
