@@ -105,27 +105,28 @@ public class Main extends Activity {
             mCamera = Camera.open();
             try {
             	
-            	//--- Del Streak
-            	try {
-            		// int android.hardware.Camera.DualCameraSwitch(int)
-            		//Method DualCameraSwitch = Class.forName(
-    				//		"android.hardware.Camera").getMethod("android.hardware.Camera.DualCameraSwitch",int.class);
-            		//DualCameraSwitch.invoke(mCamera, 1);
-            		
-            		Method[] m = Class.forName("android.hardware.Camera").getMethods();
-					for(int i=0; i<m.length; i++){
-						Log.d(Main.TAG,"  Camera-method:" + m[i].toString());
-						
-						if(m[i].getName().equals("DualCameraSwitch")){
-							Log.d(Main.TAG,"DualCameraSwitch FOUND");
-							m[i].invoke(mCamera, (int)1);
-							break;
+            	String packages[] = {
+        				"com.dell.android.hardware",
+        				"com.android.camera",
+        				"android.hardware.Camera"
+        		};
+            	for(String pckg : packages){
+            		try{
+	            		Method[] m = Class.forName(pckg).getMethods();
+						for(int i=0; i<m.length; i++){
+							Log.d(Main.TAG,"  Camera-method:" + m[i].toString());
+							
+							if(m[i].getName().equals("openDualCamera")){
+								Log.d(Main.TAG,"openDualCamera FOUND");
+								m[i].invoke(mCamera, (int)1);
+								break;
+							}
 						}
-					}
-    			} catch (Exception e) {
-    				Log.e(Main.TAG, e.toString());
-    			}
-            	
+            		}
+            		catch (Exception e) {
+        				Log.e(Main.TAG, e.toString());
+        			}
+        		}
             	
             	Camera.Parameters parameters = mCamera.getParameters();
             	parameters.setPreviewFormat(PixelFormat.YCbCr_420_SP);
