@@ -293,13 +293,13 @@ public class MyMsrpSession extends MyInviteSession implements IMsrpEventDispatch
 		this.fileLength = this.file.length();
 		this.filePath = file.getAbsolutePath();
 		this.historyEvent.setFilePath(this.filePath);
-		final String fileSlector = String.format("name:\"%s\" type:%s size:%d",
+		final String fileSelector = String.format("name:\"%s\" type:%s size:%d",
 				this.fileName, this.getFileType(path), this.fileLength);
 		
 		 ActionConfig actionConfig = new ActionConfig();
          actionConfig
              .setMediaString(twrap_media_type_t.twrap_media_msrp, "file-path", path)
-             .setMediaString(twrap_media_type_t.twrap_media_msrp, "file-selector", fileSlector)
+             .setMediaString(twrap_media_type_t.twrap_media_msrp, "file-selector", fileSelector)
              .setMediaString(twrap_media_type_t.twrap_media_msrp, "accept-types", MyMsrpSession.FILE_ACCEPT_TYPES)
              .setMediaString(twrap_media_type_t.twrap_media_msrp, "file-disposition", "attachment")
              .setMediaString(twrap_media_type_t.twrap_media_msrp, "file-icon", "cid:test@doubango.org")
@@ -316,7 +316,13 @@ public class MyMsrpSession extends MyInviteSession implements IMsrpEventDispatch
 			return false;
 		}
 		
-		return false;
+		ActionConfig actionConfig = new ActionConfig();
+		actionConfig
+        .setMediaString(twrap_media_type_t.twrap_media_msrp, "content-type", ContentType);
+		boolean ret = this.session.callMsrp(this.remoteParty, actionConfig);
+		actionConfig.delete();
+		
+		return ret;
 	}
 	
 	public void setCallback(MsrpCallback callback){
