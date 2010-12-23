@@ -20,36 +20,54 @@
 */
 package org.doubango.imsdroid.sip;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.HistoryAVCallEvent;
+import org.doubango.imsdroid.Model.ObservableHashMap;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Model.HistoryEvent.StatusType;
 import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
-import org.doubango.imsdroid.media.AudioConsumer;
-import org.doubango.imsdroid.media.AudioProducer;
 import org.doubango.imsdroid.media.MediaType;
-import org.doubango.imsdroid.media.VideoConsumer;
-import org.doubango.imsdroid.media.VideoProducer;
+import org.doubango.imsdroid.media.MyProxyAudioConsumer;
+import org.doubango.imsdroid.media.MyProxyAudioProducer;
+import org.doubango.imsdroid.media.MyProxyPlugin;
+import org.doubango.imsdroid.media.MyProxyPluginMgr;
+import org.doubango.imsdroid.media.MyProxyVideoConsumer;
+import org.doubango.imsdroid.media.MyProxyVideoProducer;
 import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.CallSession;
+import org.doubango.tinyWRAP.MediaSessionMgr;
+import org.doubango.tinyWRAP.ProxyPlugin;
 import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
+import android.content.Context;
+import android.util.Log;
+import android.view.View;
+
 public class MyAVSession  extends MyInviteSession{
-
-	private static HashMap<Long, MyAVSession> sessions;
+	private static final String TAG = MyAVSession.class.getCanonicalName();
+	private static ObservableHashMap<Long, MyAVSession> sessions;
 	
+	private boolean isConsumersAndProducersInitialzed;
 	private final CallSession session;
-
+	private MediaSessionMgr mediaSessionMgr;
+	
+	private MyProxyVideoConsumer videoConsumer;
+	private MyProxyAudioConsumer audioConsumer;
+	private MyProxyVideoProducer videoProducer;
+	private MyProxyAudioProducer audioProducer;
+	
+	private Context context;
 	private String remoteParty;
 	private final MediaType mediaType;
 	private CallState state;
@@ -58,10 +76,10 @@ public class MyAVSession  extends MyInviteSession{
 	private boolean localHold;
 	private final HistoryAVCallEvent historyEvent;
 	
-	private static AudioConsumer __audioConsumer;
-	private static AudioProducer __audioProducer;
-	private static VideoProducer __videoProducer;
-	private static VideoConsumer __videoConsumer;
+//	private static AudioConsumer __audioConsumer;
+//	private static AudioProducer __audioProducer;
+//	private static VideoProducer __videoProducer;
+//	private static VideoConsumer __videoConsumer;
 	private static ScreenAV.AVInviteEventHandler __callEventHandler;
 	
 	public enum CallState{
@@ -75,27 +93,9 @@ public class MyAVSession  extends MyInviteSession{
 	}
 	
 	static {
-		MyAVSession.sessions = new HashMap<Long, MyAVSession>();
-		
-		__audioConsumer = new AudioConsumer();
-		__audioProducer = new AudioProducer();
-		__videoProducer = new VideoProducer();
-		__videoConsumer = new VideoConsumer();
-		
+		MyProxyPluginMgr.Initialize();
+		MyAVSession.sessions = new ObservableHashMap<Long, MyAVSession>(true);
 		__callEventHandler = new ScreenAV.AVInviteEventHandler();
-		
-		__audioConsumer.setActive();
-		__audioProducer.setActive();
-		__videoProducer.setActive();
-		__videoConsumer.setActive();
-	}
-	
-	public static VideoProducer getVideoProducer(){
-		return MyAVSession.__videoProducer;
-	}
-	
-	public static VideoConsumer getVideoConsumer(){
-		return MyAVSession.__videoConsumer;
 	}
 	
 	public static ScreenAV.AVInviteEventHandler getCallEventHandler(){
@@ -124,11 +124,33 @@ public class MyAVSession  extends MyInviteSession{
 		}
 	}
 	
-	public static Long getFirstId(){
-		if(!MyAVSession.sessions.isEmpty()){
-			return MyAVSession.sessions.entrySet().iterator().next().getKey();
+	public static Collection<MyAVSession> getValues(){
+		synchronized(MyAVSession.sessions){
+			return MyAVSession.sessions.values();
+		}
+	}
+	
+	public static ObservableHashMap<Long, MyAVSession> getSessions(){
+		synchronized(MyAVSession.sessions){
+			return MyAVSession.sessions;
+		}
+	}
+	
+	public static MyAVSession getFirstActiveCallAndNot(long id){
+		MyAVSession session;
+		for(Map.Entry<Long, MyAVSession> entry : MyAVSession.sessions.entrySet()) {
+			session = entry.getValue();
+			if(session.getId() != id && session.isConnected() && !session.isLocalHeld() && !session.isRemoteHeld()){
+				return session;
+			}
 		}
 		return null;
+	}
+	
+	public static boolean contains(long id){
+		synchronized(MyAVSession.sessions){
+			return MyAVSession.sessions.containsKey(id);
+		}
 	}
 	
 	public static void releaseSession(MyAVSession session){
@@ -213,6 +235,102 @@ public class MyAVSession  extends MyInviteSession{
 		this.session.addHeader("P-Preferred-Service", "urn:urn-7:3gpp-service.ims.icsi.mmtel");
 	}
 	
+	private boolean initializeConsumersAndProducers(){
+		Log.d(MyAVSession.TAG, "initializeConsumersAndProducers()");
+		if(this.isConsumersAndProducersInitialzed){
+			return true;
+		}
+		
+		if(this.mediaSessionMgr == null && this.session != null){
+			this.mediaSessionMgr = this.session.getMediaMgr();
+		}
+		if(this.mediaSessionMgr != null){
+			ProxyPlugin plugin;
+			MyProxyPlugin myProxyPlugin;
+			// Video
+			if(this.mediaType == MediaType.Video || this.mediaType == MediaType.AudioVideo){
+				if((plugin = this.mediaSessionMgr.findProxyPluginConsumer(twrap_media_type_t.twrap_media_video)) != null){
+					if((myProxyPlugin = MyProxyPluginMgr.findPlugin(plugin.getId())) != null){
+						this.videoConsumer = (MyProxyVideoConsumer)myProxyPlugin;
+						this.videoConsumer.setContext(this.context);
+					}
+				}
+				if((plugin = this.mediaSessionMgr.findProxyPluginProducer(twrap_media_type_t.twrap_media_video)) != null){
+					if((myProxyPlugin = MyProxyPluginMgr.findPlugin(plugin.getId())) != null){
+						this.videoProducer = (MyProxyVideoProducer)myProxyPlugin;
+						this.videoProducer.setContext(this.context);
+					}
+				}
+			}
+			// Audio
+			if(this.mediaType == MediaType.Audio || this.mediaType == MediaType.AudioVideo){
+				if((plugin = this.mediaSessionMgr.findProxyPluginConsumer(twrap_media_type_t.twrap_media_audio)) != null){
+					if((myProxyPlugin = MyProxyPluginMgr.findPlugin(plugin.getId())) != null){
+						this.audioConsumer = (MyProxyAudioConsumer)myProxyPlugin;
+					}
+				}
+				if((plugin = this.mediaSessionMgr.findProxyPluginProducer(twrap_media_type_t.twrap_media_audio)) != null){
+					if((myProxyPlugin = MyProxyPluginMgr.findPlugin(plugin.getId())) != null){
+						this.audioProducer = (MyProxyAudioProducer)myProxyPlugin;
+					}
+				}
+			}
+			
+			
+			this.isConsumersAndProducersInitialzed = true;
+			return true;
+		}
+		
+		return false;	
+	}
+	
+	private void deInitializeMediaSession(){
+		if(this.mediaSessionMgr != null){
+			this.mediaSessionMgr.delete();
+			this.mediaSessionMgr = null;
+		}
+	}
+	
+	public Context getContext(){
+		return this.context;
+	}
+	
+	public void setContext(Context context){
+		this.context = context;
+	}
+	
+	public final View startVideoConsumerPreview(){
+		if(this.videoConsumer != null){
+			return this.videoConsumer.startPreview();
+		}
+		return null;
+	}
+	
+	public final View startVideoProducerPreview(){
+		if(this.videoProducer != null){
+			return this.videoProducer.startPreview();
+		}
+		return null;
+	}
+	
+	public void pushBlankPacket(){
+		if(this.videoProducer != null){
+			this.videoProducer.pushBlankPacket();
+		}
+	}
+	
+	public void toggleCamera(){
+		if(this.videoProducer != null){
+			this.videoProducer.toggleCamera();
+		}
+	}
+	
+	public void setRotation(int rot){
+		if(this.videoProducer != null){
+			this.videoProducer.setRotation(rot);
+		}
+	}
+	
 	public MediaType getMediaType(){
 		return this.mediaType;
 	}
@@ -230,14 +348,20 @@ public class MyAVSession  extends MyInviteSession{
 		switch(state){
 			case CALL_INCOMING:
 				this.historyEvent.setStatus(StatusType.Incoming);
+				this.initializeConsumersAndProducers();
 				break;
 			case CALL_INPROGRESS:
 				this.historyEvent.setStatus(StatusType.Outgoing);
+				this.initializeConsumersAndProducers();
 				break;
 			case INCALL:
+			{
 				this.setConnected(true);
 				this.historyEvent.setStartTime(new Date().getTime());
+				
+				this.initializeConsumersAndProducers();
 				break;
+			}
 			case CALL_TERMINATED:
 				this.setConnected(false);
 				if (this.historyEvent.getStartTime() == this.historyEvent.getEndTime()) {
@@ -248,8 +372,12 @@ public class MyAVSession  extends MyInviteSession{
 					this.historyEvent.setEndTime(new Date().getTime());
 				}
 				ServiceManager.getHistoryService().addEvent(this.historyEvent);
+				
+				this.deInitializeMediaSession();
 				break;
 		}
+		
+		super.setChangedAndNotifyObservers(this);
 	}
 	
 	public long getStartTime(){
@@ -299,7 +427,19 @@ public class MyAVSession  extends MyInviteSession{
 	}
 	
 	public void setLocalHold(boolean localHold){
+		boolean changed = this.localHold != localHold;
 		this.localHold = localHold;
+		
+		if(this.videoProducer != null){
+			this.videoProducer.setOnPause(this.localHold || this.remoteHold);
+		}
+		if(this.audioProducer != null){
+			this.audioProducer.setOnPause(this.localHold || this.remoteHold);
+		}
+		
+		if(changed){
+			super.setChangedAndNotifyObservers(this);
+		}
 	}
 	
 	public boolean isRemoteHeld(){
@@ -307,7 +447,19 @@ public class MyAVSession  extends MyInviteSession{
 	}
 	
 	public void setRemoteHold(boolean remoteHold){
+		boolean changed = this.remoteHold != remoteHold;
 		this.remoteHold = remoteHold;
+		
+		if(this.videoProducer != null){
+			this.videoProducer.setOnPause(this.localHold || this.remoteHold);
+		}
+		if(this.audioProducer != null){
+			this.audioProducer.setOnPause(this.localHold || this.remoteHold);
+		}
+		
+		if(changed){
+			super.setChangedAndNotifyObservers(this);
+		}
 	}
 	
 	public boolean makeAudioCall(String remoteUri){

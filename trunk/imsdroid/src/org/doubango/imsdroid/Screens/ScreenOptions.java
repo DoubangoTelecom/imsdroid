@@ -69,7 +69,7 @@ public class ScreenOptions extends Screen {
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.network_48), "Network", ScreenNetwork.class),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.lock_48), "Security", ScreenSecurity.class),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.eab_48), "Contacts", ScreenOptionsContacts.class),
-        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.people_48), "Presence", ScreenPresence.class),
+        		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.im_invisible_user_48), "Presence", ScreenPresence.class),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.codecs_48), "Codecs", ScreenCodecs.class),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.messaging_48), "Messaging", ScreenMessaging.class),
         		new ScreenOptionsItem(BitmapFactory.decodeResource(getResources(), R.drawable.qos_qoe_48), "QoS/QoE", ScreenQoS.class),

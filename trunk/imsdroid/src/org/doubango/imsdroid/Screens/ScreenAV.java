@@ -47,7 +47,6 @@ import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MyAVSession.CallState;
 import org.doubango.imsdroid.utils.UriUtils;
-import org.doubango.imsdroid.media.VideoProducer;
 import android.view.OrientationEventListener;
 
 import android.app.KeyguardManager;
@@ -187,11 +186,9 @@ public class ScreenAV extends Screen {
         this.llVideoLocal.setVisibility(View.GONE);
         
         if(this.avSession != null){
+        	this.avSession.setContext(this);
         	this.remoteUri = this.avSession.getRemoteParty();
         	this.tvRemoteUri.setText(String.format("%s", UriUtils.getDisplayName(this.remoteUri)));
-        	
-        	MyAVSession.getVideoProducer().setContext(this);
-			MyAVSession.getVideoConsumer().setContext(this);
 			
 			this.updateState(this.avSession.getState());
         }
@@ -232,36 +229,35 @@ public class ScreenAV extends Screen {
         @Override
         public void onOrientationChanged(int orient)
         {
-        	//Log.d(ScreenAV.TAG,"Received Screen Orientation Change "+String.valueOf(orient));^M
+        	//Log.d(ScreenAV.TAG,"Received Screen Orientation Change "+String.valueOf(orient));
         	try { 
 					boolean flipVideo = ServiceManager.getConfigurationService().getBoolean(
 									CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.VIDEO_FLIP, Configuration.DEFAULT_GENERAL_FLIP_VIDEO);
 					
-					VideoProducer vid = MyAVSession.getVideoProducer();
-					if (vid != null) {
+					if (ScreenAV.this.avSession != null) {
 						if ((orient > 0) && (orient < 50)) {
 							if (flipVideo) {
-								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(90);
+								ScreenAV.this.avSession.setRotation(90);
 							} 
 							else {
-								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+								ScreenAV.this.avSession.setRotation(0);
 							}
 						} 
 						else if ((orient > 50) && (orient < 120)) {
-							MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+							ScreenAV.this.avSession.setRotation(0);
 						} 
 						else if ((orient > 120) && (orient < 200)) {
-							MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+							ScreenAV.this.avSession.setRotation(0);
 						} 
 						else if ((orient > 200) && (orient < 290)) {
-							MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+							ScreenAV.this.avSession.setRotation(0);
 						} 
 						else if ((orient > 270) && (orient < 360)) {
 							if (flipVideo) {
-								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(90);
+								ScreenAV.this.avSession.setRotation(90);
 							} 
 							else {
-								MyAVSession.getVideoProducer().getProxyVideoProducer().setRotation(0);
+								ScreenAV.this.avSession.setRotation(0);
 							}
 						}
 					}
@@ -329,9 +325,8 @@ public class ScreenAV extends Screen {
 		this.timerSuicide.cancel();
 		this.cancelBlankPacket();
         
-        if(avSession != null){
-        	// FIXME: cleanup
-        	MyAVSession.getVideoProducer().setContext(null);
+        if(this.avSession != null){
+        	this.avSession.setContext(null);
         } 
         
 		super.onDestroy();
@@ -345,8 +340,9 @@ public class ScreenAV extends Screen {
 				if (this.avSession.getState() == CallState.INCALL){
 					Log.d(ScreenAV.TAG,"Toggle Camera");
 					//switch cameras
-					if (MyAVSession.getVideoProducer() != null)
-						MyAVSession.getVideoProducer().toggleCamera(this.llVideoLocal);
+					if (this.avSession != null){
+						this.avSession.toggleCamera();
+					}
 
 				}
 				else {
@@ -446,10 +442,7 @@ public class ScreenAV extends Screen {
 				itemSendStopVideo.setEnabled(false);
 				itemShareContent.setEnabled(false);
 				break;
-			case INCALL:
-				itemPickUp.setIcon(R.drawable.dialer_48);
-				itemPickUp.setEnabled(true);
-				//itemPickUp.setEnabled(false);
+			case INCALL:		
 				itemHangUp.setEnabled(true);
 				itemHoldResume.setEnabled(true);
 				itemSpeaker.setEnabled(true);
@@ -458,8 +451,13 @@ public class ScreenAV extends Screen {
 				if((this.avSession.getMediaType() == MediaType.AudioVideo || this.avSession.getMediaType() == MediaType.Video)){
 					itemSendStopVideo.setTitle(this.avSession.isSendingVideo()? "Stop Video" : "Send Video").setIcon(this.avSession.isSendingVideo()? R.drawable.video_stop_48 : R.drawable.video_start_48);
 					itemSendStopVideo.setEnabled(true);
+					// Replace Answer by camera switcher
+					itemPickUp.setEnabled(true);
+					itemPickUp.setIcon(R.drawable.refresh_48);
+					itemPickUp.setTitle("Switch camera");
 				}
 				else{
+					itemPickUp.setEnabled(false);
 					itemSendStopVideo.setEnabled(false);
 				}
 				itemShareContent.setEnabled(true);
@@ -478,12 +476,7 @@ public class ScreenAV extends Screen {
 		return true;
 	}
 	
-	public static boolean makeCall(String remoteUri, MediaType mediaType){
-		if(MyAVSession.getFirstId() != null){
-			Log.e(ScreenAV.TAG, "There is already an outgoing audio/video session");
-			return false;
-		}
-		
+	public static boolean makeCall(String remoteUri, MediaType mediaType){		
 		String validUri = UriUtils.makeValidSipUri(remoteUri);
 		if(validUri == null){
 			// Show DialogError
@@ -510,6 +503,12 @@ public class ScreenAV extends Screen {
 		MyAVSession avSession = MyAVSession.createOutgoingSession(ServiceManager.getSipService().getStack(), mediaType);
 		avSession.setRemoteParty(remoteUri); // HACK
 		ServiceManager.getScreenService().show(ScreenAV.class, new Long(avSession.getId()).toString());	
+		
+		// Hold the active call
+		MyAVSession activeCall = MyAVSession.getFirstActiveCallAndNot(avSession.getId());
+		if(activeCall != null){
+			activeCall.holdCall();
+		}
 		
 		switch(mediaType){
 			case AudioVideo:
@@ -543,10 +542,10 @@ public class ScreenAV extends Screen {
 		public void run() {	
 			Log.d(ScreenAV.TAG,"Resending Blank Packet "+String.valueOf(ScreenAV.countBlankPacket));
 			if (ScreenAV.countBlankPacket < 3) {
-				if (MyAVSession.getVideoProducer() != null) {
-					MyAVSession.getVideoProducer().pushBlankPacket();
-					ScreenAV.countBlankPacket++;
+				if (ScreenAV.this.avSession != null) {
+					ScreenAV.this.avSession.pushBlankPacket();
 				}
+				ScreenAV.countBlankPacket++;
 			}
 			else {
 				this.cancel();
@@ -565,7 +564,10 @@ public class ScreenAV extends Screen {
 		public void run() {
 			ScreenAV.this.runOnUiThread(new Runnable() {
 				public void run() {
-					ScreenAV.this.screenService.show(ScreenHome.class);
+					Screen currentScreen = ScreenAV.this.screenService.getCurrentScreen();
+					if(currentScreen != null && currentScreen.getId() == ScreenAV.this.id){
+						ScreenAV.this.screenService.show(ScreenHome.class);
+					}
 					ScreenAV.this.screenService.destroy(ScreenAV.this.getId());
 				}});
 		}
@@ -652,7 +654,7 @@ public class ScreenAV extends Screen {
 		this.llVideoLocal.removeAllViews();
 		if(start){
 			this.timerBlankPacket.cancel();
-			final View local_preview = MyAVSession.getVideoProducer().startPreview();
+			final View local_preview = this.avSession.startVideoProducerPreview();
 			if(local_preview != null){
 				final ViewParent viewParent = local_preview.getParent();
 				if(viewParent != null && viewParent instanceof ViewGroup){
@@ -712,6 +714,12 @@ public class ScreenAV extends Screen {
 										new OnClickListener() {
 											@Override
 											public void onClick(View v) {
+												// Hold active call
+												final MyAVSession activeSession = MyAVSession.getFirstActiveCallAndNot(ScreenAV.this.avSession.getId());
+												if(activeSession != null){
+													activeSession.holdCall();
+												}
+												// Accept call
 												ScreenAV.this.avSession.acceptCall();
 											}
 										}, new OnClickListener() {
@@ -742,7 +750,7 @@ public class ScreenAV extends Screen {
 					// Video consumer
 					this.llVideoRemote.removeAllViews();
 					if(this.avSession.getMediaType() == MediaType.AudioVideo || this.avSession.getMediaType() == MediaType.Video){
-						final View remote_preview = MyAVSession.getVideoConsumer().startPreview();
+						final View remote_preview = this.avSession.startVideoConsumerPreview();
 						if(remote_preview != null){
 							final ViewParent viewParent = remote_preview.getParent();
 							if(viewParent != null && viewParent instanceof ViewGroup){
@@ -761,7 +769,11 @@ public class ScreenAV extends Screen {
 					ScreenAV.this.ivState.setImageResource(R.drawable.bullet_ball_glass_red_16);
 					
 					/* schedule suicide */
-					this.timerSuicide.schedule(this.timerTaskSuicide, new Date(new Date().getTime() + 1500));
+					try{
+						this.timerSuicide.schedule(this.timerTaskSuicide, new Date(new Date().getTime() + 1500));
+					}catch(IllegalStateException ise){// Already scheduled
+						Log.d(ScreenAV.TAG, ise.toString());
+					}
 					this.timerTaskInCall.cancel();
 					this.timerBlankPacket.cancel();
 				break;
@@ -805,7 +817,7 @@ public class ScreenAV extends Screen {
 		}
 		
 		@Override
-		public long getId(){
+		public long getSessionId(){
 			if(this.avScreen != null && this.avScreen.avSession != null){
 				return this.avScreen.avSession.getId();
 			}
@@ -912,7 +924,6 @@ public class ScreenAV extends Screen {
 				case TERMWAIT:
 					ServiceManager.getSoundService().stopRingBackTone();
 					ServiceManager.getSoundService().stopRingTone();
-					ServiceManager.cancelAVCallNotif();
 					
 					if(avSession.getState() == CallState.CALL_TERMINATED){
 						// already terminated by termwait
@@ -932,6 +943,7 @@ public class ScreenAV extends Screen {
 					} 
 					ServiceManager.vibrate(100);
 					MyAVSession.releaseSession(e.getSessionId());
+					ServiceManager.refreshAVCallNotif(R.drawable.phone_call_25);
 					this.audioManager.setMode(AudioManager.MODE_NORMAL);
 					break;
 				case LOCAL_HOLD_OK:

@@ -56,6 +56,7 @@ import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Screens.Screen;
 import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.imsdroid.Screens.ScreenAVQueue;
 import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenHistory;
 import org.doubango.imsdroid.Screens.ScreenHome;
@@ -69,13 +70,14 @@ import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.events.IRegistrationEventHandler;
 import org.doubango.imsdroid.events.RegistrationEventArgs;
 import org.doubango.imsdroid.events.RegistrationEventTypes;
+import org.doubango.imsdroid.media.MediaType;
+import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.PresenceStatus;
 
 import android.app.ActivityGroup;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -116,6 +118,8 @@ implements IRegistrationEventHandler
     public static final int ACTION_SHOW_HISTORY = 3;
     public static final int ACTION_SHOW_MSRP_INC_SCREEN = 4;
     public static final int ACTION_SHOW_CONTSHARE_SCREEN = 5;
+    public static final int ACTION_SHOW_AVCALLS_SCREEN = 6;
+    public static final int ACTION_INTERCEPT_OUTGOING_CALL = 7;
     
     private static String TAG = Main.class.getCanonicalName();
     
@@ -390,6 +394,18 @@ implements IRegistrationEventHandler
 				}
 				break;
 				
+			case Main.ACTION_SHOW_AVCALLS_SCREEN:
+				if(MyAVSession.getSessions().size()>1){
+					ServiceManager.getScreenService().show(ScreenAVQueue.class);
+				}
+				else if(MyAVSession.getSessions().size() == 1){
+					MyAVSession session = MyAVSession.getSessions().getAt(0);
+					if(session != null){
+						ServiceManager.getScreenService().show(ScreenAV.class, Long.toString(session.getId()));
+					}
+				}
+				break;
+				
 			case ACTION_SHOW_MSRP_INC_SCREEN:
 				id = bundle.getString("session-id");
 				if(id != null){
@@ -399,6 +415,11 @@ implements IRegistrationEventHandler
 				
 			case Main.ACTION_SHOW_HISTORY:
 				ServiceManager.getScreenService().show(ScreenHistory.class);
+				break;
+				
+			case Main.ACTION_INTERCEPT_OUTGOING_CALL:
+				String number = bundle.getString("number");
+				ScreenAV.makeCall(number, MediaType.AudioVideo);
 				break;
 				
 			case Main.ACTION_SHOW_CONTSHARE_SCREEN:

@@ -21,7 +21,11 @@
 package org.doubango.imsdroid.Services.Impl;
 
 import org.doubango.imsdroid.IMSDroid;
+import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.Model.Configuration;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
+import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
+import org.doubango.imsdroid.utils.StringUtils;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,13 +37,35 @@ public class ServiceManagerReceiver extends BroadcastReceiver
 	@Override
 	public void onReceive(Context context, Intent intent) 
 	{
-		 SharedPreferences settings = context.getSharedPreferences(IMSDroid.getContext().getPackageName(), 0);
-		 if(settings != null && settings.getBoolean("autostarts", Configuration.DEFAULT_GENERAL_AUTOSTART)){
-			 if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-				Intent i = new Intent(context, ServiceManager.class);
-				i.putExtra("autostarted", true);
-				context.startService(i);
+		String action = intent.getAction();
+		
+		if(Intent.ACTION_BOOT_COMPLETED.equals(action)){
+			SharedPreferences settings = context.getSharedPreferences(IMSDroid.getContext().getPackageName(), 0);
+			 if(settings != null && settings.getBoolean("autostarts", Configuration.DEFAULT_GENERAL_AUTOSTART)){
+					Intent i = new Intent(context, ServiceManager.class);
+					i.putExtra("autostarted", true);
+					context.startService(i);
+			 }
+		}
+		else if (Intent.ACTION_NEW_OUTGOING_CALL.equals(action) && ServiceManager.getSipService().isRegistered()) {
+			String number = getResultData();
+			if(StringUtils.isNullOrEmpty(number)){
+				return;
 			}
-		 }
+			
+			boolean intercept = ServiceManager.getConfigurationService().getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.INTERCEPT_OUTGOING_CALLS, Configuration.DEFAULT_GENERAL_INTERCEPT_OUTGOING_CALLS);
+			if(intercept){
+				ServiceManager.getScreenService().bringToFront(Main.ACTION_INTERCEPT_OUTGOING_CALL,
+						new String[] {"number", number}
+				);
+				
+				setResultData(null);
+				return;
+			}
+			
+			setResultData(number);
+		}
+		
+		 
 	}
 }

@@ -506,7 +506,7 @@ public class MyMsrpSession extends MyInviteSession implements IMsrpEventDispatch
 		}
 		
 		@Override
-		public long getId() {
+		public long getSessionId() {
 			return this.session.getId();
 		}
 		

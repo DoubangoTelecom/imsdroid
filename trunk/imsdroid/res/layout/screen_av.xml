@@ -29,7 +29,7 @@
 <LinearLayout android:orientation="vertical" android:layout_height="fill_parent" android:layout_marginLeft="5px" android:layout_width="wrap_content" android:layout_weight="3" android:background="@color/main_relativeLayout_top_color" android:gravity="center">
 <TextView android:id="@+id/screen_av_textView_remoteUri" android:layout_height="wrap_content" android:layout_width="fill_parent" android:ellipsize="middle" android:text="Alice" android:textSize="25px" android:textStyle="bold" android:textColor="@color/white"></TextView><TextView android:id="@+id/screen_av_textView_time" android:textStyle="bold" android:layout_below="@+id/screen_av_textView_remoteUri" android:layout_alignParentLeft="true" android:textSize="25px" android:text="00:00" android:layout_height="wrap_content" android:layout_width="fill_parent" android:textColor="@color/red"></TextView>
 </LinearLayout>
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/dialertext_47" android:id="@+id/screen_av_imageView_dialer" android:clickable="true" android:layout_marginRight="2px" android:layout_gravity="center"></ImageView>
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/keyboard_shortcuts_48" android:id="@+id/screen_av_imageView_dialer" android:clickable="true" android:layout_marginRight="2px" android:layout_gravity="center"></ImageView>
 
 
 </LinearLayout>

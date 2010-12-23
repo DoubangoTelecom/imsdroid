@@ -21,6 +21,7 @@
 
 package org.doubango.imsdroid.Screens;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.media.MediaType;
 
@@ -28,7 +29,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Contacts;
 import android.provider.Contacts.People;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -113,9 +116,19 @@ public class ScreenDialer extends Screen {
 	private OnClickListener ibContact_OnClickListener = new OnClickListener(){
 		@Override
 		public void onClick(View v) {
-			startActivityForResult(new Intent(Intent.ACTION_PICK, People.CONTENT_URI), 
-					ScreenDialer.SELECT_CONTACT);
-			
+			try{
+				if (IMSDroid.getSDKVersion()<5) {
+					startActivityForResult(new Intent(Intent.ACTION_PICK, People.CONTENT_URI), 
+							ScreenDialer.SELECT_CONTACT);
+				}
+				else{
+					startActivityForResult(new  Intent(Intent.ACTION_PICK, Uri.parse("content://contacts/people/")), 
+							ScreenDialer.SELECT_CONTACT);
+				}
+			}
+			catch(Exception e){
+				Log.e("ScreenDialer", e.toString());
+			}
 		}
 	};
 
@@ -136,7 +149,7 @@ public class ScreenDialer extends Screen {
 				case ScreenDialer.SELECT_CONTACT:
 					Uri contactData = data.getData();
 			        Cursor cursor =  managedQuery(contactData, null, null, null, null);
-			        if (cursor.moveToFirst()) {
+			        if (cursor.moveToFirst()) {			        	
 			          String phoneId = cursor.getString(cursor.getColumnIndexOrThrow(People.NUMBER));
 			          if(phoneId != null){
 			        	  this.etAddress.setText(phoneId);

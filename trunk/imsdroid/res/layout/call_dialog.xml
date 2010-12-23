@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent" android:orientation="vertical" android:gravity="center_horizontal" android:layout_height="fill_parent">
-<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/call_dialog_textView_remote_party" android:text="John Doe" android:textColor="@color/white" android:textStyle="bold" android:textSize="30px"></TextView><ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/call_dialog_imageView_contact" android:src="@drawable/large_contact" android:layout_marginTop="15px"></ImageView>
+  android:layout_width="fill_parent" android:orientation="vertical" android:gravity="center_horizontal" android:layout_height="fill_parent" android:padding="15px">
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/call_dialog_textView_remote_party" android:text="John Doe" android:textColor="@color/white" android:textStyle="bold" android:textSize="30px"></TextView><ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/call_dialog_imageView_contact" android:layout_marginTop="15px" android:src="@drawable/question_128"></ImageView>
 
 <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_horizontal" android:layout_marginTop="30px"><ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/call_dialog_imageButton_pick" android:src="@drawable/phone_pick_up_64" android:layout_marginRight="15px"></ImageButton><ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/call_dialog_imageButton_hang" android:src="@drawable/phone_hang_up_64" android:layout_marginLeft="15px"></ImageButton>
 </LinearLayout>

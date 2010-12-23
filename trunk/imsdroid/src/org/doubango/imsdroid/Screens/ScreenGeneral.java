@@ -37,6 +37,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+/**
+ * ScreenGeneral
+ * @author Mamadou Diop
+ *
+ */
 public class ScreenGeneral  extends Screen {
 	
 	private Spinner spAudioPlaybackLevel;
@@ -44,6 +49,7 @@ public class ScreenGeneral  extends Screen {
 	private CheckBox cbFFC;
 	private CheckBox cbVflip;
 	private CheckBox cbAutoStart;
+	private CheckBox cbInterceptOutgoingCalls;
 	private EditText etEnumDomain;
 	
 	private final IConfigurationService configurationService;
@@ -67,6 +73,7 @@ public class ScreenGeneral  extends Screen {
         setContentView(R.layout.screen_general);
         
         this.cbFullScreenVideo = (CheckBox)this.findViewById(R.id.screen_general_checkBox_fullscreen);
+        this.cbInterceptOutgoingCalls = (CheckBox)this.findViewById(R.id.screen_general_checkBox_interceptCall);
         this.cbFFC = (CheckBox)this.findViewById(R.id.screen_general_checkBox_ffc);
         this.cbVflip = (CheckBox)this.findViewById(R.id.screen_general_checkBox_videoflip);
         this.cbAutoStart = (CheckBox)this.findViewById(R.id.screen_general_checkBox_autoStart);
@@ -79,6 +86,7 @@ public class ScreenGeneral  extends Screen {
         this.spAudioPlaybackLevel.setAdapter(adapter);
         
         this.cbFullScreenVideo.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FULL_SCREEN_VIDEO, Configuration.DEFAULT_GENERAL_FULL_SCREEN_VIDEO));
+        this.cbInterceptOutgoingCalls.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.INTERCEPT_OUTGOING_CALLS, Configuration.DEFAULT_GENERAL_INTERCEPT_OUTGOING_CALLS));
         this.cbFFC.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FFC, Configuration.DEFAULT_GENERAL_FFC));
         this.cbVflip.setChecked(this.configurationService.getBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.VIDEO_FLIP, Configuration.DEFAULT_GENERAL_FLIP_VIDEO));
         SharedPreferences settings = getSharedPreferences(IMSDroid.getContext().getPackageName(), 0);
@@ -91,6 +99,7 @@ public class ScreenGeneral  extends Screen {
         this.etEnumDomain.setText(this.configurationService.getString(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.ENUM_DOMAIN, Configuration.DEFAULT_GENERAL_ENUM_DOMAIN));
         
         this.addConfigurationListener(this.cbFullScreenVideo);
+        this.addConfigurationListener(this.cbInterceptOutgoingCalls);
         this.addConfigurationListener(this.cbFFC);
         this.addConfigurationListener(this.cbVflip);
         this.addConfigurationListener(this.cbAutoStart);
@@ -102,6 +111,7 @@ public class ScreenGeneral  extends Screen {
 		if(this.computeConfiguration){
 			
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FULL_SCREEN_VIDEO, this.cbFullScreenVideo.isChecked());
+			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.INTERCEPT_OUTGOING_CALLS, this.cbInterceptOutgoingCalls.isChecked());
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.FFC, this.cbFFC.isChecked());
 			this.configurationService.setBoolean(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.VIDEO_FLIP, this.cbVflip.isChecked());
 			this.configurationService.setFloat(CONFIGURATION_SECTION.GENERAL, CONFIGURATION_ENTRY.AUDIO_PLAY_LEVEL, ((AudioPlayBackLevel)this.spAudioPlaybackLevel.getSelectedItem()).value);
