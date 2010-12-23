@@ -27,6 +27,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -36,6 +37,7 @@ public class IMSDroid extends Application {
     private static PackageManager packageManager;
     private static String packageName;
     private static String deviceURN;
+    private static int sdkVersion;
 
     public IMSDroid() {
     	IMSDroid.instance = this;
@@ -52,6 +54,13 @@ public class IMSDroid extends Application {
 		IMSDroid.packageManager = IMSDroid.instance.getPackageManager();    		
 		IMSDroid.packageName = IMSDroid.instance.getPackageName();
 	}
+    
+    public static int getSDKVersion(){
+    	if(IMSDroid.sdkVersion == 0){
+    		IMSDroid.sdkVersion = Integer.parseInt(Build.VERSION.SDK);
+    	}
+    	return IMSDroid.sdkVersion;
+    }
     
 	public static int getVersionCode(){
     	if(IMSDroid.packageManager != null){

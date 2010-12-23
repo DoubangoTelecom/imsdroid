@@ -24,5 +24,5 @@ package org.doubango.imsdroid.events;
 public interface IInviteEventHandler /* extends IEventHandler<InviteEventArgs> */{
 	boolean onInviteEvent(Object sender, InviteEventArgs e);
 	boolean canHandle(long id);
-	long getId();
+	long getSessionId();
 }

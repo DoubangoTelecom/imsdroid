@@ -160,7 +160,7 @@ public class ScreenFileTransferQueue  extends Screen implements IMsrpEventHandle
 		}
 		
 		@Override
-		public long getId() {
+		public long getSessionId() {
 			return -1;
 		}
 		

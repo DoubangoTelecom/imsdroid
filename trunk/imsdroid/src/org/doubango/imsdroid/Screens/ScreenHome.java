@@ -101,6 +101,8 @@ implements IRegistrationEventHandler
 				getResources(), R.drawable.image_gallery_48), "Content Sharing", ScreenFileTransferQueue.class));
 		this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
 				getResources(), R.drawable.chat_48), "Chat", ScreenChatQueue.class));
+		//this.items.add(new ScreenHomeItem(BitmapFactory.decodeResource(
+		//		getResources(), R.drawable.avatar_48), "Sessions", ScreenAVQueue.class));
 		
 		// gridView
 		this.adapter = new ScreenHomeAdapter(this.items);
@@ -188,15 +190,8 @@ implements IRegistrationEventHandler
 									}
 								});
 					}
-					else{
-						if(item.screenCls == ScreenDialer.class && MyAVSession.getFirstId() != null){
-							if(!ScreenHome.this.screenService.show(ScreenAV.class, MyAVSession.getFirstId().toString())){
-								ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
-							}
-						}
-						else{
-							ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
-						}
+					else{					
+						ScreenHome.this.screenService.show(item.screenCls, item.screenCls.getCanonicalName());
 					}
 				}
 			}

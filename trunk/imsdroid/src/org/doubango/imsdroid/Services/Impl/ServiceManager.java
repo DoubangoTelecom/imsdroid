@@ -23,6 +23,7 @@ package org.doubango.imsdroid.Services.Impl;
 import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
+import org.doubango.imsdroid.Model.ObservableHashMap;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
@@ -73,6 +74,7 @@ implements IRegistrationEventHandler
 			ProxyVideoConsumer.registerPlugin();
 			ProxyAudioProducer.registerPlugin();
 			ProxyAudioConsumer.registerPlugin();
+			// See MyProxyPluginMgr for Default chromas
 
 		} catch (UnsatisfiedLinkError e) {
 			Log.e(Main.class.getCanonicalName(),
@@ -183,9 +185,12 @@ implements IRegistrationEventHandler
         		intent.putExtra("action", Main.ACTION_SHOW_CONTSHARE_SCREEN);
         		break;
         	case NOTIF_AVCALL_ID:
-        		if(MyAVSession.getFirstId() != null){
-        			intent.putExtra("action", Main.ACTION_SHOW_AVSCREEN);
-        			intent.putExtra("session-id", MyAVSession.getFirstId().toString());
+        		final ObservableHashMap<Long, MyAVSession> sessions  = MyAVSession.getSessions();
+        		tickerText = String.format("%s (%d)", tickerText, sessions.size());
+        		if(sessions.size()>0){
+        			intent.putExtra("action", Main.ACTION_SHOW_AVCALLS_SCREEN);
+        			//--intent.putExtra("action", Main.ACTION_SHOW_AVSCREEN);
+        			//--intent.putExtra("session-id", MyAVSession.getFirstId().toString());
         		}
         		break;
        		default:
@@ -220,8 +225,19 @@ implements IRegistrationEventHandler
     	ServiceManager.showNotification(NOTIF_CONTSHARE_ID, drawableId, tickerText);
     }
     
-    public static void cancelAVCallNotif(){
-    	ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
+    public static void cancelAVCallNotif(boolean force){
+    	if(force || MyAVSession.getSessions().size()==0){
+    		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
+    	}
+    }
+    
+    public static void refreshAVCallNotif(int drawableId){
+    	if(MyAVSession.getSessions().size()==0){
+    		ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
+    	}
+    	else{
+    		ServiceManager.showNotification(NOTIF_AVCALL_ID, drawableId, "In Call");
+    	}
     }
     
     public static void cancelContShareNotif(){

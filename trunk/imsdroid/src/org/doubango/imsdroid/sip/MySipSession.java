@@ -21,6 +21,8 @@
 
 package org.doubango.imsdroid.sip;
 
+import java.util.Observable;
+
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
@@ -28,7 +30,7 @@ import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.tinyWRAP.SipSession;
 
-public abstract class MySipSession implements Comparable<MySipSession>{
+public abstract class MySipSession extends Observable implements Comparable<MySipSession>{
 	
 	// Services
 	protected final IConfigurationService configurationService;
@@ -39,17 +41,22 @@ public abstract class MySipSession implements Comparable<MySipSession>{
 	protected String fromUri;
 	protected String toUri;
 	protected String compId;
+	protected long id;
 	
 	public MySipSession(MySipStack sipStack) {
 				
 		this.configurationService = ServiceManager.getConfigurationService();
 		this.sipStack = sipStack;
+		this.id = -1;
 		/* init must be called by the child class after session_create() */
 		/* this.init(); */
 	}
 	
 	public long getId(){
-		return this.getSession().getId();
+		if(this.id == -1){
+			this.id =  this.getSession().getId();
+		}
+		return this.id;
 	}
 	
 	public MySipStack getStack(){
@@ -107,6 +114,11 @@ public abstract class MySipSession implements Comparable<MySipSession>{
 	}
 	
 	protected abstract SipSession getSession();
+	
+	protected void setChangedAndNotifyObservers(Object data){
+		super.setChanged();
+		super.notifyObservers(data);
+	}
 	
 	@Override
 	public int compareTo(MySipSession another) {

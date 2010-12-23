@@ -63,6 +63,7 @@ public class Configuration {
 	public static final boolean DEFAULT_3G = false;
 	
 	public static final boolean DEFAULT_GENERAL_FULL_SCREEN_VIDEO = true;
+	public static final boolean DEFAULT_GENERAL_INTERCEPT_OUTGOING_CALLS = true;
 	public static final boolean DEFAULT_GENERAL_FFC = true;
 	public static final boolean DEFAULT_GENERAL_FLIP_VIDEO = false;
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
@@ -127,7 +128,7 @@ public class Configuration {
 		DISPLAY_NAME, IMPI, IMPU, PASSWORD,
 
 		/* === GENERAL === */
-		FULL_SCREEN_VIDEO, FFC, VIDEO_FLIP, AUDIO_PLAY_LEVEL, ENUM_DOMAIN,
+		FULL_SCREEN_VIDEO, FFC, INTERCEPT_OUTGOING_CALLS, VIDEO_FLIP, AUDIO_PLAY_LEVEL, ENUM_DOMAIN,
 
 		/* === VoLTE === */
 
