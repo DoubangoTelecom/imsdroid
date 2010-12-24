@@ -50,6 +50,7 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 	
 	private AudioTrack audioTrack;
 	private ByteBuffer audioFrame;
+	private boolean prepared;
 	
 	public MyProxyAudioConsumer(BigInteger id, ProxyAudioConsumer consumer){
 		super(id, consumer);
@@ -75,17 +76,19 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 					CONFIGURATION_ENTRY.AUDIO_PLAY_LEVEL,
 					Configuration.DEFAULT_GENERAL_AUDIO_PLAY_LEVEL);
 			this.audioTrack.setStereoVolume(AudioTrack.getMaxVolume()*audioPlaybackLevel, AudioTrack.getMaxVolume()*0.25f);
+			this.prepared = true;
 			return 0;
 		}
 		else{
 			Log.e(MyProxyAudioConsumer.TAG, "prepare() failed");
+			this.prepared = false;
 			return -1;
 		}
 	}
 	
 	private int startCallback() {
 		Log.d(MyProxyAudioConsumer.TAG, "startCallback");
-		if(this.audioTrack != null){
+		if(this.prepared && this.audioTrack != null){
 			this.started = true;
 			new Thread(this.runnablePlayer).start();
 			return 0;
