@@ -3,6 +3,12 @@
 
 <wiki:toc max_depth="2" />
 
+==1.2.348==
+ * Add support for multiple concurrent calls (thanks to http://www.theipcompany.nl/)
+ * Allow intercepting outgoing calls
+ * Add support for MP4V-ES codec
+ * Fix issues
+
 ==1.1.327==
  * Fix issue 21, issue 56, issue 84, issue 96, issue 100, issue 86 and issue 108
  * Add support for iLBC
