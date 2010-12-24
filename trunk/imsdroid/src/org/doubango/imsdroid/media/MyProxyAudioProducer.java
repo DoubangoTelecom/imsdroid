@@ -46,6 +46,7 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
 	
 	private AudioRecord audioRecorder;
 	private ByteBuffer audioFrame;
+	private boolean prepared;
 	
 	public MyProxyAudioProducer(BigInteger id, ProxyAudioProducer producer){
 		super(id, producer);
@@ -81,17 +82,19 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
 				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT, bufferSize);
 		if(this.audioRecorder.getState() == AudioRecord.STATE_INITIALIZED){
+			this.prepared = true;
 			return 0;
 		}
 		else{
 			Log.e(MyProxyAudioProducer.TAG, "prepare() failed");
+			this.prepared = false;
 			return -1;
 		}
     }
 
 	private int startCallback(){
     	Log.d(MyProxyAudioProducer.TAG, "startCallback");
-    	if(this.audioRecorder != null){
+    	if(this.prepared && this.audioRecorder != null){
 			this.started = true;
 			new Thread(this.runnableRecorder).start();
 			return 0;
