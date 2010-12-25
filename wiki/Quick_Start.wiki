@@ -98,8 +98,8 @@ You can enter any phone number (e.g. '+33100000000' or '0600000000'), SIP URI (e
 
 From the Dialer screen you can click on:<br />
 [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/avatar_24.png] to select the phone number from the native address book. <br />
-[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/phone_pick_up_48.png]  to make audio call. <br />
-[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/user_monitor_48.png]  to make audio/video call. <br />
+[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/voice_call_48.png]  to make audio call. <br />
+[http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/visio_call_48.png]  to make audio/video call. <br />
 [http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/message_48.png]  to send a SIP MESSAGE (Short IM). <br />
 
 ===From the History==
