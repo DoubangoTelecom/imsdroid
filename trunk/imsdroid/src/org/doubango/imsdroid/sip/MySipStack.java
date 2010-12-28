@@ -23,13 +23,9 @@ package org.doubango.imsdroid.sip;
 
 import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.Model.Configuration;
-import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
-import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_SECTION;
 import org.doubango.imsdroid.Services.INetworkService;
 import org.doubango.imsdroid.Services.Impl.ServiceManager;
 import org.doubango.imsdroid.Services.Impl.NetworkService.DNS_TYPE;
-import org.doubango.imsdroid.utils.StringUtils;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipStack;
 

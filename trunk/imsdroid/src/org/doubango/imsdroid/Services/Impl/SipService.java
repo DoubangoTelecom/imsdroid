@@ -586,7 +586,7 @@ implements ISipService, tinyWRAPConstants {
 			else{
 				this.pubPres.setFromUri(defaultIdentity);
 				this.pubPres.setToUri(defaultIdentity);
-				this.subMwi.setSigCompId(this.sipStack.getSigCompId());
+				this.pubPres.setSigCompId(this.sipStack.getSigCompId());
 			}
 			
 			String freeText = this.configurationService.getString(CONFIGURATION_SECTION.RCS, CONFIGURATION_ENTRY.FREE_TEXT, Configuration.DEFAULT_RCS_FREE_TEXT);
