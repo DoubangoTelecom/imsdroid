@@ -48,6 +48,7 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 	private final MyProxyAudioConsumerCallback callback;
 	private final ProxyAudioConsumer consumer;
 	
+	private int bufferSize;
 	private AudioTrack audioTrack;
 	private ByteBuffer audioFrame;
 	private boolean prepared;
@@ -64,7 +65,7 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 		
 		int minBufferSize = AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		int shortsPerNotif = (rate * ptime)/1000;
-		int bufferSize = ((minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * MyProxyAudioConsumer.AUDIO_BUFFER_FACTOR);
+		this.bufferSize = ((minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * MyProxyAudioConsumer.AUDIO_BUFFER_FACTOR);
 		this.audioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		
 		this.audioTrack = new AudioTrack(MyProxyAudioConsumer.AUDIO_STREAM_TYPE,
@@ -122,9 +123,10 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 			
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
+			boolean playing = false;
+			int writtenBytes = 0;
 			final byte[] audioBytes = new byte[MyProxyAudioConsumer.this.audioFrame.capacity()];
 			final byte[] silenceBytes = new byte[audioBytes.length];
-			MyProxyAudioConsumer.this.audioTrack.play();
 			
 			while(MyProxyAudioConsumer.this.valid && MyProxyAudioConsumer.this.started){
 				if(MyProxyAudioConsumer.this.audioTrack == null){
@@ -135,12 +137,20 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 				final long sizeInBytes = MyProxyAudioConsumer.this.consumer.pull(MyProxyAudioConsumer.this.audioFrame, audioBytes.length);				
 				if(sizeInBytes >0){ 
 					MyProxyAudioConsumer.this.audioFrame.get(audioBytes);
-					MyProxyAudioConsumer.this.audioTrack.write(audioBytes, 0, audioBytes.length);
+					/* writtenBytes +=*/ MyProxyAudioConsumer.this.audioTrack.write(audioBytes, 0, audioBytes.length);
+					writtenBytes += audioBytes.length;
 				}
 				else{ // silence
 					MyProxyAudioConsumer.this.audioTrack.write(silenceBytes, 0, silenceBytes.length);
+					writtenBytes += silenceBytes.length;
 				}
 				
+				// Start playing the buffer if we have enough data
+				if(!playing && writtenBytes>= MyProxyAudioConsumer.this.bufferSize){
+					Log.d(MyProxyAudioConsumer.TAG, "===== Audio Player Thread (Play) =====");
+					playing = true;
+					MyProxyAudioConsumer.this.audioTrack.play();
+				}
 				MyProxyAudioConsumer.this.audioFrame.rewind();
 			}
 			

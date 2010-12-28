@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import oma.xml.prs.pidf.oma_pres.BasicType;
 import oma.xml.prs.pidf.oma_pres.OverridingWillingness;
 
 import org.doubango.imsdroid.IMSDroid;
@@ -62,15 +63,12 @@ import org.doubango.imsdroid.utils.StringUtils;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
-import android.content.ContentUris;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
-import android.provider.Contacts.People.Phones;
 import android.util.Log;
 
 public class ContactService  extends Service implements IContactService, IRegistrationEventHandler, ISubscriptionEventHandler, IXcapEventHandler{
@@ -334,7 +332,10 @@ public class ContactService  extends Service implements IContactService, IRegist
 						final Activities activities = person.getActivities();
 						
 						if(overridingWillingness != null){
-							// FIXME
+							status = (overridingWillingness.getBasic() == BasicType.closed) ? PresenceStatus.Offline : PresenceStatus.Online;
+                            //if (!String.IsNullOrEmpty(person.overridingWillingness.Until)){
+                            //    contact.HyperAvaiability = Rfc3339DateTime.Parse(person.overridingWillingness.Until).ToLocalTime();
+                            //}
 						}
 						
 						if(activities != null && !activities.getAppointmentOrAwayOrBreakfast().isEmpty()){
@@ -419,51 +420,62 @@ public class ContactService  extends Service implements IContactService, IRegist
 				Log.d(ContactService.TAG, "Loading contacts (local)");
 				ContactService.this.addressBook.clear();
 				
-				
-				String[] projectionp = new String[]{
-		                People.NAME,
-		                People.NUMBER
-		             };
-
-		        Cursor c = IMSDroid.getContext().getContentResolver().query(People.CONTENT_URI, projectionp, null, null, People.NAME + " ASC");
-		        c.moveToFirst();
-		        int nameCol = c.getColumnIndex(People.NAME);
-		        int numCol = c.getColumnIndex(People.NUMBER);
-
-		        int nContacts = c.getCount();
-		        do{
-		        	String numr = c.getString(numCol);
-		        	int t = 0;
-		        	t++;
-		            //Do something
-		        } while(c.moveToNext());
-				
-				
-				
-				
 				if (ContactService.this.addressBook.getGroup("rcs") == null) {
 					ContactService.this.addressBook.addGroup("rcs", "Social buddies");
 				}
-				String[] projection = new String[] { People.DISPLAY_NAME, People.NUMBER };
-				Uri contacts =  People.CONTENT_URI;
-				Cursor managedCursor = ServiceManager.getMainActivity().managedQuery(contacts,
-                        projection, // Which columns to return 
-                        null,       // Which rows to return (all rows)
-                        null,       // Selection arguments (none)
-                        // Put the results in ascending order by name
-                        People.DISPLAY_NAME + " ASC");
+				
 				
 				final String realm = ServiceManager.getConfigurationService().getString(
 						CONFIGURATION_SECTION.NETWORK, CONFIGURATION_ENTRY.REALM,
-						Configuration.DEFAULT_REALM);
+						Configuration.DEFAULT_REALM).replaceFirst("sip:", "");
 				String displayName;				
 				String phone;
-				while (managedCursor.moveToNext()) {
-					phone = managedCursor.getString(managedCursor .getColumnIndex(People.NUMBER));
-					if(phone != null){
-						displayName = managedCursor.getString(managedCursor.getColumnIndex(People.DISPLAY_NAME));
-						ContactService.this.addressBook.addContact(new Contact(String.format("sip:%s@%s", phone, realm),
-								displayName, "rcs"));
+				
+				//
+				//	Contact API for Android 2.0
+				//
+				if(IMSDroid.getSDKVersion() >=5){
+					final String[] projection = new String[] { 
+							android.provider.BaseColumns._ID,
+							android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER,
+							android.provider.ContactsContract.Contacts.DISPLAY_NAME
+							};
+					Cursor managedCursor = ServiceManager.getMainActivity().managedQuery(android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+							projection, // Which columns to return
+							null,       // Which rows to return (all rows)
+							null,       // Selection arguments (none)
+							// Put the results in ascending order by name
+							android.provider.ContactsContract.Contacts.DISPLAY_NAME + " ASC"
+						);
+						
+					 while(managedCursor.moveToNext()){
+						 phone = managedCursor.getString(managedCursor .getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER));
+						 if(phone != null){
+							displayName = managedCursor.getString(managedCursor.getColumnIndex(android.provider.ContactsContract.Contacts.DISPLAY_NAME));
+							ContactService.this.addressBook.addContact(new Contact(String.format("sip:%s@%s", phone, realm),
+										displayName, "rcs"));
+						 }
+					 }
+				}
+				//
+				//	Contact API for Android 1.5 and 1.6
+				//
+				else{
+					String[] projection = new String[] { People.DISPLAY_NAME, People.NUMBER };
+					Cursor managedCursor = ServiceManager.getMainActivity().managedQuery(People.CONTENT_URI,
+	                        projection, // Which columns to return 
+	                        null,       // Which rows to return (all rows)
+	                        null,       // Selection arguments (none)
+	                        // Put the results in ascending order by name
+	                        People.DISPLAY_NAME + " ASC");
+										
+					while (managedCursor.moveToNext()) {
+						phone = managedCursor.getString(managedCursor .getColumnIndex(People.NUMBER));
+						if(phone != null){
+							displayName = managedCursor.getString(managedCursor.getColumnIndex(People.DISPLAY_NAME));
+							ContactService.this.addressBook.addContact(new Contact(String.format("sip:%s@%s", phone, realm),
+									displayName, "rcs"));
+						}
 					}
 				}
 				
@@ -519,7 +531,9 @@ public class ContactService  extends Service implements IContactService, IRegist
 										ContactService.this.loadContacts();
 									}
 								};
-								IMSDroid.getContext().getContentResolver().registerContentObserver(Contacts.CONTENT_URI, true, ContactService.this.localContactObserver);
+								IMSDroid.getContext().getContentResolver().registerContentObserver(IMSDroid.getSDKVersion() >=5 ? android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI : Contacts.CONTENT_URI, 
+										true, 
+										ContactService.this.localContactObserver);
 							}
 						});
 						Looper.loop();// loop() until quit() is called
