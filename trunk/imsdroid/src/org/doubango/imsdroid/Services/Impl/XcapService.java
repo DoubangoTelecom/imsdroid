@@ -27,6 +27,7 @@ import ietf.params.xml.ns.rls_services.RlsServices;
 import ietf.params.xml.ns.rls_services.ServiceType;
 import ietf.params.xml.ns.xcap_caps.XcapCaps;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
