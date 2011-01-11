@@ -3,6 +3,9 @@
 
 <wiki:toc max_depth="2" />
 
+==1.2.355==
+ * Fix  issue 138 , issue 141,  issue 147  and  issue 148
+
 ==1.2.348==
  * Add support for multiple concurrent calls (thanks to http://www.theipcompany.nl/)
  * Allow intercepting outgoing calls
