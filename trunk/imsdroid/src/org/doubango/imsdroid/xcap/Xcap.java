@@ -25,6 +25,12 @@ public class Xcap {
 	public static final String XCAP_AUID_IETF_PRES_RULES_NS = "urn:ietf:params:xml:ns:pres-rules";
 	public static final String XCAP_AUID_IETF_PRES_RULES_DOC = "index";
 	
+	/*== pidf-manipulation ==*/
+	public static final String XCAP_AUID_IETF_PIDF_MANIPULATION_ID = "pidf-manipulation";
+	public static final String XCAP_AUID_IETF_PIDF_MANIPULATION_MIME_TYPE = "application/pidf+xml";
+	public static final String XCAP_AUID_IETF_PIDF_MANIPULATION_NS = "urn:ietf:params:xml:ns:pidf";
+	public static final String XCAP_AUID_IETF_PIDF_MANIPULATION_DOC = "index";
+	
 	/*== org.openmobilealliance.pres-rules ==*/
 	public static final String XCAP_AUID_OMA_PRES_RULES_ID = "org.openmobilealliance.pres-rules";
 	public static final String XCAP_AUID_OMA_PRES_RULES_MIME_TYPE = "application/auth-policy+xml";
@@ -66,6 +72,8 @@ public class Xcap {
 	public static final String XCAP_AUID_OMA_SHARED_GROUPS_MIME_TYPE = "application/vnd.oma.group-usage-list+xml";
 	public static final String XCAP_AUID_OMA_SHARED_GROUPS_NS = "urn:ietf:params:xml:ns:resource-lists";
 	public static final String XCAP_AUID_OMA_SHARED_GROUPS_DOC = "index";
+	
+	
 	
 	public enum State{
 		NONE,

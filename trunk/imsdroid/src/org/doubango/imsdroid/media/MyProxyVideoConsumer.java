@@ -126,9 +126,10 @@ public class MyProxyVideoConsumer extends MyProxyPlugin{
 		
 		// Get canvas for drawing
 		final Canvas canvas = this.preview.holder.lockCanvas();
-		if (canvas != null){		
+		if (canvas != null){
 			if(this.isFullScreenRequired){
-				canvas.drawBitmap(this.rgb565Bitmap, null, this.preview.rect, null);
+				//canvas.drawBitmap(this.rgb565Bitmap, null, this.preview.surfDisplay, null);
+				canvas.drawBitmap(this.rgb565Bitmap, null, this.preview.surfFrame, null);
 			}
 			else{
 				canvas.drawBitmap(this.rgb565Bitmap, 0, 0, null);
@@ -204,19 +205,23 @@ public class MyProxyVideoConsumer extends MyProxyPlugin{
 	 */
 	static class MyProxyVideoConsumerPreview extends SurfaceView implements SurfaceHolder.Callback {
 		private final SurfaceHolder holder;
-		private final Rect rect;
+		private Rect surfFrame;
+		private Rect surfDisplay;
+		private final float ratio;
 		MyProxyVideoConsumerPreview(Context context, int width, int height, int fps) {
 			super(context);
 			
 			this.holder = getHolder();
 			this.holder.addCallback(this);
+			this.ratio = (float)width/(float)height;
 			
 			if(this.holder != null){
-				this.rect = this.holder.getSurfaceFrame();
+				this.surfFrame = this.holder.getSurfaceFrame();
 			}
 			else{
-				this.rect = null;
+				this.surfFrame = null;
 			}
+			this.surfDisplay = this.surfFrame;
 		}
 	
 		public void surfaceCreated(SurfaceHolder holder) {
@@ -226,6 +231,18 @@ public class MyProxyVideoConsumer extends MyProxyPlugin{
 		}
 	
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+			if(holder != null){
+				this.surfFrame = holder.getSurfaceFrame();
+				
+				// (w/h)=ratio => 
+				// 1) h=w/ratio 
+				// and 
+				// 2) w=h*ratio
+				int newW = (int)(w/ratio) > h ? (int)(h * ratio) : w;
+				int newH = (int)(newW/ratio) > h ? h : (int)(newW/ratio);
+				
+				this.surfDisplay = new Rect(0, 0, newW, newH);
+			}
 		}
 	}
 }
