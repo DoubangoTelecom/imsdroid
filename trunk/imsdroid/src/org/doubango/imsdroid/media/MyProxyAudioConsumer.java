@@ -22,6 +22,7 @@ package org.doubango.imsdroid.media;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.doubango.imsdroid.Model.Configuration;
 import org.doubango.imsdroid.Model.Configuration.CONFIGURATION_ENTRY;
@@ -42,7 +43,7 @@ import android.util.Log;
  */
 public class MyProxyAudioConsumer extends MyProxyPlugin{
 	private static final String TAG = MyProxyAudioConsumer.class.getCanonicalName();
-	private static final int AUDIO_BUFFER_FACTOR = 1;
+	private static final int AUDIO_BUFFER_FACTOR = 2;
 	private static final int AUDIO_STREAM_TYPE = AudioManager.STREAM_VOICE_CALL;
 	
 	private final MyProxyAudioConsumerCallback callback;
@@ -69,14 +70,15 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 		this.audioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		
 		this.audioTrack = new AudioTrack(MyProxyAudioConsumer.AUDIO_STREAM_TYPE,
-				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,
+				rate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize, AudioTrack.MODE_STREAM);
 		if(this.audioTrack.getState() == AudioTrack.STATE_INITIALIZED){
 			float audioPlaybackLevel = ServiceManager.getConfigurationService().getFloat(
 					CONFIGURATION_SECTION.GENERAL,
 					CONFIGURATION_ENTRY.AUDIO_PLAY_LEVEL,
 					Configuration.DEFAULT_GENERAL_AUDIO_PLAY_LEVEL);
-			this.audioTrack.setStereoVolume(AudioTrack.getMaxVolume()*audioPlaybackLevel, AudioTrack.getMaxVolume()*0.25f);
+			//this.audioTrack.setStereoVolume(AudioTrack.getMaxVolume()*audioPlaybackLevel, AudioTrack.getMaxVolume()*0.25f);
+			this.audioTrack.setStereoVolume(audioPlaybackLevel, audioPlaybackLevel);
 			this.prepared = true;
 			return 0;
 		}
@@ -123,8 +125,11 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 			
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
-			final byte[] audioBytes = new byte[MyProxyAudioConsumer.this.audioFrame.capacity()];
-			final byte[] silenceBytes = new byte[audioBytes.length];
+			int frameLength = MyProxyAudioConsumer.this.audioFrame.capacity();
+			final int framesCount = 1; // Number of 20ms' to copy
+			final byte[] audioBytes = new byte[frameLength*framesCount];
+			int i;
+			long sizeInBytes;
 			
 			MyProxyAudioConsumer.this.audioTrack.play();
 			
@@ -133,16 +138,42 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 					break;
 				}
 				
+				for(i=0; i<framesCount; i++){
+					sizeInBytes = MyProxyAudioConsumer.this.consumer.pull(MyProxyAudioConsumer.this.audioFrame, frameLength);
+					if(sizeInBytes>0){
+						MyProxyAudioConsumer.this.audioFrame.get(audioBytes, i*frameLength, frameLength);
+						MyProxyAudioConsumer.this.audioFrame.rewind();
+						//if(sizeInBytes<frameLength){
+						// TODO
+						//}
+					}
+					else{
+						Arrays.fill(audioBytes, i*frameLength, (i*frameLength)+frameLength, (byte)0);
+					}
+				}
+				
+				
+				/*long avg=0;
+				for(i=0;i<audioBytes.length;i+=1){
+					avg+=Math.abs(audioBytes[i]);
+				}
+				if(Math.abs(avg)>=18000)
+					Log.d(MyProxyAudioConsumer.TAG, "avg="+avg);
+				else
+					Arrays.fill(audioBytes, 0, audioBytes.length, (byte)0);
+				*/
+				MyProxyAudioConsumer.this.audioTrack.write(audioBytes, 0, audioBytes.length);
+				
 				/* get sound data from the jitter buffer */
-				final long sizeInBytes = MyProxyAudioConsumer.this.consumer.pull(MyProxyAudioConsumer.this.audioFrame, audioBytes.length);				
-				if(sizeInBytes >0){ 
-					MyProxyAudioConsumer.this.audioFrame.get(audioBytes);
-					/* writtenBytes +=*/ MyProxyAudioConsumer.this.audioTrack.write(audioBytes, 0, audioBytes.length);
-					MyProxyAudioConsumer.this.audioFrame.rewind();
-				}
-				else{ // silence
-					MyProxyAudioConsumer.this.audioTrack.write(silenceBytes, 0, silenceBytes.length);
-				}
+//				final long sizeInBytes = MyProxyAudioConsumer.this.consumer.pull(MyProxyAudioConsumer.this.audioFrame, audioBytes.length);				
+//				if(sizeInBytes >0){ 
+//					MyProxyAudioConsumer.this.audioFrame.get(audioBytes);
+//					/* writtenBytes +=*/ MyProxyAudioConsumer.this.audioTrack.write(audioBytes, 0, audioBytes.length);
+//					MyProxyAudioConsumer.this.audioFrame.rewind();
+//				}
+//				else{ // silence
+//					MyProxyAudioConsumer.this.audioTrack.write(silenceBytes, 0, silenceBytes.length);
+//				}
 			}
 			
 			if(MyProxyAudioConsumer.this.audioTrack != null){

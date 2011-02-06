@@ -75,6 +75,7 @@ import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.PresenceStatus;
 
 import android.app.ActivityGroup;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -197,7 +198,7 @@ implements IRegistrationEventHandler
             this.screenService.show(ScreenHome.class);
         }
                 
-        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+        //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
         //setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 

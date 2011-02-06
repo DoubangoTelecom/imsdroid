@@ -62,6 +62,27 @@ public class IMSDroid extends Application {
     	return IMSDroid.sdkVersion;
     }
     
+    public static boolean useSetModeToHackSpeaker(){
+    	//http://stackoverflow.com/questions/4278471/trouble-with-loud-speaker-off-on-galaxy-s
+    	String model = Build.MODEL;
+        return  model.equalsIgnoreCase("GT-I9000") ||       // base model
+        		model.equalsIgnoreCase("GT-I5500") ||		// Galaxy Europa
+                model.equalsIgnoreCase("SPH-D700") ||       // Epic         (Sprint)
+                model.equalsIgnoreCase("SGH-I897") ||       // Captivate    (AT&T)
+                model.equalsIgnoreCase("SGH-T959") ||       // Vibrant      (T-Mobile)
+                model.equalsIgnoreCase("SCH-I500") ||       // Fascinate    (Verizon)
+                model.equalsIgnoreCase("SCH-I400") ||       // Continuum    (T-Mobile) 
+                
+                model.equalsIgnoreCase("blade")    ||		// ZTE Blade
+                
+                model.equalsIgnoreCase("htc_supersonic") || //HTC EVO
+                
+                model.equalsIgnoreCase("U8110") || // Huawei U8110
+                model.equalsIgnoreCase("U8150")  // Huawei U8110
+                
+                ;
+    }
+    
 	public static int getVersionCode(){
     	if(IMSDroid.packageManager != null){
     		try {

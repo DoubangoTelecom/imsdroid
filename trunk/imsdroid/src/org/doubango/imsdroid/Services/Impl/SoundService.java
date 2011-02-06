@@ -171,14 +171,6 @@ public class SoundService extends Service implements ISoundService {
 				e.printStackTrace();
 			}
 		}
-		
-		/*try{
-			this.ringTonePlayer.setLooping(true);
-			this.ringTonePlayer.start();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}*/
 	}
 
 	@Override
