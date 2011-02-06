@@ -47,7 +47,6 @@ import org.doubango.imsdroid.sip.MyAVSession;
 import org.doubango.imsdroid.sip.MySipStack;
 import org.doubango.imsdroid.sip.MyAVSession.CallState;
 import org.doubango.imsdroid.utils.UriUtils;
-import android.view.OrientationEventListener;
 
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
@@ -59,12 +58,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -118,6 +117,8 @@ public class ScreenAV extends Screen {
 	private ImageButton btDtmf_Sharp;
 	private ImageButton btDtmf_Star;
 	
+	private boolean speakerOn;
+	private AudioManager audioManager;
 	private ProxSensor proxSensor;
 	private KeyguardLock keyguardLock;
 	private final IScreenService screenService;
@@ -151,6 +152,8 @@ public class ScreenAV extends Screen {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_av);
         OrientationEventListener mListener;
+        
+        this.audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         
         // retrieve id
         this.id = getIntent().getStringExtra("id");
@@ -278,11 +281,13 @@ public class ScreenAV extends Screen {
 		super.onStart();
 		
 		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-		if(keyguardManager != null && keyguardManager.inKeyguardRestrictedInputMode()){
+		if(keyguardManager != null){
 			if(this.keyguardLock == null){
 				this.keyguardLock = keyguardManager.newKeyguardLock(ScreenAV.TAG);
 			}
-			this.keyguardLock.disableKeyguard();
+			if(keyguardManager.inKeyguardRestrictedInputMode()){
+				this.keyguardLock.disableKeyguard();
+			}
 		}
 		
 		if(this.proxSensor == null){
@@ -383,8 +388,7 @@ public class ScreenAV extends Screen {
 				break;
 				
 			case ScreenAV.MENU_SPEAKER:
-				AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-				am.setSpeakerphoneOn(!am.isSpeakerphoneOn());
+				setSpeakerphoneOn(!speakerOn);
 				break;
 		}
 		return true;
@@ -644,6 +648,42 @@ public class ScreenAV extends Screen {
 		}
 	};
 
+	private void setSpeakerphoneOn(boolean on){
+   
+		if (IMSDroid.getSDKVersion() < 5){
+			this.audioManager.setRouting(AudioManager.MODE_IN_CALL, 
+					on ? AudioManager.ROUTE_SPEAKER : AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL);
+		}
+		else{
+			if(IMSDroid.useSetModeToHackSpeaker()){
+				audioManager.setMode(AudioManager.MODE_IN_CALL);
+			}
+			this.audioManager.setSpeakerphoneOn(on);
+			if(IMSDroid.useSetModeToHackSpeaker()){
+				audioManager.setMode(AudioManager.MODE_NORMAL);
+			}
+		}
+		
+		speakerOn = on;
+	}
+	
+	private void setInCallMode(boolean bInCall){
+		if(bInCall){
+			if (IMSDroid.getSDKVersion() < 5){
+				this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+			}
+			else{
+			}
+		}
+		else{
+			if (IMSDroid.getSDKVersion() < 5){
+				this.audioManager.setMode(AudioManager.MODE_NORMAL);
+			}
+			else{
+			}
+		}
+	}
+	
 	private void startStopVideo(boolean start){
 		if(this.avSession== null || (this.avSession.getMediaType() != MediaType.AudioVideo && this.avSession.getMediaType() != MediaType.Video)){
 			return;
@@ -877,10 +917,8 @@ public class ScreenAV extends Screen {
 					}
 					break;
 				case EARLY_MEDIA:
-					if (Integer.parseInt(Build.VERSION.SDK) < 5){
-						this.audioManager.setMode(AudioManager.MODE_IN_CALL);
-					}
-					this.audioManager.setSpeakerphoneOn(false);
+					this.avScreen.setInCallMode(true);
+					this.avScreen.setSpeakerphoneOn(false);
 					if(this.avScreen != null){
 						this.avScreen.runOnUiThread(new Runnable() {
 							public void run() {
@@ -897,10 +935,12 @@ public class ScreenAV extends Screen {
 					ServiceManager.getSoundService().stopRingTone();
 					ServiceManager.showAVCallNotif(R.drawable.phone_call_25, "In Call");
 					
-					if (Integer.parseInt(Build.VERSION.SDK) < 5){
-						this.audioManager.setMode(AudioManager.MODE_IN_CALL);
-					}
-					this.audioManager.setSpeakerphoneOn(false);
+					this.avScreen.setInCallMode(true);
+					this.avScreen.setSpeakerphoneOn(false);
+					
+					//http://hi-android.info/src/com/android/phone/PhoneUtils.java.html
+					//this.avScreen.audioManager.setParameters("noise_suppression=on");
+					
 					
 					avSession.setState(CallState.INCALL);
 					
@@ -944,7 +984,7 @@ public class ScreenAV extends Screen {
 					ServiceManager.vibrate(100);
 					MyAVSession.releaseSession(e.getSessionId());
 					ServiceManager.refreshAVCallNotif(R.drawable.phone_call_25);
-					this.audioManager.setMode(AudioManager.MODE_NORMAL);
+					this.avScreen.setInCallMode(false);
 					break;
 				case LOCAL_HOLD_OK:
 					avSession.setLocalHold(true);
@@ -1047,13 +1087,16 @@ public class ScreenAV extends Screen {
 		public void onSensorChanged(SensorEvent event) {
 			try{ // Keep it until we get a phone supporting this feature
 				if(this.avScreen == null || this.avScreen.keyguardLock == null){
+					Log.e(ScreenAV.TAG, "invalid state");
 					return;
 				}
 				if(event.values != null && event.values.length >0){
 					if(event.values[0] < this.maxRange){
+						Log.d(ScreenAV.TAG, "reenableKeyguard()");
 						this.avScreen.keyguardLock.reenableKeyguard();
 					}
 					else{
+						Log.d(ScreenAV.TAG, "disableKeyguard()");
 						this.avScreen.keyguardLock.disableKeyguard();
 					}
 				}

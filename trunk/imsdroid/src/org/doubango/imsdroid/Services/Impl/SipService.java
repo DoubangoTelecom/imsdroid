@@ -76,6 +76,7 @@ import org.doubango.tinyWRAP.RPMessage;
 import org.doubango.tinyWRAP.RegistrationEvent;
 import org.doubango.tinyWRAP.SMSData;
 import org.doubango.tinyWRAP.SMSEncoder;
+import org.doubango.tinyWRAP.SdpMessage;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
@@ -312,7 +313,7 @@ implements ISipService, tinyWRAPConstants {
 			Log.e(SipService.TAG, "Failed to set Proxy-CSCF parameters");
 			return false;
 		}
-
+		
 		// Set local IP (If your reusing this code on non-Android platforms, let
 		// doubango retrieve the best IP address)
 		boolean ipv6 = StringUtils.equals(this.preferences.ipversion, "ipv6", true);
@@ -951,7 +952,7 @@ implements ISipService, tinyWRAPConstants {
 			}
 			
 			return 0;
-		}	
+		}
 		
 		@Override
 		public int OnStackEvent(StackEvent e) {
@@ -996,7 +997,7 @@ implements ISipService, tinyWRAPConstants {
 			}
 			return 0;
 		}
-
+		
 		@Override
 		public int OnInviteEvent(InviteEvent e) {
 			//short code = e.getCode();

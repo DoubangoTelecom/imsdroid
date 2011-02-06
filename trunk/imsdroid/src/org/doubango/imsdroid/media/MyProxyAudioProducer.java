@@ -79,7 +79,7 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
 		this.audioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		
 		this.audioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
-				rate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+				rate, AudioFormat.CHANNEL_IN_MONO,
 				AudioFormat.ENCODING_PCM_16BIT, bufferSize);
 		if(this.audioRecorder.getState() == AudioRecord.STATE_INITIALIZED){
 			this.prepared = true;
@@ -133,12 +133,25 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
 					break;
 				}
 				
-				// To avoid overrun read data event if on pause
-				 if((read = MyProxyAudioProducer.this.audioRecorder.read(MyProxyAudioProducer.this.audioFrame, size)) > 0){
-					 if(!MyProxyAudioProducer.this.paused){
-						 MyProxyAudioProducer.this.producer.push(MyProxyAudioProducer.this.audioFrame, read);
-					 }
+				// To avoid overrun read data even if on pause
+				if((read = MyProxyAudioProducer.this.audioRecorder.read(MyProxyAudioProducer.this.audioFrame, size)) > 0){
+					if(!MyProxyAudioProducer.this.paused){
+						MyProxyAudioProducer.this.producer.push(MyProxyAudioProducer.this.audioFrame, read);
+					}
 				}
+				
+				/*byte[] audioData = new byte[size];
+				if((read = MyProxyAudioProducer.this.audioRecorder.read(audioData, 0, size)) > 0){
+					 if(!MyProxyAudioProducer.this.paused){
+						 for(int i=0;i<size;i++){
+							 audioData[i]>>=2;
+						 }
+						 MyProxyAudioProducer.this.audioFrame.put(audioData);						 
+						 MyProxyAudioProducer.this.producer.push(MyProxyAudioProducer.this.audioFrame, read);
+						 MyProxyAudioProducer.this.audioFrame.rewind();
+					 }
+				}*/
+				
 			}
 			
 			if(MyProxyAudioProducer.this.audioRecorder != null){
