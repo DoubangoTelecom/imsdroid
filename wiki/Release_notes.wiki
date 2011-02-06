@@ -3,6 +3,10 @@
 
 <wiki:toc max_depth="2" />
 
+==1.2.366==
+ * Fix issue 158, issue 165
+ * Add support for 4-way conference call using [http://code.google.com/p/openvcs/ OpenVCS]
+
 ==1.2.355==
  * Fix  issue 138 , issue 141,  issue 147  and  issue 148
 
