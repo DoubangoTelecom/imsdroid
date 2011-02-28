@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:background="@color/color_white" android:layout_gravity="center_vertical|center_horizontal|center" android:gravity="center_vertical|center_horizontal|center">
+    <TextView android:layout_height="wrap_content" android:layout_alignParentLeft="true" android:layout_width="wrap_content" android:id="@+id/screen_splash_textView_PoweredBy" android:layout_below="@+id/screen_splash_ImageView_Logo" android:textSize="14px" android:textStyle="bold" android:text="Provided to you By Doubango Telecom"/>
+    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_splash_ImageView_Logo" android:src="@drawable/icon"/>
+    
+</RelativeLayout>

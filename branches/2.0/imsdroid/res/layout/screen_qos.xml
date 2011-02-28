@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+<TextView  android:layout_height="wrap_content" android:id="@+id/screen_qos_textView_preconditions" android:text="Preconditions" android:textSize="16px" android:textStyle="bold" android:layout_width="fill_parent" android:layout_marginTop="5px"></TextView>
+<TextView android:layout_below="@+id/screen_qos_textView_preconditions" android:layout_height="wrap_content" android:id="@+id/screen_qos_textView_precond_strength" android:text="Strength" android:layout_width="fill_parent" android:layout_marginLeft="10px"></TextView>
+
+<Spinner android:layout_below="@+id/screen_qos_textView_precond_strength" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_qos_spinner_precond_strength" android:layout_marginLeft="10px" android:layout_marginRight="5px"></Spinner>
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_qos_textView_type" android:layout_below="@+id/screen_qos_spinner_precond_strength" android:text="Type" android:layout_marginLeft="10px"></TextView>
+<Spinner android:layout_below="@+id/screen_qos_textView_type" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:layout_marginRight="5px" android:id="@+id/screen_qos_Spinner_precond_type"></Spinner>
+<TextView android:layout_height="wrap_content" android:id="@+id/screen_qos_textView_precond_bandwidth" android:text="Bandwidth" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:layout_below="@+id/screen_qos_Spinner_precond_type"></TextView>
+<Spinner android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:layout_marginRight="5px" android:id="@+id/screen_qos_spinner_precond_bandwidth" android:layout_below="@+id/screen_qos_textView_precond_bandwidth"></Spinner>
+
+<CheckBox android:layout_below="@+id/screen_qos_spinner_precond_bandwidth" android:layout_height="wrap_content" android:id="@+id/screen_qos_checkBox_sessiontimers" android:text="Enable Session Timers" android:layout_width="fill_parent"></CheckBox>
+
+<RelativeLayout android:layout_below="@+id/screen_qos_checkBox_sessiontimers" android:id="@+id/screen_qos_relativeLayout_sessiontimers" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:layout_height="wrap_content">
+
+<TextView android:layout_height="wrap_content" android:id="@+id/screen_qos_textView_stimeout" android:text="Timeout" android:layout_width="fill_parent"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_below="@+id/screen_qos_textView_stimeout" android:layout_width="fill_parent" android:inputType="number" android:text="90" android:id="@+id/screen_qos_editText_stimeout" android:layout_marginRight="5px"></EditText>
+<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_qos_editText_stimeout" android:layout_width="fill_parent" android:id="@+id/screen_qos_textView_refresher" android:text="Refresher"></TextView>
+
+
+
+
+<Spinner android:layout_below="@+id/screen_qos_textView_refresher" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginRight="5px" android:id="@+id/screen_qos_spinner_refresher"></Spinner>
+</RelativeLayout>
+
+</RelativeLayout>
+
+
+</ScrollView>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent">
+    
+    <LinearLayout android:orientation="horizontal" android:layout_height="fill_parent" android:layout_width="fill_parent">
+        <TextView android:layout_marginTop="2px" android:layout_marginLeft="2px" android:layout_width="wrap_content" android:textStyle="bold" android:layout_weight="3" android:id="@+id/screen_tab_history_item_av_textView_remote" android:layout_marginRight="2px" android:text="Francesca Bianchi" android:textColor="@color/color_white" android:layout_height="wrap_content" android:textSize="25dp"></TextView>
+        <ImageView android:layout_width="wrap_content" android:layout_gravity="right" android:layout_height="wrap_content" android:id="@+id/screen_tab_history_item_av_imageView_type" android:src="@drawable/call_incoming_45"></ImageView>
+    </LinearLayout>
+    <TextView android:layout_width="fill_parent" android:gravity="right" android:id="@+id/screen_tab_history_item_av_textView_date" android:text="Vendredi 5 janvier 1997" android:layout_height="wrap_content" android:textSize="16dp"></TextView>
+</LinearLayout>

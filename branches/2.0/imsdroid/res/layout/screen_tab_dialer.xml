@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<LinearLayout
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent" android:orientation="vertical" android:weightSum="3" android:layout_alignParentBottom="true" android:layout_alignParentTop="true">
+	    <LinearLayout android:layout_height="wrap_content" android:layout_alignParentTop="true" android:layout_width="fill_parent" android:id="@+id/screen_tab_dialer_linearLayout_top">
+	        <EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_margin="3px" android:id="@+id/screen_tab_dialer_editText_number" android:text="0230903422" android:textSize="40dp"></EditText>
+	    </LinearLayout>
+	    <LinearLayout android:id="@+id/screen_tab_dialer_linearLayout_keyboard" android:layout_below="@+id/screen_tab_dialer_linearLayout_info" android:layout_width="fill_parent" android:gravity="center_horizontal" android:orientation="vertical" android:layout_margin="3px" android:layout_height="wrap_content" android:layout_weight="3" android:weightSum="10">
+	        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="2" android:weightSum="6">
+	            
+	            <Button android:id="@+id/screen_tab_dialer_button_1" android:tag="1" android:layout_margin="4px" android:layout_width="wrap_content" android:layout_weight="2" android:layout_height="fill_parent" android:text="1" android:textStyle="bold" android:textColor="@color/color_white" android:textSize="25dp" android:clickable="true"></Button>
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_2" android:tag="2" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="2"></Button>
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_3" android:tag="3" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="3"></Button>
+	        </LinearLayout>
+	        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="2" android:weightSum="6">
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_4" android:tag="4" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="4"></Button>
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_5" android:tag="5" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="5"></Button>
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_6" android:tag="6" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="6"></Button>
+	        </LinearLayout>
+	        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="2" android:weightSum="6">
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_7" android:tag="7" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="7"></Button>
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_8" android:tag="8" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="8"></Button>
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_9" android:tag="9" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="9"></Button>
+	        </LinearLayout>
+	        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="2" android:weightSum="6">
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_star" android:tag="*" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="*"></Button>
+	            <Button android:tag="0" android:layout_margin="4px" android:id="@+id/screen_tab_dialer_button_0" android:layout_width="wrap_content" android:layout_weight="2" android:layout_height="fill_parent" android:text="0"></Button>
+	            <Button android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_sharp" android:tag="#" android:layout_margin="4px" android:layout_weight="2" android:layout_height="fill_parent" android:text="#"></Button>
+	        </LinearLayout>
+	        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="2" android:weightSum="6">
+	            <Button android:layout_margin="4px" android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_chat" android:text="Chat" android:layout_weight="2" android:layout_height="fill_parent"></Button>
+	            <Button android:layout_margin="4px" android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_call" android:text="Call" android:layout_weight="2" android:layout_height="fill_parent"></Button>
+	            <Button android:layout_margin="4px" android:layout_width="wrap_content" android:id="@+id/screen_tab_dialer_button_del" android:layout_weight="2" android:layout_height="fill_parent" android:text="Delete"></Button>
+	        </LinearLayout>
+	    </LinearLayout>
+	</LinearLayout>
+</RelativeLayout>

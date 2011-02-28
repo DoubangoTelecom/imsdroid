@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:weightSum="3" android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingBottom="5px">
+
+
+
+
+<LinearLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:orientation="vertical" android:layout_weight="3"><TextView android:layout_height="wrap_content" android:id="@+id/screen_codecs_item_textView_name" android:text="AMR-NB-BE" android:textStyle="bold" android:layout_width="wrap_content" android:textSize="25dp" android:textColor="@color/color_white"></TextView><TextView android:layout_height="wrap_content" android:text="AMR Narrow Band Bandwidth Efficient (8 KHz)" android:id="@+id/screen_codecs_item_textView_description" android:layout_width="wrap_content"></TextView></LinearLayout><ImageView android:layout_height="wrap_content" android:layout_toRightOf="@+id/screen_codecs_item_textView_description" android:layout_width="wrap_content" android:src="@drawable/check_off_38" android:layout_weight="0" android:id="@+id/screen_codecs_item_imageView_state"></ImageView>
+
+
+
+</LinearLayout>
