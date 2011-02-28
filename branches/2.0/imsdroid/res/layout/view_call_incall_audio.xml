@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:background="@color/color_violet">
+      <TextView android:layout_height="wrap_content" android:layout_alignParentLeft="true" android:textSize="20px" android:textStyle="bold" android:textColor="@color/color_white" android:layout_width="fill_parent" android:gravity="center_horizontal" android:text="In Call" android:id="@+id/view_call_incall_audio_textView_info"></TextView>
+      <LinearLayout android:layout_below="@+id/view_call_incall_audio_textView_info" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignLeft="@+id/view_call_incall_audio_textView_info" android:layout_alignRight="@+id/view_call_incall_audio_textView_info" android:id="@+id/view_call_incall_audio_linearLayout_avatar" android:gravity="center_horizontal">
+          <ImageView android:layout_height="wrap_content" android:src="@drawable/android_avatar_big" android:id="@+id/view_call_incall_audio_imageView_avatar" android:layout_margin="5px" android:layout_width="wrap_content"></ImageView>
+          <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom" android:text="12:00" android:textSize="12px" android:textStyle="bold" android:textColor="@color/color_white" android:id="@+id/view_call_incall_audio_textView_duration"></TextView>
+      </LinearLayout>
+    <TextView android:layout_height="wrap_content" android:text="John Doe" android:textSize="20px" android:textStyle="bold" android:textColor="@color/color_white" android:gravity="center_horizontal" android:layout_width="fill_parent" android:layout_margin="4px" android:id="@+id/view_call_incall_audio_textView_remote" android:layout_alignRight="@+id/view_call_incall_audio_linearLayout_avatar" android:layout_below="@+id/view_call_incall_audio_linearLayout_avatar" android:layout_alignLeft="@+id/view_call_incall_audio_linearLayout_avatar"></TextView>
+    <LinearLayout android:layout_width="fill_parent" android:weightSum="2" android:id="@+id/view_call_trying_linearLayout_pick_or_hang" android:layout_height="wrap_content" android:layout_margin="3px" android:layout_below="@+id/view_call_incall_audio_textView_remote">
+        <Button android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:layout_margin="3px" android:id="@+id/view_call_incall_audio_button_hang" android:text="End"></Button>
+    </LinearLayout>
+    <SlidingDrawer android:layout_width="fill_parent" android:id="@+id/slidingDrawer1" android:layout_height="fill_parent" android:handle="@+id/handle" android:content="@+id/content" android:layout_below="@+id/sview_call_trying_imageView_avatar" android:layout_alignLeft="@+id/sview_call_trying_imageView_avatar" android:layout_alignRight="@+id/sview_call_trying_imageView_avatar">
+        <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/handle" android:text="Keyboard"></Button>
+        <LinearLayout android:id="@+id/content" android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@color/color_violet"></LinearLayout>
+    </SlidingDrawer>
+</RelativeLayout>

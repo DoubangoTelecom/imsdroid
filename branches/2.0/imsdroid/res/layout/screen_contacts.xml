@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+
+
+<RadioGroup android:layout_height="wrap_content" android:layout_toRightOf="@+id/screen_contacts_radioButton_local" android:id="@+id/screen_contacts_radioGroup" android:layout_width="fill_parent">
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_contacts_radioButton_local" android:text="Local Storage" android:checked="true"></RadioButton>
+<RadioButton android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/screen_contacts_radioButton_remote" android:layout_below="@+id/screen_contacts_radioButton_local" android:text="Remote Storage (XDMS)"></RadioButton>
+</RadioGroup>
+
+<RelativeLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_marginLeft="20px" android:layout_below="@+id/screen_contacts_radioGroup" android:id="@+id/screen_contacts_relativeLayout_remote">
+<TextView android:layout_height="wrap_content" android:id="@+id/screen_contacts_textView_xcaproot" android:text="Base URI (xcap-root)" android:layout_width="fill_parent"></TextView>
+<EditText android:layout_height="wrap_content" android:id="@+id/screen_contacts_editText_xcaproot" android:text="http://doubango.org:8080/services" android:layout_width="fill_parent" android:layout_below="@+id/screen_contacts_textView_xcaproot"></EditText>
+
+<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_contacts_editText_xcaproot" android:id="@+id/screen_contacts_textView_username" android:text="Authentication Name (XUI)" android:layout_width="fill_parent"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_below="@+id/screen_contacts_textView_username" android:layout_width="fill_parent" android:text="sip:alice@open-ims.test" android:id="@+id/screen_contacts_editText_xui"></EditText>
+<TextView android:layout_height="wrap_content" android:id="@+id/screen_contacts_textView_passxord" android:text="Password" android:layout_width="fill_parent" android:layout_below="@+id/screen_contacts_editText_xui"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_below="@+id/screen_contacts_textView_passxord" android:id="@+id/screen_contacts_editText_password" android:layout_width="fill_parent" android:inputType="textPassword"></EditText>
+</RelativeLayout>
+
+
+</RelativeLayout>

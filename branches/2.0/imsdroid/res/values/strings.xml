@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IMSDroid</string>
+    <string name="doubango_revision">550</string>
+   	<string name="spinner_ipversion">Select IP version</string>
+	<string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>
+	<string name="spinner_transport">Select Network Transport</string>
+    
+    <string name="copyright" formatted="false">
+    IMSDroid/v%s (doubango r%s), Copyright © 2009-2010 Mamadou Diop. All rights reserved.\n\n
+    IMSDroid is free software: you can redistribute it and/or modify it under the terms of
+    the GNU General Public License as published by the Free Software Foundation, either version 3
+    of the License, or (at your option) any later version.\n
+    \n
+    IMSDroid is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU General Public License for more details.\n
+    \n
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.\n
+    \n
+    For more information about the project: http://code.google.com/p/imsdroid/.\n
+    Addition copyright information: http://code.google.com/p/imsdroid/wiki/Copyrigths. \n
+  </string>
+  
+    <!-- Colors -->
+    <color name="color_white">#FFFFFF</color>
+    <color name="color_violet">#9900FF</color>
+    <color name="color_gray">#736F6E</color>
+</resources>
