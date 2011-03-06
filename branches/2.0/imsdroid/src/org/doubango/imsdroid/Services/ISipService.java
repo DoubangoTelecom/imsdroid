@@ -1,6 +1,7 @@
 
 package org.doubango.imsdroid.Services;
 
+import org.doubango.imsdroid.Sip.MySipSession.ConnectionState;
 import org.doubango.imsdroid.Sip.MySipStack;
 import org.doubango.imsdroid.Sip.PresenceStatus;
 
@@ -9,6 +10,7 @@ public interface ISipService extends IBaseService {
 	void setDefaultIdentity(String identity);
     MySipStack getSipStack();
     boolean isRegistered();
+    ConnectionState getRegistrationState();
     boolean isXcapEnabled();
     boolean isPublicationEnabled();
     boolean isSubscriptionEnabled();

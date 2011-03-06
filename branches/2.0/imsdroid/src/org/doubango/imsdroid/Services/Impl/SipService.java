@@ -129,6 +129,14 @@ implements ISipService, tinyWRAPConstants {
 		}
 		return false;
 	}
+	
+	@Override
+	public ConnectionState getRegistrationState(){
+		if (mRegSession != null) {
+			return mRegSession.getConnectionState();
+		}
+		return ConnectionState.NONE;
+	}
 
 	@Override
 	public boolean isXcapEnabled() {
@@ -389,6 +397,7 @@ implements ISipService, tinyWRAPConstants {
 		
 		return true;
 	}
+
 	@Override
 	public boolean unRegister() {
 		if (isRegistered()) {
@@ -543,7 +552,7 @@ implements ISipService, tinyWRAPConstants {
                     else if (((mySession = MyAVSession.getSession(sessionId)) != null)){
                         mySession.setConnectionState(ConnectionState.TERMINATED);
                         ((MyInviteSession)mySession).setState(InviteState.TERMINATED);
-                        mSipService.broadcastInviteEvent(new InviteEventArgs(sessionId, InviteEventTypes.DISCONNECTED, phrase));
+                        mSipService.broadcastInviteEvent(new InviteEventArgs(sessionId, InviteEventTypes.TERMINATED, phrase));
                         if(mySession instanceof MyAVSession){
                         	// FIXME: ERROR/dalvikvm(1098): ERROR: detaching thread with interp frames (count=4)
                         	MyAVSession.releaseSession((MyAVSession)mySession);
@@ -865,7 +874,7 @@ implements ISipService, tinyWRAPConstants {
 					break;
 				case tinyWRAPConstants.tsip_event_code_stack_stopped:
 					mSipService.mSipStack.setState(STACK_STATE.STOPPED);
-					Log.d(TAG, "Stack stoped");
+					Log.d(TAG, "Stack stopped");
 					break;
 			}
 			return 0;

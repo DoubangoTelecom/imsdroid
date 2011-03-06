@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_height="wrap_content" android:layout_width="wrap_content"><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Connection Error" android:textSize="20px" android:textStyle="bold" android:textColor="@color/color_white" android:id="@+id/custom_dialog_textView_title"></TextView>
+<ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/custom_dialog_textView_title" android:src="@drawable/delete_48" android:id="@+id/custom_dialog_imageView_icon"></ImageView>
+<TextView android:layout_below="@+id/custom_dialog_textView_title" android:text="Your message here!" android:textSize="16px" android:id="@+id/custom_dialog_textView_msg" android:layout_toRightOf="@+id/custom_dialog_imageView_icon" android:layout_marginLeft="5px" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+</RelativeLayout>

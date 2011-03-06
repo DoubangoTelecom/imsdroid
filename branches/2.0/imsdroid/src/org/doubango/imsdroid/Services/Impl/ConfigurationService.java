@@ -89,22 +89,46 @@ public class ConfigurationService extends BaseService implements IConfigurationS
 
 	@Override
 	public String getString(ConfigurationEntry entry, String defaultValue) {
-		return mSettings.getString(entry.toString(), defaultValue);
+		try{
+			return mSettings.getString(entry.toString(), defaultValue);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return defaultValue;
+		}
 	}
 
 	@Override
 	public int getInt(ConfigurationEntry entry, int defaultValue) {
-		return mSettings.getInt(entry.toString(), defaultValue);
+		try{
+			return mSettings.getInt(entry.toString(), defaultValue);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return defaultValue;
+		}
 	}
 
 	@Override
 	public float getFloat(ConfigurationEntry entry, float defaultValue) {
-		return mSettings.getFloat(entry.toString(), defaultValue);
+		try{
+			return mSettings.getFloat(entry.toString(), defaultValue);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return defaultValue;
+		}
 	}
 
 	@Override
 	public boolean getBoolean(ConfigurationEntry entry, boolean defaultValue) {
-		return mSettings.getBoolean(entry.toString(), defaultValue);
+		try{
+			return mSettings.getBoolean(entry.toString(), defaultValue);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return defaultValue;
+		}
 	}
 
 	@Override

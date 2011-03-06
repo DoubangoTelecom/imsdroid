@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="fill_parent" android:clickable="true"
+  android:gravity="center_vertical|center_horizontal" android:layout_width="fill_parent" android:background="@drawable/sel_keypad">
+    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/view_dialer_button_image_imageView" android:src="@drawable/icon"></ImageView>
+</LinearLayout>

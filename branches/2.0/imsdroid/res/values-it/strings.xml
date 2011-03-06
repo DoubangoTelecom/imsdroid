@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Strings -->
+    <string name="day_today">Oggi</string>
+    <string name="day_yesterday">Ieri</string>
+    
+    <!-- Codes -->
+    <string-array name="stringarray_codes">
+        <item>Italy +39</item>
+    </string-array>
+    
+</resources>

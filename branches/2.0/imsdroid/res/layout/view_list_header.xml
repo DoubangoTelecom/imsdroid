@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/view_list_header_title"
+  android:layout_width="fill_parent" android:text="Group" android:textColor="@color/color_white" android:textStyle="bold" android:background="@color/color_gray" android:textSize="16dp" android:layout_height="wrap_content" android:paddingLeft="3px">
+</TextView>

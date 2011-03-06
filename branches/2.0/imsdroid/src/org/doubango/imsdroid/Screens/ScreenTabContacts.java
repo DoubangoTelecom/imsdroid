@@ -23,7 +23,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -92,6 +91,7 @@ public class ScreenTabContacts extends BaseScreen {
 		mAItemMessaging.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				// ScreenChat.startChat(mSelectedContact.getPrimaryNumber());
 				if(mLasQuickAction != null){
 					mLasQuickAction.dismiss();
 				}
@@ -112,7 +112,6 @@ public class ScreenTabContacts extends BaseScreen {
 	    mListView.setOnItemLongClickListener(mOnItemListViewLongClickListener);
 	    registerForContextMenu(mListView);
 	    
-	    // mAItemVoiceCall.setIcon(getResources().getDrawable(R.drawable.call_onscreen_24));
 	}
 	
 	private final OnItemClickListener mOnItemListViewClickListener = new OnItemClickListener() {
@@ -123,13 +122,13 @@ public class ScreenTabContacts extends BaseScreen {
 				if(!StringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
 					if(!MyAVSession.hasActiveSession()){
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
-						mLasQuickAction.addActionItem(mAItemVideoCall);
+						// mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
-					mLasQuickAction.addActionItem(mAItemMessaging);
+					// mLasQuickAction.addActionItem(mAItemMessaging);
 				}
 				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 				mLasQuickAction.show();
-			}	
+			}
 		}
 	};
 	
@@ -140,7 +139,19 @@ public class ScreenTabContacts extends BaseScreen {
 				return true;
 			}
 			
-			
+			mSelectedContact = (Contact)parent.getItemAtPosition(position);
+			if(mSelectedContact != null){
+				mLasQuickAction = new QuickAction(view);
+				if(!StringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
+					if(!MyAVSession.hasActiveSession()){
+						mLasQuickAction.addActionItem(mAItemVoiceCall);
+						// mLasQuickAction.addActionItem(mAItemVideoCall);
+					}
+					// mLasQuickAction.addActionItem(mAItemMessaging);
+				}
+				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
+				mLasQuickAction.show();
+			}
 			return true;
 		}
 	};
@@ -155,7 +166,7 @@ public class ScreenTabContacts extends BaseScreen {
 		private final ObservableList<Contact> mContacts;
 		
 		
-		public MySeparatedListAdapter(Context context){
+		private MySeparatedListAdapter(Context context){
 			super(context);
 			mContext = context;
 			mHandler = new Handler();
@@ -175,20 +186,26 @@ public class ScreenTabContacts extends BaseScreen {
 		
 		private void updateSections(){
 			clearSections();
-			List<Contact> contacts = mContacts.getList();
-			String lastGroup = "$", displayName;
-			ScreenTabContactsAdapter lastAdapter = null;
-			
-			for(Contact contact : contacts){
-				displayName = contact.getDisplayName();
-				if((!StringUtils.isNullOrEmpty(displayName) && !displayName.startsWith(lastGroup))){
-					lastGroup = displayName.substring(0, 1);
-					lastAdapter = new ScreenTabContactsAdapter(mContext, lastGroup);
-					addSection(lastGroup, lastAdapter);
-				}
+			synchronized(mContacts){
+				List<Contact> contacts = mContacts.getList();
+				String lastGroup = "$", displayName;
+				ScreenTabContactsAdapter lastAdapter = null;
 				
-				if(lastAdapter != null){
-					lastAdapter.addContact(contact);
+				for(Contact contact : contacts){
+					displayName = contact.getDisplayName();
+					if(StringUtils.isNullOrEmpty(displayName)){
+						continue;
+					}
+					final String group = displayName.substring(0, 1).toUpperCase();
+					if(!group.equalsIgnoreCase(lastGroup)){
+						lastGroup = group;
+						lastAdapter = new ScreenTabContactsAdapter(mContext, lastGroup);
+						addSection(lastGroup, lastAdapter);
+					}
+					
+					if(lastAdapter != null){
+						lastAdapter.addContact(contact);
+					}
 				}
 			}
 		}
@@ -196,27 +213,28 @@ public class ScreenTabContacts extends BaseScreen {
 		@Override
 		protected View getHeaderView(int position, View convertView, ViewGroup parent, final Adapter adapter) {
 			if (convertView == null) {
-				convertView = mInflater.inflate(R.layout.screen_tab_contacts_group_item, parent, false);
+				convertView = mInflater.inflate(R.layout.view_list_header, parent, false);
 			}
-			TextView tvDisplayName = (TextView)convertView.findViewById(R.id.list_header_title);
+			TextView tvDisplayName = (TextView)convertView.findViewById(R.id.view_list_header_title);
 			tvDisplayName.setText(((ScreenTabContactsAdapter)adapter).getSectionText());
 			return convertView;
 		}
 
 		@Override
 		public void update(Observable observable, Object data) {
-			updateSections();
-			if(Thread.currentThread() == Looper.getMainLooper().getThread()){
-				notifyDataSetChanged();
-			}
-			else{
+			//if(Thread.currentThread() == Looper.getMainLooper().getThread()){
+			//	updateSections();
+			//	notifyDataSetChanged();
+			//}
+			//else{
 				mHandler.post(new Runnable(){
 					@Override
 					public void run() {
+						updateSections();
 						notifyDataSetChanged();
 					}
 				});
-			}
+			//}
 		}
 	}
 	

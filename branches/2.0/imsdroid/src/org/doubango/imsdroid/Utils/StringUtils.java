@@ -1,8 +1,13 @@
 package org.doubango.imsdroid.Utils;
 
+
 public class StringUtils {
-	public static String empty(){
+	public static String emptyValue(){
 		return "";
+	}
+	
+	public static String nullValue(){
+		return "(null)";
 	}
 	
 	public static boolean isNullOrEmpty(String s){
@@ -38,6 +43,19 @@ public class StringUtils {
 				return defaultValue;
 			}
 			return Long.parseLong(value);
+		}
+		catch(NumberFormatException e){
+			e.printStackTrace();
+		}
+		return defaultValue;
+	}
+	
+	public static int parseInt(String value, int defaultValue){
+		try{
+			if(StringUtils.isNullOrEmpty(value)){
+				return defaultValue;
+			}
+			return Integer.parseInt(value);
 		}
 		catch(NumberFormatException e){
 			e.printStackTrace();

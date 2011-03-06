@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    android:shape="rectangle">
+    <gradient
+   	 	android:layout_height="fill_parent"
+    	android:layout_width="fill_parent"
+    
+        android:startColor="@color/color_dark"
+        android:endColor="@color/color_light"
+        android:angle="90"/>
+        <!-- 
+    <padding android:left="7dp"
+        android:top="7dp"
+        android:right="7dp"
+        android:bottom="7dp" />
+         -->
+        <!--  
+    		<corners android:radius="8dp" />
+    	-->
+</shape>

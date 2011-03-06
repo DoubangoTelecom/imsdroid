@@ -7,7 +7,7 @@ public enum InviteEventTypes {
     EARLY_MEDIA,
     CONNECTED,
     TERMWAIT,
-    DISCONNECTED,
+    TERMINATED,
     LOCAL_HOLD_OK,
     LOCAL_HOLD_NOK,
     LOCAL_RESUME_OK,

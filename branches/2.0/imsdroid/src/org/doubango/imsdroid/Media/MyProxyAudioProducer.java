@@ -3,13 +3,11 @@ package org.doubango.imsdroid.Media;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-
 import org.doubango.imsdroid.IMSDroid;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 import org.doubango.tinyWRAP.ProxyAudioProducerCallback;
 
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
@@ -54,19 +52,8 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
 	}
 	
 	public void setSpeakerphoneOn(boolean speakerOn){
-		final AudioManager audiomanager = IMSDroid.getAudioManager();
-		if (IMSDroid.getSDKVersion() < 5){
-			audiomanager.setRouting(AudioManager.MODE_IN_CALL, 
-					speakerOn ? AudioManager.ROUTE_SPEAKER : AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL);
-		}
-		else{
-			if(IMSDroid.useSetModeToHackSpeaker()){
-				audiomanager.setMode(AudioManager.MODE_IN_CALL);
-			}
-			audiomanager.setSpeakerphoneOn(speakerOn);
-			if(IMSDroid.useSetModeToHackSpeaker()){
-				audiomanager.setMode(AudioManager.MODE_NORMAL);
-			}
+		Log.d(TAG, "setSpeakerphoneOn("+speakerOn+")");
+		if (IMSDroid.getSDKVersion() >= 5){
 			mRoutingChanged = true;
 		}
 	}
@@ -84,7 +71,7 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
     	Log.d(MyProxyAudioProducer.TAG, "startCallback");
     	if(mPrepared && this.mAudioRecorder != null){
 			super.mStarted = true;
-			new Thread(this.runnableRecorder).start();
+			new Thread(mRunnableRecorder).start();
 			return 0;
 		}
         return -1;
@@ -106,7 +93,7 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
     }
 	
 	private int prepare(int ptime, int rate, int channels){
-		final int minBufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		final int minBufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		final int shortsPerNotif = (rate * ptime)/1000;
 		final int bufferSize = (minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * MyProxyAudioProducer.AUDIO_BUFFER_FACTOR;
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
@@ -135,7 +122,7 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
 		super.mPrepared = false;
 	}
 	
-	private Runnable runnableRecorder = new Runnable(){
+	private Runnable mRunnableRecorder = new Runnable(){
 		@Override
 		public void run() {
 			Log.d(TAG, "===== Audio Recorder (Start) ===== ");
@@ -211,3 +198,4 @@ public class MyProxyAudioProducer extends MyProxyPlugin{
         }
     }
 }
+

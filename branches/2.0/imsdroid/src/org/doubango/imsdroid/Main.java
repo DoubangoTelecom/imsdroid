@@ -47,9 +47,11 @@ public class Main extends ActivityGroup {
         setContentView(R.layout.main);
         
         mHanler = new Handler();
+        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
         
         if(!ServiceManager.isStarted()){
         	startActivityForResult(new Intent(this, ScreenSplash.class), Main.RC_SPLASH);
+        	return;
         }
         
         Bundle bundle = savedInstanceState;
@@ -64,8 +66,6 @@ public class Main extends ActivityGroup {
         else if(screenService != null){
         	screenService.show(ScreenHome.class);
         }
-        
-        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
     }
     
     @Override

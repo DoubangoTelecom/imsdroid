@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.doubango.imsdroid.IMSDroid;
-import org.doubango.imsdroid.Model.PhoneNumber.PhoneNumberFilterByType;
+import org.doubango.imsdroid.Model.PhoneNumber.PhoneNumberFilterByAnyValid;
 import org.doubango.imsdroid.Model.PhoneNumber.PhoneType;
 import org.doubango.imsdroid.Utils.ListUtils;
 import org.doubango.imsdroid.Utils.ObservableObject;
@@ -22,7 +22,6 @@ public class Contact extends ObservableObject{
 	
 	private final int mId;
 	private String mDisplayName;
-	private String mWiPhoneNumber;
 	private final List<PhoneNumber> mPhoneNumbers;
 	private int mPhotoId;
 	private Bitmap mPhoto;
@@ -43,20 +42,21 @@ public class Contact extends ObservableObject{
 	}
 	
 	public String getPrimaryNumber(){
-		final PhoneNumber primaryNumber = ListUtils.getFirstOrDefault(mPhoneNumbers, new PhoneNumberFilterByType(PhoneType.MOBILE));
+		final PhoneNumber primaryNumber = ListUtils.getFirstOrDefault(mPhoneNumbers, new PhoneNumberFilterByAnyValid());
 		if(primaryNumber != null){
 			return primaryNumber.getNumber();
 		}
 		return null;
 	}
 	
-	public String getWiPhoneNumber(){
-		return mWiPhoneNumber;
-	}
-	
 	public void addPhoneNumber(PhoneType type, String number, String description){
 		final PhoneNumber phoneNumber = new PhoneNumber(type, number, description);
-		mPhoneNumbers.add(phoneNumber);
+		if(type == PhoneType.MOBILE){
+			mPhoneNumbers.add(0, phoneNumber);
+		}
+		else{
+			mPhoneNumbers.add(phoneNumber);
+		}
 	}
 	
 	public void setDisplayName(String displayName){

@@ -27,6 +27,7 @@ public class ConfigurationUtils {
 	public static final String DEFAULT_IDENTITY_PASSWORD = null;
 	
 	// Network
+	public static final int DEFAULT_NETWORK_REGISTRATION_TIMEOUT = 1700;//FIXME
 	public static final String DEFAULT_NETWORK_REALM = "doubango.org";
 	public static final boolean DEFAULT_NETWORK_USE_WIFI = true;
 	public static final boolean DEFAULT_NETWORK_USE_3G = false;
@@ -113,6 +114,7 @@ public class ConfigurationUtils {
 		IDENTITY_PASSWORD,
 		
 		// Network
+		NETWORK_REGISTRATION_TIMEOUT,
 		NETWORK_REALM,
 		NETWORK_USE_WIFI,
 		NETWORK_USE_3G,
