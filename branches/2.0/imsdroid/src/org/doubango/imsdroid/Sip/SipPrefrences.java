@@ -79,7 +79,11 @@ public class SipPrefrences {
 	}
 	
 	public void setRealm(String realm) {
-		mRealm = realm;
+		if((mRealm = realm) != null){
+			if(!mRealm.contains(":")){ // sip:,sips:,...
+				mRealm="sip:"+mRealm;
+			}
+		}
 	}
 	
 	public String getRealm() {
