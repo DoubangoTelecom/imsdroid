@@ -2,8 +2,11 @@ package org.doubango.imsdroid;
 
 
 import org.doubango.imsdroid.Events.EventArgs;
+import org.doubango.imsdroid.Events.InviteEventArgs;
 import org.doubango.imsdroid.Events.RegistrationEventArgs;
+import org.doubango.imsdroid.Events.RegistrationEventTypes;
 import org.doubango.imsdroid.Media.MyProxyPluginMgr;
+import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
@@ -18,6 +21,7 @@ import org.doubango.imsdroid.Services.Impl.HistoryService;
 import org.doubango.imsdroid.Services.Impl.NetworkService;
 import org.doubango.imsdroid.Services.Impl.ScreenService;
 import org.doubango.imsdroid.Services.Impl.SipService;
+import org.doubango.imsdroid.Services.Impl.SoundService;
 import org.doubango.imsdroid.Services.Impl.StorageService;
 import org.doubango.imsdroid.Sip.MyAVSession;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
@@ -40,6 +44,7 @@ import android.util.Log;
 public class ServiceManager   extends Service {
 	private final static String TAG = ServiceManager.class.getCanonicalName();
 	private static final String CONTENT_TITLE = "IMSDroid";
+	public static final String ACTION_STATE_EVENT = TAG + ".ACTION_STATE_EVENT";
 	
 	private static boolean sStarted;
 	private static boolean sInitialized;
@@ -57,7 +62,7 @@ public class ServiceManager   extends Service {
 	private static ISipService sSipService;
 	private static ISoundService sSoundService;
 	
-	private static BroadcastReceiver sSipBroadcastReceiver;
+	private static BroadcastReceiver sBroadcastReceiver;
 	
 	private static final int NOTIF_AVCALL_ID = 19833892;
 	@SuppressWarnings("unused")
@@ -93,70 +98,126 @@ public class ServiceManager   extends Service {
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
+		Log.d(TAG, "onBind()");
 		return null;
 	}
 	
 	@Override
+	public boolean onUnbind(Intent intent) {
+		Log.d(TAG, "onUnbind()");
+		return super.onUnbind(intent);
+	}
+
+	@Override
 	public void onCreate() {
 		super.onCreate();
+		Log.d(TAG, "onCreate()");
 		
 		if(sNotifManager == null){
 			sNotifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		}
-		
-		// Display a notification about us starting.  We put an icon in the status bar.
-		ServiceManager.showAppNotif(R.drawable.bullet_ball_glass_red_16, null);
 	}
 	
 	@Override
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
+		Log.d(TAG, "onStart()");
 		
-		sSipBroadcastReceiver = new BroadcastReceiver() {
+		// register()
+		sBroadcastReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				final String action = intent.getAction();
-				if(!sStarted){
-					Log.d(TAG, "Not started");
-					return;
-				}
 				
 				// Registration Event
 				if(SipService.ACTION_REGISTRATION_EVENT.equals(action)){
 					RegistrationEventArgs args = intent.getParcelableExtra(EventArgs.EXTRA_NAME);
+					@SuppressWarnings("unused")
+					final RegistrationEventTypes type;
 					if(args == null){
 						Log.e(TAG, "Invalid event args");
 						return;
 					}
-					switch(args.getEventType()){
+					switch((type = args.getEventType())){
 						case REGISTRATION_OK:
 						case REGISTRATION_NOK:
+						case REGISTRATION_INPROGRESS:
+						case UNREGISTRATION_INPROGRESS:
 						case UNREGISTRATION_OK:
 						case UNREGISTRATION_NOK:
 						default:
 							showAppNotif(sSipService.isRegistered() ? R.drawable.bullet_ball_glass_green_16 : R.drawable.bullet_ball_glass_red_16, null);
 							break;
-						case REGISTRATION_INPROGRESS:
-						case UNREGISTRATION_INPROGRESS:
-							showAppNotif(R.drawable.bullet_ball_glass_grey_16, null);
+					}
+				}
+				
+				// Invite Event
+				else if(SipService.ACTION_INVITE_EVENT.equals(action)){
+					InviteEventArgs args = intent.getParcelableExtra(EventArgs.EXTRA_NAME);
+					if(args == null){
+						Log.e(TAG, "Invalid event args");
+						return;
+					}
+					
+					final MyAVSession avSession = MyAVSession.getSession(args.getSessionId());
+					
+					switch(args.getEventType()){							
+						case TERMWAIT:
+						case TERMINATED:
+							//if(avSession != null){ //FIXME: could be removed by SipService.OnDialogEvent()
+								refreshAVCallNotif(R.drawable.phone_call_25);
+							//}
+							sSoundService.stopRingBackTone();
+							sSoundService.stopRingTone();
 							break;
+							
+						case INCOMING:
+							if(avSession != null){
+								showAVCallNotif(R.drawable.phone_call_25, "Incoming call");
+								ScreenAV.receiveCall(avSession);
+							}
+							sSoundService.startRingTone();
+							break;
+							
+						case INPROGRESS:
+							if(avSession != null){
+								showAVCallNotif(R.drawable.phone_call_25, "Outgoing call");
+							}
+							sSoundService.startRingBackTone();
+							break;
+						
+						case CONNECTED:
+						case EARLY_MEDIA:
+							if(avSession != null){
+								showAVCallNotif(R.drawable.phone_call_25, "In Call");
+							}
+							sSoundService.stopRingBackTone();
+							sSoundService.stopRingTone();
+							break;
+						default: break;
 					}
 				}
 			}
 		};
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(SipService.ACTION_REGISTRATION_EVENT);
-		registerReceiver(sSipBroadcastReceiver, intentFilter);
+		intentFilter.addAction(SipService.ACTION_INVITE_EVENT);
+		registerReceiver(sBroadcastReceiver, intentFilter);
+		
+		// alert()
+		final Intent i = new Intent(ACTION_STATE_EVENT);
+		i.putExtra("started", true);
+		sendBroadcast(i);
 	}
 	
 	
 	
 	@Override
 	public void onDestroy() {
-		if(sSipBroadcastReceiver != null){
-			unregisterReceiver(sSipBroadcastReceiver);
-			sSipBroadcastReceiver = null;
+		Log.d(TAG, "onDestroy()");
+		if(sBroadcastReceiver != null){
+			unregisterReceiver(sBroadcastReceiver);
+			sBroadcastReceiver = null;
 		}
 		// Cancel the persistent notifications.
 		if(sNotifManager != null){
@@ -186,6 +247,9 @@ public class ServiceManager   extends Service {
 		if(sScreenService == null){
 			sScreenService = new ScreenService();
 		}
+		if(sSoundService == null){
+			sSoundService = new SoundService();
+		}
 		if(sContactService == null){
 			sContactService = new ContactService();
 		}
@@ -193,11 +257,12 @@ public class ServiceManager   extends Service {
 			sSipService = new SipService();
 		}
 		
+		
 		return true;
 	}
 	
 	public static boolean start() {
-		if(ServiceManager.sStarted){
+		if(sStarted){
 			return true;
 		}
 		
@@ -214,27 +279,17 @@ public class ServiceManager   extends Service {
 		success &= sScreenService.start();
 		success &= sContactService.start();
 		success &= sSipService.start();
+		success &= sSoundService.start();
 		
 		if(success){
 			success &= sHistoryService.load();
-			success &= sContactService.load();
+			/* success &=*/ sContactService.load();
 		}
-/*
-		
-		
-		
-		
-		
-		
-		success &= ServiceManager.soundService.start();
-		
-		success &= ServiceManager.xcapService.start();
-*/
 		else{
 			Log.e(TAG, "Failed to start services");
 		}
 		
-		ServiceManager.sStarted = true;
+		sStarted = true;
 		return success;
 	}
 	
@@ -243,33 +298,20 @@ public class ServiceManager   extends Service {
 			return true;
 		}
 		
-		// stops Android service
-		IMSDroid.getContext().stopService(
-				new Intent(IMSDroid.getContext(), ServiceManager.class));
-		
 		boolean success = true;
 		
 		success &= sConfigurationService.stop();
-		success &= sNetworkService.stop();
 		success &= sScreenService.stop();
 		success &= sHistoryService.stop();
 		success &= sStorageService.stop();
 		success &= sContactService.stop();
 		success &= sSipService.stop();
-/*
+		success &= sSoundService.stop();
+		success &= sNetworkService.stop();
 		
-		
-		
-		
-		
-		
-		success &= ServiceManager.soundService.stop();
-		
-		success &= ServiceManager.xcapService.stop();
-*/
-		//ServiceManager.notifManager.cancel(ServiceManager.NOTIF_REGISTRATION_ID);
-		//ServiceManager.notifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
-		
+		// stops Android service
+		IMSDroid.getContext().stopService(
+				new Intent(IMSDroid.getContext(), ServiceManager.class));
 		if(!success){
 			Log.e(TAG, "Failed to stop services");
 		}
@@ -352,25 +394,26 @@ public class ServiceManager   extends Service {
 
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
-        sNotifManager.notify(notifId, notification);
+        ServiceManager.sNotifManager.notify(notifId, notification);
     }
 	
-	public static void showAppNotif(int drawableId, String tickerText){
+	private static void showAppNotif(int drawableId, String tickerText){
     	Log.d(TAG, "showAppNotif");
-    	showNotification(NOTIF_APP_ID, drawableId, tickerText);
+    	ServiceManager.showNotification(NOTIF_APP_ID, drawableId, tickerText);
     }
 	
-	public static void showAVCallNotif(int drawableId, String tickerText){
-    	showNotification(NOTIF_AVCALL_ID, drawableId, tickerText);
+	private static void showAVCallNotif(int drawableId, String tickerText){
+    	ServiceManager.showNotification(NOTIF_AVCALL_ID, drawableId, tickerText);
     }
 	
-	public static void cancelAVCallNotif(){
+	@SuppressWarnings("unused")
+	private static void cancelAVCallNotif(){
     	if(!MyAVSession.hasActiveSession()){
     		sNotifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
     	}
     }
     
-    public static void refreshAVCallNotif(int drawableId){
+    private static void refreshAVCallNotif(int drawableId){
     	if(!MyAVSession.hasActiveSession()){
     		sNotifManager.cancel(ServiceManager.NOTIF_AVCALL_ID);
     	}

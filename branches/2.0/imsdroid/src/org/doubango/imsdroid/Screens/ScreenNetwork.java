@@ -4,6 +4,7 @@ import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.ServiceManager;
 import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Utils.ConfigurationUtils;
+import org.doubango.imsdroid.Utils.StringUtils;
 import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
 
 import android.os.Bundle;
@@ -62,7 +63,7 @@ public class ScreenNetwork extends BaseScreen {
         mSpProxyDiscovery.setAdapter(adapter);
         
         mEtProxyHost.setText(mConfigurationService.getString(ConfigurationEntry.NETWORK_PCSCF_HOST, ConfigurationUtils.DEFAULT_NETWORK_PCSCF_HOST));
-        mEtProxyPort.setText(mConfigurationService.getString(ConfigurationEntry.NETWORK_PCSCF_PORT, Integer.toString(ConfigurationUtils.DEFAULT_NETWORK_PCSCF_PORT)));
+        mEtProxyPort.setText(Integer.toString(mConfigurationService.getInt(ConfigurationEntry.NETWORK_PCSCF_PORT, ConfigurationUtils.DEFAULT_NETWORK_PCSCF_PORT)));
         mSpTransport.setSelection(super.getSpinnerIndex(
 				mConfigurationService.getString(ConfigurationEntry.NETWORK_TRANSPORT, sSpinnerTransportItems[0]),
 				sSpinnerTransportItems));
@@ -94,8 +95,8 @@ public class ScreenNetwork extends BaseScreen {
 			
 			mConfigurationService.putString(ConfigurationEntry.NETWORK_PCSCF_HOST, 
 					mEtProxyHost.getText().toString().trim());
-			mConfigurationService.putString(ConfigurationEntry.NETWORK_PCSCF_PORT, 
-					mEtProxyPort.getText().toString().trim());
+			mConfigurationService.putInt(ConfigurationEntry.NETWORK_PCSCF_PORT, 
+					StringUtils.parseInt(mEtProxyPort.getText().toString().trim(), ConfigurationUtils.DEFAULT_NETWORK_PCSCF_PORT) );
 			mConfigurationService.putString(ConfigurationEntry.NETWORK_TRANSPORT, 
 					ScreenNetwork.sSpinnerTransportItems[mSpTransport.getSelectedItemPosition()]);
 			mConfigurationService.putString(ConfigurationEntry.NETWORK_PCSCF_DISCOVERY, 

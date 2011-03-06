@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+	android:dither="true"
+	>
+	<item android:drawable="@drawable/grad_dark" 
+		android:state_pressed="false"/>
+    <item android:drawable="@drawable/grad_light"
+          android:state_pressed="true"/>
+    <item android:drawable="@drawable/grad_light"
+          android:state_focused="true"/>
+</selector>

@@ -36,7 +36,21 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 	}
 	
 	public void setSpeakerphoneOn(boolean speakerOn){
-		return;
+		Log.d(TAG, "setSpeakerphoneOn("+speakerOn+")");
+		final AudioManager audiomanager = IMSDroid.getAudioManager();
+		if (IMSDroid.getSDKVersion() < 5){
+			audiomanager.setRouting(AudioManager.MODE_IN_CALL, 
+					speakerOn ? AudioManager.ROUTE_SPEAKER : AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL);
+		}
+		else{
+			if(IMSDroid.useSetModeToHackSpeaker()){
+				audiomanager.setMode(AudioManager.MODE_IN_CALL);
+			}
+			audiomanager.setSpeakerphoneOn(speakerOn);
+			if(IMSDroid.useSetModeToHackSpeaker()){
+				audiomanager.setMode(AudioManager.MODE_NORMAL);
+			}
+		}
 	}
 	
 	public void toggleSpeakerphone(){
@@ -46,20 +60,22 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 	private int prepareCallback(int ptime, int rate, int channels) {
 		Log.d(TAG, "prepareCallback("+ptime+","+rate+","+channels+")");
 		
-		final int minBufferSize = AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		final int minBufferSize = AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		final int shortsPerNotif = (rate * ptime)/1000;
 		mBufferSize = ((minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * MyProxyAudioConsumer.AUDIO_BUFFER_FACTOR);
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		
+		setSpeakerphoneOn(false); // FIXME
 		mAudioTrack = new AudioTrack(MyProxyAudioConsumer.AUDIO_STREAM_TYPE,
 				rate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				mBufferSize, AudioTrack.MODE_STREAM);
 		if(mAudioTrack.getState() == AudioTrack.STATE_INITIALIZED){
-			// final float audioPlaybackLevel = ServiceManager.getConfigurationService().getFloat(
+			Log.d(TAG, "Consumer BufferSize="+mBufferSize+"MinBufferSize="+minBufferSize);
+			//final float audioPlaybackLevel = ServiceManager.getConfigurationService().getFloat(
 			//		ConfigurationEntry.GENERAL_AUDIO_PLAY_LEVEL,
 			//		ConfigurationUtils.DEFAULT_GENERAL_AUDIO_PLAY_LEVEL);
-			// this.audioTrack.setStereoVolume(AudioTrack.getMaxVolume()*audioPlaybackLevel, AudioTrack.getMaxVolume()*0.25f);
-			// mAudioTrack.setStereoVolume(audioPlaybackLevel, audioPlaybackLevel);
+			//this.audioTrack.setStereoVolume(AudioTrack.getMaxVolume()*audioPlaybackLevel, AudioTrack.getMaxVolume()*0.25f);
+			//mAudioTrack.setStereoVolume(audioPlaybackLevel, audioPlaybackLevel);
 			super.mPrepared = true;
 			return 0;
 		}
@@ -102,17 +118,17 @@ public class MyProxyAudioConsumer extends MyProxyPlugin{
 	private Runnable runnablePlayer = new Runnable(){
 		@Override
 		public void run() {
-Log.d(TAG, "===== Audio Player Thread (Start) =====");
+			Log.d(TAG, "===== Audio Player Thread (Start) =====");
 			
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
 			int frameLength = MyProxyAudioConsumer.this.mAudioFrame.capacity();
-			final int framesCount = 2; // Number of 20ms' to copy
+			final int framesCount = 1; // Number of 20ms' to copy
 			final byte[] audioBytes = new byte[frameLength*framesCount];
 			int i, gapSize;
 			long sizeInBytes;
 			
-			MyProxyAudioConsumer.this.mAudioTrack.play();
+			mAudioTrack.play();
 			
 			while(MyProxyAudioConsumer.super.mValid && MyProxyAudioConsumer.super.mStarted){
 				if(mAudioTrack == null){

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.ServiceManager;
 import org.doubango.imsdroid.Media.MediaType;
 import org.doubango.imsdroid.Media.MyProxyAudioConsumer;
@@ -25,6 +26,7 @@ import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.util.Log;
 import android.view.View;
 
@@ -300,6 +302,13 @@ public class MyAVSession extends MyInviteSession{
 		}
 	}
 	
+	public void setModeInCall(boolean bInCall){
+		final AudioManager audiomanager = IMSDroid.getAudioManager();
+		if(IMSDroid.isSetModeAllowed()){
+			audiomanager.setMode(bInCall ? AudioManager.MODE_IN_CALL : AudioManager.MODE_NORMAL);
+		}
+	}
+	
 	@Override
 	public void setState(InviteState state){
 		if(super.mState == state){
@@ -319,11 +328,13 @@ public class MyAVSession extends MyInviteSession{
 				break;
 				
 			case INCALL:
+				setModeInCall(true);
 				mHistoryEvent.setStartTime(new Date().getTime());
 				initializeConsumersAndProducers();
 				break;
 			
 			case TERMINATED:
+				setModeInCall(false);
 				if (mHistoryEvent.getStartTime() == mHistoryEvent.getEndTime() 
 						&& mHistoryEvent.getStatus() == StatusType.Incoming) {
 					mHistoryEvent.setStatus(StatusType.Missed);

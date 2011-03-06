@@ -1,5 +1,8 @@
 package org.doubango.imsdroid.Sip;
 
+import org.doubango.imsdroid.ServiceManager;
+import org.doubango.imsdroid.Utils.ConfigurationUtils;
+import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
 import org.doubango.tinyWRAP.RegistrationSession;
 import org.doubango.tinyWRAP.SipSession;
 
@@ -13,9 +16,9 @@ public class MyRegistrationSession extends MySipSession {
 
         super.init();
         super.setSigCompId(sipStack.getSigCompId());
-
-        // FIXME
-        mSession.setExpires(60);
+        
+        mSession.setExpires(ServiceManager.getConfigurationService().getInt(ConfigurationEntry.NETWORK_REGISTRATION_TIMEOUT, 
+        		ConfigurationUtils.DEFAULT_NETWORK_REGISTRATION_TIMEOUT));
         
         /* support for 3GPP SMS over IP */
         super.addCaps("+g.3gpp.smsip");

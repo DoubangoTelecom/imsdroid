@@ -6,6 +6,10 @@
 	<string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>
 	<string name="spinner_transport">Select Network Transport</string>
     
+    <!-- Strings -->
+    <string name="day_today">Today</string>
+    <string name="day_yesterday">Yesterday</string>
+    
     <string name="copyright" formatted="false">
     IMSDroid/v%s (doubango r%s), Copyright © 2009-2010 Mamadou Diop. All rights reserved.\n\n
     IMSDroid is free software: you can redistribute it and/or modify it under the terms of
@@ -25,7 +29,10 @@
   </string>
   
     <!-- Colors -->
+    <color name="color_black">#000000</color>
     <color name="color_white">#FFFFFF</color>
     <color name="color_violet">#9900FF</color>
     <color name="color_gray">#736F6E</color>
+    <color name="color_dark">#161C27</color>
+    <color name="color_light">#4D6288</color>
 </resources>

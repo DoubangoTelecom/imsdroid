@@ -1,22 +1,21 @@
 package org.doubango.imsdroid.Screens;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.ServiceManager;
 import org.doubango.imsdroid.Media.MediaType;
-import org.doubango.imsdroid.Model.Contact;
+import org.doubango.imsdroid.Model.HistoryAVCallEvent.HistoryEventAVFilter;
 import org.doubango.imsdroid.Model.HistoryEvent;
 import org.doubango.imsdroid.QuickAction.ActionItem;
 import org.doubango.imsdroid.QuickAction.QuickAction;
-import org.doubango.imsdroid.Services.IContactService;
 import org.doubango.imsdroid.Services.IHistoryService;
 import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Sip.MyAVSession;
-import org.doubango.imsdroid.Utils.ObservableList;
+import org.doubango.imsdroid.Utils.DateTimeUtils;
 import org.doubango.imsdroid.Utils.StringUtils;
 import org.doubango.imsdroid.Utils.UriUtils;
 
@@ -31,8 +30,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,11 +39,10 @@ public class ScreenTabHistory extends BaseScreen {
 	private static String TAG = ScreenTabHistory.class.getCanonicalName();
 	
 	private final IHistoryService mHistorytService;
-	private final IContactService mContactService;
 	private final ISipService mSipService;
 	
 	private ScreenTabHistoryAdapter mAdapter;
-	private GridView mGridView;
+	private ListView mListView;
 	
 	private final ActionItem mAItemVoiceCall;
 	private final ActionItem mAItemVideoCall;
@@ -57,7 +55,6 @@ public class ScreenTabHistory extends BaseScreen {
 		super(SCREEN_TYPE.TAB_HISTORY_T, TAG);
 		
 		mHistorytService = ServiceManager.getHistoryService();
-		mContactService = ServiceManager.getContactService();
 		mSipService = ServiceManager.getSipService();
 		
 		mAItemVoiceCall = new ActionItem();
@@ -93,8 +90,11 @@ public class ScreenTabHistory extends BaseScreen {
 		mAItemMessaging.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if(mLasQuickAction != null){
-					mLasQuickAction.dismiss();
+				if(mSelectedEvent != null){
+					// ScreenChat.startChat(mSelectedEvent.getRemoteParty());
+					if(mLasQuickAction != null){
+						mLasQuickAction.dismiss();
+					}
 				}
 			}
 		});
@@ -106,11 +106,10 @@ public class ScreenTabHistory extends BaseScreen {
 		setContentView(R.layout.screen_tab_history);
 		
 		mAdapter = new ScreenTabHistoryAdapter(this);
-		mGridView = (GridView) findViewById(R.id.screen_tab_history_gridView);
-		mGridView.setAdapter(mAdapter);
-		mGridView.setOnItemClickListener(mOnItemListViewClickListener);
-		mGridView.setOnItemLongClickListener(mOnItemListViewLongClickListener);
-	    registerForContextMenu(mGridView);
+		mListView = (ListView) findViewById(R.id.screen_tab_history_listView);
+		mListView.setAdapter(mAdapter);
+		mListView.setOnItemClickListener(mOnItemListViewClickListener);
+		mListView.setOnItemLongClickListener(mOnItemListViewLongClickListener);
 	}
 	
 	@Override
@@ -135,7 +134,7 @@ public class ScreenTabHistory extends BaseScreen {
 				if(!StringUtils.isNullOrEmpty(mSelectedEvent.getRemoteParty())){
 					if(!MyAVSession.hasActiveSession()){
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
-						mLasQuickAction.addActionItem(mAItemVideoCall);
+						// mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
 					mLasQuickAction.addActionItem(mAItemMessaging);
 				}
@@ -151,8 +150,11 @@ public class ScreenTabHistory extends BaseScreen {
 		}
 	};
 	
+	/**
+	 * ScreenTabHistoryAdapter
+	 */
 	static class ScreenTabHistoryAdapter extends BaseAdapter implements Observer {
-		private final ObservableList<HistoryEvent> mEvents;
+		private List<HistoryEvent> mEvents;
 		private final LayoutInflater mInflater;
 		private final Handler mHandler;
 		private final ScreenTabHistory mBaseScreen;
@@ -161,15 +163,20 @@ public class ScreenTabHistory extends BaseScreen {
 		private final static int TYPE_ITEM_SMS = 1;
 		private final static int TYPE_ITEM_FILE_TRANSFER = 2;
 		private final static int TYPE_COUNT = 3;
-		private final static SimpleDateFormat durationFormat = new SimpleDateFormat("mm:ss");
-		private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MMM dd hh:mm aaa");
 		
-		private ScreenTabHistoryAdapter(ScreenTabHistory baseSceen) {
+		ScreenTabHistoryAdapter(ScreenTabHistory baseSceen) {
 			mBaseScreen = baseSceen;
 			mHandler = new Handler();
 			mInflater = LayoutInflater.from(mBaseScreen);
-			mEvents = ServiceManager.getHistoryService().getObservableEvents();
-			mEvents.addObserver(this);
+			mEvents = mBaseScreen.mHistorytService.getObservableEvents()
+					.filter(new HistoryEventAVFilter());
+			mBaseScreen.mHistorytService.getObservableEvents().addObserver(this);
+		}
+		
+		@Override
+		protected void finalize() throws Throwable {
+			mBaseScreen.mHistorytService.getObservableEvents().deleteObserver(this);
+			super.finalize();
 		}
 		
 		@Override
@@ -197,12 +204,12 @@ public class ScreenTabHistory extends BaseScreen {
 		
 		@Override
 		public int getCount() {
-			return mEvents.getList().size();
+			return mEvents.size();
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return mEvents.getList().get(position);
+			return mEvents.get(position);
 		}
 
 		@Override
@@ -212,6 +219,8 @@ public class ScreenTabHistory extends BaseScreen {
 
 		@Override
 		public void update(Observable observable, Object data) {
+			mEvents = mBaseScreen.mHistorytService.getObservableEvents()
+					.filter(new HistoryEventAVFilter());
 			if(Thread.currentThread() == Looper.getMainLooper().getThread()){
 				notifyDataSetChanged();
 			}
@@ -238,28 +247,16 @@ public class ScreenTabHistory extends BaseScreen {
 					case Audio:
 					case AudioVideo:
 						view = mInflater.inflate(R.layout.screen_tab_history_item_av, null);
-						default:
 						break;
 					case FileTransfer:
-						break;
 					case SMS:
-						break;
+					default:
+						Log.e(TAG, "Invalid media type");
+						return null;
 				}
 			}
 			
-			String remoteParty = event.getRemoteParty();
-			if(remoteParty != null){
-				final Contact contact = mBaseScreen.mContactService.getContactByUri(remoteParty);
-				if(contact != null && contact.getDisplayName() != null){
-					remoteParty = contact.getDisplayName();
-				}
-				else{
-					remoteParty = UriUtils.getDisplayName(remoteParty);
-				}
-			}
-			else{
-				remoteParty = "(null)";
-			}
+			String remoteParty = UriUtils.getDisplayName(event.getRemoteParty());
 			
 			if(event != null){
 				switch(event.getMediaType()){
@@ -268,9 +265,8 @@ public class ScreenTabHistory extends BaseScreen {
 						final ImageView ivType = (ImageView)view.findViewById(R.id.screen_tab_history_item_av_imageView_type);
 						final TextView tvRemote = (TextView)view.findViewById(R.id.screen_tab_history_item_av_textView_remote);
 						final TextView tvDate = (TextView)view.findViewById(R.id.screen_tab_history_item_av_textView_date);
-						final String duration = ScreenTabHistoryAdapter.durationFormat.format(new Date(event.getEndTime() - event.getStartTime()));
-						final String date = ScreenTabHistoryAdapter.dateFormat.format(new Date(event.getStartTime()));
-						tvDate.setText(String.format("%s (%s)", date, duration));
+						final String date = DateTimeUtils.getFriendlyDateString(new Date(event.getStartTime()));
+						tvDate.setText(date);
 						tvRemote.setText(remoteParty);
 						switch(event.getStatus()){
 							case Outgoing:

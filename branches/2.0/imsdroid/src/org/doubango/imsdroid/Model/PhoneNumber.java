@@ -1,6 +1,7 @@
 package org.doubango.imsdroid.Model;
 
 import org.doubango.imsdroid.Utils.Predicate;
+import org.doubango.imsdroid.Utils.StringUtils;
 
 public class PhoneNumber {
 	
@@ -112,4 +113,17 @@ public class PhoneNumber {
 			return (phoneNumber != null && phoneNumber.getPhoneType() == mType);
 		}
 	}
+	
+	/**
+	 * PhoneNumberFilterByAnyValid
+	 */
+	public static class PhoneNumberFilterByAnyValid implements Predicate<PhoneNumber>{
+		PhoneNumberFilterByAnyValid(){
+		}
+		@Override
+		public boolean apply(PhoneNumber phoneNumber) {
+			return (phoneNumber != null && !StringUtils.isNullOrEmpty(phoneNumber.getNumber()));
+		}
+	}
+	
 }

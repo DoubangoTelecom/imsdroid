@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -20,11 +21,13 @@ public class IMSDroid extends Application{
 	private static PackageManager sPackageManager;
     private static String sPackageName;
     private static String sDeviceURN;
+    private static String sDeviceIMEI;
     private static int sSdkVersion;
     private static int sVersionCode;
     private static AudioManager sAudioManager;
     private static SensorManager sSensorManager;
     private static KeyguardManager sKeyguardManager;
+    private static ConnectivityManager sConnectivityManager;
     
     public IMSDroid() {
     	sInstance = this;
@@ -40,6 +43,7 @@ public class IMSDroid extends Application{
 		
 		sPackageManager = sInstance.getPackageManager();    		
 		sPackageName = sInstance.getPackageName();
+		Log.d(TAG,"Build.MODEL="+Build.MODEL);
 	}
     
     public static int getSDKVersion(){
@@ -51,7 +55,7 @@ public class IMSDroid extends Application{
     
     public static boolean useSetModeToHackSpeaker(){
     	//http://stackoverflow.com/questions/4278471/trouble-with-loud-speaker-off-on-galaxy-s
-    	String model = Build.MODEL;
+    	final String model = Build.MODEL;
         return  model.equalsIgnoreCase("GT-I9000") ||       // base model
         		model.equalsIgnoreCase("GT-I5500") ||		// Galaxy Europa
                 model.equalsIgnoreCase("SPH-D700") ||       // Epic         (Sprint)
@@ -68,6 +72,16 @@ public class IMSDroid extends Application{
                 model.equalsIgnoreCase("U8150")  // Huawei U8110
                 
                 ;
+    }
+    
+    public static boolean isSetModeAllowed(){
+    	final String model = Build.MODEL;
+    	return model.equalsIgnoreCase("ZTE-U V880");
+    }
+    
+    public static boolean isBuggyProximitySensor(){
+    	final String model = Build.MODEL;
+    	return model.equalsIgnoreCase("ZTE-U V880");
     }
     
     public static int getVersionCode(){
@@ -95,9 +109,9 @@ public class IMSDroid extends Application{
     public static String getDeviceURN(){
     	if(StringUtils.isNullOrEmpty(sDeviceURN)){
 	    	try{
-		    	TelephonyManager telephonyMgr = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
-		        String msisdn = telephonyMgr.getLine1Number();
-		        if(msisdn == null){
+		    	final TelephonyManager telephonyMgr = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+		        final String msisdn = telephonyMgr.getLine1Number();
+		        if(StringUtils.isNullOrEmpty(msisdn)){
 		        	sDeviceURN = String.format("urn:imei:%s", telephonyMgr.getDeviceId());
 		        }
 		        else{
@@ -110,6 +124,14 @@ public class IMSDroid extends Application{
 	    	}
     	}
     	return sDeviceURN;
+    }
+    
+    public static String getDeviceIMEI(){
+    	if(StringUtils.isNullOrEmpty(sDeviceIMEI)){
+    		final TelephonyManager telephonyMgr = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+    		sDeviceIMEI = telephonyMgr.getDeviceId();
+    	}
+    	return sDeviceIMEI;
     }
     
     public static AudioManager getAudioManager(){
@@ -131,5 +153,12 @@ public class IMSDroid extends Application{
     		sKeyguardManager = (KeyguardManager)getContext().getSystemService(Context.KEYGUARD_SERVICE);
     	}
     	return sKeyguardManager;
+    }
+    
+    public static ConnectivityManager getConnectivityManager(){
+    	if(sConnectivityManager == null){
+    		sConnectivityManager = (ConnectivityManager) getContext().getSystemService(CONNECTIVITY_SERVICE);
+    	}
+    	return sConnectivityManager;
     }
 }

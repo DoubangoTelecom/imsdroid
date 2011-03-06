@@ -44,7 +44,7 @@ public class ScreenIdentity  extends BaseScreen {
         mEtDisplayName.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_DISPLAY_NAME, ConfigurationUtils.DEFAULT_IDENTITY_DISPLAY_NAME));
         mEtIMPU.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_IMPU, ConfigurationUtils.DEFAULT_IDENTITY_IMPU));
         mEtIMPI.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_IMPI, ConfigurationUtils.DEFAULT_IDENTITY_IMPI));
-        mEtPassword.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_PASSWORD, StringUtils.empty()));
+        mEtPassword.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_PASSWORD, StringUtils.emptyValue()));
         mEtRealm.setText(mConfigurationService.getString(ConfigurationEntry.NETWORK_REALM, ConfigurationUtils.DEFAULT_NETWORK_REALM));
         mCbEarlyIMS.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NETWORK_USE_EARLY_IMS, ConfigurationUtils.DEFAULT_NETWORK_USE_EARLY_IMS));
         
