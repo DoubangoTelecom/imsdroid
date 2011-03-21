@@ -6,13 +6,8 @@ import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenSplash;
 import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.ngn.media.NgnProxyPluginMgr;
 import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.utils.NgnStringUtils;
-import org.doubango.tinyWRAP.ProxyAudioConsumer;
-import org.doubango.tinyWRAP.ProxyAudioProducer;
-import org.doubango.tinyWRAP.ProxyVideoConsumer;
-import org.doubango.tinyWRAP.ProxyVideoProducer;
 
 import android.app.Activity;
 import android.app.ActivityGroup;
@@ -220,27 +215,6 @@ public class Main extends ActivityGroup {
 					}
 				}
 				break;
-		}
-	}
-    
-    
-    static {
-		try {
-			System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class
-					.getPackage().getName()));
-			
-			ProxyVideoProducer.registerPlugin();
-			ProxyVideoConsumer.registerPlugin();
-			ProxyAudioProducer.registerPlugin();
-			ProxyAudioConsumer.registerPlugin();
-			
-			NgnProxyPluginMgr.Initialize();
-		} catch (UnsatisfiedLinkError e) {
-			Log.e(TAG,
-					"Native code library failed to load.\n" + e.getMessage());
-		} catch (Exception e) {
-			Log.e(TAG,
-					"Native code library failed to load.\n" + e.getMessage());
 		}
 	}
 }
