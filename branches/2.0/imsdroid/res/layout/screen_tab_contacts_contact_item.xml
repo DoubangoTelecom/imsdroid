@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingTop="5px" android:orientation="horizontal" android:weightSum="3">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_tab_contacts_item_imageView_avatar" android:src="@drawable/avatar_48"></ImageView>
-<TextView android:text="John Doe" android:layout_height="wrap_content" android:id="@+id/screen_tab_contacts_item_textView_displayname" android:layout_width="wrap_content" android:layout_weight="3" android:layout_margin="2px" android:textColor="@color/color_white" android:ellipsize="end" android:textSize="23dp"></TextView>
+  android:layout_width="fill_parent" android:orientation="horizontal" android:layout_height="wrap_content" android:paddingTop="3px">
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_tab_contacts_item_imageView_avatar" android:layout_marginBottom="3px" android:src="@drawable/avatar_24"></ImageView>
+<TextView android:text="John Doe" android:id="@+id/screen_tab_contacts_item_textView_displayname" android:layout_width="wrap_content" android:layout_weight="3" android:textColor="@color/color_white" android:textSize="23dp" android:layout_height="fill_parent" android:gravity="center_vertical" android:layout_margin="4dp" android:ellipsize="end" android:lines="1"></TextView>
 </LinearLayout>

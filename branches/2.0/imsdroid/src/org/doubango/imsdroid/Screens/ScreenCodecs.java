@@ -3,10 +3,8 @@ package org.doubango.imsdroid.Screens;
 import java.util.ArrayList;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
 
@@ -25,7 +23,7 @@ import android.widget.TextView;
 public class ScreenCodecs  extends BaseScreen{
 	private static String TAG = ScreenCodecs.class.getCanonicalName();
 	
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	private GridView mGridView;
 	private ScreenCodecsAdapter mAdapter;
@@ -34,8 +32,8 @@ public class ScreenCodecs  extends BaseScreen{
 	public ScreenCodecs() {
 		super(SCREEN_TYPE.CODECS_T, ScreenCodecs.class.getCanonicalName());
 		
-		mConfigurationService = ServiceManager.getConfigurationService();
-		mCodecs = mConfigurationService.getInt(ConfigurationEntry.MEDIA_CODECS, ConfigurationUtils.DEFAULT_MEDIA_CODECS);
+		mConfigurationService = getEngine().getConfigurationService();
+		mCodecs = mConfigurationService.getInt(NgnConfigurationEntry.MEDIA_CODECS, NgnConfigurationEntry.DEFAULT_MEDIA_CODECS);
 	}
 	
 	@Override
@@ -65,7 +63,7 @@ public class ScreenCodecs  extends BaseScreen{
 	
 	protected void onPause() {
 		if(super.mComputeConfiguration){			
-			mConfigurationService.putInt(ConfigurationEntry.MEDIA_CODECS, mCodecs);
+			mConfigurationService.putInt(NgnConfigurationEntry.MEDIA_CODECS, mCodecs);
 			SipStack.setCodecs_2(mCodecs);
 			
 			// Compute
@@ -101,39 +99,38 @@ public class ScreenCodecs  extends BaseScreen{
 		private static final ArrayList<ScreenCodecsItem> sScreenCodecsItems = new ArrayList<ScreenCodecsItem>();
 		
 		static{
-			//
 	        // Audio Codecs
-	        //
 			sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_pcma.swigValue(), "PCMA", "PCMA (8 KHz)"));
 			sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_pcmu.swigValue(), "PCMU", "PCMU (8 KHz)"));
-			sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_gsm.swigValue(), "GSM", "GSM (8 KHz)"));
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_amr_nb_oa)){
+			if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_gsm))
+				sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_gsm.swigValue(), "GSM", "GSM (8 KHz)"));
+			if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_amr_nb_oa))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_amr_nb_oa.swigValue(), "AMR-NB-OA", "AMR Narrow Band Octet Aligned (8 KHz)"));
-	        }
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_amr_nb_be)){
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_amr_nb_be))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_amr_nb_be.swigValue(), "AMR-NB-BE", "AMR Narrow Band Bandwidth Efficient (8 KHz)"));
-	        }
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_ilbc)){
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_ilbc))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_ilbc.swigValue(), "iLBC", "internet Low Bitrate Codec (8 KHz)"));
-	        }
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_speex_nb)){
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_speex_nb))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_nb.swigValue(), "Speex-NB", "Speex Narrow Band (8 KHz)"));
-	        }
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g729ab)){
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g729ab))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_g729ab.swigValue(), "G.729", "G729 Annex A/B (8 KHz)"));
-	        }
-	        
-	        //
 	        // Video Codecs
-	        //
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_mp4ves_es.swigValue(), "MP4V-ES", "MPEG-4 Part 2"));
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_theora.swigValue(), "Theora", "Theora"));
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue(), "H264-BP10", "H.264 Base Profile 1.0"));
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp20.swigValue(), "H264-BP20", "H.264 Base Profile 2.0"));
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp30.swigValue(), "H264-BP30", "H.264 Base Profile 3.0"));
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263.swigValue(),"H.263", "H.263"));
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263p.swigValue(), "H.263+", "H.263-1998"));
-	        sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263pp.swigValue(), "H.263++", "H.263-2000"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_mp4ves_es))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_mp4ves_es.swigValue(), "MP4V-ES", "MPEG-4 Part 2"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_theora))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_theora.swigValue(), "Theora", "Theora"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_bp10))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue(), "H264-BP10", "H.264 Base Profile 1.0"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_bp20))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp20.swigValue(), "H264-BP20", "H.264 Base Profile 2.0"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_bp30))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp30.swigValue(), "H264-BP30", "H.264 Base Profile 3.0"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h263))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263.swigValue(),"H.263", "H.263"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h263p))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263p.swigValue(), "H.263+", "H.263-1998"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h263pp))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263pp.swigValue(), "H.263++", "H.263-2000"));
 		}
 		
 		private final LayoutInflater mInflater;

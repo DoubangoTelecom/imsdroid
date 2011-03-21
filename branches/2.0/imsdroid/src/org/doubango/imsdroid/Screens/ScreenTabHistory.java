@@ -6,18 +6,17 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Media.MediaType;
-import org.doubango.imsdroid.Model.HistoryAVCallEvent.HistoryEventAVFilter;
-import org.doubango.imsdroid.Model.HistoryEvent;
 import org.doubango.imsdroid.QuickAction.ActionItem;
 import org.doubango.imsdroid.QuickAction.QuickAction;
-import org.doubango.imsdroid.Services.IHistoryService;
-import org.doubango.imsdroid.Services.ISipService;
-import org.doubango.imsdroid.Sip.MyAVSession;
 import org.doubango.imsdroid.Utils.DateTimeUtils;
-import org.doubango.imsdroid.Utils.StringUtils;
-import org.doubango.imsdroid.Utils.UriUtils;
+import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.model.NgnHistoryAVCallEvent.HistoryEventAVFilter;
+import org.doubango.ngn.model.NgnHistoryEvent;
+import org.doubango.ngn.services.INgnHistoryService;
+import org.doubango.ngn.services.INgnSipService;
+import org.doubango.ngn.sip.NgnAVSession;
+import org.doubango.ngn.utils.NgnStringUtils;
+import org.doubango.ngn.utils.NgnUriUtils;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,8 +37,8 @@ import android.widget.Toast;
 public class ScreenTabHistory extends BaseScreen {
 	private static String TAG = ScreenTabHistory.class.getCanonicalName();
 	
-	private final IHistoryService mHistorytService;
-	private final ISipService mSipService;
+	private final INgnHistoryService mHistorytService;
+	private final INgnSipService mSipService;
 	
 	private ScreenTabHistoryAdapter mAdapter;
 	private ListView mListView;
@@ -48,14 +47,14 @@ public class ScreenTabHistory extends BaseScreen {
 	private final ActionItem mAItemVideoCall;
 	private final ActionItem mAItemMessaging;
 	
-	private HistoryEvent mSelectedEvent;
+	private NgnHistoryEvent mSelectedEvent;
 	private QuickAction mLasQuickAction;
 	
 	public ScreenTabHistory() {
 		super(SCREEN_TYPE.TAB_HISTORY_T, TAG);
 		
-		mHistorytService = ServiceManager.getHistoryService();
-		mSipService = ServiceManager.getSipService();
+		mHistorytService = getEngine().getHistoryService();
+		mSipService = getEngine().getSipService();
 		
 		mAItemVoiceCall = new ActionItem();
 		mAItemVoiceCall.setTitle("Voice");
@@ -63,7 +62,7 @@ public class ScreenTabHistory extends BaseScreen {
 			@Override
 			public void onClick(View v) {
 				if(mSelectedEvent != null){
-					ScreenAV.makeCall(mSelectedEvent.getRemoteParty(), MediaType.Audio);
+					ScreenAV.makeCall(mSelectedEvent.getRemoteParty(), NgnMediaType.Audio);
 					if(mLasQuickAction != null){
 						mLasQuickAction.dismiss();
 					}
@@ -77,7 +76,7 @@ public class ScreenTabHistory extends BaseScreen {
 			@Override
 			public void onClick(View v) {
 				if(mSelectedEvent != null){
-					ScreenAV.makeCall(mSelectedEvent.getRemoteParty(), MediaType.AudioVideo);
+					ScreenAV.makeCall(mSelectedEvent.getRemoteParty(), NgnMediaType.AudioVideo);
 					if(mLasQuickAction != null){
 						mLasQuickAction.dismiss();
 					}
@@ -128,11 +127,11 @@ public class ScreenTabHistory extends BaseScreen {
 				return;
 			}
 			
-			mSelectedEvent = (HistoryEvent)parent.getItemAtPosition(position);
+			mSelectedEvent = (NgnHistoryEvent)parent.getItemAtPosition(position);
 			if(mSelectedEvent != null){
 				mLasQuickAction = new QuickAction(view);
-				if(!StringUtils.isNullOrEmpty(mSelectedEvent.getRemoteParty())){
-					if(!MyAVSession.hasActiveSession()){
+				if(!NgnStringUtils.isNullOrEmpty(mSelectedEvent.getRemoteParty())){
+					if(!NgnAVSession.hasActiveSession()){
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
 						// mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
@@ -154,7 +153,7 @@ public class ScreenTabHistory extends BaseScreen {
 	 * ScreenTabHistoryAdapter
 	 */
 	static class ScreenTabHistoryAdapter extends BaseAdapter implements Observer {
-		private List<HistoryEvent> mEvents;
+		private List<NgnHistoryEvent> mEvents;
 		private final LayoutInflater mInflater;
 		private final Handler mHandler;
 		private final ScreenTabHistory mBaseScreen;
@@ -186,7 +185,7 @@ public class ScreenTabHistory extends BaseScreen {
 		
 		@Override
 		public int getItemViewType(int position) {
-			final HistoryEvent event = (HistoryEvent)getItem(position);
+			final NgnHistoryEvent event = (NgnHistoryEvent)getItem(position);
 			if(event != null){
 				switch(event.getMediaType()){
 					case Audio:
@@ -238,7 +237,7 @@ public class ScreenTabHistory extends BaseScreen {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
 			
-			final HistoryEvent event = (HistoryEvent)getItem(position);
+			final NgnHistoryEvent event = (NgnHistoryEvent)getItem(position);
 			if(event == null){
 				return null;
 			}
@@ -256,7 +255,7 @@ public class ScreenTabHistory extends BaseScreen {
 				}
 			}
 			
-			String remoteParty = UriUtils.getDisplayName(event.getRemoteParty());
+			String remoteParty = NgnUriUtils.getDisplayName(event.getRemoteParty());
 			
 			if(event != null){
 				switch(event.getMediaType()){

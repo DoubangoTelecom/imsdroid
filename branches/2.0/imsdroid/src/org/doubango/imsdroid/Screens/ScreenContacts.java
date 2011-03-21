@@ -1,10 +1,8 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -25,12 +23,12 @@ public class ScreenContacts  extends BaseScreen {
 	private EditText mEtPassword;
 	private RelativeLayout mRlRemote;
 	
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	public ScreenContacts() {
 		super(SCREEN_TYPE.CONTACTS_T, TAG);
 		
-		mConfigurationService = ServiceManager.getConfigurationService();
+		mConfigurationService = getEngine().getConfigurationService();
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +44,11 @@ public class ScreenContacts  extends BaseScreen {
         mRlRemote = (RelativeLayout)findViewById(R.id.screen_contacts_relativeLayout_remote);
         
         // load values from configuration file (Do it before adding UI listeners)
-        mRbRemote.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.XCAP_ENABLED, ConfigurationUtils.DEFAULT_XCAP_ENABLED));
+        mRbRemote.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.XCAP_ENABLED, NgnConfigurationEntry.DEFAULT_XCAP_ENABLED));
         //rbRemote.setChecked(!rbLocal.isChecked());
-        mEtXcapRoot.setText(mConfigurationService.getString(ConfigurationEntry.XCAP_ROOT, ConfigurationUtils.DEFAULT_XCAP_ROOT));
-        mEtXUI.setText(mConfigurationService.getString(ConfigurationEntry.XCAP_USERNAME, ConfigurationUtils.DEFAULT_XCAP_USERNAME));
-        mEtPassword.setText(mConfigurationService.getString(ConfigurationEntry.XCAP_PASSWORD, ConfigurationUtils.DEFAULT_XCAP_PASSWORD));
+        mEtXcapRoot.setText(mConfigurationService.getString(NgnConfigurationEntry.XCAP_XCAP_ROOT, NgnConfigurationEntry.DEFAULT_XCAP_ROOT));
+        mEtXUI.setText(mConfigurationService.getString(NgnConfigurationEntry.XCAP_USERNAME, NgnConfigurationEntry.DEFAULT_XCAP_USERNAME));
+        mEtPassword.setText(mConfigurationService.getString(NgnConfigurationEntry.XCAP_PASSWORD, NgnConfigurationEntry.DEFAULT_XCAP_PASSWORD));
         mRlRemote.setVisibility(mRbLocal.isChecked() ? View.INVISIBLE : View.VISIBLE);
         
         // add listeners (for the configuration)
@@ -71,12 +69,12 @@ public class ScreenContacts  extends BaseScreen {
 	
 	protected void onPause() {
 		if(super.mComputeConfiguration){
-			mConfigurationService.putBoolean(ConfigurationEntry.XCAP_ENABLED, mRbRemote.isChecked());
-			mConfigurationService.putString(ConfigurationEntry.XCAP_ROOT, 
+			mConfigurationService.putBoolean(NgnConfigurationEntry.XCAP_ENABLED, mRbRemote.isChecked());
+			mConfigurationService.putString(NgnConfigurationEntry.XCAP_XCAP_ROOT, 
 				mEtXcapRoot.getText().toString());
-			mConfigurationService.putString(ConfigurationEntry.XCAP_USERNAME, 
+			mConfigurationService.putString(NgnConfigurationEntry.XCAP_USERNAME, 
 				mEtXUI.getText().toString());
-			mConfigurationService.putString(ConfigurationEntry.XCAP_PASSWORD, 
+			mConfigurationService.putString(NgnConfigurationEntry.XCAP_PASSWORD, 
 				mEtPassword.getText().toString());
 			
 			// Compute

@@ -5,26 +5,25 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.doubango.imsdroid.Engine;
 import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Events.EventArgs;
-import org.doubango.imsdroid.Events.InviteEventArgs;
-import org.doubango.imsdroid.Media.MediaType;
-import org.doubango.imsdroid.Model.Contact;
-import org.doubango.imsdroid.Services.IConfigurationService;
 import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Services.Impl.SipService;
-import org.doubango.imsdroid.Sip.MyAVSession;
-import org.doubango.imsdroid.Sip.MyInviteSession.InviteState;
-import org.doubango.imsdroid.Sip.MySipStack;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
 import org.doubango.imsdroid.Utils.DialerUtils;
-import org.doubango.imsdroid.Utils.GraphicsUtils;
-import org.doubango.imsdroid.Utils.StringUtils;
-import org.doubango.imsdroid.Utils.UriUtils;
+import org.doubango.ngn.events.NgnEventArgs;
+import org.doubango.ngn.events.NgnInviteEventArgs;
+import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.model.NgnContact;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.services.INgnSipService;
+import org.doubango.ngn.sip.NgnAVSession;
+import org.doubango.ngn.sip.NgnInviteSession.InviteState;
+import org.doubango.ngn.sip.NgnSipStack;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.ngn.utils.NgnGraphicsUtils;
+import org.doubango.ngn.utils.NgnStringUtils;
+import org.doubango.ngn.utils.NgnUriUtils;
 
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
@@ -39,11 +38,15 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -54,10 +57,6 @@ public class ScreenAV extends BaseScreen{
 	private static final SimpleDateFormat sDurationTimerFormat = new SimpleDateFormat("mm:ss");
 	private static int sCountBlankPacket=0;
 	
-	@SuppressWarnings("unused")
-	private final IConfigurationService mConfigurationService;
-	private final IScreenService mScreenService;
-	
 	private String mRemotePartyDisplayName;
 	private Bitmap mRemotePartyPhoto;
 	
@@ -66,16 +65,27 @@ public class ScreenAV extends BaseScreen{
 	private RelativeLayout mMainLayout;
 	private BroadcastReceiver mSipBroadCastRecv;
 	
+	private View mViewTrying;
+	private View mViewInAudioCall;
+	private View mViewInCallVideo;
+	private FrameLayout mViewLocalVideoPreview;
+	private FrameLayout mViewRemoteVideoPreview;
+	private View mViewTermwait;
+	private View mViewProxSensor;
+	
 	private final Timer mTimerInCall;
 	private final Timer mTimerSuicide;
 	private final Timer mTimerBlankPacket;
-	private MyAVSession mAVSession;
+	private NgnAVSession mAVSession;
+	private boolean mIsVideoCall;
 	
 	private TextView mTvInfo;
 	private TextView mTvDuration;
 	
 	private MyProxSensor mProxSensor;
 	private KeyguardLock mKeyguardLock;
+	
+	private PowerManager.WakeLock mWakeLock;
 	
 	private static final int SELECT_CONTENT = 1;
 	
@@ -85,6 +95,8 @@ public class ScreenAV extends BaseScreen{
 	private final static int MENU_SEND_STOP_VIDEO = 3;
 	private final static int MENU_SHARE_CONTENT = 4;
 	private final static int MENU_SPEAKER = 5;
+	
+	private static boolean SHOW_SIP_PHRASE = false;
 	
 	private static enum ViewType{
 		ViewNone,
@@ -102,9 +114,6 @@ public class ScreenAV extends BaseScreen{
 		mTimerInCall = new Timer();
 		mTimerSuicide = new Timer();
 		mTimerBlankPacket = new Timer();
-		
-		mConfigurationService = ServiceManager.getConfigurationService();
-		mScreenService = ServiceManager.getScreenService();
 	}
 
 	@Override
@@ -113,13 +122,13 @@ public class ScreenAV extends BaseScreen{
 		setContentView(R.layout.screen_av);
 		
 		super.mId = getIntent().getStringExtra("id");
-		if(StringUtils.isNullOrEmpty(super.mId)){
+		if(NgnStringUtils.isNullOrEmpty(super.mId)){
 			Log.e(TAG, "Invalid audio/video session");
 			finish(); 
 			mScreenService.show(ScreenHome.class);
 			return;
 		}
-		mAVSession = MyAVSession.getSession(StringUtils.parseLong(super.mId, -1));
+		mAVSession = NgnAVSession.getSession(NgnStringUtils.parseLong(super.mId, -1));
 		if(mAVSession == null){
 			Log.e(TAG, "Cannot find audio/video session");
 			finish(); 
@@ -127,22 +136,24 @@ public class ScreenAV extends BaseScreen{
 			return;
 		}
 		mAVSession.incRef();
+		mAVSession.setContext(this);
 		
-		final Contact remoteParty = ServiceManager.getContactService().getContactByUri(mAVSession.getRemotePartyUri());
+		final NgnContact remoteParty = getEngine().getContactService().getContactByUri(mAVSession.getRemotePartyUri());
 		if(remoteParty != null){
 			mRemotePartyDisplayName = remoteParty.getDisplayName();
 			if((mRemotePartyPhoto = remoteParty.getPhoto()) != null){
-				mRemotePartyPhoto = GraphicsUtils.getResizedBitmap(mRemotePartyPhoto, 
-						GraphicsUtils.getSizeInPixel(127), GraphicsUtils.getSizeInPixel(126));
+				mRemotePartyPhoto = NgnGraphicsUtils.getResizedBitmap(mRemotePartyPhoto, 
+						NgnGraphicsUtils.getSizeInPixel(128), NgnGraphicsUtils.getSizeInPixel(128));
 			}
 		}
 		else{
-			mRemotePartyDisplayName = UriUtils.getDisplayName(mAVSession.getRemotePartyUri());
+			mRemotePartyDisplayName = NgnUriUtils.getDisplayName(mAVSession.getRemotePartyUri());
 		}
-		
-		if(StringUtils.isNullOrEmpty(mRemotePartyDisplayName)){
+		if(NgnStringUtils.isNullOrEmpty(mRemotePartyDisplayName)){
 			mRemotePartyDisplayName = "Unknown";
 		}
+		
+		mIsVideoCall = mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video;
 		
 		mInflater = LayoutInflater.from(this);
 		
@@ -153,7 +164,7 @@ public class ScreenAV extends BaseScreen{
 			}
 		};
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(SipService.ACTION_INVITE_EVENT);
+		intentFilter.addAction(NgnInviteEventArgs.ACTION_INVITE_EVENT);
 	    registerReceiver(mSipBroadCastRecv, intentFilter);
 		
 		mMainLayout = (RelativeLayout)findViewById(R.id.screen_av_relativeLayout);
@@ -165,6 +176,7 @@ public class ScreenAV extends BaseScreen{
 	@Override
 	protected void onStart() {
 		super.onStart();
+		Log.d(TAG,"onStart()");
 		
 		final KeyguardManager keyguardManager = IMSDroid.getKeyguardManager();
 		if(keyguardManager != null){
@@ -176,6 +188,14 @@ public class ScreenAV extends BaseScreen{
 			}
 		}
 		
+		final PowerManager powerManager = IMSDroid.getPowerManager();
+		if(powerManager != null && mWakeLock == null){
+			mWakeLock = powerManager.newWakeLock(PowerManager.ON_AFTER_RELEASE | PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
+			if(mWakeLock != null){
+				mWakeLock.acquire();
+			}
+		}
+		
 		if(mProxSensor == null && !IMSDroid.isBuggyProximitySensor()){
 			mProxSensor = new MyProxSensor(this);
 		}
@@ -184,24 +204,40 @@ public class ScreenAV extends BaseScreen{
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Log.d(TAG,"onPause()");
 		
 		if(mProxSensor != null){
 			mProxSensor.stop();
+		}
+		
+		if(mWakeLock != null && mWakeLock.isHeld()){
+			mWakeLock.release();
 		}
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.d(TAG,"onResume()");
 		
 		if(mProxSensor != null){
 			mProxSensor.start();
 		}
+		
+		 if(mAVSession.getState() == InviteState.INCALL){
+        	try{
+				mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
+			}
+			catch(IllegalStateException ise){
+				Log.d(TAG, ise.toString());
+			}
+	     }
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		Log.d(TAG,"onStop()");
 		
 		if(mKeyguardLock != null){
 			mKeyguardLock.reenableKeyguard();
@@ -210,6 +246,7 @@ public class ScreenAV extends BaseScreen{
 	
 	@Override
 	protected void onDestroy() {
+		Log.d(TAG,"onDestroy()");
        if(mSipBroadCastRecv != null){
     	   unregisterReceiver(mSipBroadCastRecv);
     	   mSipBroadCastRecv = null;
@@ -218,6 +255,11 @@ public class ScreenAV extends BaseScreen{
        mTimerInCall.cancel();
        mTimerSuicide.cancel();
        cancelBlankPacket();
+       
+       if(mWakeLock != null && mWakeLock.isHeld()){
+			mWakeLock.release();
+       }
+       mWakeLock = null;
        
        if(mAVSession != null){
     	   mAVSession.setContext(null);
@@ -237,12 +279,16 @@ public class ScreenAV extends BaseScreen{
 			return true;
 		}
 		
-		MenuItem itemPickUp = menu.add(0, ScreenAV.MENU_PICKUP, 0, "Answer");
-		MenuItem itemHangUp = menu.add(0, ScreenAV.MENU_HANGUP, 0, "Hang-up");
-		MenuItem itemHoldResume = menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, "Hold");
-		MenuItem itemSendStopVideo = menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, "Send Video");
-		MenuItem itemShareContent = menu.add(1, ScreenAV.MENU_SHARE_CONTENT, 0, "Share Content");
-		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, IMSDroid.getAudioManager().isSpeakerphoneOn() ? "Speaker OFF" : "Speaker ON");
+		MenuItem itemSendStopVideo = null;
+		
+		MenuItem itemPickUp = menu.add(0, ScreenAV.MENU_PICKUP, 0, getString(R.string.string_answer));
+		MenuItem itemHangUp = menu.add(0, ScreenAV.MENU_HANGUP, 0, getString(R.string.string_endcall));
+		MenuItem itemHoldResume = menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, getString(R.string.string_hold));
+		if(mIsVideoCall){
+			itemSendStopVideo = menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, getString(R.string.string_send_video));
+		}
+		// MenuItem itemShareContent = menu.add(1, ScreenAV.MENU_SHARE_CONTENT, 0, "Share Content");
+		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, IMSDroid.getAudioManager().isSpeakerphoneOn() ? getString(R.string.string_speaker_off) : getString(R.string.string_speaker_on));
 		
 		switch(mAVSession.getState()){
 			case INCOMING:
@@ -251,8 +297,10 @@ public class ScreenAV extends BaseScreen{
 				itemHangUp.setEnabled(true);
 				itemHoldResume.setEnabled(false);
 				itemSpeaker.setEnabled(false);
-				itemSendStopVideo.setEnabled(false);
-				itemShareContent.setEnabled(false);
+				if(itemSendStopVideo != null){
+					itemSendStopVideo.setEnabled(false);
+				}
+				// itemShareContent.setEnabled(false);
 				break;
 			}
 			
@@ -262,8 +310,10 @@ public class ScreenAV extends BaseScreen{
 				itemHangUp.setEnabled(true);
 				itemHoldResume.setEnabled(false);
 				itemSpeaker.setEnabled(false);
-				itemSendStopVideo.setEnabled(false);
-				itemShareContent.setEnabled(false);
+				if(itemSendStopVideo != null){
+					itemSendStopVideo.setEnabled(false);
+				}
+				//itemShareContent.setEnabled(false);
 				break;
 			}
 			
@@ -273,19 +323,19 @@ public class ScreenAV extends BaseScreen{
 				itemHoldResume.setEnabled(true);
 				itemSpeaker.setEnabled(true);
 				
-				if((mAVSession.getMediaType() == MediaType.AudioVideo || mAVSession.getMediaType() == MediaType.Video)){
-					itemSendStopVideo.setTitle(mAVSession.isSendingVideo() ? "Stop Video" : "Send Video");
+				if(itemSendStopVideo != null){
+					itemSendStopVideo.setTitle(mAVSession.isSendingVideo() ? "Stop Video" : getString(R.string.string_send_video))
+					.setIcon(mAVSession.isSendingVideo() ? R.drawable.video_stop_48 : R.drawable.video_start_48);
 					itemSendStopVideo.setEnabled(true);
-					// Replace Answer by camera switcher
+					//Replace Answer by camera switcher
 					itemPickUp.setEnabled(true);
-					itemPickUp.setTitle("Switch camera");
+					itemPickUp.setTitle(getString(R.string.string_switch_camera)).setIcon(R.drawable.refresh_48);
 				}
 				else{
 					itemPickUp.setEnabled(false);
-					itemSendStopVideo.setEnabled(false);
 				}
-				itemShareContent.setEnabled(true);
-				itemHoldResume.setTitle(mAVSession.isLocalHeld()? "Resume" : "Hold");
+				//itemShareContent.setEnabled(true);
+				itemHoldResume.setTitle(mAVSession.isLocalHeld()? getString(R.string.string_resume) : getString(R.string.string_hold));
 			
 				break;
 			}
@@ -297,8 +347,10 @@ public class ScreenAV extends BaseScreen{
 				itemHangUp.setEnabled(false);
 				itemHoldResume.setEnabled(false);
 				itemSpeaker.setEnabled(false);
-				itemSendStopVideo.setEnabled(false);
-				itemShareContent.setEnabled(false);
+				if(itemSendStopVideo != null){
+					itemSendStopVideo.setEnabled(false);
+				}
+				//itemShareContent.setEnabled(false);
 				break;
 			}
 		}
@@ -366,15 +418,18 @@ public class ScreenAV extends BaseScreen{
 		return true;
 	}
 	
-	public static boolean receiveCall(MyAVSession avSession){
-		ServiceManager.getScreenService().bringToFront(Main.ACTION_SHOW_AVSCREEN,
+	public static boolean receiveCall(NgnAVSession avSession){
+		((Engine)Engine.getInstance()).getScreenService().bringToFront(Main.ACTION_SHOW_AVSCREEN,
 				new String[] {"session-id", Long.toString(avSession.getId())}
 		);
 		return true;
 	}
 	
-	public static boolean makeCall(String remoteUri, MediaType mediaType){		
-		String validUri = UriUtils.makeValidSipUri(remoteUri);
+	public static boolean makeCall(String remoteUri, NgnMediaType mediaType){
+		final INgnSipService sipService = ((Engine)Engine.getInstance()).getSipService();
+		final INgnConfigurationService configurationService = ((Engine)Engine.getInstance()).getConfigurationService();
+		final IScreenService screeneService = ((Engine)Engine.getInstance()).getScreenService();
+		final String validUri = NgnUriUtils.makeValidSipUri(remoteUri);
 		if(validUri == null){
 			Log.e(TAG, "failed to normalize sip uri '" + remoteUri + "'");
 			return false;
@@ -383,12 +438,12 @@ public class ScreenAV extends BaseScreen{
 			remoteUri = validUri;
 			if(remoteUri.startsWith("tel:")){
 				// E.164 number => use ENUM protocol
-				final MySipStack sipStack = ServiceManager.getSipService().getSipStack();
+				final NgnSipStack sipStack = sipService.getSipStack();
 				if(sipStack != null){
-					String phoneNumber = UriUtils.getValidPhoneNumber(remoteUri);
+					String phoneNumber = NgnUriUtils.getValidPhoneNumber(remoteUri);
 					if(phoneNumber != null){
-						String enumDomain = ServiceManager.getConfigurationService().getString(
-								ConfigurationEntry.GENERAL_ENUM_DOMAIN, ConfigurationUtils.DEFAULT_GENERAL_ENUM_DOMAIN);
+						String enumDomain = configurationService.getString(
+								NgnConfigurationEntry.GENERAL_ENUM_DOMAIN, NgnConfigurationEntry.DEFAULT_GENERAL_ENUM_DOMAIN);
 						String sipUri = sipStack.dnsENUM("E2U+SIP", phoneNumber, enumDomain);
 						if(sipUri != null){
 							remoteUri = sipUri;
@@ -398,12 +453,12 @@ public class ScreenAV extends BaseScreen{
 			}
 		}
 		
-		MyAVSession avSession = MyAVSession.createOutgoingSession(ServiceManager.getSipService().getSipStack(), mediaType);
+		NgnAVSession avSession = NgnAVSession.createOutgoingSession(sipService.getSipStack(), mediaType);
 		avSession.setRemotePartyUri(remoteUri); // HACK
-		ServiceManager.getScreenService().show(ScreenAV.class, Long.toString(avSession.getId()));	
+		screeneService.show(ScreenAV.class, Long.toString(avSession.getId()));	
 		
 		// Hold the active call
-		final MyAVSession activeCall = MyAVSession.getFirstActiveCallAndNot(avSession.getId());
+		final NgnAVSession activeCall = NgnAVSession.getFirstActiveCallAndNot(avSession.getId());
 		if(activeCall != null){
 			activeCall.holdCall();
 		}
@@ -433,8 +488,8 @@ public class ScreenAV extends BaseScreen{
 			return;
 		}
 		final String action = intent.getAction();
-		if(SipService.ACTION_INVITE_EVENT.equals(action)){
-			InviteEventArgs args = intent.getParcelableExtra(EventArgs.EXTRA_NAME);
+		if(NgnInviteEventArgs.ACTION_INVITE_EVENT.equals(action)){
+			NgnInviteEventArgs args = intent.getParcelableExtra(NgnEventArgs.EXTRA_EMBEDDED);
 			if(args == null){
 				Log.e(TAG, "Invalid event args");
 				return;
@@ -458,12 +513,12 @@ public class ScreenAV extends BaseScreen{
 				case INCALL:
 					//if(state == InviteState.INCALL){
 						// stop using the speaker (also done in ServiceManager())
-						ServiceManager.getSoundService().stopRingTone();
+						getEngine().getSoundService().stopRingTone();
 						mAVSession.setSpeakerphoneOn(false);
 					//}
 					loadInCallView();
 					// Send blank packets to open NAT pinhole
-					if(mAVSession != null && mAVSession.getMediaType() == MediaType.AudioVideo || mAVSession.getMediaType() == MediaType.Video){
+					if(mAVSession != null && mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video){
 						mTimerBlankPacket.schedule(mTimerTaskBlankPacket, 0, 250);
 					}
 					try{
@@ -472,14 +527,14 @@ public class ScreenAV extends BaseScreen{
 					catch(IllegalStateException ise){
 						Log.d(TAG, ise.toString());
 					}
-					
+					// release power lock
+					if(mWakeLock != null && mWakeLock.isHeld()){
+						mWakeLock.release();
+			        }
 					break;
 					
 				case TERMINATING:
 				case TERMINATED:
-					if(mTvInfo != null){
-						mTvInfo.setText(args.getPhrase());
-					}	
 					try{
 						mTimerSuicide.schedule(mTimerTaskSuicide, new Date(new Date().getTime() + 1500));
 					}
@@ -488,7 +543,12 @@ public class ScreenAV extends BaseScreen{
 					}
 					mTimerTaskInCall.cancel();
 					mTimerBlankPacket.cancel();
-					loadTermView();
+					loadTermView(SHOW_SIP_PHRASE ? args.getPhrase() : null);
+					
+					// release power lock
+					if(mWakeLock != null && mWakeLock.isHeld()){
+						mWakeLock.release();
+			        }
 					break;
 			}
 		}
@@ -522,14 +582,16 @@ public class ScreenAV extends BaseScreen{
 		}
 		Log.d(TAG, "loadTryingView()");	
 		
-		final View view = mInflater.inflate(R.layout.view_call_trying, null);
-		loadKeyboard(view);
-		mTvInfo = (TextView)view.findViewById(R.id.view_call_trying_textView_info);
+		if(mViewTrying == null){
+			mViewTrying = mInflater.inflate(R.layout.view_call_trying, null);
+			loadKeyboard(mViewTrying);
+		}
+		mTvInfo = (TextView)mViewTrying.findViewById(R.id.view_call_trying_textView_info);
 		
-		final TextView tvRemote = (TextView)view.findViewById(R.id.view_call_trying_textView_remote);
-		final ImageButton btPick = (ImageButton)view.findViewById(R.id.view_call_trying_imageButton_pick);
-		final ImageButton btHang = (ImageButton)view.findViewById(R.id.view_call_trying_imageButton_hang);
-		final ImageView ivAvatar = (ImageView)view.findViewById(R.id.view_call_trying_imageView_avatar);
+		final TextView tvRemote = (TextView)mViewTrying.findViewById(R.id.view_call_trying_textView_remote);
+		final ImageButton btPick = (ImageButton)mViewTrying.findViewById(R.id.view_call_trying_imageButton_pick);
+		final ImageButton btHang = (ImageButton)mViewTrying.findViewById(R.id.view_call_trying_imageButton_hang);
+		final ImageView ivAvatar = (ImageView)mViewTrying.findViewById(R.id.view_call_trying_imageView_avatar);
 		btPick.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -545,13 +607,13 @@ public class ScreenAV extends BaseScreen{
 		
 		switch(mAVSession.getState()){
 	        case INCOMING:
-	        	mTvInfo.setText("Incoming Call");
+	        	mTvInfo.setText(getString(R.string.string_call_incoming));
 	        	break;
 	        case INPROGRESS:
 	        case REMOTE_RINGING:
 	        case EARLY_MEDIA:
 	        default:
-	        	mTvInfo.setText("Outgoing Call");
+	        	mTvInfo.setText(getString(R.string.string_call_outgoing));
 	        	btPick.setVisibility(View.GONE);
 	        	break;
 	    }
@@ -562,23 +624,22 @@ public class ScreenAV extends BaseScreen{
 		}
 		
 		mMainLayout.removeAllViews();
-		mMainLayout.addView(view);
+		mMainLayout.addView(mViewTrying);
 		mCurrentView = ViewType.ViewTrying;
 	}
 	
-	private void loadInCallView(){
-		if(mCurrentView == ViewType.ViewInCall){
-			return;
+	private void loadInCallAudioView(){
+		Log.d(TAG, "loadInCallAudioView()");
+		if(mViewInAudioCall == null){
+			mViewInAudioCall = mInflater.inflate(R.layout.view_call_incall_audio, null);
+			loadKeyboard(mViewInAudioCall);
 		}
-		Log.d(TAG, "loadInCallView()");
+		mTvInfo = (TextView)mViewInAudioCall.findViewById(R.id.view_call_incall_audio_textView_info);
 		
-		final View audioView = mInflater.inflate(R.layout.view_call_incall_audio, null);
-		loadKeyboard(audioView);
-		mTvInfo = (TextView)audioView.findViewById(R.id.view_call_incall_audio_textView_info);
-		final TextView tvRemote = (TextView)audioView.findViewById(R.id.view_call_incall_audio_textView_remote);
-		final ImageButton btHang = (ImageButton)audioView.findViewById(R.id.view_call_incall_audio_imageButton_hang);
-		final ImageView ivAvatar = (ImageView)audioView.findViewById(R.id.view_call_incall_audio_imageView_avatar);
-		mTvDuration = (TextView)audioView.findViewById(R.id.view_call_incall_audio_textView_duration);
+		final TextView tvRemote = (TextView)mViewInAudioCall.findViewById(R.id.view_call_incall_audio_textView_remote);
+		final ImageButton btHang = (ImageButton)mViewInAudioCall.findViewById(R.id.view_call_incall_audio_imageButton_hang);
+		final ImageView ivAvatar = (ImageView)mViewInAudioCall.findViewById(R.id.view_call_incall_audio_imageView_avatar);
+		mTvDuration = (TextView)mViewInAudioCall.findViewById(R.id.view_call_incall_audio_textView_duration);
 		
 		btHang.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -591,10 +652,54 @@ public class ScreenAV extends BaseScreen{
 		if(mRemotePartyPhoto != null){
 			ivAvatar.setImageBitmap(mRemotePartyPhoto);
 		}
+		mTvInfo.setText(getString(R.string.string_incall));
 		
 		mMainLayout.removeAllViews();
-		mMainLayout.addView(audioView);
+		mMainLayout.addView(mViewInAudioCall);
 		mCurrentView = ViewType.ViewInCall;
+	}
+	
+	private void loadInCallVideoView(){
+		Log.d(TAG, "loadInCallVideoView()");
+		if(mViewInCallVideo == null){
+			mViewInCallVideo = mInflater.inflate(R.layout.view_call_incall_video, null);
+			mViewLocalVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_linearLayout_local_video);
+			mViewRemoteVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_linearLayout_remote_video);
+		}
+		
+        mTvDuration = null;
+		mTvInfo = null;
+		mMainLayout.removeAllViews();
+		mMainLayout.addView(mViewInCallVideo);
+		
+		// Video Consumer
+		mViewRemoteVideoPreview.removeAllViews();
+        final View remotePreview = mAVSession.startVideoConsumerPreview();
+		if(remotePreview != null){
+            final ViewParent viewParent = remotePreview.getParent();
+            if(viewParent != null && viewParent instanceof ViewGroup){
+                    ((ViewGroup)(viewParent)).removeView(remotePreview);
+            }
+            mViewRemoteVideoPreview.addView(remotePreview);
+        }
+		// Video Producer
+		startStopVideo(mAVSession.isSendingVideo());
+		
+		mCurrentView = ViewType.ViewInCall;
+	}
+	
+	private void loadInCallView(){
+		if(mCurrentView == ViewType.ViewInCall){
+			return;
+		}
+		Log.d(TAG, "loadInCallView()");
+		
+		if(mIsVideoCall){
+			loadInCallVideoView();
+		}
+		else{
+			loadInCallAudioView();
+		}
 	}
 	
 	private void loadProxSensorView(){
@@ -602,42 +707,45 @@ public class ScreenAV extends BaseScreen{
 			return;
 		}
 		Log.d(TAG, "loadProxSensorView()");
+		if(mViewProxSensor == null){
+			mViewProxSensor = mInflater.inflate(R.layout.view_call_proxsensor, null);
+		}
 		mMainLayout.removeAllViews();
-		final View proxSensorView = mInflater.inflate(R.layout.view_call_proxsensor, null);
-		mMainLayout.addView(proxSensorView);
+		mMainLayout.addView(mViewProxSensor);
 		mCurrentView = ViewType.ViewProxSensor;
 	}
 	
-	private void loadTermView(){
+	private void loadTermView(String phrase){
 		if(mCurrentView == ViewType.ViewTermwait){
 			return;
 		}
 		Log.d(TAG, "loadTermView()");
 		
-		if(mCurrentView == ViewType.ViewTrying){
-			return;
+		if(mViewTermwait == null){
+			mViewTermwait = mInflater.inflate(R.layout.view_call_trying, null);
+			loadKeyboard(mViewTermwait);
 		}
-		Log.d(TAG, "loadTryingView()");	
+		mTvInfo = (TextView)mViewTermwait.findViewById(R.id.view_call_trying_textView_info);
 		
-		final View view = mInflater.inflate(R.layout.view_call_trying, null);
-		loadKeyboard(view);
-		mTvInfo = (TextView)view.findViewById(R.id.view_call_trying_textView_info);
-		
-		final TextView tvRemote = (TextView)view.findViewById(R.id.view_call_trying_textView_remote);
-		final ImageView ivAvatar = (ImageView)view.findViewById(R.id.view_call_trying_imageView_avatar);
-		view.findViewById(R.id.view_call_trying_imageButton_pick).setVisibility(View.GONE);
-		view.findViewById(R.id.view_call_trying_imageButton_hang).setVisibility(View.GONE);
-		view.setBackgroundResource(R.drawable.grad_bkg_termwait);
+		final TextView tvRemote = (TextView)mViewTermwait.findViewById(R.id.view_call_trying_textView_remote);
+		final ImageView ivAvatar = (ImageView)mViewTermwait.findViewById(R.id.view_call_trying_imageView_avatar);
+		mViewTermwait.findViewById(R.id.view_call_trying_imageButton_pick).setVisibility(View.GONE);
+		mViewTermwait.findViewById(R.id.view_call_trying_imageButton_hang).setVisibility(View.GONE);
+		mViewTermwait.setBackgroundResource(R.drawable.grad_bkg_termwait);
 		
 		tvRemote.setText(mRemotePartyDisplayName);
 		if(mRemotePartyPhoto != null){
 			ivAvatar.setImageBitmap(mRemotePartyPhoto);
 		}
-		mTvInfo.setText("Terminating Call...");
+		mTvInfo.setText(NgnStringUtils.isNullOrEmpty(phrase) ? getString(R.string.string_call_terminated) : phrase);
 		
 		mMainLayout.removeAllViews();
-		mMainLayout.addView(view);
+		mMainLayout.addView(mViewTermwait);
 		mCurrentView = ViewType.ViewTermwait;
+	}
+	
+	private void loadTermView(){
+		loadTermView(null);
 	}
 	
 	private final TimerTask mTimerTaskInCall = new TimerTask(){
@@ -671,8 +779,10 @@ public class ScreenAV extends BaseScreen{
 	};
 	
 	private void cancelBlankPacket(){
-		mTimerBlankPacket.cancel();
-		sCountBlankPacket=0;
+		if(mTimerBlankPacket != null){
+			mTimerBlankPacket.cancel();
+			sCountBlankPacket=0;
+		}
 	}
 	
 	private final TimerTask mTimerTaskSuicide = new TimerTask(){
@@ -692,32 +802,37 @@ public class ScreenAV extends BaseScreen{
 	
 	
 	private void startStopVideo(boolean bStart){
-		if(mAVSession == null || (mAVSession.getMediaType() != MediaType.AudioVideo && mAVSession.getMediaType() != MediaType.Video)){
+		Log.d(TAG, "startStopVideo("+bStart+")");
+		if(!mIsVideoCall){
 			return;
 		}
 		
 		mAVSession.setSendingVideo(bStart);
 		
-//		this.llVideoLocal.removeAllViews();
-//		if(bStart){
-//			this.timerBlankPacket.cancel();
-//			final View local_preview = mAVSession.startVideoProducerPreview();
-//			if(local_preview != null){
-//				final ViewParent viewParent = local_preview.getParent();
-//				if(viewParent != null && viewParent instanceof ViewGroup){
-//					((ViewGroup)(viewParent)).removeView(local_preview);
-//				}
-//				this.llVideoLocal.addView(local_preview);
-//			}
-//		}
-//		this.llVideoLocal.setVisibility(bStart ? View.VISIBLE : View.GONE);
+		if(mViewLocalVideoPreview != null){
+			mViewLocalVideoPreview.removeAllViews();
+			if(bStart){
+				cancelBlankPacket();
+				final View localPreview = mAVSession.startVideoProducerPreview();
+				if(localPreview != null){
+					final ViewParent viewParent = localPreview.getParent();
+					if(viewParent != null && viewParent instanceof ViewGroup){
+						((ViewGroup)(viewParent)).removeView(localPreview);
+					}
+					mViewLocalVideoPreview.addView(localPreview);
+					mViewLocalVideoPreview.bringChildToFront(localPreview);
+				}
+			}
+			mViewLocalVideoPreview.setVisibility(bStart ? View.VISIBLE : View.GONE);
+			mViewLocalVideoPreview.bringToFront();
+		}
 	}
 	
 	private View.OnClickListener mOnKeyboardClickListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			if(mAVSession != null){
-				mAVSession.sendDTMF(StringUtils.parseInt(v.getTag().toString(), -1));
+				mAVSession.sendDTMF(NgnStringUtils.parseInt(v.getTag().toString(), -1));
 			}
 		}
 	};

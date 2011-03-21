@@ -1,11 +1,9 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.StringUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +16,7 @@ import android.widget.Spinner;
 public class ScreenNetwork extends BaseScreen {
 	private final static String TAG = ScreenNetwork.class.getCanonicalName();
 	
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	private EditText mEtProxyHost;
 	private EditText mEtProxyPort;
@@ -30,13 +28,13 @@ public class ScreenNetwork extends BaseScreen {
 	private RadioButton mRbIPv4;
 	private RadioButton mRbIPv6;
 	
-	private final static String[] sSpinnerTransportItems = new String[] {ConfigurationUtils.DEFAULT_NETWORK_TRANSPORT.toUpperCase(), "TCP", /*"TLS", "SCTP"*/};
-	private final static String[] sSpinnerProxydiscoveryItems = new String[] {ConfigurationUtils.DEFAULT_NETWORK_PCSCF_DISCOVERY, ConfigurationUtils.PCSCF_DISCOVERY_DNS_SRV/*, "DHCPv4/v6", "Both"*/};
+	private final static String[] sSpinnerTransportItems = new String[] {NgnConfigurationEntry.DEFAULT_NETWORK_TRANSPORT.toUpperCase(), "TCP", /*"TLS", "SCTP"*/};
+	private final static String[] sSpinnerProxydiscoveryItems = new String[] {NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_DISCOVERY, NgnConfigurationEntry.PCSCF_DISCOVERY_DNS_SRV/*, "DHCPv4/v6", "Both"*/};
 	
 	public ScreenNetwork() {
 		super(SCREEN_TYPE.NETWORK_T, TAG);
 		
-		this.mConfigurationService = ServiceManager.getConfigurationService();
+		this.mConfigurationService = getEngine().getConfigurationService();
 	}
 	
 	@Override
@@ -62,20 +60,20 @@ public class ScreenNetwork extends BaseScreen {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpProxyDiscovery.setAdapter(adapter);
         
-        mEtProxyHost.setText(mConfigurationService.getString(ConfigurationEntry.NETWORK_PCSCF_HOST, ConfigurationUtils.DEFAULT_NETWORK_PCSCF_HOST));
-        mEtProxyPort.setText(Integer.toString(mConfigurationService.getInt(ConfigurationEntry.NETWORK_PCSCF_PORT, ConfigurationUtils.DEFAULT_NETWORK_PCSCF_PORT)));
+        mEtProxyHost.setText(mConfigurationService.getString(NgnConfigurationEntry.NETWORK_PCSCF_HOST, NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_HOST));
+        mEtProxyPort.setText(Integer.toString(mConfigurationService.getInt(NgnConfigurationEntry.NETWORK_PCSCF_PORT, NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_PORT)));
         mSpTransport.setSelection(super.getSpinnerIndex(
-				mConfigurationService.getString(ConfigurationEntry.NETWORK_TRANSPORT, sSpinnerTransportItems[0]),
+				mConfigurationService.getString(NgnConfigurationEntry.NETWORK_TRANSPORT, sSpinnerTransportItems[0]),
 				sSpinnerTransportItems));
         mSpProxyDiscovery.setSelection(super.getSpinnerIndex(
-				mConfigurationService.getString(ConfigurationEntry.NETWORK_PCSCF_DISCOVERY, sSpinnerProxydiscoveryItems[0]),
+				mConfigurationService.getString(NgnConfigurationEntry.NETWORK_PCSCF_DISCOVERY, sSpinnerProxydiscoveryItems[0]),
 				sSpinnerProxydiscoveryItems));
-        mCbSigComp.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NETWORK_USE_SIGCOMP, ConfigurationUtils.DEFAULT_NETWORK_USE_SIGCOMP));
+        mCbSigComp.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NETWORK_USE_SIGCOMP, NgnConfigurationEntry.DEFAULT_NETWORK_USE_SIGCOMP));
         
-        mCbWiFi.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NETWORK_USE_WIFI, ConfigurationUtils.DEFAULT_NETWORK_USE_WIFI));
-        mCb3G.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NETWORK_USE_3G, ConfigurationUtils.DEFAULT_NETWORK_USE_3G));
-        mRbIPv4.setChecked(mConfigurationService.getString(ConfigurationEntry.NETWORK_IP_VERSION,
-				ConfigurationUtils.DEFAULT_NETWORK_IP_VERSION).equalsIgnoreCase("ipv4"));
+        mCbWiFi.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NETWORK_USE_WIFI, NgnConfigurationEntry.DEFAULT_NETWORK_USE_WIFI));
+        mCb3G.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NETWORK_USE_3G, NgnConfigurationEntry.DEFAULT_NETWORK_USE_3G));
+        mRbIPv4.setChecked(mConfigurationService.getString(NgnConfigurationEntry.NETWORK_IP_VERSION,
+        		NgnConfigurationEntry.DEFAULT_NETWORK_IP_VERSION).equalsIgnoreCase("ipv4"));
         mRbIPv6.setChecked(!mRbIPv4.isChecked());
         
         // add listeners (for the configuration)
@@ -93,20 +91,20 @@ public class ScreenNetwork extends BaseScreen {
 	protected void onPause() {
 		if(super.mComputeConfiguration){
 			
-			mConfigurationService.putString(ConfigurationEntry.NETWORK_PCSCF_HOST, 
+			mConfigurationService.putString(NgnConfigurationEntry.NETWORK_PCSCF_HOST, 
 					mEtProxyHost.getText().toString().trim());
-			mConfigurationService.putInt(ConfigurationEntry.NETWORK_PCSCF_PORT, 
-					StringUtils.parseInt(mEtProxyPort.getText().toString().trim(), ConfigurationUtils.DEFAULT_NETWORK_PCSCF_PORT) );
-			mConfigurationService.putString(ConfigurationEntry.NETWORK_TRANSPORT, 
+			mConfigurationService.putInt(NgnConfigurationEntry.NETWORK_PCSCF_PORT, 
+					NgnStringUtils.parseInt(mEtProxyPort.getText().toString().trim(), NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_PORT) );
+			mConfigurationService.putString(NgnConfigurationEntry.NETWORK_TRANSPORT, 
 					ScreenNetwork.sSpinnerTransportItems[mSpTransport.getSelectedItemPosition()]);
-			mConfigurationService.putString(ConfigurationEntry.NETWORK_PCSCF_DISCOVERY, 
+			mConfigurationService.putString(NgnConfigurationEntry.NETWORK_PCSCF_DISCOVERY, 
 					ScreenNetwork.sSpinnerProxydiscoveryItems[mSpProxyDiscovery.getSelectedItemPosition()]);
-			mConfigurationService.putBoolean(ConfigurationEntry.NETWORK_USE_SIGCOMP,  mCbSigComp.isChecked());
-			mConfigurationService.putBoolean(ConfigurationEntry.NETWORK_USE_WIFI, 
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NETWORK_USE_SIGCOMP,  mCbSigComp.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NETWORK_USE_WIFI, 
 					mCbWiFi.isChecked());
-			mConfigurationService.putBoolean(ConfigurationEntry.NETWORK_USE_3G, 
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NETWORK_USE_3G, 
 					mCb3G.isChecked());
-			mConfigurationService.putString(ConfigurationEntry.NETWORK_IP_VERSION, 
+			mConfigurationService.putString(NgnConfigurationEntry.NETWORK_IP_VERSION, 
 					mRbIPv4.isChecked() ? "ipv4" : "ipv6");
 			
 			// Compute

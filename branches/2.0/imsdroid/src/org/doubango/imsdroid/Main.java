@@ -6,8 +6,13 @@ import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenSplash;
 import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Sip.MyAVSession;
-import org.doubango.imsdroid.Utils.StringUtils;
+import org.doubango.ngn.media.NgnProxyPluginMgr;
+import org.doubango.ngn.sip.NgnAVSession;
+import org.doubango.ngn.utils.NgnStringUtils;
+import org.doubango.tinyWRAP.ProxyAudioConsumer;
+import org.doubango.tinyWRAP.ProxyAudioProducer;
+import org.doubango.tinyWRAP.ProxyVideoConsumer;
+import org.doubango.tinyWRAP.ProxyVideoProducer;
 
 import android.app.Activity;
 import android.app.ActivityGroup;
@@ -31,12 +36,14 @@ public class Main extends ActivityGroup {
 	private static final int RC_SPLASH = 0;
 	
 	private Handler mHanler;
+	private final IScreenService mScreenService;
 	
 	public Main(){
 		super();
 		
 		// Sets main activity (should be done before starting services)
-    	ServiceManager.setMainActivity(this);
+    	Engine.getInstance().setMainActivity(this);
+    	mScreenService = ((Engine)Engine.getInstance()).getScreenService();
 	}
 	
     /** Called when the activity is first created. */
@@ -49,13 +56,13 @@ public class Main extends ActivityGroup {
         mHanler = new Handler();
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
         
-        if(!ServiceManager.isStarted()){
+        if(!Engine.getInstance().isStarted()){
         	startActivityForResult(new Intent(this, ScreenSplash.class), Main.RC_SPLASH);
         	return;
         }
         
         Bundle bundle = savedInstanceState;
-        final IScreenService screenService = ServiceManager.getScreenService();
+        final IScreenService screenService = ((Engine)(Engine.getInstance())).getScreenService();
         if(bundle == null){
 	        Intent intent = getIntent();
 	        bundle = intent == null ? null : intent.getExtras();
@@ -80,8 +87,8 @@ public class Main extends ActivityGroup {
 	
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		if(ServiceManager.getScreenService().getCurrentScreen().hasMenu()){
-			return ServiceManager.getScreenService().getCurrentScreen().createOptionsMenu(menu);
+		if(mScreenService.getCurrentScreen().hasMenu()){
+			return mScreenService.getCurrentScreen().createOptionsMenu(menu);
 		}
 		
 		return false;
@@ -89,16 +96,16 @@ public class Main extends ActivityGroup {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
-		if(ServiceManager.getScreenService().getCurrentScreen().hasMenu()){
+		if(mScreenService.getCurrentScreen().hasMenu()){
 			menu.clear();
-			return ServiceManager.getScreenService().getCurrentScreen().createOptionsMenu(menu);
+			return mScreenService.getCurrentScreen().createOptionsMenu(menu);
 		}
 		return false;
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		IBaseScreen baseScreen = ServiceManager.getScreenService().getCurrentScreen();
+		IBaseScreen baseScreen = mScreenService.getCurrentScreen();
 		if(baseScreen instanceof Activity){
 			return ((Activity)baseScreen).onOptionsItemSelected(item);
 		}
@@ -107,13 +114,12 @@ public class Main extends ActivityGroup {
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		final IScreenService screenService = ServiceManager.getScreenService();
-		if(screenService == null){
+		if(mScreenService == null){
 			super.onSaveInstanceState(outState);
 			return;
 		}
 		
-		IBaseScreen screen = screenService.getCurrentScreen();
+		IBaseScreen screen = mScreenService.getCurrentScreen();
 		if(screen != null){
 			outState.putInt("action", Main.ACTION_RESTORE_LAST_STATE);
 			outState.putString("screen-id", screen.getId());
@@ -144,8 +150,7 @@ public class Main extends ActivityGroup {
     
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-    	final IScreenService screenService = ServiceManager.getScreenService();
-		final IBaseScreen currentScreen = screenService.getCurrentScreen();
+		final IBaseScreen currentScreen = mScreenService.getCurrentScreen();
 		if(currentScreen != null){
 			if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && currentScreen.getType() != SCREEN_TYPE.HOME_T) {
 				if(currentScreen.hasBack()){
@@ -154,13 +159,13 @@ public class Main extends ActivityGroup {
 					}
 				}
 				else {
-					screenService.back();
+					mScreenService.back();
 				}
 				return true;
 			}
 			else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
 				if(!currentScreen.hasMenu()){
-					screenService.show(ScreenHome.class);
+					mScreenService.show(ScreenHome.class);
 					return true;
 				}
 				else if(currentScreen instanceof Activity){
@@ -174,8 +179,8 @@ public class Main extends ActivityGroup {
     public void exit(){
     	mHanler.post(new Runnable() {
 			public void run() {
-				if (!ServiceManager.stop()) {
-					Log.e(TAG, "Failed to stop services");
+				if (!Engine.getInstance().stop()) {
+					Log.e(TAG, "Failed to stop engine");
 				}				
 				finish();
 			}
@@ -190,15 +195,15 @@ public class Main extends ActivityGroup {
 			case Main.ACTION_RESTORE_LAST_STATE:
 				id = bundle.getString("screen-id");
 				final String screenTypeStr = bundle.getString("screen-type");
-				final SCREEN_TYPE screenType = StringUtils.isNullOrEmpty(screenTypeStr) ? SCREEN_TYPE.HOME_T :
+				final SCREEN_TYPE screenType = NgnStringUtils.isNullOrEmpty(screenTypeStr) ? SCREEN_TYPE.HOME_T :
 						SCREEN_TYPE.valueOf(screenTypeStr);
 				switch(screenType){
 					case AV_T:
-						ServiceManager.getScreenService().show(ScreenAV.class, id);
+						mScreenService.show(ScreenAV.class, id);
 						break;
 					default:
-						if(!ServiceManager.getScreenService().show(id)){
-							ServiceManager.getScreenService().show(ScreenHome.class);
+						if(!mScreenService.show(id)){
+							mScreenService.show(ScreenHome.class);
 						}
 						break;
 				}
@@ -207,14 +212,35 @@ public class Main extends ActivityGroup {
 			// Show Audio/Video Calls
 			case Main.ACTION_SHOW_AVSCREEN:
 				id = bundle.getString("session-id");
-				final MyAVSession avSession = StringUtils.isNullOrEmpty(id) ? MyAVSession.getFirstActiveCallAndNot(-1):
-					MyAVSession.getSession(StringUtils.parseLong(id, -1));
+				final NgnAVSession avSession = NgnStringUtils.isNullOrEmpty(id) ? NgnAVSession.getFirstActiveCallAndNot(-1):
+					NgnAVSession.getSession(NgnStringUtils.parseLong(id, -1));
 				if(avSession != null){
-					if(!ServiceManager.getScreenService().show(ScreenAV.class, Long.toString(avSession.getId()))){
-						ServiceManager.getScreenService().show(ScreenHome.class);
+					if(!mScreenService.show(ScreenAV.class, Long.toString(avSession.getId()))){
+						mScreenService.show(ScreenHome.class);
 					}
 				}
 				break;
+		}
+	}
+    
+    
+    static {
+		try {
+			System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class
+					.getPackage().getName()));
+			
+			ProxyVideoProducer.registerPlugin();
+			ProxyVideoConsumer.registerPlugin();
+			ProxyAudioProducer.registerPlugin();
+			ProxyAudioConsumer.registerPlugin();
+			
+			NgnProxyPluginMgr.Initialize();
+		} catch (UnsatisfiedLinkError e) {
+			Log.e(TAG,
+					"Native code library failed to load.\n" + e.getMessage());
+		} catch (Exception e) {
+			Log.e(TAG,
+					"Native code library failed to load.\n" + e.getMessage());
 		}
 	}
 }

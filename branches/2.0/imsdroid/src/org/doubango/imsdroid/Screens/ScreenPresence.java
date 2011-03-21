@@ -3,12 +3,10 @@ package org.doubango.imsdroid.Screens;
 import java.io.IOException;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Services.ISipService;
-import org.doubango.imsdroid.Sip.PresenceStatus;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.services.INgnSipService;
+import org.doubango.ngn.sip.NgnPresenceStatus;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -50,23 +48,23 @@ public class ScreenPresence  extends BaseScreen{
 	private Preview mPreview;
 	
 	private final static StatusItem[] sSpinnerStatusItems = new StatusItem[] {
-		new StatusItem(R.drawable.user_online_24, PresenceStatus.Online, PresenceStatus.Online.toString()),
-		new StatusItem(R.drawable.user_busy_24, PresenceStatus.Busy, "Busy"),
-		new StatusItem(R.drawable.user_back_24, PresenceStatus.BeRightBack, "Be Right Back"),
-		new StatusItem(R.drawable.user_time_24, PresenceStatus.Away, "Away"),
-		new StatusItem(R.drawable.user_onthephone_24, PresenceStatus.OnThePhone, "On the phone"),
-		new StatusItem(R.drawable.user_hyper_avail_24, PresenceStatus.HyperAvailable, "HyperAvailable"),
-		new StatusItem(R.drawable.user_offline_24, PresenceStatus.Offline, "Offline"),
+		new StatusItem(R.drawable.user_online_24, NgnPresenceStatus.Online, NgnPresenceStatus.Online.toString()),
+		new StatusItem(R.drawable.user_busy_24, NgnPresenceStatus.Busy, "Busy"),
+		new StatusItem(R.drawable.user_back_24, NgnPresenceStatus.BeRightBack, "Be Right Back"),
+		new StatusItem(R.drawable.user_time_24, NgnPresenceStatus.Away, "Away"),
+		new StatusItem(R.drawable.user_onthephone_24, NgnPresenceStatus.OnThePhone, "On the phone"),
+		new StatusItem(R.drawable.user_hyper_avail_24, NgnPresenceStatus.HyperAvailable, "HyperAvailable"),
+		new StatusItem(R.drawable.user_offline_24, NgnPresenceStatus.Offline, "Offline"),
 	};
 	
-	private final IConfigurationService mConfigurationService;
-	private final ISipService mSipService;
+	private final INgnConfigurationService mConfigurationService;
+	private final INgnSipService mSipService;
 	
 	public ScreenPresence() {
 		super(SCREEN_TYPE.PRESENCE_T, ScreenPresence.class.getCanonicalName());
 		
-		mConfigurationService = ServiceManager.getConfigurationService();
-		mSipService = ServiceManager.getSipService();
+		mConfigurationService = getEngine().getConfigurationService();
+		mSipService = getEngine().getSipService();
 	}
 	
 	@Override
@@ -86,15 +84,15 @@ public class ScreenPresence  extends BaseScreen{
         
         mSpStatus.setAdapter(new ScreenOptionsAdapter(this));
         
-        mCbEnablePresence.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_PRESENCE, ConfigurationUtils.DEFAULT_RCS_USE_PRESENCE));
-        mCbEnableRLS.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_RLS, ConfigurationUtils.DEFAULT_RCS_USE_RLS));
-        mCbEnablePartialPub.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_PARTIAL_PUB, ConfigurationUtils.DEFAULT_RCS_USE_PARTIAL_PUB));
-        mEtFreeText.setText(mConfigurationService.getString(ConfigurationEntry.RCS_FREE_TEXT, ConfigurationUtils.DEFAULT_RCS_FREE_TEXT));
+        mCbEnablePresence.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_PRESENCE, NgnConfigurationEntry.DEFAULT_RCS_USE_PRESENCE));
+        mCbEnableRLS.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_RLS, NgnConfigurationEntry.DEFAULT_RCS_USE_RLS));
+        mCbEnablePartialPub.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_PARTIAL_PUB, NgnConfigurationEntry.DEFAULT_RCS_USE_PARTIAL_PUB));
+        mEtFreeText.setText(mConfigurationService.getString(NgnConfigurationEntry.RCS_FREE_TEXT, NgnConfigurationEntry.DEFAULT_RCS_FREE_TEXT));
         mRlPresence.setVisibility(mCbEnablePresence.isChecked()? View.VISIBLE : View.INVISIBLE);
         mSpStatus.setSelection(getSpinnerIndex(
-				Enum.valueOf(PresenceStatus.class, mConfigurationService.getString(
-						ConfigurationEntry.RCS_STATUS,
-						ConfigurationUtils.DEFAULT_RCS_STATUS.toString()))));
+				Enum.valueOf(NgnPresenceStatus.class, mConfigurationService.getString(
+						NgnConfigurationEntry.RCS_STATUS,
+						NgnConfigurationEntry.DEFAULT_RCS_STATUS.toString()))));
         
         // add local listeners
         mSpStatus.setOnItemSelectedListener(spStatus_OnItemSelectedListener);
@@ -117,13 +115,13 @@ public class ScreenPresence  extends BaseScreen{
 	@Override
 	protected void onPause() {
 		if(super.mComputeConfiguration){
-			final String oldFreeText = mConfigurationService.getString(ConfigurationEntry.RCS_FREE_TEXT, ConfigurationUtils.DEFAULT_RCS_FREE_TEXT);
+			final String oldFreeText = mConfigurationService.getString(NgnConfigurationEntry.RCS_FREE_TEXT, NgnConfigurationEntry.DEFAULT_RCS_FREE_TEXT);
 			final String newFreeText = mEtFreeText.getText().toString();
 			
-			mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_PRESENCE, mCbEnablePresence.isChecked());
-			mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_RLS, mCbEnableRLS.isChecked());
-			mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_PARTIAL_PUB, mCbEnablePartialPub.isChecked());
-			mConfigurationService.putString(ConfigurationEntry.RCS_FREE_TEXT, newFreeText);
+			mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_PRESENCE, mCbEnablePresence.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_RLS, mCbEnableRLS.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_PARTIAL_PUB, mCbEnablePartialPub.isChecked());
+			mConfigurationService.putString(NgnConfigurationEntry.RCS_FREE_TEXT, newFreeText);
 			
 			// publish if needed (Status is done below)
 			if(!oldFreeText.equals(newFreeText)){
@@ -159,7 +157,7 @@ public class ScreenPresence  extends BaseScreen{
 	
 	private OnItemSelectedListener spStatus_OnItemSelectedListener = new OnItemSelectedListener(){
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-			mConfigurationService.putString(ConfigurationEntry.RCS_STATUS, 
+			mConfigurationService.putString(NgnConfigurationEntry.RCS_STATUS, 
 					sSpinnerStatusItems[position].mStatus.toString());
 			// ServiceManager.getMainActivity().setStatus(ScreenPresence.sSpinnerStatusItems[position].mDrawableId);
 			if(mSipService.isRegistered()){
@@ -176,7 +174,7 @@ public class ScreenPresence  extends BaseScreen{
 		}
 	};
 	
-	public static int getStatusDrawableId(PresenceStatus status){
+	public static int getStatusDrawableId(NgnPresenceStatus status){
 		int i;
 		for(i = 0; i< sSpinnerStatusItems.length; i++){
 			if(sSpinnerStatusItems[i].mStatus == status){
@@ -186,7 +184,7 @@ public class ScreenPresence  extends BaseScreen{
 		return sSpinnerStatusItems[0].mDrawableId;
 	}
 	
-	private int getSpinnerIndex(PresenceStatus status){
+	private int getSpinnerIndex(NgnPresenceStatus status){
 		int i;
 		for(i = 0; i< sSpinnerStatusItems.length; i++){
 			if(sSpinnerStatusItems[i].mStatus == status){
@@ -201,10 +199,10 @@ public class ScreenPresence  extends BaseScreen{
 
 	static class StatusItem {
 		private final int mDrawableId;
-		private final PresenceStatus mStatus;
+		private final NgnPresenceStatus mStatus;
 		private final String mText;
 
-		private StatusItem(int drawableId, PresenceStatus status, String text) {
+		private StatusItem(int drawableId, NgnPresenceStatus status, String text) {
 			mDrawableId = drawableId;
 			mStatus = status;
 			mText = text;

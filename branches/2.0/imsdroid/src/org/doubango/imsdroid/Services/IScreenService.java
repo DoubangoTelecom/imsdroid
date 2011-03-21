@@ -2,10 +2,11 @@
 package org.doubango.imsdroid.Services;
 
 import org.doubango.imsdroid.Screens.IBaseScreen;
+import org.doubango.ngn.services.INgnBaseService;
 
 import android.app.Activity;
 
-public interface IScreenService extends IBaseService{
+public interface IScreenService extends INgnBaseService{
 	boolean back();
 	boolean bringToFront(int action, String[]... args);
 	boolean bringToFront(String[]... args);

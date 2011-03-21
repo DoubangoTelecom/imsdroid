@@ -28,6 +28,21 @@
     Addition copyright information: http://code.google.com/p/imsdroid/wiki/Copyrigths. \n
   </string>
   
+  <string name="string_answer">Answer</string>
+    <string name="string_endcall">End Call</string>
+    <string name="string_speaker_on">Speaker ON</string>
+    <string name="string_speaker_off">Speaker OFF</string>
+    <string name="string_hold">Hold</string>
+	<string name="string_resume">Resume</string>
+	<string name="string_send_video">Send Video</string>
+	<string name="string_stop_video">Stop Video</string>
+	<string name="string_switch_camera">Switch camera</string>
+  <string name="string_call_terminated">Call Terminated</string> 
+  <string name="string_incall">In Call</string> 
+  <string name="string_call_incoming">Incoming Call</string>
+  <string name="string_call_outgoing">Outgoing Call</string>
+  <string name="string_call_cancelled">Call cancelled</string> 
+  
     <!-- Colors -->
     <color name="color_black">#000000</color>
     <color name="color_white">#FFFFFF</color>
