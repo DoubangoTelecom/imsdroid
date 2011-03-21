@@ -1,7 +1,9 @@
 package org.doubango.imsdroid.Screens;
 
+import org.doubango.imsdroid.Engine;
+import org.doubango.imsdroid.NativeService;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -30,16 +32,17 @@ public class ScreenSplash extends BaseScreen {
 				final String action = intent.getAction();
 				Log.d(TAG, "onReceive()");
 				
-				if(ServiceManager.ACTION_STATE_EVENT.equals(action)){
+				if(NativeService.ACTION_STATE_EVENT.equals(action)){
 					if(intent.getBooleanExtra("started", false)){
-						ServiceManager.getScreenService().show(ScreenHome.class);
+						mScreenService.show(ScreenHome.class);
+						getEngine().getConfigurationService().putBoolean(NgnConfigurationEntry.GENERAL_AUTOSTART, true);
 						finish();
 					}
 				}
 			}
 		};
 		final IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(ServiceManager.ACTION_STATE_EVENT);
+		intentFilter.addAction(NativeService.ACTION_STATE_EVENT);
 	    registerReceiver(mBroadCastRecv, intentFilter);
 	}
 	
@@ -54,21 +57,18 @@ public class ScreenSplash extends BaseScreen {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		new Thread(new Runnable(){
+		final Engine engine = getEngine();
+			
+		final Thread thread = new Thread(new Runnable(){
 			@Override
 			public void run() {
-				if(!ServiceManager.isStarted()){
-					Log.d(TAG, "Try to start service manager");
-					ServiceManager.initialize();
-					ServiceManager.start();
-//					try {
-//						Thread.sleep(1000);
-//					} catch (InterruptedException e) {
-//						Log.e(TAG, e.toString());
-//					}
+				if(!engine.isStarted()){
+					Log.d(TAG, "Starts the engine from the splash screen");
+					engine.start();
 				}
 			}
-		}).start();
+		});
+		thread.setPriority(Thread.MAX_PRIORITY);
+		thread.start();
 	}
 }

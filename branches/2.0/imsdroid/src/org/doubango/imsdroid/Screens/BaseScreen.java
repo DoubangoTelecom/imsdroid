@@ -1,15 +1,16 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.CustomDialog;
+import org.doubango.imsdroid.Engine;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
 import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Utils.StringUtils;
+import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -63,35 +64,42 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 	protected ProgressDialog mProgressDialog;
 	protected Handler mHanler;
 	
+	protected final IScreenService mScreenService;
+
 	protected BaseScreen(SCREEN_TYPE type, String id) {
 		super();
 		mType = type;
 		mId = id;
+		mScreenService = ((Engine)Engine.getInstance()).getScreenService();
+	}
+
+	protected Engine getEngine(){
+		return (Engine)Engine.getInstance();
 	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
 		mHanler = new Handler();
 	}
 
-
 	@Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-    	if(!processKeyDown(keyCode, event)){
-    		return super.onKeyDown(keyCode, event);
-    	}
-    	return true;
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (!processKeyDown(keyCode, event)) {
+			return super.onKeyDown(keyCode, event);
+		}
+		return true;
 	}
-	
+
 	@Override
 	public String getId() {
 		return mId;
 	}
-	
+
 	@Override
-	public SCREEN_TYPE getType(){
+	public SCREEN_TYPE getType() {
 		return mType;
 	}
 
@@ -101,20 +109,20 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 	}
 
 	@Override
-	public boolean hasBack(){
+	public boolean hasBack() {
 		return false;
 	}
-	
+
 	@Override
-	public boolean back(){
-		return ServiceManager.getScreenService().back();
+	public boolean back() {
+		return mScreenService.back();
 	}
-	
+
 	@Override
 	public boolean createOptionsMenu(Menu menu) {
 		return false;
 	}
-	
+
 	protected void addConfigurationListener(RadioButton radioButton) {
 		radioButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton buttonView,
@@ -164,16 +172,17 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 
 	protected int getSpinnerIndex(String value, String[] values) {
 		for (int i = 0; i < values.length; i++) {
-			if (StringUtils.equals(value, values[i], true)) {
+			if (NgnStringUtils.equals(value, values[i], true)) {
 				return i;
 			}
 		}
 		return 0;
 	}
-	
-	protected void showInProgress(String text, boolean bIndeterminate, boolean bCancelable){
-		synchronized(this){
-			if(mProgressDialog == null){
+
+	protected void showInProgress(String text, boolean bIndeterminate,
+			boolean bCancelable) {
+		synchronized (this) {
+			if (mProgressDialog == null) {
 				mProgressDialog = new ProgressDialog(this);
 				mProgressDialog.setOnCancelListener(new OnCancelListener() {
 					@Override
@@ -188,17 +197,17 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 			}
 		}
 	}
-	
-	protected void cancelInProgress(){
-		synchronized(this){
-			if(mProgressDialog != null){
+
+	protected void cancelInProgress() {
+		synchronized (this) {
+			if (mProgressDialog != null) {
 				mProgressDialog.cancel();
 				mProgressDialog = null;
 			}
 		}
 	}
-	
-	protected void cancelInProgressOnUiThread(){
+
+	protected void cancelInProgressOnUiThread() {
 		mHanler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -206,8 +215,9 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 			}
 		});
 	}
-	
-	protected void showInProgressOnUiThread(final String text, final boolean bIndeterminate, final boolean bCancelable){
+
+	protected void showInProgressOnUiThread(final String text,
+			final boolean bIndeterminate, final boolean bCancelable) {
 		mHanler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -215,18 +225,17 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 			}
 		});
 	}
-	
-	protected void showMsgBox(String title, String message){
-		CustomDialog.show(this, R.drawable.icon, title, message, 
-				"OK", new DialogInterface.OnClickListener() {
+
+	protected void showMsgBox(String title, String message) {
+		CustomDialog.show(this, R.drawable.icon, title, message, "OK",
+				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 					}
-				}, 
-				null, null);
+				}, null, null);
 	}
-	
-	protected void showMsgBoxOnUiThread(final String title, final String message){
+
+	protected void showMsgBoxOnUiThread(final String title, final String message) {
 		mHanler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -234,35 +243,35 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 			}
 		});
 	}
-	
-	public static boolean processKeyDown(int keyCode, KeyEvent event){
-		final IScreenService screenService = ServiceManager.getScreenService();
+
+	public static boolean processKeyDown(int keyCode, KeyEvent event) {
+		final IScreenService screenService = ((Engine)Engine.getInstance()).getScreenService();
 		final IBaseScreen currentScreen = screenService.getCurrentScreen();
-		if(currentScreen != null){
-			if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && currentScreen.getType() != SCREEN_TYPE.HOME_T) {
-				if(currentScreen.hasBack()){
-					if(!currentScreen.back()){
+		if (currentScreen != null) {
+			if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0
+					&& currentScreen.getType() != SCREEN_TYPE.HOME_T) {
+				if (currentScreen.hasBack()) {
+					if (!currentScreen.back()) {
 						return false;
 					}
-				}
-				else {
+				} else {
 					screenService.back();
 				}
 				return true;
-			}
-			else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
-				if(currentScreen instanceof Activity && currentScreen.hasMenu()){
+			} else if (keyCode == KeyEvent.KEYCODE_MENU
+					&& event.getRepeatCount() == 0) {
+				if (currentScreen instanceof Activity
+						&& currentScreen.hasMenu()) {
 					return false;
-					//return ((Activity)currentScreen).onKeyDown(keyCode, event);
+					// return ((Activity)currentScreen).onKeyDown(keyCode,
+					// event);
 				}
-				/*if(!currentScreen.hasMenu()){
-					screenService.show(ScreenHome.class);
-					return true;
-				}
-				else if(currentScreen instanceof Activity){
-					return ((Activity)currentScreen).onKeyDown(keyCode, event);
-				}
-				*/
+				/*
+				 * if(!currentScreen.hasMenu()){
+				 * screenService.show(ScreenHome.class); return true; } else
+				 * if(currentScreen instanceof Activity){ return
+				 * ((Activity)currentScreen).onKeyDown(keyCode, event); }
+				 */
 				return true;
 			}
 		}

@@ -1,10 +1,8 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,7 +22,7 @@ import android.widget.Toast;
 public class ScreenSecurity extends BaseScreen {
 	private final static String TAG = ScreenSecurity.class.getCanonicalName();
 	
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	private final static int REQUEST_CODE_PRIV_KEY = 1234;
 	private final static int REQUEST_CODE_PUB_KEY = 12345;
@@ -48,7 +46,7 @@ public class ScreenSecurity extends BaseScreen {
 	public  ScreenSecurity() {
 		super(SCREEN_TYPE.SECURITY_T, TAG);
 		
-		mConfigurationService = ServiceManager.getConfigurationService();
+		mConfigurationService = getEngine().getConfigurationService();
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +67,8 @@ public class ScreenSecurity extends BaseScreen {
         mCbTlsSecAgree = (CheckBox)findViewById(R.id.screen_security_checkBox_tls_secagree);
         
         // load values from configuration file (do it before adding UI listeners)
-        mEtAMF.setText(mConfigurationService.getString(ConfigurationEntry.SECURITY_IMSAKA_AMF, ConfigurationUtils.DEFAULT_SECURITY_IMSAKA_AMF));
-        mEtOpId.setText(mConfigurationService.getString(ConfigurationEntry.SECURITY_IMSAKA_OPID, ConfigurationUtils.DEFAULT_SECURITY_IMSAKA_OPID));
+        mEtAMF.setText(mConfigurationService.getString(NgnConfigurationEntry.SECURITY_IMSAKA_AMF, NgnConfigurationEntry.DEFAULT_SECURITY_IMSAKA_AMF));
+        mEtOpId.setText(mConfigurationService.getString(NgnConfigurationEntry.SECURITY_IMSAKA_OPID, NgnConfigurationEntry.DEFAULT_SECURITY_IMSAKA_OPID));
         //mEtPrivKey.setText(mConfigurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PRIV_KEY_FILE, Configuration.DEFAULT_TLS_PRIV_KEY_FILE));
         //mEtPubKey.setText(mConfigurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PUB_KEY_FILE, Configuration.DEFAULT_TLS_PUB_KEY_FILE));
         //mEtCA.setText(mConfigurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_CA_FILE, Configuration.DEFAULT_TLS_CA_FILE));
@@ -91,8 +89,8 @@ public class ScreenSecurity extends BaseScreen {
 	protected void onPause() {
 		if(super.mComputeConfiguration){
 			
-			mConfigurationService.putString(ConfigurationEntry.SECURITY_IMSAKA_AMF, mEtAMF.getText().toString());
-			mConfigurationService.putString(ConfigurationEntry.SECURITY_IMSAKA_OPID, mEtOpId.getText().toString());
+			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_IMSAKA_AMF, mEtAMF.getText().toString());
+			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_IMSAKA_OPID, mEtOpId.getText().toString());
 			
 			//configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PRIV_KEY_FILE, etPrivKey.getText().toString());
 			//configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PUB_KEY_FILE, etPubKey.getText().toString());

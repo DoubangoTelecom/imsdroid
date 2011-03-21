@@ -1,7 +1,6 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
 
 import android.app.Activity;
 import android.content.Context;
@@ -36,7 +35,7 @@ public class ScreenSettings extends BaseScreen {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				final ScreenSettingsItem item = (ScreenSettingsItem)parent.getItemAtPosition(position);
 				if (item != null) {
-					ServiceManager.getScreenService().show(item.mClass, item.mClass.getCanonicalName());
+					mScreenService.show(item.mClass, item.mClass.getCanonicalName());
 				}
 			}
 		});

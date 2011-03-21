@@ -1,11 +1,10 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Media.MediaType;
-import org.doubango.imsdroid.Services.ISipService;
 import org.doubango.imsdroid.Utils.DialerUtils;
-import org.doubango.imsdroid.Utils.StringUtils;
+import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.services.INgnSipService;
+import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -20,12 +19,12 @@ public class ScreenTabDialer  extends BaseScreen {
 	
 	private EditText mEtNumber;
 	
-	private final ISipService mSipService;
+	private final INgnSipService mSipService;
 	
 	public ScreenTabDialer() {
 		super(SCREEN_TYPE.HOME_T, TAG);
 		
-		mSipService = ServiceManager.getSipService();
+		mSipService = getEngine().getSipService();
 	}
 
 	@Override
@@ -86,9 +85,9 @@ public class ScreenTabDialer  extends BaseScreen {
 			int tag = Integer.parseInt(v.getTag().toString());
 			final String number = mEtNumber.getText().toString();
 			if(tag == DialerUtils.TAG_CHAT){
-				if(mSipService.isRegistered() && !StringUtils.isNullOrEmpty(number)){
+				if(mSipService.isRegistered() && !NgnStringUtils.isNullOrEmpty(number)){
 					// ScreenChat.startChat(number);
-					mEtNumber.setText(StringUtils.emptyValue());
+					mEtNumber.setText(NgnStringUtils.emptyValue());
 				}
 			}
 			else if(tag == DialerUtils.TAG_DELETE){
@@ -101,9 +100,9 @@ public class ScreenTabDialer  extends BaseScreen {
 				}
 			}
 			else if(tag == DialerUtils.TAG_AUDIO_CALL){
-				if(mSipService.isRegistered() && !StringUtils.isNullOrEmpty(number)){
-					ScreenAV.makeCall(number, MediaType.Audio);
-					mEtNumber.setText(StringUtils.emptyValue());
+				if(mSipService.isRegistered() && !NgnStringUtils.isNullOrEmpty(number)){
+					ScreenAV.makeCall(number, NgnMediaType.Audio);
+					mEtNumber.setText(NgnStringUtils.emptyValue());
 				}
 			}
 			else{

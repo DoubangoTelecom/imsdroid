@@ -1,10 +1,8 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -22,13 +20,13 @@ public class ScreenMessaging  extends BaseScreen {
 	private CheckBox mCbMsrpOMFDR;
 	private CheckBox mCbMWI;
 	
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	
 	public ScreenMessaging() {
 		super(SCREEN_TYPE.MESSAGING_T, TAG);
 		
-		mConfigurationService = ServiceManager.getConfigurationService();
+		mConfigurationService = getEngine().getConfigurationService();
 	}
 	
 	@Override
@@ -46,13 +44,13 @@ public class ScreenMessaging  extends BaseScreen {
         mCbMWI = (CheckBox)findViewById(R.id.screen_messaging_checkBox_mwi);
         
         // load values from configuration file (do it before adding UI listeners)
-        mEtConferenceFactory.setText(mConfigurationService.getString(ConfigurationEntry.RCS_CONF_FACT, ConfigurationUtils.DEFAULT_RCS_CONF_FACT));
-        mEtSMSC.setText(mConfigurationService.getString(ConfigurationEntry.RCS_SMSC, ConfigurationUtils.DEFAULT_RCS_SMSC));
-        mCbBinarySMS.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_BINARY_SMS, ConfigurationUtils.DEFAULT_RCS_USE_BINARY_SMS));
-        mCbMsrpSuccessReports.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_MSRP_SUCCESS, ConfigurationUtils.DEFAULT_RCS_USE_MSRP_SUCCESS));
-        mCbMsrpFailureReports.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_MSRP_FAILURE, ConfigurationUtils.DEFAULT_RCS_USE_MSRP_FAILURE));
-        mCbMsrpOMFDR.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_OMAFDR, ConfigurationUtils.DEFAULT_RCS_USE_OMAFDR));
-        mCbMWI.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.RCS_USE_MWI, ConfigurationUtils.DEFAULT_RCS_USE_MWI));
+        mEtConferenceFactory.setText(mConfigurationService.getString(NgnConfigurationEntry.RCS_CONF_FACT, NgnConfigurationEntry.DEFAULT_RCS_CONF_FACT));
+        mEtSMSC.setText(mConfigurationService.getString(NgnConfigurationEntry.RCS_SMSC, NgnConfigurationEntry.DEFAULT_RCS_SMSC));
+        mCbBinarySMS.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_BINARY_SMS, NgnConfigurationEntry.DEFAULT_RCS_USE_BINARY_SMS));
+        mCbMsrpSuccessReports.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_MSRP_SUCCESS, NgnConfigurationEntry.DEFAULT_RCS_USE_MSRP_SUCCESS));
+        mCbMsrpFailureReports.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_MSRP_FAILURE, NgnConfigurationEntry.DEFAULT_RCS_USE_MSRP_FAILURE));
+        mCbMsrpOMFDR.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_OMAFDR, NgnConfigurationEntry.DEFAULT_RCS_USE_OMAFDR));
+        mCbMWI.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.RCS_USE_MWI, NgnConfigurationEntry.DEFAULT_RCS_USE_MWI));
         
         addConfigurationListener(mEtConferenceFactory);
         addConfigurationListener(mEtSMSC);
@@ -67,13 +65,13 @@ public class ScreenMessaging  extends BaseScreen {
 	protected void onPause() {
 		if(super.mComputeConfiguration){
 			
-			mConfigurationService.putString(ConfigurationEntry.RCS_CONF_FACT, mEtConferenceFactory.getText().toString());
-	        mConfigurationService.putString(ConfigurationEntry.RCS_SMSC, mEtSMSC.getText().toString());
-	        mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_BINARY_SMS, mCbBinarySMS.isChecked());
-	        mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_MSRP_SUCCESS, mCbMsrpSuccessReports.isChecked());
-	        mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_MSRP_FAILURE, mCbMsrpFailureReports.isChecked());
-	        mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_OMAFDR, mCbMsrpOMFDR.isChecked());
-	        mConfigurationService.putBoolean(ConfigurationEntry.RCS_USE_MWI, mCbMWI.isChecked());
+			mConfigurationService.putString(NgnConfigurationEntry.RCS_CONF_FACT, mEtConferenceFactory.getText().toString());
+	        mConfigurationService.putString(NgnConfigurationEntry.RCS_SMSC, mEtSMSC.getText().toString());
+	        mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_BINARY_SMS, mCbBinarySMS.isChecked());
+	        mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_MSRP_SUCCESS, mCbMsrpSuccessReports.isChecked());
+	        mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_MSRP_FAILURE, mCbMsrpFailureReports.isChecked());
+	        mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_OMAFDR, mCbMsrpOMFDR.isChecked());
+	        mConfigurationService.putBoolean(NgnConfigurationEntry.RCS_USE_MWI, mCbMWI.isChecked());
 	        
 			// Compute
 			if(!mConfigurationService.commit()){

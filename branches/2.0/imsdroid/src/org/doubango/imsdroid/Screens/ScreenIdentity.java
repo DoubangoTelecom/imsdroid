@@ -1,11 +1,9 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
-import org.doubango.imsdroid.Utils.StringUtils;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +12,7 @@ import android.widget.EditText;
 
 public class ScreenIdentity  extends BaseScreen {
 	private final static String TAG = ScreenIdentity.class.getCanonicalName();
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	private EditText mEtDisplayName;
 	private EditText mEtIMPU;
@@ -26,7 +24,7 @@ public class ScreenIdentity  extends BaseScreen {
 	public ScreenIdentity() {
 		super(SCREEN_TYPE.IDENTITY_T, TAG);
 		
-		mConfigurationService = ServiceManager.getConfigurationService();
+		mConfigurationService = getEngine().getConfigurationService();
 	}
 
 	
@@ -41,12 +39,12 @@ public class ScreenIdentity  extends BaseScreen {
         mEtRealm = (EditText)findViewById(R.id.screen_identity_editText_realm);
         mCbEarlyIMS = (CheckBox)findViewById(R.id.screen_identity_checkBox_earlyIMS);
         
-        mEtDisplayName.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_DISPLAY_NAME, ConfigurationUtils.DEFAULT_IDENTITY_DISPLAY_NAME));
-        mEtIMPU.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_IMPU, ConfigurationUtils.DEFAULT_IDENTITY_IMPU));
-        mEtIMPI.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_IMPI, ConfigurationUtils.DEFAULT_IDENTITY_IMPI));
-        mEtPassword.setText(mConfigurationService.getString(ConfigurationEntry.IDENTITY_PASSWORD, StringUtils.emptyValue()));
-        mEtRealm.setText(mConfigurationService.getString(ConfigurationEntry.NETWORK_REALM, ConfigurationUtils.DEFAULT_NETWORK_REALM));
-        mCbEarlyIMS.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NETWORK_USE_EARLY_IMS, ConfigurationUtils.DEFAULT_NETWORK_USE_EARLY_IMS));
+        mEtDisplayName.setText(mConfigurationService.getString(NgnConfigurationEntry.IDENTITY_DISPLAY_NAME, NgnConfigurationEntry.DEFAULT_IDENTITY_DISPLAY_NAME));
+        mEtIMPU.setText(mConfigurationService.getString(NgnConfigurationEntry.IDENTITY_IMPU, NgnConfigurationEntry.DEFAULT_IDENTITY_IMPU));
+        mEtIMPI.setText(mConfigurationService.getString(NgnConfigurationEntry.IDENTITY_IMPI, NgnConfigurationEntry.DEFAULT_IDENTITY_IMPI));
+        mEtPassword.setText(mConfigurationService.getString(NgnConfigurationEntry.IDENTITY_PASSWORD, NgnStringUtils.emptyValue()));
+        mEtRealm.setText(mConfigurationService.getString(NgnConfigurationEntry.NETWORK_REALM, NgnConfigurationEntry.DEFAULT_NETWORK_REALM));
+        mCbEarlyIMS.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NETWORK_USE_EARLY_IMS, NgnConfigurationEntry.DEFAULT_NETWORK_USE_EARLY_IMS));
         
         super.addConfigurationListener(mEtDisplayName);
         super.addConfigurationListener(mEtIMPU);
@@ -58,17 +56,17 @@ public class ScreenIdentity  extends BaseScreen {
 
 	protected void onPause() {
 		if(super.mComputeConfiguration){
-			mConfigurationService.putString(ConfigurationEntry.IDENTITY_DISPLAY_NAME, 
+			mConfigurationService.putString(NgnConfigurationEntry.IDENTITY_DISPLAY_NAME, 
 					mEtDisplayName.getText().toString().trim());
-			mConfigurationService.putString(ConfigurationEntry.IDENTITY_IMPU, 
+			mConfigurationService.putString(NgnConfigurationEntry.IDENTITY_IMPU, 
 					mEtIMPU.getText().toString().trim());
-			mConfigurationService.putString(ConfigurationEntry.IDENTITY_IMPI, 
+			mConfigurationService.putString(NgnConfigurationEntry.IDENTITY_IMPI, 
 					mEtIMPI.getText().toString().trim());
-			mConfigurationService.putString(ConfigurationEntry.IDENTITY_PASSWORD, 
+			mConfigurationService.putString(NgnConfigurationEntry.IDENTITY_PASSWORD, 
 					mEtPassword.getText().toString().trim());
-			mConfigurationService.putString(ConfigurationEntry.NETWORK_REALM, 
+			mConfigurationService.putString(NgnConfigurationEntry.NETWORK_REALM, 
 					mEtRealm.getText().toString().trim());
-			mConfigurationService.putBoolean(ConfigurationEntry.NETWORK_USE_EARLY_IMS, 
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NETWORK_USE_EARLY_IMS, 
 					mCbEarlyIMS.isChecked());
 			
 			// Compute

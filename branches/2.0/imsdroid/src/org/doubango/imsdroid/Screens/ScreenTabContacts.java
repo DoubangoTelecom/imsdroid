@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.doubango.imsdroid.Engine;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Media.MediaType;
-import org.doubango.imsdroid.Model.Contact;
 import org.doubango.imsdroid.QuickAction.ActionItem;
 import org.doubango.imsdroid.QuickAction.QuickAction;
-import org.doubango.imsdroid.Services.IContactService;
-import org.doubango.imsdroid.Services.ISipService;
-import org.doubango.imsdroid.Sip.MyAVSession;
-import org.doubango.imsdroid.Utils.GraphicsUtils;
-import org.doubango.imsdroid.Utils.ObservableList;
 import org.doubango.imsdroid.Utils.SeparatedListAdapter;
-import org.doubango.imsdroid.Utils.StringUtils;
+import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.model.NgnContact;
+import org.doubango.ngn.services.INgnContactService;
+import org.doubango.ngn.services.INgnSipService;
+import org.doubango.ngn.sip.NgnAVSession;
+import org.doubango.ngn.utils.NgnGraphicsUtils;
+import org.doubango.ngn.utils.NgnObservableList;
+import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -40,8 +40,8 @@ public class ScreenTabContacts extends BaseScreen {
 	private static String TAG = ScreenTabContacts.class.getCanonicalName();
 	  
 	@SuppressWarnings("unused")
-	private final IContactService mContactService;
-	private final ISipService mSipService;
+	private final INgnContactService mContactService;
+	private final INgnSipService mSipService;
 	private MySeparatedListAdapter mAdapter;
 	private ListView mListView;
 	
@@ -49,14 +49,14 @@ public class ScreenTabContacts extends BaseScreen {
 	private final ActionItem mAItemVideoCall;
 	private final ActionItem mAItemMessaging;
 	
-	private Contact mSelectedContact;
+	private NgnContact mSelectedContact;
 	private QuickAction mLasQuickAction;
 	
 	public ScreenTabContacts() {
 		super(SCREEN_TYPE.TAB_CONTACTS, TAG);
 		
-		mContactService = ServiceManager.getContactService();
-		mSipService = ServiceManager.getSipService();
+		mContactService = getEngine().getContactService();
+		mSipService = getEngine().getSipService();
 		
 		mAItemVoiceCall = new ActionItem();
 		mAItemVoiceCall.setTitle("Voice");
@@ -64,7 +64,7 @@ public class ScreenTabContacts extends BaseScreen {
 			@Override
 			public void onClick(View v) {
 				if(mSelectedContact != null){
-					ScreenAV.makeCall(mSelectedContact.getPrimaryNumber(), MediaType.Audio);
+					ScreenAV.makeCall(mSelectedContact.getPrimaryNumber(),NgnMediaType.Audio);
 					if(mLasQuickAction != null){
 						mLasQuickAction.dismiss();
 					}
@@ -78,7 +78,7 @@ public class ScreenTabContacts extends BaseScreen {
 			@Override
 			public void onClick(View v) {
 				if(mSelectedContact != null){
-					ScreenAV.makeCall(mSelectedContact.getPrimaryNumber(), MediaType.AudioVideo);
+					ScreenAV.makeCall(mSelectedContact.getPrimaryNumber(), NgnMediaType.AudioVideo);
 					if(mLasQuickAction != null){
 						mLasQuickAction.dismiss();
 					}
@@ -116,11 +116,11 @@ public class ScreenTabContacts extends BaseScreen {
 	
 	private final OnItemClickListener mOnItemListViewClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			mSelectedContact = (Contact)parent.getItemAtPosition(position);
+			mSelectedContact = (NgnContact)parent.getItemAtPosition(position);
 			if(mSelectedContact != null){
 				mLasQuickAction = new QuickAction(view);
-				if(!StringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
-					if(!MyAVSession.hasActiveSession()){
+				if(!NgnStringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
+					if(!NgnAVSession.hasActiveSession()){
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
 						// mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
@@ -139,11 +139,11 @@ public class ScreenTabContacts extends BaseScreen {
 				return true;
 			}
 			
-			mSelectedContact = (Contact)parent.getItemAtPosition(position);
+			mSelectedContact = (NgnContact)parent.getItemAtPosition(position);
 			if(mSelectedContact != null){
 				mLasQuickAction = new QuickAction(view);
-				if(!StringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
-					if(!MyAVSession.hasActiveSession()){
+				if(!NgnStringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
+					if(!NgnAVSession.hasActiveSession()){
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
 						// mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
@@ -163,7 +163,7 @@ public class ScreenTabContacts extends BaseScreen {
 		private final LayoutInflater mInflater;
 		private final Context mContext;
 		private final Handler mHandler;
-		private final ObservableList<Contact> mContacts;
+		private final NgnObservableList<NgnContact> mContacts;
 		
 		
 		private MySeparatedListAdapter(Context context){
@@ -171,7 +171,7 @@ public class ScreenTabContacts extends BaseScreen {
 			mContext = context;
 			mHandler = new Handler();
 			mInflater = LayoutInflater.from(mContext);
-			mContacts = ServiceManager.getContactService().getObservableContacts();
+			mContacts = Engine.getInstance().getContactService().getObservableContacts();
 			mContacts.addObserver(this);
 			
 			updateSections();
@@ -180,20 +180,20 @@ public class ScreenTabContacts extends BaseScreen {
 		
 		@Override
 		protected void finalize() throws Throwable {
-			ServiceManager.getContactService().getObservableContacts().deleteObserver(this);
+			Engine.getInstance().getContactService().getObservableContacts().deleteObserver(this);
 			super.finalize();
 		}
 		
 		private void updateSections(){
 			clearSections();
 			synchronized(mContacts){
-				List<Contact> contacts = mContacts.getList();
+				List<NgnContact> contacts = mContacts.getList();
 				String lastGroup = "$", displayName;
 				ScreenTabContactsAdapter lastAdapter = null;
 				
-				for(Contact contact : contacts){
+				for(NgnContact contact : contacts){
 					displayName = contact.getDisplayName();
-					if(StringUtils.isNullOrEmpty(displayName)){
+					if(NgnStringUtils.isNullOrEmpty(displayName)){
 						continue;
 					}
 					final String group = displayName.substring(0, 1).toUpperCase();
@@ -245,7 +245,7 @@ public class ScreenTabContacts extends BaseScreen {
 		private final LayoutInflater mInflater;
 		
 		private final Context mContext;
-		private List<Contact> mContacts;
+		private List<NgnContact> mContacts;
 		private final String mSectionText;
 		
 		private ScreenTabContactsAdapter(Context context, String sectionText) {
@@ -258,9 +258,9 @@ public class ScreenTabContacts extends BaseScreen {
 			return mSectionText;
 		}
 		
-		public void addContact(Contact contact){
+		public void addContact(NgnContact contact){
 			if(mContacts == null){
-				mContacts = new ArrayList<Contact>();
+				mContacts = new ArrayList<NgnContact>();
 			}
 			mContacts.add(contact);
 		}
@@ -290,7 +290,7 @@ public class ScreenTabContacts extends BaseScreen {
 			if (view == null) {
 				view = mInflater.inflate(R.layout.screen_tab_contacts_contact_item, null);
 			}
-			final Contact contact = (Contact)getItem(position);
+			final NgnContact contact = (NgnContact)getItem(position);
 			
 			if(contact != null){
 				final ImageView ivAvatar = (ImageView) view.findViewById(R.id.screen_tab_contacts_item_imageView_avatar);
@@ -302,7 +302,7 @@ public class ScreenTabContacts extends BaseScreen {
 						ivAvatar.setImageResource(R.drawable.avatar_48);
 					}
 					else{
-						ivAvatar.setImageBitmap(GraphicsUtils.getResizedBitmap(avatar, GraphicsUtils.getSizeInPixel(48), GraphicsUtils.getSizeInPixel(48)));
+						ivAvatar.setImageBitmap(NgnGraphicsUtils.getResizedBitmap(avatar, NgnGraphicsUtils.getSizeInPixel(48), NgnGraphicsUtils.getSizeInPixel(48)));
 					}
 				}
 			}

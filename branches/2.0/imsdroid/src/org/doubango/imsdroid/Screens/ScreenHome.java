@@ -1,14 +1,12 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.CustomDialog;
+import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Events.EventArgs;
-import org.doubango.imsdroid.Events.RegistrationEventArgs;
-import org.doubango.imsdroid.Services.IScreenService;
-import org.doubango.imsdroid.Services.ISipService;
-import org.doubango.imsdroid.Services.Impl.SipService;
-import org.doubango.imsdroid.Sip.MySipSession.ConnectionState;
+import org.doubango.ngn.events.NgnEventArgs;
+import org.doubango.ngn.events.NgnRegistrationEventArgs;
+import org.doubango.ngn.services.INgnSipService;
+import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -39,16 +37,14 @@ public class ScreenHome extends BaseScreen {
 	
 	private GridView mGridView;
 	
-	private final ISipService mSipService;
-	private final IScreenService mScreenService;
+	private final INgnSipService mSipService;
 	
 	private BroadcastReceiver mSipBroadCastRecv;
 	
 	public ScreenHome() {
 		super(SCREEN_TYPE.HOME_T, TAG);
 		
-		mSipService = ServiceManager.getSipService();
-		mScreenService = ServiceManager.getScreenService();
+		mSipService = getEngine().getSipService();
 	}
 	
 	@Override
@@ -70,7 +66,7 @@ public class ScreenHome extends BaseScreen {
 							mSipService.unRegister();
 						}
 						else{
-							mSipService.register();
+							mSipService.register(ScreenHome.this);
 						}
 					}
 					else if(position == ScreenHomeItem.ITEM_EXIT_POS){
@@ -83,7 +79,7 @@ public class ScreenHome extends BaseScreen {
 								new DialogInterface.OnClickListener() {
 									@Override
 									public void onClick(DialogInterface dialog, int which) {
-										ServiceManager.getMainActivity().exit();
+										((Main)(getEngine().getMainActivity())).exit();
 									}
 								}, "No",
 								new DialogInterface.OnClickListener() {
@@ -106,8 +102,8 @@ public class ScreenHome extends BaseScreen {
 				final String action = intent.getAction();
 				
 				// Registration Event
-				if(SipService.ACTION_REGISTRATION_EVENT.equals(action)){
-					RegistrationEventArgs args = intent.getParcelableExtra(EventArgs.EXTRA_NAME);
+				if(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT.equals(action)){
+					NgnRegistrationEventArgs args = intent.getParcelableExtra(NgnEventArgs.EXTRA_EMBEDDED);
 					if(args == null){
 						Log.e(TAG, "Invalid event args");
 						return;
@@ -127,7 +123,7 @@ public class ScreenHome extends BaseScreen {
 			}
 		};
 		final IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(SipService.ACTION_REGISTRATION_EVENT);
+		intentFilter.addAction(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT);
 	    registerReceiver(mSipBroadCastRecv, intentFilter);
 	}
 
@@ -158,10 +154,10 @@ public class ScreenHome extends BaseScreen {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
 			case ScreenHome.MENU_EXIT:
-				ServiceManager.getMainActivity().exit();
+				((Main)getEngine().getMainActivity()).exit();
 				break;
 			case ScreenHome.MENU_SETTINGS:
-				ServiceManager.getScreenService().show(ScreenSettings.class);
+				mScreenService.show(ScreenSettings.class);
 				break;
 		}
 		return true;

@@ -1,23 +1,25 @@
 
 package org.doubango.imsdroid.Services.Impl;
 
+import org.doubango.imsdroid.Engine;
 import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
 import org.doubango.imsdroid.Screens.IBaseScreen;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Services.IScreenService;
+import org.doubango.ngn.services.impl.NgnBaseService;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.LinearLayout;
 
-public class ScreenService extends BaseService implements IScreenService {
-private final static String TAG = ScreenService.class.getCanonicalName();
+public class ScreenService extends NgnBaseService implements IScreenService {
+	private final static String TAG = ScreenService.class.getCanonicalName();
 	
 	private int mLastScreensIndex = -1; // ring cursor
 	private final String[] mLastScreens =  new String[]{ // ring
@@ -97,7 +99,7 @@ private final static String TAG = ScreenService.class.getCanonicalName();
 
 	@Override
 	public boolean show(Class<? extends Activity> cls, String id) {
-		final Main mainActivity = ServiceManager.getMainActivity();
+		final Main mainActivity = (Main)Engine.getInstance().getMainActivity();
 		
 		String screen_id = (id == null) ? cls.getCanonicalName() : id;
 		Intent intent = new Intent(mainActivity, cls);
@@ -108,7 +110,7 @@ private final static String TAG = ScreenService.class.getCanonicalName();
 			
 			LinearLayout layout = (LinearLayout) mainActivity.findViewById(R.id.main_linearLayout_principal);
 			layout.removeAllViews();
-			layout.addView(view);
+			layout.addView(view, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 			
 			// add to stack
 			this.mLastScreens[(++this.mLastScreensIndex % this.mLastScreens.length)] = screen_id;
@@ -125,7 +127,7 @@ private final static String TAG = ScreenService.class.getCanonicalName();
 
 	@Override
 	public boolean show(String id) {
-		final  Activity screen = (Activity)ServiceManager.getMainActivity().getLocalActivityManager().getActivity(id);
+		final  Activity screen = (Activity)((Main)Engine.getInstance().getMainActivity()).getLocalActivityManager().getActivity(id);
 		if (screen == null) {
 			Log.e(TAG, String.format(
 					"Failed to retrieve the Screen with id=%s", id));
@@ -137,8 +139,8 @@ private final static String TAG = ScreenService.class.getCanonicalName();
 
 	@Override
 	public void runOnUiThread(Runnable r) {
-		if(ServiceManager.getMainActivity() != null){
-			ServiceManager.getMainActivity().runOnUiThread(r);
+		if(Engine.getInstance().getMainActivity() != null){
+			Engine.getInstance().getMainActivity().runOnUiThread(r);
 		}
 		else{
 			Log.e(this.getClass().getCanonicalName(), "No Main activity");
@@ -147,7 +149,7 @@ private final static String TAG = ScreenService.class.getCanonicalName();
 
 	@Override
 	public boolean destroy(String id) {
-		return (ServiceManager.getMainActivity().getLocalActivityManager().destroyActivity(id, true) != null);
+		return (((Main)Engine.getInstance().getMainActivity()).getLocalActivityManager().destroyActivity(id, true) != null);
 	}
 
 	@Override
@@ -156,11 +158,11 @@ private final static String TAG = ScreenService.class.getCanonicalName();
 
 	@Override
 	public IBaseScreen getCurrentScreen() {
-		return (IBaseScreen)ServiceManager.getMainActivity().getLocalActivityManager().getCurrentActivity();
+		return (IBaseScreen)((Main)Engine.getInstance().getMainActivity()).getLocalActivityManager().getCurrentActivity();
 	}
 
 	@Override
 	public IBaseScreen getScreen(String id) {
-		return (IBaseScreen)ServiceManager.getMainActivity().getLocalActivityManager().getActivity(id);
+		return (IBaseScreen)((Main)Engine.getInstance().getMainActivity()).getLocalActivityManager().getActivity(id);
 	}
 }

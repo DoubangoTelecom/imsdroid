@@ -1,10 +1,8 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -29,12 +27,12 @@ public class ScreenNatt extends BaseScreen {
 	private EditText mEtStunServer;
 	private EditText mEtStunPort;
 	
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	public  ScreenNatt() {
 		super(SCREEN_TYPE.NATT_T, TAG);
 		
-		mConfigurationService = ServiceManager.getConfigurationService();
+		mConfigurationService = getEngine().getConfigurationService();
 	}
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +51,12 @@ public class ScreenNatt extends BaseScreen {
         mEtStunPort = (EditText)findViewById(R.id.screen_natt_editText_stun_port);
         
         // load values from configuration file (do it before adding UI listeners)
-        mCbHackAoR.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NATT_HACK_AOR, ConfigurationUtils.DEFAULT_NATT_HACK_AOR));
-        mCbEnableStun.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NATT_USE_STUN, ConfigurationUtils.DEFAULT_NATT_USE_STUN));
-        mCbEnableIce.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NATT_USE_ICE, ConfigurationUtils.DEFAULT_NATT_USE_ICE));
-        mRbDiscoStun.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.NATT_STUN_DISCO, ConfigurationUtils.DEFAULT_NATT_STUN_DISCO));
-        mEtStunServer.setText(mConfigurationService.getString(ConfigurationEntry.NATT_STUN_SERVER, ConfigurationUtils.DEFAULT_NATT_STUN_SERVER));
-        mEtStunPort.setText(mConfigurationService.getString(ConfigurationEntry.NATT_STUN_PORT, Integer.toString(ConfigurationUtils.DEFAULT_NATT_STUN_PORT)));
+        mCbHackAoR.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NATT_HACK_AOR, NgnConfigurationEntry.DEFAULT_NATT_HACK_AOR));
+        mCbEnableStun.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NATT_USE_STUN, NgnConfigurationEntry.DEFAULT_NATT_USE_STUN));
+        mCbEnableIce.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NATT_USE_ICE, NgnConfigurationEntry.DEFAULT_NATT_USE_ICE));
+        mRbDiscoStun.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.NATT_STUN_DISCO, NgnConfigurationEntry.DEFAULT_NATT_STUN_DISCO));
+        mEtStunServer.setText(mConfigurationService.getString(NgnConfigurationEntry.NATT_STUN_SERVER, NgnConfigurationEntry.DEFAULT_NATT_STUN_SERVER));
+        mEtStunPort.setText(mConfigurationService.getString(NgnConfigurationEntry.NATT_STUN_PORT, Integer.toString(NgnConfigurationEntry.DEFAULT_NATT_STUN_PORT)));
         
         mRlEnableStun.setVisibility(mCbEnableStun.isChecked() ? View.VISIBLE : View.INVISIBLE);
         mRlStunServer.setVisibility(mRbSetStun.isChecked() ? View.VISIBLE : View.INVISIBLE);
@@ -80,12 +78,12 @@ public class ScreenNatt extends BaseScreen {
 	protected void onPause() {
 		if(super.mComputeConfiguration){
 			
-			mConfigurationService.putBoolean(ConfigurationEntry.NATT_HACK_AOR, mCbHackAoR.isChecked());
-			mConfigurationService.putBoolean(ConfigurationEntry.NATT_USE_STUN, mCbEnableStun.isChecked());
-			mConfigurationService.putBoolean(ConfigurationEntry.NATT_USE_ICE, mCbEnableIce.isChecked());
-			mConfigurationService.putBoolean(ConfigurationEntry.NATT_STUN_DISCO, mRbDiscoStun.isChecked());
-			mConfigurationService.putString(ConfigurationEntry.NATT_STUN_SERVER, mEtStunServer.getText().toString());
-			mConfigurationService.putString(ConfigurationEntry.NATT_STUN_PORT, mEtStunPort.getText().toString());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NATT_HACK_AOR, mCbHackAoR.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NATT_USE_STUN, mCbEnableStun.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NATT_USE_ICE, mCbEnableIce.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.NATT_STUN_DISCO, mRbDiscoStun.isChecked());
+			mConfigurationService.putString(NgnConfigurationEntry.NATT_STUN_SERVER, mEtStunServer.getText().toString());
+			mConfigurationService.putString(NgnConfigurationEntry.NATT_STUN_PORT, mEtStunPort.getText().toString());
 	        
 			// Compute
 			if(!mConfigurationService.commit()){

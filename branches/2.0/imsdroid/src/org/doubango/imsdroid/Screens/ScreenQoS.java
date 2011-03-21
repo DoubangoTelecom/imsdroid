@@ -1,10 +1,8 @@
 package org.doubango.imsdroid.Screens;
 
 import org.doubango.imsdroid.R;
-import org.doubango.imsdroid.ServiceManager;
-import org.doubango.imsdroid.Services.IConfigurationService;
-import org.doubango.imsdroid.Utils.ConfigurationUtils;
-import org.doubango.imsdroid.Utils.ConfigurationUtils.ConfigurationEntry;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 
@@ -30,7 +28,7 @@ public class ScreenQoS  extends BaseScreen {
 	private Spinner mSpPrecondType;
 	private Spinner mSpPrecondBandwidth;
 	
-	private final static String[] sSpinnerRefresherItems = new String[] {ConfigurationUtils.DEFAULT_QOS_REFRESHER, "uas", "uac"};
+	private final static String[] sSpinnerRefresherItems = new String[] {NgnConfigurationEntry.DEFAULT_QOS_REFRESHER, "uas", "uac"};
 	private final static ScreenQoSStrength[] sSpinnerPrecondStrengthItems = new ScreenQoSStrength[] {
 			new ScreenQoSStrength(tmedia_qos_strength_t.tmedia_qos_strength_none, "None"),
 			new ScreenQoSStrength(tmedia_qos_strength_t.tmedia_qos_strength_optional, "Optional"),
@@ -41,15 +39,15 @@ public class ScreenQoS  extends BaseScreen {
 		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_segmented, "Segmented"),
 		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_e2e, "End2End")
 		};
-	private final static String[] sSpinnerPrecondBandwidthItems = new String[] {ConfigurationUtils.DEFAULT_QOS_PRECOND_BANDWIDTH, "Medium", "High"};
+	private final static String[] sSpinnerPrecondBandwidthItems = new String[] {NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH, "Medium", "High"};
 	
-	private final IConfigurationService mConfigurationService;
+	private final INgnConfigurationService mConfigurationService;
 	
 	public ScreenQoS() {
 		super(SCREEN_TYPE.QOS_T, TAG);
 
 		// Services
-		mConfigurationService = ServiceManager.getConfigurationService();
+		mConfigurationService = getEngine().getConfigurationService();
 	}
 	
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,24 +81,24 @@ public class ScreenQoS  extends BaseScreen {
         mSpPrecondBandwidth.setAdapter(adapter);
         
         // load values from configuration file (Do it before adding UI listeners)
-        mCbEnableSessionTimers.setChecked(mConfigurationService.getBoolean(ConfigurationEntry.QOS_USE_SESSION_TIMERS, ConfigurationUtils.DEFAULT_QOS_USE_SESSION_TIMERS));
-        mEtSessionTimeOut.setText(mConfigurationService.getString(ConfigurationEntry.QOS_SIP_CALLS_TIMEOUT, Integer.toString(ConfigurationUtils.DEFAULT_QOS_SIP_CALLS_TIMEOUT)));
+        mCbEnableSessionTimers.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.QOS_USE_SESSION_TIMERS, NgnConfigurationEntry.DEFAULT_QOS_USE_SESSION_TIMERS));
+        mEtSessionTimeOut.setText(mConfigurationService.getString(NgnConfigurationEntry.QOS_SIP_CALLS_TIMEOUT, Integer.toString(NgnConfigurationEntry.DEFAULT_QOS_SIP_CALLS_TIMEOUT)));
 		mSpRefresher.setSelection(getSpinnerIndex(
-				mConfigurationService.getString(ConfigurationEntry.QOS_REFRESHER,
+				mConfigurationService.getString(NgnConfigurationEntry.QOS_REFRESHER,
 						sSpinnerRefresherItems[0]),
 						sSpinnerRefresherItems));
 		
 		mSpPrecondStrength.setSelection(ScreenQoSStrength.getSpinnerIndex(tmedia_qos_strength_t.valueOf(mConfigurationService.getString(
-				ConfigurationEntry.QOS_PRECOND_STRENGTH,
-				ConfigurationUtils.DEFAULT_QOS_PRECOND_STRENGTH))));
+				NgnConfigurationEntry.QOS_PRECOND_STRENGTH,
+				NgnConfigurationEntry.DEFAULT_QOS_PRECOND_STRENGTH))));
 		
 		
 		mSpPrecondType.setSelection(ScreenQoSType.getSpinnerIndex(tmedia_qos_stype_t.valueOf(mConfigurationService.getString(
-						ConfigurationEntry.QOS_PRECOND_TYPE,
-						ConfigurationUtils.DEFAULT_QOS_PRECOND_TYPE))));
+				NgnConfigurationEntry.QOS_PRECOND_TYPE,
+				NgnConfigurationEntry.DEFAULT_QOS_PRECOND_TYPE))));
 		
 		mSpPrecondBandwidth.setSelection(getSpinnerIndex(
-				mConfigurationService.getString(ConfigurationEntry.QOS_PRECOND_BANDWIDTH,
+				mConfigurationService.getString(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH,
 						sSpinnerPrecondBandwidthItems[0]),
 						sSpinnerPrecondBandwidthItems));
 		
@@ -121,17 +119,17 @@ public class ScreenQoS  extends BaseScreen {
 	protected void onPause() {
 		if(super.mComputeConfiguration){
 			
-			mConfigurationService.putBoolean(ConfigurationEntry.QOS_USE_SESSION_TIMERS,
+			mConfigurationService.putBoolean(NgnConfigurationEntry.QOS_USE_SESSION_TIMERS,
 					mCbEnableSessionTimers.isChecked());
-			mConfigurationService.putString(ConfigurationEntry.QOS_SIP_CALLS_TIMEOUT,
+			mConfigurationService.putString(NgnConfigurationEntry.QOS_SIP_CALLS_TIMEOUT,
 					mEtSessionTimeOut.getText().toString());
-			mConfigurationService.putString(ConfigurationEntry.QOS_REFRESHER, 
+			mConfigurationService.putString(NgnConfigurationEntry.QOS_REFRESHER, 
 					sSpinnerRefresherItems[mSpRefresher.getSelectedItemPosition()]);
-			mConfigurationService.putString(ConfigurationEntry.QOS_PRECOND_STRENGTH, 
+			mConfigurationService.putString(NgnConfigurationEntry.QOS_PRECOND_STRENGTH, 
 					sSpinnerPrecondStrengthItems[mSpPrecondStrength.getSelectedItemPosition()].mStrength.toString());
-			mConfigurationService.putString(ConfigurationEntry.QOS_PRECOND_TYPE, 
+			mConfigurationService.putString(NgnConfigurationEntry.QOS_PRECOND_TYPE, 
 					sSpinnerPrecondTypeItems[mSpPrecondType.getSelectedItemPosition()].mType.toString());
-			mConfigurationService.putString(ConfigurationEntry.QOS_PRECOND_BANDWIDTH, 
+			mConfigurationService.putString(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH, 
 					sSpinnerPrecondBandwidthItems[mSpPrecondBandwidth.getSelectedItemPosition()]);
 			
 			// Compute

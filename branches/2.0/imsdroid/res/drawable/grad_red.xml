@@ -7,9 +7,9 @@
    	 	android:layout_height="fill_parent"
     	android:layout_width="fill_parent"
     
-        android:startColor="#BE0202"
-        android:endColor="#7F2308"
+        android:startColor="#CC0000"
+        android:endColor="#852007"
         android:angle="90"/>
         
-        <corners android:radius="10dp" />
+        <!-- corners android:radius="10dp" /-->
 </shape>

@@ -2,14 +2,13 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="fill_parent"
     android:layout_width="fill_parent"
-    android:shape="rectangle">
+    android:shape="oval">
     <gradient
    	 	android:layout_height="fill_parent"
     	android:layout_width="fill_parent"
     
-        android:startColor="#9C0301"
-        android:endColor="#6B1A06"
+        android:startColor="#FF0000"
+        android:centerColor="#FF0000"
+        android:endColor="#FFFFFF"
         android:angle="90"/>
-        
-        <!-- corners android:radius="10dp" /-->
 </shape>
