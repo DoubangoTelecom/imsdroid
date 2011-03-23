@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <TextView android:layout_height="wrap_content" android:id="@+id/textViewInfo" android:layout_margin="2px" android:layout_width="fill_parent" android:gravity="center" android:text="You are signed out!"></TextView>
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:weightSum="4" android:layout_margin="2px">
+        <TextView android:layout_height="wrap_content" android:id="@+id/textViewPublicIdentity" android:text="Public Identity:" android:layout_marginRight="4px" android:layout_width="wrap_content"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/editTextPublicIdentity" android:layout_width="wrap_content" android:layout_weight="4" android:text="sip:101@doubango.org"></EditText>
+    </LinearLayout>
+    
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:weightSum="4" android:layout_margin="2px">
+        <TextView android:layout_height="wrap_content" android:id="@+id/textViewPrivateIdentity" android:text="Private Identity:" android:layout_marginRight="4px" android:layout_width="wrap_content"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/editTextPrivateIdentity" android:layout_width="wrap_content" android:layout_weight="4" android:text="101"></EditText>
+    </LinearLayout>
+    
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:weightSum="4" android:layout_margin="2px">
+        <TextView android:layout_height="wrap_content" android:id="@+id/textViewPassword" android:text="Password:" android:layout_marginRight="4px" android:layout_width="wrap_content"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/editTextPassword" android:layout_width="wrap_content" android:layout_weight="4" android:text="my secret"></EditText>
+    </LinearLayout>
+    
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:weightSum="4" android:layout_margin="2px">
+        <TextView android:layout_height="wrap_content" android:id="@+id/textViewRealm" android:text="Realm:" android:layout_marginRight="4px" android:layout_width="wrap_content"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/editTextRealm" android:layout_width="wrap_content" android:layout_weight="4" android:text="doubango.org"></EditText>
+    </LinearLayout>
+    
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:weightSum="4" android:layout_margin="2px">
+        <TextView android:layout_height="wrap_content" android:id="@+id/textViewProxyHost" android:layout_marginRight="4px" android:layout_width="wrap_content" android:text="Proxy Host"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/editTextProxyHost" android:layout_width="wrap_content" android:layout_weight="4" android:text="10.139.224.173"></EditText>
+    </LinearLayout>
+    
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:weightSum="4" android:layout_margin="2px">
+        <TextView android:layout_height="wrap_content" android:id="@+id/textViewProxyPort" android:layout_marginRight="4px" android:layout_width="wrap_content" android:text="Proxy Port"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/editTextProxyPort" android:layout_width="wrap_content" android:layout_weight="4" android:inputType="number" android:text="5060"></EditText>
+    </LinearLayout>
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sign In" android:id="@+id/buttonSignInOut" android:gravity="center" android:layout_gravity="center"></Button>
+    
+</LinearLayout>
