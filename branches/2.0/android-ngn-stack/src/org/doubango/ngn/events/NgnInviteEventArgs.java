@@ -3,6 +3,9 @@ package org.doubango.ngn.events;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Event argument for SIP INVITE sessions
+ */
 public class NgnInviteEventArgs extends NgnEventArgs{
 	private final static String TAG = NgnInviteEventArgs.class.getCanonicalName();
 	private long mSessionId;

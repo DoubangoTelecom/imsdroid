@@ -20,6 +20,14 @@ import android.os.Looper;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.util.Log;
 
+/**@page NgnContactService_page Contact Service
+ * The Contact service is used to retrieve contacts from the native address book.
+ * 
+ */
+
+/**
+ * Service used to retrieve contacts from the native address book.
+ */
 public class NgnContactService  extends NgnBaseService implements INgnContactService{
 	private final static String TAG = NgnContactService.class.getCanonicalName();
 	

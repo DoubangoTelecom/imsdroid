@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+/**
+ * Android native service running in the background. This service is started but the engine.
+ */
 public class NgnNativeService extends Service {
 	private final static String TAG = NgnNativeService.class.getCanonicalName();
 	

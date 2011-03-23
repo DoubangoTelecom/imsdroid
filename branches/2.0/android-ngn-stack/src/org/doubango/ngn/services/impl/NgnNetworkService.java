@@ -37,6 +37,13 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+/**@page NgnNetworkService_page Network Service
+ * The network service is used to manage both WiFi and 3g/4g network connections.
+ */
+
+/**
+ * Network service.
+ */
 public class NgnNetworkService  extends NgnBaseService implements INgnNetworkService {
 	private static final String TAG = NgnNetworkService.class.getCanonicalName();
 	

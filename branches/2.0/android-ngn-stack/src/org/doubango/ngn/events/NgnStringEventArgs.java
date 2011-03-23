@@ -3,6 +3,9 @@ package org.doubango.ngn.events;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Generic event argument containing short string
+ */
 public class NgnStringEventArgs extends NgnEventArgs {
 	private String mValue;
 	

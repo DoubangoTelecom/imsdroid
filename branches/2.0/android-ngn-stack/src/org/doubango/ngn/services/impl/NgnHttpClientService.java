@@ -15,6 +15,13 @@ import org.doubango.ngn.services.INgnHttpClientService;
 
 import android.util.Log;
 
+/**@page NgnHttpClientService_page HTTP/HTTPS Service
+ * The HTTP/HTTPS service is used to send and retrieve data to/from remote server using HTTP/HTTPS protocol.
+ */
+
+/**
+ * HTTP/HTTPS service.
+ */
 public class NgnHttpClientService extends NgnBaseService implements INgnHttpClientService{
 	private static final String TAG = NgnHttpClientService.class.getCanonicalName();
 	

@@ -2,6 +2,9 @@ package org.doubango.ngn.events;
 
 import android.os.Parcel;
 
+/**
+ * Event argument associated to the stack
+ */
 public class NgnStackEventArgs extends NgnEventArgs{
 	private final static String TAG = NgnStackEventArgs.class.getCanonicalName();
 	

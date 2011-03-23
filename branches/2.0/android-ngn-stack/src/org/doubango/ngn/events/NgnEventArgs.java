@@ -3,7 +3,9 @@ package org.doubango.ngn.events;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
+/**
+ * Base class for all events
+ */
 public abstract class NgnEventArgs implements Parcelable {
 	public static final String EXTRA_EMBEDDED = "EXTRA_" + NgnEventArgs.class.getCanonicalName();
 	

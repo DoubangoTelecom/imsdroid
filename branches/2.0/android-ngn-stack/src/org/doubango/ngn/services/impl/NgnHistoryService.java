@@ -15,6 +15,7 @@ import org.simpleframework.xml.core.Persister;
 
 import android.util.Log;
 
+
 public class NgnHistoryService extends NgnBaseService implements INgnHistoryService {
 	private final static String TAG = NgnHistoryService.class.getCanonicalName();
 	private final static String HISTORY_FILE = "history.xml";

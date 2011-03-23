@@ -6,6 +6,13 @@ import org.doubango.ngn.services.INgnStorageService;
 
 import android.util.Log;
 
+/**@page NgnStorageService_page Storage Service
+ * This service is used to manage storage functions.
+ */
+
+/**
+ * Storage service.
+ */
 public class NgnStorageService  extends NgnBaseService implements INgnStorageService{
 	private final static String TAG = NgnStorageService.class.getCanonicalName();
 	
