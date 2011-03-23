@@ -1,5 +1,6 @@
 package org.doubango.ngn;
 
+import org.doubango.ngn.media.NgnProxyPluginMgr;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnContactService;
 import org.doubango.ngn.services.INgnHistoryService;
@@ -16,6 +17,10 @@ import org.doubango.ngn.services.impl.NgnNetworkService;
 import org.doubango.ngn.services.impl.NgnSipService;
 import org.doubango.ngn.services.impl.NgnSoundService;
 import org.doubango.ngn.services.impl.NgnStorageService;
+import org.doubango.tinyWRAP.ProxyAudioConsumer;
+import org.doubango.tinyWRAP.ProxyAudioProducer;
+import org.doubango.tinyWRAP.ProxyVideoConsumer;
+import org.doubango.tinyWRAP.ProxyVideoProducer;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -24,6 +29,11 @@ import android.content.Intent;
 import android.os.Vibrator;
 import android.util.Log;
 
+/**
+ * Next Generation Network Engine.
+ * This is the main entry point to have access to all services (SIP, XCAP, MSRP, History, ...).
+ * Anywhere in the code you can get an instance of the engine by calling @ref getInstance() function.
+ */
 public class NgnEngine {
 	private final static String TAG = NgnEngine.class.getCanonicalName();
 	
@@ -44,6 +54,20 @@ public class NgnEngine {
 	protected INgnSipService mSipService;
 	protected INgnSoundService mSoundService;
 	
+	public static void initialize(){
+		ProxyVideoProducer.registerPlugin();
+		ProxyVideoConsumer.registerPlugin();
+		ProxyAudioProducer.registerPlugin();
+		ProxyAudioConsumer.registerPlugin();
+		
+		NgnProxyPluginMgr.Initialize();
+	}
+	
+	/**
+	 * Gets an instance of the NGN engine. You can call this function as many as you need and it will always return th
+	 * same instance.
+	 * @return An instance of the NGN engine.
+	 */
 	public static NgnEngine getInstance(){
 		if(sInstance == null){
 			sInstance = new NgnEngine();
@@ -51,11 +75,25 @@ public class NgnEngine {
 		return sInstance;
 	}
 	
-	public NgnEngine(){
-		mNotifManager = (NotificationManager) NgnApplication.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+	/**
+	 * Default constructor for the NGN engine. You should never call this function from your code. Instead you should
+	 * use @ref getInstance().
+	 * @sa @ref getInstance()
+	 */
+	protected NgnEngine(){
+		final Context applicationContext = NgnApplication.getContext();
+		if(applicationContext != null){
+			mNotifManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
+		}
+		else mNotifManager = null;
 		mVibrator = null;
 	}
 	
+	/**
+	 * Starts the engine. This function will start all underlying services (SIP, XCAP, MSRP, History, ...).
+	 * You must call this function before trying to use any of the underlying services.
+	 * @return true if all services have been successfully started and false otherwise
+	 */
 	public synchronized boolean start() {
 		if(mStarted){
 			return true;
@@ -87,6 +125,10 @@ public class NgnEngine {
 		return success;
 	}
 	
+	/**
+	 * Stops the engine. This function will stop all underlying services (SIP, XCAP, MSRP, History, ...).
+	 * @return true if all services have been successfully stopped and false otherwise
+	 */
 	public synchronized boolean stop() {
 		if(!mStarted){
 			return true;
@@ -119,18 +161,38 @@ public class NgnEngine {
 		return success;
 	}
 	
+	/**
+	 * Checks whether the engine is started.
+	 * @return true is the engine is running and false otherwise.
+	 * @sa @ref start() @ref stop()
+	 */
 	public synchronized boolean isStarted(){
 		return mStarted;
 	}
 	
+	/**
+	 * Sets the main activity to use as context in order to query some native resources.
+	 * It's up to you to call this function in order to retrieve the contacts for the ContactService.
+	 * @param mainActivity The activity
+	 * @sa @ref getMainActivity()
+	 */
 	public void setMainActivity(Activity mainActivity){
 		mMainActivity = mainActivity;
 	}
 	
+	/**
+	 * Gets the main activity.
+	 * @return the main activity
+	 * @sa @ref setMainActivity()
+	 */
 	public Activity getMainActivity(){
 		return mMainActivity;
 	}
 	
+	/**
+	 * Gets the configuration service.
+	 * @return the configuration service.
+	 */
 	public INgnConfigurationService getConfigurationService(){
 		if(mConfigurationService == null){
 			mConfigurationService = new NgnConfigurationService();
@@ -138,6 +200,10 @@ public class NgnEngine {
 		return mConfigurationService;
 	}
 	
+	/**
+	 * Gets the storage service.
+	 * @return the storage service.
+	 */
 	public INgnStorageService getStorageService(){
 		if(mStorageService == null){
 			mStorageService = new NgnStorageService();
@@ -145,6 +211,10 @@ public class NgnEngine {
 		return mStorageService;
 	}
 	
+	/**
+	 * Gets the network service
+	 * @return the network service
+	 */
 	public INgnNetworkService getNetworkService(){
 		if(mNetworkService == null){
 			mNetworkService = new NgnNetworkService();
@@ -152,6 +222,10 @@ public class NgnEngine {
 		return mNetworkService;
 	}
 	
+	/**
+	 * Gets the HTTP service
+	 * @return the HTTP service
+	 */
 	public INgnHttpClientService getHttpClientService(){
 		if(mHttpClientService == null){
 			mHttpClientService = new NgnHttpClientService();
@@ -159,6 +233,10 @@ public class NgnEngine {
 		return mHttpClientService;
 	}
 	
+	/**
+	 * Gets the contact service
+	 * @return the contact service
+	 */
 	public INgnContactService getContactService(){
 		if(mContactService == null){
 			mContactService = new NgnContactService();
@@ -166,6 +244,10 @@ public class NgnEngine {
 		return mContactService;
 	}
 	
+	/**
+	 * Gets the history service
+	 * @return the history service
+	 */
 	public INgnHistoryService getHistoryService(){
 		if(mHistoryService == null){
 			mHistoryService = new NgnHistoryService();
@@ -173,6 +255,10 @@ public class NgnEngine {
 		return mHistoryService;
 	}
 	
+	/**
+	 * Gets the SIP service
+	 * @return the sip service
+	 */
 	public INgnSipService getSipService(){
 		if(mSipService == null){
 			mSipService = new NgnSipService();
@@ -180,6 +266,10 @@ public class NgnEngine {
 		return mSipService;
 	}
 	
+	/**
+	 * Gets the sound service
+	 * @return the sound service
+	 */
 	public INgnSoundService getSoundService(){
 		if(mSoundService == null){
 			mSoundService = new NgnSoundService();
@@ -187,6 +277,10 @@ public class NgnEngine {
 		return mSoundService;
 	}
 	
+	/**
+	 * Gets the native service class
+	 * @return the native service class
+	 */
 	public Class<? extends NgnNativeService> getNativeServiceClass(){
 		return NgnNativeService.class;
 	}

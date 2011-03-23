@@ -4,12 +4,7 @@ import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.Impl.ScreenService;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.NgnNativeService;
-import org.doubango.ngn.media.NgnProxyPluginMgr;
 import org.doubango.ngn.sip.NgnAVSession;
-import org.doubango.tinyWRAP.ProxyAudioConsumer;
-import org.doubango.tinyWRAP.ProxyAudioProducer;
-import org.doubango.tinyWRAP.ProxyVideoConsumer;
-import org.doubango.tinyWRAP.ProxyVideoProducer;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -29,23 +24,10 @@ public class Engine extends NgnEngine{
 	private IScreenService mScreenService;
 	
 	static {
-		try {
-			System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class.getPackage().getName()));
-			
-			ProxyVideoProducer.registerPlugin();
-			ProxyVideoConsumer.registerPlugin();
-			ProxyAudioProducer.registerPlugin();
-			ProxyAudioConsumer.registerPlugin();
-			
-			NgnProxyPluginMgr.Initialize();
-		} catch (UnsatisfiedLinkError e) {
-			Log.e(TAG,
-					"Native code library failed to load.\n" + e.getMessage());
-		} catch (Exception e) {
-			Log.e(TAG,
-					"Native code library failed to load.\n" + e.getMessage());
-		}
+		System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class.getPackage().getName()));
+		NgnEngine.initialize();
 	}
+	
 	public static NgnEngine getInstance(){
 		if(sInstance == null){
 			sInstance = new Engine();

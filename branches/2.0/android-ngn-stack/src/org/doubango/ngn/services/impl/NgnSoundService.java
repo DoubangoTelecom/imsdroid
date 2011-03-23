@@ -9,6 +9,24 @@ import android.media.RingtoneManager;
 import android.media.ToneGenerator;
 import android.util.Log;
 
+/**@page NgnSoundService_page Sound Service
+ * 
+ * The sound service is used to play the tones (ringtone, ringback, alert, ...).
+ * You have to start the service through the NGN engine before any use.
+ * 
+ * @code
+ * // Gets and instance of the NGN engine
+ * NgnEngine mEngine = NgnEngine.getInstance();
+ * // Plays the ringback tone
+ * mEngine.getSoundService().startRingBackTone();
+ * // Stops the ringback tone
+ * mEngine.getSoundService().stopRingBackTone();
+ * @endcode
+ */
+
+/**
+ * Sound service.
+ */
 public class NgnSoundService extends NgnBaseService implements INgnSoundService{
 	private final static String TAG = NgnSoundService.class.getCanonicalName();
 	
@@ -16,6 +34,7 @@ public class NgnSoundService extends NgnBaseService implements INgnSoundService{
 	private static final int TONE_RELATIVE_VOLUME = 50;
 	
 	private ToneGenerator mRingbackPlayer;
+	private ToneGenerator mDTMFPlayer;
 	private Ringtone mRingtonePlayer;
 	
 	@Override
@@ -43,19 +62,55 @@ public class NgnSoundService extends NgnBaseService implements INgnSoundService{
 				mRingtonePlayer = null;
 			}
 		}
+		
+		if(mDTMFPlayer != null){
+			synchronized(mDTMFPlayer){
+				mDTMFPlayer.release();
+				mDTMFPlayer = null;
+			}
+		}
+		
 		return true;
 	}
 
 	@Override
 	public void startDTMF(int number) {
-		// TODO Auto-generated method stub
-		
+		if (mDTMFPlayer == null) {
+			try {
+				mDTMFPlayer = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, TONE_RELATIVE_VOLUME);
+			} catch (RuntimeException e) {
+				Log.w(TAG, "Exception caught while creating local tone generator: " + e);
+				mDTMFPlayer = null;
+			}
+		}
+
+		if(mDTMFPlayer != null){
+			synchronized(mDTMFPlayer){
+				switch(number){
+					case 0: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_0); break;
+					case 1: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_1); break;
+					case 2: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_2); break;
+					case 3: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_3); break;
+					case 4: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_4); break;
+					case 5: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_5); break;
+					case 6: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_6); break;
+					case 7: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_7); break;
+					case 8: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_8); break;
+					case 9: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_9); break;
+					case 10: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_S); break;
+					case 11: mDTMFPlayer.startTone(ToneGenerator.TONE_DTMF_P); break;
+				}
+			}
+		}
 	}
 
 	@Override
 	public void stopDTMF() {
-		// TODO Auto-generated method stub
-		
+		if(mDTMFPlayer != null){
+			synchronized(mDTMFPlayer){
+				mDTMFPlayer.stopTone();
+			}
+		}
 	}
 
 	@Override

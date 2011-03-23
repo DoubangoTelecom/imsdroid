@@ -1,5 +1,8 @@
 package org.doubango.ngn.events;
 
+/**
+ * List of all supported types associated to SIP INVITE event arguments
+ */
 public enum NgnInviteEventTypes {
 	INCOMING,
     INPROGRESS,

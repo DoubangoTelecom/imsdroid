@@ -8,6 +8,9 @@ import org.doubango.ngn.services.impl.NgnNetworkService.DNS_TYPE;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipStack;
 
+/**
+ * SIP/IMS Stack
+ */
 public class NgnSipStack extends SipStack{
 
 	public enum STACK_STATE {
@@ -18,6 +21,13 @@ public class NgnSipStack extends SipStack{
 	private String mCompId;
 	private final INgnNetworkService mNetworkService;
 	
+	/**
+	 * Creates new SIP/IMS Stack. You should use
+	 * @param callback
+	 * @param realmUri
+	 * @param impiUri
+	 * @param impuUri
+	 */
 	public NgnSipStack(SipCallback callback, String realmUri, String impiUri, String impuUri){
 		super(callback, realmUri, impiUri, impuUri);
 		

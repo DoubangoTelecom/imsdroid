@@ -30,6 +30,9 @@ import android.media.AudioManager;
 import android.util.Log;
 import android.view.View;
 
+/**
+ * Audio/Video call session
+ */
 public class NgnAVSession extends NgnInviteSession{
 
 	private CallSession mSession;
@@ -74,6 +77,13 @@ public class NgnAVSession extends NgnInviteSession{
         }
     }
 
+    /**
+     * Creates an outgoing audio/video call session.
+     * @param sipStack the IMS/SIP stack to use to make the call
+     * @param mediaType the media type. 
+     * @return an audio/video session
+     * @sa @ref makeAudioCall() @ref makeAudioVideoCall()
+     */
     public static NgnAVSession createOutgoingSession(NgnSipStack sipStack, NgnMediaType mediaType){
         synchronized (sSessions){
             final NgnAVSession avSession = new NgnAVSession(sipStack, null, mediaType, InviteState.INPROGRESS);
@@ -92,6 +102,11 @@ public class NgnAVSession extends NgnInviteSession{
         }
     }
 
+	/**
+	 * Retrieves an audio/video session by id.
+	 * @param id the id of the audio/video session to retrieve
+	 * @return an audio/video session with the specified id if exist and null otherwise
+	 */
 	public static NgnAVSession getSession(long id) {
 		synchronized (sSessions) {
 			if (sSessions.containsKey(id))
@@ -101,18 +116,32 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 
+	/**
+	 * Gets the number of pending audio/video sessions. These sessions could be active or not.
+	 * @return the number of pending audio/video sessions.
+	 * @sa @ref hasActiveSession()
+	 */
 	public static int getSize(){
         synchronized (sSessions){
             return sSessions.size();
         }
     }
 	
+	/**
+	 * Checks whether we already have an audio/video session with the specified id.
+	 * @param id the id of the session to look for
+	 * @return true if exist and false otherwise
+	 */
     public static boolean hasSession(long id){
         synchronized (sSessions){
             return sSessions.containsKey(id);
         }
     }
     
+    /**
+     * Check whether we have at least one active audio/video session.
+     * @return true if exist and false otherwise
+     */
     public static boolean hasActiveSession(){
     	synchronized (sSessions){
     		final Collection<NgnAVSession> mysessions = sSessions.values();
@@ -125,6 +154,12 @@ public class NgnAVSession extends NgnInviteSession{
     	return false;
     }
     
+    /**
+     * Gets the first active audio/video session with an id different than the one specified
+     * as parameter
+     * @param id the id of the session to exclude from the search
+     * @return an audio/video session matching the criteria or null if no one exist
+     */
     public static NgnAVSession getFirstActiveCallAndNot(long id){
 		NgnAVSession session;
 		for(Map.Entry<Long, NgnAVSession> entry : sSessions.entrySet()) {
@@ -136,14 +171,84 @@ public class NgnAVSession extends NgnInviteSession{
 		return null;
 	}
     
+    /**
+     * Places an audio call. Event if the NGN engine supports multi-line calls it's recommended
+     * to check that there is no active call before trying to make new one. You can use @ref hasActiveSession()
+     * function to check there is already an active audio/video session. Putting the current active active call
+     * in hold before placing the new one could also be a recommended solution.
+     * @param remoteUri the remote party uri. Could be a SIP/TEL uri, nomadic number, MSISDN number, ...
+     * example: sip:test@doubango.org, tel:+33600000000, 78888667, ...
+     * @param sipStack the SIP/IMS stack to use
+     * @return true if the call has been successfully placed and false otherwise
+     * @sa @ref createOutgoingSession() @ref makeAudioVideoCall()
+     */
     public static boolean makeAudioCall(String remoteUri, NgnSipStack sipStack){
     	NgnAVSession avSession = NgnAVSession.createOutgoingSession(sipStack, NgnMediaType.Audio);
     	return avSession.makeCall(NgnUriUtils.makeValidSipUri(remoteUri));
     }
     
+    /**
+     * Places an audio/video call. Event if the NGN engine supports multi-line calls it's recommended
+     * to check that there is no active call before trying to make new one. You can use @ref hasActiveSession()
+     * function to check there is already an active audio/video session. Putting the current active active call
+     * in hold before placing the new one could also be a recommended solution.
+     * @param remoteUri the remote party uri. Could be a SIP/TEL uri, nomadic number, MSISDN number, ...
+     * example: sip:test@doubango.org, tel:+33600000000, 78888667, ...
+     * @param sipStack the SIP/IMS stack to use
+     * @return true if the call has been successfully placed and false otherwise
+     * @sa @ref createOutgoingSession() @ref makeAudioCall()
+     */
     public static boolean makeAudioVideoCall(String remoteUri, NgnSipStack sipStack){
     	NgnAVSession avSession = NgnAVSession.createOutgoingSession(sipStack, NgnMediaType.AudioVideo);
     	return avSession.makeCall(NgnUriUtils.makeValidSipUri(remoteUri));
+    }
+    
+    /**
+	 * Makes an audio/video call. The call type depends on the mediaType define in the session object.
+	 * @param remoteUri the remote party uri. Could be a SIP/TEL uri, nomadic number, MSISDN number, ...
+     * example: sip:test@doubango.org, tel:+33600000000, 78888667, ...
+	 * @return true if the call succeed and false otherwise
+	 * @sa @ref createOutgoingSession() @ref makeAudioCall() @ref makeAudioVideoCall()
+	 */
+    public boolean makeCall(String remoteUri){
+        boolean ret;
+
+        super.mOutgoing = true;
+        super.setToUri(remoteUri);
+
+        ActionConfig config = new ActionConfig();
+        switch (super.getMediaType())
+        {
+            case AudioVideo:
+            case Video:
+                ret = mSession.callAudioVideo(remoteUri, config);
+                break;
+            case Audio:
+            default:
+                ret = mSession.callAudio(remoteUri, config);
+                break;
+        }
+        config.delete();
+
+        return ret;
+    }
+
+    /**
+     * Starts video sharing session
+     * @param remoteUri  the remote party uri. Could be a SIP/TEL uri, nomadic number, MSISDN number, ...
+     * example: sip:test@doubango.org, tel:+33600000000, 78888667, ...
+	 * @return true if the call succeed and false otherwise
+     */
+    public boolean makeVideoSharingCall(String remoteUri){
+        boolean ret;
+
+        super.mOutgoing = true;
+
+        ActionConfig config = new ActionConfig();
+        ret = mSession.callVideo(remoteUri, config);
+        config.delete();
+
+        return ret;
     }
     
     protected NgnAVSession(NgnSipStack sipStack, CallSession session, NgnMediaType mediaType, InviteState callState){
@@ -236,14 +341,29 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 	
+	/**
+	 * Gets the context associated to this session. Only used for video session to track the SurfaceView
+	 * lifecycle
+	 * @return the context
+	 */
 	public Context getContext(){
 		return mContext;
 	}
 	
+	/**
+	 * Sets a context to associated to this session
+	 * @param context the context
+	 */
 	public void setContext(Context context){
 		mContext = context;
 	}
 	
+	/**
+	 * Starts the video consumer. A video consumer view used to display the video stream
+	 * sent from the remote party. It's up to you to embed this view into a layout (LinearLayout, RelativeLayou,
+	 * FrameLayout, ...) in order to display it.
+	 * @return the view where the remote video stream will be displayed
+	 */
 	public final View startVideoConsumerPreview(){
 		if(mVideoConsumer != null){
 			return mVideoConsumer.startPreview();
@@ -251,6 +371,14 @@ public class NgnAVSession extends NgnInviteSession{
 		return null;
 	}
 	
+	/**
+	 * Starts the video producer. A video producer is any device capable to generate video frames.
+	 * It's likely a video camera (front facing or rear). The view associated to the producer is used as a feedback to
+	 * show the local video stream sent to the remote party.
+	 * It's up to you to embed this view into a layout (LinearLayout, RelativeLayou,
+	 * FrameLayout, ...) in order to display it.
+	 * @return the view where the local video stream will be displayed
+	 */
 	public final View startVideoProducerPreview(){
 		if(mVideoProducer != null){
 			return mVideoProducer.startPreview();
@@ -258,6 +386,10 @@ public class NgnAVSession extends NgnInviteSession{
 		return null;
 	}
 	
+	/**
+	 * Checks whether we are sending video or not
+	 * @return true if we are already sending video and false otherwise
+	 */
 	public boolean isSendingVideo(){
 		return mSendingVideo;
 	}
@@ -272,18 +404,29 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 	
+	/**
+	 * Switch from rear to font-facing camera or vice-versa
+	 */
 	public void toggleCamera(){
 		if(mVideoProducer != null){
 			mVideoProducer.toggleCamera();
 		}
 	}
 	
+	/**
+	 * Sets the local video rotation angle
+	 * @param rot rotation angle in degree
+	 */
 	public void setRotation(int rot){
 		if(mVideoProducer != null){
 			mVideoProducer.setRotation(rot);
 		}
 	}
 	
+	/**
+	 * Enables or disables the speakerphone
+	 * @param speakerOn true to enable the speakerphone and false to disable it
+	 */
 	public void setSpeakerphoneOn(boolean speakerOn){
 		if(mAudioProducer != null){
 			mAudioProducer.setSpeakerphoneOn(speakerOn);
@@ -293,6 +436,9 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 	
+	/**
+	 * Toggles the speakerphone. Enable it if disabled and vice-versa
+	 */
 	public void toggleSpeakerphone(){
 		if(mAudioProducer != null){
 			mAudioProducer.toggleSpeakerphone();
@@ -354,10 +500,19 @@ public class NgnAVSession extends NgnInviteSession{
 		return mHistoryEvent.getStartTime();
 	}
 	
+	/**
+	 * Accepts an incoming audio/video call
+	 * @return true is succeed and false otherwise
+	 * @sa @ref hangUpCall()
+	 */
 	public boolean acceptCall(){
         return mSession.accept();
     }
 
+	/**
+	 * Ends an audio/video call. The call could be in any state: incoming, outgoing, incall, ...
+	 * @return true if succeed and false otherwise
+	 */
     public boolean hangUpCall(){
         if (super.isConnected()){
             return mSession.hangup();
@@ -367,14 +522,30 @@ public class NgnAVSession extends NgnInviteSession{
         }
     }
 
+    /**
+     * Puts the call on hold. At any time you can check if the call is held or not by using @ref isLocalHeld()
+     * @return true if succeed and false otherwise
+     * @sa @ref resumeCall() @ref isLocalHeld() @ref isRemoteHeld() @ref resumeCall()
+     */
     public boolean holdCall(){
 		return mSession.hold();
 	}
-	
+    
+    /**
+     * Resumes a call. The call should be previously held using @ref holdCall()
+     * @return true is succeed and false otherwise
+     * @sa @ref holdCall() @ref isLocalHeld() @ref isRemoteHeld()
+     */
 	public boolean resumeCall(){		
 		return mSession.resume();
 	}
 	
+	/**
+	 * Checks whether the call is locally held held or not. You should use @ref resumeCall() to resume
+	 * the call.
+	 * @return true if locally held and false otherwise
+	 * @sa @ref isRemoteHeld()
+	 */
 	public boolean isLocalHeld(){
 		return mLocalHold;
 	}
@@ -395,6 +566,11 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 	
+	/**
+	 * Checks whether the call is remotely held or not
+	 * @return true if the call is remotely held and false otherwise
+	 * @sa @ref isLocalHeld()
+	 */
 	public boolean isRemoteHeld(){
 		return mRemoteHold;
 	}
@@ -415,43 +591,13 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 
-    public boolean makeCall(String remoteUri){
-        boolean ret;
-
-        super.mOutgoing = true;
-        super.setToUri(remoteUri);
-
-        ActionConfig config = new ActionConfig();
-        switch (super.getMediaType())
-        {
-            case AudioVideo:
-            case Video:
-                ret = mSession.callAudioVideo(remoteUri, config);
-                break;
-            case Audio:
-            default:
-                ret = mSession.callAudio(remoteUri, config);
-                break;
-        }
-        config.delete();
-
-        return ret;
-    }
-
-    public boolean makeVideoSharingCall(String remoteUri){
-        boolean ret;
-
-        super.mOutgoing = true;
-
-        ActionConfig config = new ActionConfig();
-        ret = mSession.callVideo(remoteUri, config);
-        config.delete();
-
-        return ret;
-    }
-
+    /**
+     * Sends DTMF digit. The session must be active (incoming, outgoing, incall, ...) in order to try
+     * to send DTMF digits.
+     * @param digit the digit to send
+     * @return true if succeed and false otherwise
+     */
     public boolean sendDTMF(int digit){
         return mSession.sendDTMF(digit);
     }
-
 }

@@ -19,6 +19,9 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
 
+/**
+ * Contact class defining an entity from the native address book or XCAP server.
+ */
 public class NgnContact extends NgnObservableObject{
 	
 	private final int mId;
@@ -27,6 +30,11 @@ public class NgnContact extends NgnObservableObject{
 	private int mPhotoId;
 	private Bitmap mPhoto;
 	
+	/**
+	 * Creates new address book
+	 * @param id a unique id defining this contact
+	 * @param displayName the contact's display name
+	 */
 	public NgnContact(int id, String displayName){
 		super();
 		mId = id;
@@ -34,14 +42,26 @@ public class NgnContact extends NgnObservableObject{
 		mPhoneNumbers = new ArrayList<NgnPhoneNumber>();
 	}
 	
+	/**
+	 * Gets the id of the contact
+	 * @return a unique id defining this contact
+	 */
 	public int getId(){
 		return mId;
 	}
 	
+	/**
+	 * Gets all phone numbers associated to this contact
+	 * @return list of all numbers associated to this contact
+	 */
 	public List<NgnPhoneNumber> getPhoneNumbers(){
 		return mPhoneNumbers;
 	}
 	
+	/**
+	 * Gets the default/primary phone number value. Most likely the mobile number
+	 * @return the contact's primary number
+	 */
 	public String getPrimaryNumber(){
 		final NgnPhoneNumber primaryNumber = NgnListUtils.getFirstOrDefault(mPhoneNumbers, new PhoneNumberFilterByAnyValid());
 		if(primaryNumber != null){
@@ -58,6 +78,12 @@ public class NgnContact extends NgnObservableObject{
 		return null;
 	}
 	
+	/**
+	 * Attach a new phone number to this contact
+	 * @param type the type of the phone number to add
+	 * @param number the actual value of the phone number
+	 * @param description a short description
+	 */
 	public void addPhoneNumber(PhoneType type, String number, String description){
 		final NgnPhoneNumber phoneNumber = new NgnPhoneNumber(type, number, description);
 		if(type == PhoneType.MOBILE){
@@ -68,11 +94,19 @@ public class NgnContact extends NgnObservableObject{
 		}
 	}
 	
+	/**
+	 * Sets the contact's display name value
+	 * @param displayName the new display name to assign to the contact
+	 */
 	public void setDisplayName(String displayName){
 		mDisplayName = displayName;
 		super.setChangedAndNotifyObservers(displayName);
 	}
 	
+	/**
+	 * Gets the contact's display name
+	 * @return the contact's display name
+	 */
 	public String getDisplayName(){
 		return NgnStringUtils.isNullOrEmpty(mDisplayName) ? NgnStringUtils.nullValue() : mDisplayName;
 	}
@@ -81,6 +115,10 @@ public class NgnContact extends NgnObservableObject{
 		mPhotoId = photoId;
 	}
 	
+	/**
+	 * Gets the photo associated to this contact
+	 * @return a bitmap representing the contact's photo
+	 */
 	public Bitmap getPhoto(){
 		if(mPhotoId != 0 && mPhoto == null){
 			try{
@@ -98,9 +136,6 @@ public class NgnContact extends NgnObservableObject{
 		return mPhoto;
 	}
 	
-	/**
-	 * PhoneNumberFilterByType
-	 */
 	public static class ContactFilterByAnyPhoneNumber implements NgnPredicate<NgnContact>{
 		private final String mPhoneNumber;
 		public ContactFilterByAnyPhoneNumber(String phoneNumber){
@@ -117,9 +152,6 @@ public class NgnContact extends NgnObservableObject{
 		}
 	}
 	
-	/**
-	 * ContactFilterByWiPhoneNumber
-	 */
 	public static class ContactFilterByWiPhoneNumber implements NgnPredicate<NgnContact>{
 		private final String mWiPhoneNumber;
 		public ContactFilterByWiPhoneNumber(String wiPhoneNumber){
