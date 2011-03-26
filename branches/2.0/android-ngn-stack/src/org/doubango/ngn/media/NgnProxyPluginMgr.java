@@ -25,6 +25,7 @@ public class NgnProxyPluginMgr {
 	
 	public static void Initialize() {
         ProxyVideoConsumer.setDefaultChroma(tmedia_chroma_t.tmedia_rgb565le);
+        ProxyVideoConsumer.setDefaultAutoResizeDisplay(true);
         ProxyVideoProducer.setDefaultChroma(tmedia_chroma_t.tmedia_nv21);
 	}
 	

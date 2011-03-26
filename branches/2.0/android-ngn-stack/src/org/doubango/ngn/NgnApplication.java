@@ -249,16 +249,21 @@ public class NgnApplication extends Application{
     private static PowerManager sPowerManager;
     private static PowerManager.WakeLock sPowerManagerLock;
     
+    
     public NgnApplication() {
     	sInstance = this;
     }
 
+    public static NgnApplication getInstance(){
+    	return sInstance;
+    }
+    
     /**
      * Retrieve application's context
      * @return Android context
      */
     public static Context getContext() {
-        return sInstance;
+        return getInstance();
     }
     
     @Override

@@ -13,9 +13,6 @@ import android.hardware.Camera.PreviewCallback;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-/**
- * MyCameraProducer
- */
 public class NgnCameraProducer {
 	private static final String TAG = NgnCameraProducer.class.getCanonicalName();
 	private static Camera instance;
@@ -272,11 +269,6 @@ public class NgnCameraProducer {
 		}
 	}
 	
-	/**
-	 * FrontFacingCameraMapper
-	 * @author Mamadou Diop
-	 *
-	 */
 	static class FrontFacingCameraMapper
 	{
 		private static int preferredIndex = -1;

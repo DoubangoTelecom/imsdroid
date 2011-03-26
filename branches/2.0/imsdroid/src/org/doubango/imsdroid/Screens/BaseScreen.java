@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -28,7 +29,7 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 
 public abstract class BaseScreen extends Activity implements IBaseScreen {
-
+	private static final String TAG = BaseScreen.class.getCanonicalName();
 	public static enum SCREEN_TYPE {
 		// Well-Known
 		ABOUT_T,
@@ -258,7 +259,16 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 					screenService.back();
 				}
 				return true;
-			} else if (keyCode == KeyEvent.KEYCODE_MENU
+			}
+			else if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+				if(currentScreen.getType() == SCREEN_TYPE.AV_T){
+					Log.d(TAG, "intercepting volume changed event");
+					if(((ScreenAV)currentScreen).onVolumeChanged((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN))){
+						return true;
+					}
+				}
+			}
+			else if (keyCode == KeyEvent.KEYCODE_MENU
 					&& event.getRepeatCount() == 0) {
 				if (currentScreen instanceof Activity
 						&& currentScreen.hasMenu()) {

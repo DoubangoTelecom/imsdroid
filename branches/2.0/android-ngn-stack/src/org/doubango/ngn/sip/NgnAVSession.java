@@ -448,6 +448,16 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 	
+	public boolean onVolumeChanged(boolean bDown){
+		if(mAudioProducer == null || !mAudioProducer.onVolumeChanged(bDown)){
+			return false;
+		}
+		if(mAudioConsumer == null || !mAudioConsumer.onVolumeChanged(bDown)){
+			return false;
+		}
+		return true;
+	}
+	
 	public void setModeInCall(boolean bInCall){
 		final AudioManager audiomanager = NgnApplication.getAudioManager();
 		if(NgnApplication.isSetModeAllowed()){

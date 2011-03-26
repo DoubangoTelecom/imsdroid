@@ -28,7 +28,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private final ProxyAudioProducer mProducer;
 	private boolean mRoutingChanged;
 	
-	private AudioRecord mAudioRecorder;
+	private AudioRecord mAudioRecord;
 	private ByteBuffer mAudioFrame;
 	private int mPtime, mRate, mChannels;
 	
@@ -67,6 +67,10 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		setSpeakerphoneOn(!NgnApplication.getAudioManager().isSpeakerphoneOn());
 	}
 	
+	public boolean onVolumeChanged(boolean bDown){
+		return true;
+	}
+	
 	private int prepareCallback(int ptime, int rate, int channels){
     	Log.d(NgnProxyAudioProducer.TAG, "prepareCallback("+ptime+","+rate+","+channels+")");
     	return prepare(ptime, rate, channels);
@@ -74,7 +78,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 
 	private int startCallback(){
     	Log.d(NgnProxyAudioProducer.TAG, "startCallback");
-    	if(mPrepared && mAudioRecorder != null){
+    	if(mPrepared && mAudioRecord != null){
 			super.mStarted = true;
 			final Thread t = new Thread(mRunnableRecorder, "AudioProducerThread");
 			// t.setPriority(Thread.MAX_PRIORITY);
@@ -93,7 +97,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private int stopCallback(){
     	Log.d(NgnProxyAudioProducer.TAG, "stopCallback");
     	super.mStarted = false;
-		if(mAudioRecorder != null){
+		if(mAudioRecord != null){
 			return 0;
 		}
 		return -1;
@@ -115,31 +119,31 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		mPtime = ptime; mRate = rate; mChannels = channels;
 		
-		mAudioRecorder = new AudioRecord(
+		mAudioRecord = new AudioRecord(
 				// WiPhone.isAGCSupported() ? MediaRecorder.AudioSource.VOICE_RECOGNITION : MediaRecorder.AudioSource.MIC,
 				MediaRecorder.AudioSource.MIC,
 				rate, 
 				AudioFormat.CHANNEL_IN_MONO, 
 				AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize);
-		if(mAudioRecorder.getState() == AudioRecord.STATE_INITIALIZED){
+		if(mAudioRecord.getState() == AudioRecord.STATE_INITIALIZED){
 			super.mPrepared = true;
 			return 0;
 		}
 		else{
-			Log.e(TAG, "prepare("+mAudioRecorder.getState()+") failed");
+			Log.e(TAG, "prepare("+mAudioRecord.getState()+") failed");
 			super.mPrepared = false;
 			return -1;
 		}
 	}
 	
 	private synchronized void unprepare(){
-		if(mAudioRecorder != null){
+		if(mAudioRecord != null){
 			if(super.mPrepared){ // only call stop() is the AudioRecord is in initialized state
-				mAudioRecorder.stop();
+				mAudioRecord.stop();
 			}
-			mAudioRecorder.release();
-			mAudioRecorder = null;
+			mAudioRecord.release();
+			mAudioRecord = null;
 		}
 		super.mPrepared = false;
 	}
@@ -150,7 +154,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 			Log.d(TAG, "===== Audio Recorder (Start) ===== ");
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
-			mAudioRecorder.startRecording();
+			mAudioRecord.startRecording();
 			final int nSize = mAudioFrame.capacity();
 			int nRead;
 			
@@ -161,7 +165,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 			}
 			
 			while(NgnProxyAudioProducer.super.mValid && mStarted){
-				if(mAudioRecorder == null){
+				if(mAudioRecord == null){
 					break;
 				}
 				
@@ -173,12 +177,12 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 						break;
 					}
 					if(!NgnProxyAudioProducer.super.mPaused){
-						mAudioRecorder.startRecording();
+						mAudioRecord.startRecording();
 					}
 				}
 				
 				// To avoid overrun read data even if on pause
-				if((nRead = mAudioRecorder.read(mAudioFrame, nSize)) > 0){
+				if((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0){
 					if(!NgnProxyAudioProducer.super.mPaused){
 						if(nRead != nSize){
 							mProducer.push(mAudioFrame, nRead);

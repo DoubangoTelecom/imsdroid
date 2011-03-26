@@ -1,5 +1,6 @@
 package org.doubango.imsdroid;
 
+import org.doubango.imsdroid.Screens.BaseScreen;
 import org.doubango.imsdroid.Screens.BaseScreen.SCREEN_TYPE;
 import org.doubango.imsdroid.Screens.IBaseScreen;
 import org.doubango.imsdroid.Screens.ScreenAV;
@@ -145,30 +146,10 @@ public class Main extends ActivityGroup {
     
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-		final IBaseScreen currentScreen = mScreenService.getCurrentScreen();
-		if(currentScreen != null){
-			if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && currentScreen.getType() != SCREEN_TYPE.HOME_T) {
-				if(currentScreen.hasBack()){
-					if(!currentScreen.back()){
-						super.onKeyDown(keyCode, event);
-					}
-				}
-				else {
-					mScreenService.back();
-				}
-				return true;
-			}
-			else if(keyCode == KeyEvent.KEYCODE_MENU && event.getRepeatCount() == 0){
-				if(!currentScreen.hasMenu()){
-					mScreenService.show(ScreenHome.class);
-					return true;
-				}
-				else if(currentScreen instanceof Activity){
-					return ((Activity)currentScreen).onKeyDown(keyCode, event);
-				}
-			}
-		}
-		return super.onKeyDown(keyCode, event);
+    	if(!BaseScreen.processKeyDown(keyCode, event)){
+    		return super.onKeyDown(keyCode, event);
+    	}
+    	return true;
 	}
     
     public void exit(){

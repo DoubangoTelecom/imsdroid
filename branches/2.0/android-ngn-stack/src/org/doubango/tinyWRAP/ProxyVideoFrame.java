@@ -39,8 +39,8 @@ public class ProxyVideoFrame {
     return tinyWRAPJNI.ProxyVideoFrame_getSize(swigCPtr, this);
   }
 
-  public long getContent(java.nio.ByteBuffer output, long maxsize) {
-    return tinyWRAPJNI.ProxyVideoFrame_getContent(swigCPtr, this, output, maxsize);
+  public long getContent(java.nio.ByteBuffer pOutput, long nMaxsize) {
+    return tinyWRAPJNI.ProxyVideoFrame_getContent(swigCPtr, this, pOutput, nMaxsize);
   }
 
 }

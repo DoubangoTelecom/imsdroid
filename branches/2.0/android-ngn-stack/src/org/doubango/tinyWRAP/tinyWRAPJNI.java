@@ -235,6 +235,8 @@ public class tinyWRAPJNI {
   public final static native int ProxyVideoConsumerCallback_prepareSwigExplicitProxyVideoConsumerCallback(long jarg1, ProxyVideoConsumerCallback jarg1_, int jarg2, int jarg3, int jarg4);
   public final static native int ProxyVideoConsumerCallback_consume(long jarg1, ProxyVideoConsumerCallback jarg1_, long jarg2, ProxyVideoFrame jarg2_);
   public final static native int ProxyVideoConsumerCallback_consumeSwigExplicitProxyVideoConsumerCallback(long jarg1, ProxyVideoConsumerCallback jarg1_, long jarg2, ProxyVideoFrame jarg2_);
+  public final static native int ProxyVideoConsumerCallback_bufferCopied(long jarg1, ProxyVideoConsumerCallback jarg1_, long jarg2, long jarg3);
+  public final static native int ProxyVideoConsumerCallback_bufferCopiedSwigExplicitProxyVideoConsumerCallback(long jarg1, ProxyVideoConsumerCallback jarg1_, long jarg2, long jarg3);
   public final static native int ProxyVideoConsumerCallback_start(long jarg1, ProxyVideoConsumerCallback jarg1_);
   public final static native int ProxyVideoConsumerCallback_startSwigExplicitProxyVideoConsumerCallback(long jarg1, ProxyVideoConsumerCallback jarg1_);
   public final static native int ProxyVideoConsumerCallback_pause(long jarg1, ProxyVideoConsumerCallback jarg1_);
@@ -244,11 +246,17 @@ public class tinyWRAPJNI {
   public final static native void ProxyVideoConsumerCallback_director_connect(ProxyVideoConsumerCallback obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void ProxyVideoConsumerCallback_change_ownership(ProxyVideoConsumerCallback obj, long cptr, boolean take_or_release);
   public final static native void delete_ProxyVideoConsumer(long jarg1);
-  public final static native boolean ProxyVideoConsumer_setDisplaySize(long jarg1, ProxyVideoConsumer jarg1_, int jarg2, int jarg3);
+  public final static native boolean ProxyVideoConsumer_setDisplaySize(long jarg1, ProxyVideoConsumer jarg1_, long jarg2, long jarg3);
+  public final static native long ProxyVideoConsumer_getDisplayWidth(long jarg1, ProxyVideoConsumer jarg1_);
+  public final static native long ProxyVideoConsumer_getDisplayHeight(long jarg1, ProxyVideoConsumer jarg1_);
   public final static native void ProxyVideoConsumer_setCallback(long jarg1, ProxyVideoConsumer jarg1_, long jarg2, ProxyVideoConsumerCallback jarg2_);
+  public final static native boolean ProxyVideoConsumer_setAutoResizeDisplay(long jarg1, ProxyVideoConsumer jarg1_, boolean jarg2);
+  public final static native boolean ProxyVideoConsumer_getAutoResizeDisplay(long jarg1, ProxyVideoConsumer jarg1_);
+  public final static native boolean ProxyVideoConsumer_setConsumeBuffer(long jarg1, ProxyVideoConsumer jarg1_, java.nio.ByteBuffer jarg2, long jarg3);
   public final static native java.math.BigInteger ProxyVideoConsumer_getMediaSessionId(long jarg1, ProxyVideoConsumer jarg1_);
   public final static native boolean ProxyVideoConsumer_registerPlugin();
   public final static native void ProxyVideoConsumer_setDefaultChroma(int jarg1);
+  public final static native void ProxyVideoConsumer_setDefaultAutoResizeDisplay(boolean jarg1);
   public final static native void delete_ProxyVideoFrame(long jarg1);
   public final static native long ProxyVideoFrame_getSize(long jarg1, ProxyVideoFrame jarg1_);
   public final static native long ProxyVideoFrame_getContent(long jarg1, ProxyVideoFrame jarg1_, java.nio.ByteBuffer jarg2, long jarg3);
@@ -502,11 +510,14 @@ public class tinyWRAPJNI {
   public static int SwigDirector_ProxyAudioConsumerCallback_stop(ProxyAudioConsumerCallback self) {
     return self.stop();
   }
-  public static int SwigDirector_ProxyVideoConsumerCallback_prepare(ProxyVideoConsumerCallback self, int width, int height, int fps) {
-    return self.prepare(width, height, fps);
+  public static int SwigDirector_ProxyVideoConsumerCallback_prepare(ProxyVideoConsumerCallback self, int nWidth, int nHeight, int nFps) {
+    return self.prepare(nWidth, nHeight, nFps);
   }
   public static int SwigDirector_ProxyVideoConsumerCallback_consume(ProxyVideoConsumerCallback self, long frame) {
     return self.consume((frame == 0) ? null : new ProxyVideoFrame(frame, false));
+  }
+  public static int SwigDirector_ProxyVideoConsumerCallback_bufferCopied(ProxyVideoConsumerCallback self, long nCopiedSize, long nAvailableSize) {
+    return self.bufferCopied(nCopiedSize, nAvailableSize);
   }
   public static int SwigDirector_ProxyVideoConsumerCallback_start(ProxyVideoConsumerCallback self) {
     return self.start();
