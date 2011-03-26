@@ -65,6 +65,8 @@ public class NgnConfigurationEntry {
 	public static final String MEDIA_AUDIO_RESAMPLER_QUALITY = "MEDIA_AUDIO_RESAMPLER_QUALITY." + TAG;
 	public static final String MEDIA_AUDIO_CONSUMER_GAIN = "MEDIA_AUDIO_CONSUMER_GAIN." + TAG;
 	public static final String MEDIA_AUDIO_PRODUCER_GAIN = "MEDIA_AUDIO_PRODUCER_GAIN." + TAG;
+	public static final String MEDIA_AUDIO_CONSUMER_ATTENUATION = "MEDIA_AUDIO_CONSUMER_ATTENUATION." + TAG;
+	public static final String MEDIA_AUDIO_PRODUCER_ATTENUATION = "MEDIA_AUDIO_PRODUCER_ATTENUATION." + TAG;
 	
 	// Security
 	public static final String SECURITY_IMSAKA_AMF = "SECURITY_IMSAKA_AMF." + TAG;
@@ -154,8 +156,10 @@ public class NgnConfigurationEntry {
 		tdav_codec_id_t.tdav_codec_id_h263p.swigValue() |
 		tdav_codec_id_t.tdav_codec_id_h263.swigValue();
 	public static final int DEFAULT_MEDIA_AUDIO_RESAMPLER_QUALITY = 0;
-	public static final int DEFAULT_MEDIA_AUDIO_CONSUMER_GAIN = 14;
-	public static final int DEFAULT_MEDIA_AUDIO_PRODUCER_GAIN = 14;
+	public static final int DEFAULT_MEDIA_AUDIO_CONSUMER_GAIN = 0; // disabled
+	public static final int DEFAULT_MEDIA_AUDIO_PRODUCER_GAIN = 0; // disabled
+	public static final float DEFAULT_MEDIA_AUDIO_CONSUMER_ATTENUATION = 1f; // disabled
+	public static final float DEFAULT_MEDIA_AUDIO_PRODUCER_ATTENUATION = 1f; // disabled
 	
 	// Security
 	public static final String DEFAULT_SECURITY_IMSAKA_AMF = "0x0000";

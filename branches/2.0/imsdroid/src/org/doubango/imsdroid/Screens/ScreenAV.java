@@ -418,6 +418,13 @@ public class ScreenAV extends BaseScreen{
 		return true;
 	}
 	
+	public boolean onVolumeChanged(boolean bDown){
+		if(mAVSession != null){
+			return mAVSession.onVolumeChanged(bDown);
+		}
+		return false;
+	}
+	
 	public static boolean receiveCall(NgnAVSession avSession){
 		((Engine)Engine.getInstance()).getScreenService().bringToFront(Main.ACTION_SHOW_AVSCREEN,
 				new String[] {"session-id", Long.toString(avSession.getId())}

@@ -122,7 +122,7 @@ public class ScreenTabContacts extends BaseScreen {
 				if(!NgnStringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
 					if(!NgnAVSession.hasActiveSession()){
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
-						// mLasQuickAction.addActionItem(mAItemVideoCall);
+						mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
 					// mLasQuickAction.addActionItem(mAItemMessaging);
 				}

@@ -13,14 +13,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-/**
- * MyProxyVideoConsumer
- */
 public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	private static final String TAG = NgnProxyVideoConsumer.class.getCanonicalName();
 	private static final int DEFAULT_VIDEO_WIDTH = 176;
@@ -28,6 +28,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	private static final int DEFAULT_VIDEO_FPS = 15;
 	
 	private final MyProxyVideoConsumerCallback mCallback;
+	private final ProxyVideoConsumer mConsumer;
 	private Context mContext;
 	private MyProxyVideoConsumerPreview mPreview;
 	private int mWidth;
@@ -36,11 +37,14 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	private ByteBuffer mVideoFrame;
 	private Bitmap mRGB565Bitmap;
 	private boolean mFullScreenRequired;
+	private Looper mLooper;
+    private Handler mHandler;
 
     public NgnProxyVideoConsumer(BigInteger id, ProxyVideoConsumer consumer){
     	super(id, consumer);
+    	mConsumer = consumer;
         mCallback = new MyProxyVideoConsumerCallback(this);
-        consumer.setCallback(mCallback);
+        mConsumer.setCallback(mCallback);
         
         // Initialize video stream parameters with default values
         mWidth = NgnProxyVideoConsumer.DEFAULT_VIDEO_WIDTH;
@@ -52,10 +56,62 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     	mContext = context;
     }
     
-    // Very important: Must be done from the UI thread
 	public final View startPreview(){
 		if(mPreview == null && mContext != null){
-			mPreview = new MyProxyVideoConsumerPreview(mContext, mWidth, mHeight, mFps);
+			if(mLooper != null){
+				mLooper.quit();
+				mLooper = null;
+			}
+			
+			final Thread previewTread = new Thread() {
+				@Override
+				public void run() {
+					android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
+					Looper.prepare();
+					mLooper = Looper.myLooper();
+					
+					synchronized (this) {
+						mPreview = new MyProxyVideoConsumerPreview(mContext, mWidth, mHeight, mFps);
+						notify();
+					}
+					
+					mHandler = new Handler() {
+						public void handleMessage(Message message) {
+							final int nCopiedSize = message.arg1;
+							final int nAvailableSize = message.arg2;
+							if(mVideoFrame == null || mVideoFrame.capacity() != nAvailableSize){
+								long newWidth = mConsumer.getDisplayWidth();
+								long newHeight = mConsumer.getDisplayHeight();
+								if(newWidth<=0 || newHeight<=0){
+									Log.e(TAG,"nCopiedSize="+nCopiedSize+" and newWidth="+newWidth+" and newHeight="+newHeight);
+									return;
+								}
+								Log.d(TAG,"resizing the buffer nAvailableSize="+nAvailableSize+" and newWidth="+newWidth+" and newHeight="+newHeight);
+								mRGB565Bitmap = Bitmap.createBitmap((int)newWidth, (int)newHeight, Bitmap.Config.RGB_565);
+								mVideoFrame = ByteBuffer.allocateDirect((int)nAvailableSize);
+								mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
+								return; // Draw the picture next time
+							}
+							
+							drawFrame();
+						}
+					};
+					
+					Looper.loop();
+					mHandler = null;
+					Log.d(TAG, "VideoConsumer::Looper::exit");
+				}
+			};
+			previewTread.setPriority(Thread.MAX_PRIORITY);
+			synchronized(previewTread) {
+				previewTread.start();
+				try {
+					previewTread.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					return null;
+				}
+	        }
 		}
 		else{
 			Log.e(TAG, "Invalid state");
@@ -76,6 +132,9 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 				NgnConfigurationEntry.DEFAULT_GENERAL_FULL_SCREEN_VIDEO);
 		mRGB565Bitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
 		mVideoFrame = ByteBuffer.allocateDirect(mWidth * mHeight * 2);
+		
+		mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
+		
 		super.mPrepared = true;
 		return 0;
     }
@@ -86,12 +145,33 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     	return 0;
     }
 
+    private int bufferCopiedCallback(long nCopiedSize, long nAvailableSize) {
+    	if(!super.mValid || mRGB565Bitmap == null){
+			Log.e(TAG, "Invalid state");
+			return -1;
+		}
+		if(mPreview == null || mPreview.mHolder == null){
+			// Not on the top
+			return 0;
+		}
+		
+		if(mHandler != null){
+			final Message message = mHandler.obtainMessage();
+			message.arg1 = (int)nCopiedSize;
+			message.arg2 = (int)nAvailableSize;
+			mHandler.sendMessage(message);
+			
+		}
+		
+		return 0;
+    }
+    
     private int consumeCallback(ProxyVideoFrame _frame){    	
 		if(!super.mValid || mRGB565Bitmap == null){
 			Log.e(TAG, "Invalid state");
 			return -1;
 		}
-		if(mPreview == null || mPreview.holder == null){
+		if(mPreview == null || mPreview.mHolder == null){
 			// Not on the top
 			return 0;
 		}
@@ -99,24 +179,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 		// Get video frame content from native code
 		_frame.getContent(mVideoFrame, mVideoFrame.capacity());
 		mRGB565Bitmap.copyPixelsFromBuffer(mVideoFrame);
-		
-		// Get canvas for drawing
-		final Canvas canvas = mPreview.holder.lockCanvas();
-		if (canvas != null){
-			if(mFullScreenRequired){
-				//canvas.drawBitmap(this.rgb565Bitmap, null, this.preview.surfDisplay, null);
-				canvas.drawBitmap(mRGB565Bitmap, null, mPreview.surfFrame, null);
-			}
-			else{
-				canvas.drawBitmap(mRGB565Bitmap, 0, 0, null);
-			}					
-			mPreview.holder.unlockCanvasAndPost(canvas);
-		}
-		else{
-			Log.d(TAG, "Invalid canvas");
-		}
-		
-		mVideoFrame.rewind();
+		drawFrame();
 	    
 		return 0;
     }
@@ -130,9 +193,30 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     private int stopCallback(){
     	Log.d(TAG, "stopCallback");
     	super.mStarted = false;
+    	if(mLooper != null){
+			mLooper.quit();
+			mLooper = null;
+		}
     	return 0;
     }
 	
+    private void drawFrame(){
+    	final Canvas canvas = mPreview.mHolder.lockCanvas();
+		if (canvas != null){
+			mRGB565Bitmap.copyPixelsFromBuffer(mVideoFrame);
+			if(mFullScreenRequired){
+				canvas.drawBitmap(mRGB565Bitmap, null, mPreview.mSurfFrame, null);
+			}
+			else{
+				// display while keeping the ratio
+				canvas.drawBitmap(mRGB565Bitmap, null, mPreview.mSurfDisplay, null);
+				// Or display "as is"
+				//canvas.drawBitmap(mRGB565Bitmap, 0, 0, null);
+			}					
+			mPreview.mHolder.unlockCanvasAndPost(canvas);
+		}
+    }
+    
 	
 	/**
 	 * MyProxyVideoConsumerCallback
@@ -143,32 +227,37 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 
         public MyProxyVideoConsumerCallback(NgnProxyVideoConsumer consumer){
         	super();
-            this.myConsumer = consumer;
+            myConsumer = consumer;
         }
         
         @Override
         public int prepare(int width, int height, int fps){
-            return this.myConsumer.prepareCallback(width, height, fps);
+            return myConsumer.prepareCallback(width, height, fps);
         }
         
         @Override
         public int start(){
-            return this.myConsumer.startCallback();
+            return myConsumer.startCallback();
         }
 
         @Override
         public int consume(ProxyVideoFrame frame){
-            return this.myConsumer.consumeCallback(frame);
-        }
-
+            return myConsumer.consumeCallback(frame);
+        }        
+        
         @Override
+		public int bufferCopied(long nCopiedSize, long nAvailableSize) {
+			return myConsumer.bufferCopiedCallback(nCopiedSize, nAvailableSize);
+		}
+
+		@Override
         public int pause(){
-            return this.myConsumer.pauseCallback();
+            return myConsumer.pauseCallback();
         }
         
         @Override
         public int stop(){
-            return this.myConsumer.stopCallback();
+            return myConsumer.stopCallback();
         }
     }
 	
@@ -176,25 +265,26 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	 * MyProxyVideoConsumerPreview
 	 */
 	static class MyProxyVideoConsumerPreview extends SurfaceView implements SurfaceHolder.Callback {
-		private final SurfaceHolder holder;
-		private Rect surfFrame;
-		@SuppressWarnings("unused")
-		private Rect surfDisplay;
-		private final float ratio;
+		private final SurfaceHolder mHolder;
+		private Rect mSurfFrame;
+		private Rect mSurfDisplay;
+		private final float mRatio;
 		MyProxyVideoConsumerPreview(Context context, int width, int height, int fps) {
 			super(context);
 			
-			this.holder = getHolder();
-			this.holder.addCallback(this);
-			this.ratio = (float)width/(float)height;
+			mHolder = getHolder();
+			mHolder.addCallback(this);
+			// You don't need to enable GPU or Hardware acceleration by yourself
+			mHolder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
+			mRatio = (float)width/(float)height;
 			
-			if(this.holder != null){
-				this.surfFrame = this.holder.getSurfaceFrame();
+			if(mHolder != null){
+				mSurfFrame = mHolder.getSurfaceFrame();
 			}
 			else{
-				this.surfFrame = null;
+				mSurfFrame = null;
 			}
-			this.surfDisplay = this.surfFrame;
+			mSurfDisplay = mSurfFrame;
 		}
 	
 		public void surfaceCreated(SurfaceHolder holder) {
@@ -205,16 +295,16 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			if(holder != null){
-				this.surfFrame = holder.getSurfaceFrame();
+				mSurfFrame = holder.getSurfaceFrame();
 				
 				// (w/h)=ratio => 
 				// 1) h=w/ratio 
 				// and 
 				// 2) w=h*ratio
-				int newW = (int)(w/ratio) > h ? (int)(h * ratio) : w;
-				int newH = (int)(newW/ratio) > h ? h : (int)(newW/ratio);
+				int newW = (int)(w/mRatio) > h ? (int)(h * mRatio) : w;
+				int newH = (int)(newW/mRatio) > h ? h : (int)(newW/mRatio);
 				
-				this.surfDisplay = new Rect(0, 0, newW, newH);
+				mSurfDisplay = new Rect(0, 0, newW, newH);
 			}
 		}
 	}

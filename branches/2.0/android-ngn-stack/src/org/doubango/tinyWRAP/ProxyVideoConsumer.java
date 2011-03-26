@@ -35,12 +35,32 @@ public class ProxyVideoConsumer extends ProxyPlugin {
     super.delete();
   }
 
-  public boolean setDisplaySize(int width, int height) {
-    return tinyWRAPJNI.ProxyVideoConsumer_setDisplaySize(swigCPtr, this, width, height);
+  public boolean setDisplaySize(long nWidth, long nHeight) {
+    return tinyWRAPJNI.ProxyVideoConsumer_setDisplaySize(swigCPtr, this, nWidth, nHeight);
   }
 
-  public void setCallback(ProxyVideoConsumerCallback _callback) {
-    tinyWRAPJNI.ProxyVideoConsumer_setCallback(swigCPtr, this, ProxyVideoConsumerCallback.getCPtr(_callback), _callback);
+  public long getDisplayWidth() {
+    return tinyWRAPJNI.ProxyVideoConsumer_getDisplayWidth(swigCPtr, this);
+  }
+
+  public long getDisplayHeight() {
+    return tinyWRAPJNI.ProxyVideoConsumer_getDisplayHeight(swigCPtr, this);
+  }
+
+  public void setCallback(ProxyVideoConsumerCallback pCallback) {
+    tinyWRAPJNI.ProxyVideoConsumer_setCallback(swigCPtr, this, ProxyVideoConsumerCallback.getCPtr(pCallback), pCallback);
+  }
+
+  public boolean setAutoResizeDisplay(boolean bAutoResizeDisplay) {
+    return tinyWRAPJNI.ProxyVideoConsumer_setAutoResizeDisplay(swigCPtr, this, bAutoResizeDisplay);
+  }
+
+  public boolean getAutoResizeDisplay() {
+    return tinyWRAPJNI.ProxyVideoConsumer_getAutoResizeDisplay(swigCPtr, this);
+  }
+
+  public boolean setConsumeBuffer(java.nio.ByteBuffer pConsumeBufferPtr, long nConsumeBufferSize) {
+    return tinyWRAPJNI.ProxyVideoConsumer_setConsumeBuffer(swigCPtr, this, pConsumeBufferPtr, nConsumeBufferSize);
   }
 
   public java.math.BigInteger getMediaSessionId() {
@@ -51,8 +71,12 @@ public class ProxyVideoConsumer extends ProxyPlugin {
     return tinyWRAPJNI.ProxyVideoConsumer_registerPlugin();
   }
 
-  public static void setDefaultChroma(tmedia_chroma_t chroma) {
-    tinyWRAPJNI.ProxyVideoConsumer_setDefaultChroma(chroma.swigValue());
+  public static void setDefaultChroma(tmedia_chroma_t eChroma) {
+    tinyWRAPJNI.ProxyVideoConsumer_setDefaultChroma(eChroma.swigValue());
+  }
+
+  public static void setDefaultAutoResizeDisplay(boolean bAutoResizeDisplay) {
+    tinyWRAPJNI.ProxyVideoConsumer_setDefaultAutoResizeDisplay(bAutoResizeDisplay);
   }
 
 }

@@ -55,12 +55,16 @@ public class ProxyVideoConsumerCallback {
     tinyWRAPJNI.ProxyVideoConsumerCallback_director_connect(this, swigCPtr, swigCMemOwn, false);
   }
 
-  public int prepare(int width, int height, int fps) {
-    return (getClass() == ProxyVideoConsumerCallback.class) ? tinyWRAPJNI.ProxyVideoConsumerCallback_prepare(swigCPtr, this, width, height, fps) : tinyWRAPJNI.ProxyVideoConsumerCallback_prepareSwigExplicitProxyVideoConsumerCallback(swigCPtr, this, width, height, fps);
+  public int prepare(int nWidth, int nHeight, int nFps) {
+    return (getClass() == ProxyVideoConsumerCallback.class) ? tinyWRAPJNI.ProxyVideoConsumerCallback_prepare(swigCPtr, this, nWidth, nHeight, nFps) : tinyWRAPJNI.ProxyVideoConsumerCallback_prepareSwigExplicitProxyVideoConsumerCallback(swigCPtr, this, nWidth, nHeight, nFps);
   }
 
   public int consume(ProxyVideoFrame frame) {
     return (getClass() == ProxyVideoConsumerCallback.class) ? tinyWRAPJNI.ProxyVideoConsumerCallback_consume(swigCPtr, this, ProxyVideoFrame.getCPtr(frame), frame) : tinyWRAPJNI.ProxyVideoConsumerCallback_consumeSwigExplicitProxyVideoConsumerCallback(swigCPtr, this, ProxyVideoFrame.getCPtr(frame), frame);
+  }
+
+  public int bufferCopied(long nCopiedSize, long nAvailableSize) {
+    return (getClass() == ProxyVideoConsumerCallback.class) ? tinyWRAPJNI.ProxyVideoConsumerCallback_bufferCopied(swigCPtr, this, nCopiedSize, nAvailableSize) : tinyWRAPJNI.ProxyVideoConsumerCallback_bufferCopiedSwigExplicitProxyVideoConsumerCallback(swigCPtr, this, nCopiedSize, nAvailableSize);
   }
 
   public int start() {

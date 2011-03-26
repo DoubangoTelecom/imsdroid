@@ -7,13 +7,6 @@ import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnStringUtils;
-import org.doubango.tinyWRAP.DialogEvent;
-import org.doubango.tinyWRAP.RegistrationEvent;
-import org.doubango.tinyWRAP.RegistrationSession;
-import org.doubango.tinyWRAP.SipCallback;
-import org.doubango.tinyWRAP.SipSession;
-import org.doubango.tinyWRAP.SipStack;
-import org.doubango.tinyWRAP.tinyWRAPConstants;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;

@@ -242,7 +242,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 			Log.d(TAG,"Surface Changed Callback");
 			final Camera camera = NgnCameraProducer.getCamera();
 			try{
-				this.myProducer.startCameraPreview(camera);
+				myProducer.startCameraPreview(camera);
 			}
 			catch (Exception exception) {
 				Log.e(TAG, exception.toString());

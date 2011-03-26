@@ -60,16 +60,43 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 			audiomanager.setSpeakerphoneOn(speakerOn);
 		}
 		
-		if (NgnApplication.isAudioRecreateRequired()){
-			if(super.mPrepared){
-				mRoutingChanged = true;
-			}
+		if (super.mPrepared){
+			mRoutingChanged = NgnApplication.isAudioRecreateRequired();
+			changeVolume(false,false);// disable attenuation
 		}
 	}
 	
 	public void toggleSpeakerphone(){
 		setSpeakerphoneOn(!NgnApplication.getAudioManager().isSpeakerphoneOn());
 	}
+	
+	public boolean onVolumeChanged(boolean bDown){
+		if(!mPrepared || mAudioTrack == null){
+			return false;
+		}
+		return changeVolume(bDown, true);
+	}
+	
+	private boolean changeVolume(boolean bDown, boolean bVolumeChanged){
+		final AudioManager audioManager = NgnApplication.getAudioManager();
+		if(audioManager != null){
+			if(bVolumeChanged){
+				audioManager.adjustStreamVolume(AUDIO_STREAM_TYPE, bDown ? AudioManager.ADJUST_LOWER : AudioManager.ADJUST_RAISE, 
+					AudioManager.FLAG_SHOW_UI);
+			}
+			if(audioManager.isSpeakerphoneOn()){
+				return mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*1.0f, AudioTrack.getMaxVolume()*1.0f) == AudioTrack.SUCCESS;
+			}
+			else{
+				final float attenuation = mConfigurationService.getFloat(NgnConfigurationEntry.MEDIA_AUDIO_CONSUMER_ATTENUATION, 
+						NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_CONSUMER_ATTENUATION);
+				Log.d(TAG, "Consumer audio attenuation "+attenuation);
+				return mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*attenuation, AudioTrack.getMaxVolume()*attenuation) == AudioTrack.SUCCESS;
+			}
+		}
+		return false;
+	}
+	
 	
 	private int prepareCallback(int ptime, int rate, int channels) {
 		Log.d(TAG, "prepareCallback("+ptime+","+rate+","+channels+")");
@@ -137,6 +164,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 				mBufferSize, AudioTrack.MODE_STREAM);
 		if(mAudioTrack.getState() == AudioTrack.STATE_INITIALIZED){
 			Log.d(TAG, "Consumer BufferSize="+mBufferSize+",MinBufferSize="+minBufferSize+",TrueSampleRate="+mAudioTrack.getSampleRate());
+			changeVolume(false, false);
 			super.mPrepared = true;
 			return 0;
 		}
