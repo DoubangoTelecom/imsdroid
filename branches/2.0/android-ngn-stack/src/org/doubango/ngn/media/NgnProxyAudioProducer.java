@@ -20,8 +20,10 @@ import android.util.Log;
  */
 public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private static final String TAG = NgnProxyAudioProducer.class.getCanonicalName();
-	private final static int AUDIO_BUFFER_FACTOR = 3;
+	private final static int AUDIO_BUFFER_FACTOR = 10;
+	@SuppressWarnings("unused")
 	private final static int AUDIO_MIN_VALID_BUFFER_SIZE = 4096;
+	@SuppressWarnings("unused")
 	private final static int AUDIO_DEFAULT_BUFFER_SIZE = 6200;
 	
 	private final MyProxyAudioProducerCallback mCallback;
@@ -112,9 +114,9 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		final int minBufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		final int shortsPerNotif = (rate * ptime)/1000;
 		int bufferSize = (minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * NgnProxyAudioProducer.AUDIO_BUFFER_FACTOR;
-	    if(bufferSize <= AUDIO_MIN_VALID_BUFFER_SIZE){
-	    	bufferSize = AUDIO_DEFAULT_BUFFER_SIZE;
-	     }
+//	    if(bufferSize <= AUDIO_MIN_VALID_BUFFER_SIZE){
+//	    	bufferSize = AUDIO_DEFAULT_BUFFER_SIZE;
+//	     }
 		
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		mPtime = ptime; mRate = rate; mChannels = channels;

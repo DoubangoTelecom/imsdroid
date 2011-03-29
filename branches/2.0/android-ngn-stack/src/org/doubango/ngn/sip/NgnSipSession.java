@@ -7,6 +7,9 @@ import org.doubango.tinyWRAP.SipSession;
 
 import android.util.Log;
 
+/**
+ * Abstract class defining a SIP Session (Registration, Subscription, Publication, Call, ...)
+ */
 public abstract class NgnSipSession extends NgnObservableObject implements Comparable<NgnSipSession>{
 	protected static final String TAG = NgnSipSession.class.getCanonicalName();
 	
@@ -21,6 +24,9 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
     protected int mRefCount = 1;
     protected ConnectionState mConnectionState;
     
+    /**
+     * The connection state
+     */
     public enum ConnectionState{
         NONE,
         CONNECTING,
@@ -29,7 +35,11 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
         TERMINATED,
     }
 
-    public NgnSipSession(NgnSipStack sipStack){
+    /**
+     * Creates new SIP session
+     * @param sipStack the sip stack to use to create the session
+     */
+    protected NgnSipSession(NgnSipStack sipStack){
         mSipStack = sipStack;
         mOutgoing = false;
         mConnectionState = ConnectionState.NONE;
@@ -44,6 +54,11 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
 		super.finalize();
 	}
 
+    /**
+     * Increments the reference counting
+     * @return the new reference counting value
+     * @sa @ref decRef()
+     */
 	public int incRef(){
     	synchronized (this) {
     		if(mRefCount>0){
@@ -54,6 +69,11 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
 		}
     }
     
+	/**
+	 * Decrements the reference counting
+	 * @return the new reference counting value
+	 * @sa @ref incRef()
+	 */
     public int decRef(){
     	synchronized (this) {
 			if(--mRefCount == 0){
@@ -64,6 +84,10 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
 		}
     }
     
+    /**
+     * Gets a unique identifier defining a session
+     * @return a unique identifier defining the session
+     */
     public long getId(){
     	if(mId == -1){
             mId = getSession().getId(); 
@@ -71,52 +95,131 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
         return mId;
     }
 
+    /**
+     * Gets the associated SIP stack
+     * @return a SIP stack
+     */
     public NgnSipStack getStack(){
         return mSipStack;
     }
 
+    /**
+     * Adds a new SIP header to the session
+     * @param name the name of the header
+     * @param value the value of the header
+     * @return true if succeed and false otherwise
+     * @sa @ref removeHeader()
+     * @code
+     * mSipSession.addHeader("User-Agent", "IM-OMAv1.0");
+     * @endcode
+     */
     public boolean addHeader(String name, String value){
     	return getSession().addHeader(name, value);
     }
     
+    /**
+     * Removes a SIP header from the session
+     * @param name the name of the sip header to remove
+     * @return true if succeed and false otherwise
+     * @sa @ref addHeader()
+     * @code
+     * mSipSession.removeHeader("User-Agent");
+     * @endcode
+     */
     public boolean removeHeader(String name){
     	return getSession().removeHeader(name);
     }
     
+    /**
+     * Adds sip capabilities to the session. The capability will be added in a separate
+     * "Accept-Contact" header if the session is dialogless or in the "Contact" header otherwise
+     * @param name the name of capability to add
+     * @return true if succeed and false otherwise
+     * @sa @ref removeCaps()
+     * @code
+     * mSipSession.addCaps("+g.3gpp.smsip");
+     * @andcode
+     */
     public boolean addCaps(String name){
     	return getSession().addCaps(name);
     }
     
+    /**
+     * Adds sip capabilities to the session. The capability will be added in a separate
+     * "Accept-Contact" header if the session is dialogless or in the "Contact" header otherwise
+     * @param name the name of capability to add
+     * @param value the value of the capability
+     * @return true if succeed and false otherwise
+     * @sa @ref removeCaps()
+     * @code
+     * mSipSession.addCaps("+g.3gpp.icsi-ref", "\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
+     * @andcode
+     */
     public boolean addCaps(String name, String value){
     	return getSession().addCaps(name, value);
     }
     
+    /**
+     * Removes a sip capability from the session
+     * @param name the name of the capability to remove
+     * @return true if succeed and false otherwise
+     * @sa @ref addCaps()
+     * @code
+     * mSipSession.removeCaps("+g.3gpp.smsip");
+     * @endcode
+     */
     public boolean removeCaps(String name){
     	return getSession().removeCaps(name);
     }
     
+    /**
+     * Checks whether the session established or not. For example, you can only send files when the session
+     * is connected. You can use @ref getConnectionState() to have the exact state
+     * @return true is session is established and false otherwise
+     * @sa @ref getConnectionState()
+     */
     public boolean isConnected(){
     	return (mConnectionState == ConnectionState.CONNECTED);
     }
     
+    /**
+     * Sets the connection state of the session. You should not call this function by yourself
+     * @param state the new state
+     */
     public void setConnectionState(ConnectionState state){
     	mConnectionState = state;
     }
     
+    /**
+     * Gets the connection state of the session
+     * @return the connection state
+     * @sa @ref isConnected()
+     */
     public ConnectionState getConnectionState(){
     	return mConnectionState;
     }
     
+    /**
+     * Gets the sip from uri
+     * @return the sip from uri
+     */
     public String getFromUri(){
     	return mFromUri;
     }
     
-    public void setFromUri(String uri){
+    /**
+     * Sets the sip from uri
+     * @param uri the new sip from uri
+     * @return true if succeed and false otherwise
+     * @sa ref setToUri()
+     */
+    public boolean setFromUri(String uri){
     	if (!getSession().setFromUri(uri)){
             Log.e(TAG, String.format("%s is invalid as FromUri", uri));
-            return;
+            return false;
         }
         mFromUri = uri;
+        return true;
     }
     
     public String getToUri(){

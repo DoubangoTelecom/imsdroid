@@ -13,6 +13,9 @@ import org.doubango.tinyWRAP.SipSession;
 
 import android.util.Log;
 
+/**
+ * Messaging session used to send Pager Mode IM (SIP MESSAGE)
+ */
 public class NgnMessagingSession extends NgnSipSession {
 	private static String TAG = NgnMessagingSession.class.getCanonicalName();
 	
@@ -91,6 +94,13 @@ public class NgnMessagingSession extends NgnSipSession {
 		return mSession;
 	}
 	
+	/**
+	 * Sends binary SMS (3gpp) using SIP MESSAGE request
+	 * @param text the text (utf-8) to send.
+	 * @param SMSC the address (PSI) of the SMS center
+	 * @return true if succeed and false otherwise
+	 * @sa @ref sendTextMessage()
+	 */
 	public boolean SendBinaryMessage(String text, String SMSC){
         String SMSCPhoneNumber;
         String dstPhoneNumber;
@@ -128,6 +138,12 @@ public class NgnMessagingSession extends NgnSipSession {
         }
     }
 
+	/**
+	 * Send plain text message using SIP MESSAGE request
+	 * @param text
+	 * @return true if succeed and false otherwise
+	 * @sa @ref SendBinaryMessage()
+	 */
     public boolean sendTextMessage(String text){
         super.addHeader("Content-Type", NgnContentType.TEXT_PLAIN);
         byte[] bytes = text.getBytes();
@@ -136,10 +152,18 @@ public class NgnMessagingSession extends NgnSipSession {
         return mSession.send(payload, payload.capacity());
     }
     
+    /**
+     * Accepts the message (sends 200 OK).
+     * @return true if succeed and false otherwise
+     */
     public boolean accept() {
         return mSession.accept();
       }
 
+    /**
+     * Reject the message (sends 603 Decline)
+     * @return true if succeed and false otherwise
+     */
       public boolean reject() {
         return mSession.reject();
       }

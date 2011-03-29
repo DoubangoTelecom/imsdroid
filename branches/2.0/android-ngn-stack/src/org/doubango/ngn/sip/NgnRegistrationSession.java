@@ -5,10 +5,17 @@ import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.RegistrationSession;
 import org.doubango.tinyWRAP.SipSession;
 
+/**
+ * Registration state
+ */
 public class NgnRegistrationSession extends NgnSipSession {
 
 	private final RegistrationSession mSession;
 
+	/**
+	 * Creates new registration session
+	 * @param sipStack the stack to use to create the session
+	 */
     public NgnRegistrationSession(NgnSipStack sipStack){
     	super(sipStack);
         mSession = new RegistrationSession(sipStack);
@@ -44,10 +51,18 @@ public class NgnRegistrationSession extends NgnSipSession {
         super.addCaps("+g.3gpp.cs-voice");
     }
 
+    /**
+     * Sends SIP REGISTER request
+     * @return true if succeed and false otherwise
+     */
     public boolean register(){
         return mSession.register_();
     }
 
+    /**
+     * Unregisters (SIP REGISTER with expires=0)
+     * @return true if succeed and false otherwise
+     */
     public boolean unregister(){
         return mSession.unRegister();
     }
