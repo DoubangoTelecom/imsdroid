@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -73,6 +75,24 @@ public class NgnHttpClientService extends NgnBaseService implements INgnHttpClie
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	@Override
+	public String post(String uri, String contentUTF8){
+		String result = null;
+		try{
+			HttpPost postRequest = new HttpPost(uri);
+			HttpResponse resp = null;
+			postRequest.setEntity(new StringEntity(contentUTF8,"UTF-8"));
+			resp = mClient.execute(postRequest);
+			if(resp != null){
+				return getResponseAsString(resp);
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	public static String getResponseAsString(HttpResponse resp){

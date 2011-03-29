@@ -21,7 +21,7 @@ import android.util.Log;
  */
 public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	private static final String TAG = NgnProxyAudioConsumer.class.getCanonicalName();
-	private static final int AUDIO_BUFFER_FACTOR = 2;
+	private static final int AUDIO_BUFFER_FACTOR = 3;
 	private static final int AUDIO_STREAM_TYPE = AudioManager.STREAM_VOICE_CALL;
 	
 	private final INgnConfigurationService mConfigurationService;
