@@ -65,8 +65,7 @@ public class NgnHttpClientService extends NgnBaseService implements INgnHttpClie
 	public String get(String uri) {
 		try{
 			HttpGet getRequest = new HttpGet(uri);
-			HttpResponse resp = null;
-			resp = mClient.execute(getRequest);
+			final HttpResponse resp = mClient.execute(getRequest);
 			if(resp != null){
 				return getResponseAsString(resp);
 			}
@@ -78,13 +77,16 @@ public class NgnHttpClientService extends NgnBaseService implements INgnHttpClie
 	}
 	
 	@Override
-	public String post(String uri, String contentUTF8){
+	public String post(String uri, String contentUTF8, String contentType){
 		String result = null;
 		try{
 			HttpPost postRequest = new HttpPost(uri);
-			HttpResponse resp = null;
-			postRequest.setEntity(new StringEntity(contentUTF8,"UTF-8"));
-			resp = mClient.execute(postRequest);
+			final StringEntity entity = new StringEntity(contentUTF8,"UTF-8");
+			if(contentType != null){
+				entity.setContentType(contentType);
+			}
+			postRequest.setEntity(entity);
+			final HttpResponse resp = mClient.execute(postRequest);
 			if(resp != null){
 				return getResponseAsString(resp);
 			}

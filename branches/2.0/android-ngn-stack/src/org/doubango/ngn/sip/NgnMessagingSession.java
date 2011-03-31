@@ -22,61 +22,61 @@ public class NgnMessagingSession extends NgnSipSession {
 	private final MessagingSession mSession;
 	private static int SMS_MR = 0;
 	
-	private final static NgnObservableHashMap<Long, NgnMessagingSession> sessions = new NgnObservableHashMap<Long, NgnMessagingSession>(true);
+	private final static NgnObservableHashMap<Long, NgnMessagingSession> sSessions = new NgnObservableHashMap<Long, NgnMessagingSession>(true);
 	
 	public static NgnMessagingSession takeIncomingSession(NgnSipStack sipStack, MessagingSession session, SipMessage sipMessage){
 		final String toUri = sipMessage==null ? null: sipMessage.getSipHeaderValue("f");
 		NgnMessagingSession imSession = new NgnMessagingSession(sipStack, session, toUri);
-		NgnMessagingSession.sessions.put(imSession.getId(), imSession);
+		sSessions.put(imSession.getId(), imSession);
         return imSession;
     }
 
     public static NgnMessagingSession createOutgoingSession(NgnSipStack sipStack, String toUri){
-        synchronized (NgnMessagingSession.sessions){
+        synchronized (sSessions){
             final NgnMessagingSession imSession = new NgnMessagingSession(sipStack, null, toUri);
-            NgnMessagingSession.sessions.put(imSession.getId(), imSession);
+            sSessions.put(imSession.getId(), imSession);
             return imSession;
         }
     }
     
     public static void releaseSession(NgnMessagingSession session){
-		synchronized (NgnMessagingSession.sessions){
-            if (session != null && NgnMessagingSession.sessions.containsKey(session.getId())){
+		synchronized (sSessions){
+            if (session != null && sSessions.containsKey(session.getId())){
                 long id = session.getId();
                 session.decRef();
-                NgnMessagingSession.sessions.remove(id);
+                sSessions.remove(id);
             }
         }
     }
 
     public static void releaseSession(long id){
-		synchronized (NgnMessagingSession.sessions){
+		synchronized (sSessions){
 			NgnMessagingSession session = NgnMessagingSession.getSession(id);
             if (session != null){
                 session.decRef();
-                NgnMessagingSession.sessions.remove(id);
+                sSessions.remove(id);
             }
         }
     }
     
 	public static NgnMessagingSession getSession(long id) {
-		synchronized (NgnMessagingSession.sessions) {
-			if (NgnMessagingSession.sessions.containsKey(id))
-				return NgnMessagingSession.sessions.get(id);
+		synchronized (sSessions) {
+			if (sSessions.containsKey(id))
+				return sSessions.get(id);
 			else
 				return null;
 		}
 	}
 
 	public static int getSize(){
-        synchronized (NgnMessagingSession.sessions){
-            return NgnMessagingSession.sessions.size();
+        synchronized (sSessions){
+            return sSessions.size();
         }
     }
 	
     public static boolean hasSession(long id){
-        synchronized (NgnMessagingSession.sessions){
-            return NgnMessagingSession.sessions.containsKey(id);
+        synchronized (sSessions){
+            return sSessions.containsKey(id);
         }
     }
     

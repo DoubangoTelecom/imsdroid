@@ -1,6 +1,10 @@
 
 package org.doubango.imsdroid.Services.Impl;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.doubango.imsdroid.Engine;
 import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
@@ -11,6 +15,7 @@ import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.ngn.services.impl.NgnBaseService;
 
 import android.app.Activity;
+import android.app.LocalActivityManager;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
@@ -149,7 +154,46 @@ public class ScreenService extends NgnBaseService implements IScreenService {
 
 	@Override
 	public boolean destroy(String id) {
-		return (((Main)Engine.getInstance().getMainActivity()).getLocalActivityManager().destroyActivity(id, true) != null);
+		final LocalActivityManager activityManager = (((Main)Engine.getInstance().getMainActivity())).getLocalActivityManager();
+		if(activityManager != null){
+			activityManager.destroyActivity(id, false);
+			// http://code.google.com/p/android/issues/detail?id=12359
+			// http://www.netmite.com/android/mydroid/frameworks/base/core/java/android/app/LocalActivityManager.java
+			try {
+				final Field mActivitiesField = LocalActivityManager.class.getDeclaredField("mActivities");
+				if(mActivitiesField != null){
+					mActivitiesField.setAccessible(true);
+					@SuppressWarnings("unchecked")
+					final Map<String, Object> mActivities = (Map<String, Object>)mActivitiesField.get(activityManager);
+					if(mActivities != null){
+						mActivities.remove(id);
+					}
+					final Field mActivityArrayField = LocalActivityManager.class.getDeclaredField("mActivityArray");
+					if(mActivityArrayField != null){
+						mActivityArrayField.setAccessible(true);
+						@SuppressWarnings("unchecked")
+						final ArrayList<Object> mActivityArray = (ArrayList<Object>)mActivityArrayField.get(activityManager);
+						if(mActivityArray != null){
+							for(Object record : mActivityArray){
+								final Field idField = record.getClass().getDeclaredField("id");
+								if(idField != null){
+									idField.setAccessible(true);
+									final String _id = (String)idField.get(record);
+									if(id.equals(_id)){
+										mActivityArray.remove(record);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return true;
+		}
+		return false;
 	}
 
 	@Override

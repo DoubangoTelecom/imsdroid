@@ -17,4 +17,6 @@ public class NgnContentType {
 	public final static String XCAP_DIFF = "application/xcap-diff+xml";	
 	
 	public final static String SMS_3GPP = "application/vnd.3gpp.sms";
+	
+	public final static String JSON = "application/json";
 }

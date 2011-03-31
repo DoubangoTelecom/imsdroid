@@ -20,7 +20,7 @@ import android.util.Log;
  */
 public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private static final String TAG = NgnProxyAudioProducer.class.getCanonicalName();
-	private final static int AUDIO_BUFFER_FACTOR = 10;
+	private final static int AUDIO_BUFFER_FACTOR = 3;
 	@SuppressWarnings("unused")
 	private final static int AUDIO_MIN_VALID_BUFFER_SIZE = 4096;
 	@SuppressWarnings("unused")
@@ -83,7 +83,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
     	if(mPrepared && mAudioRecord != null){
 			super.mStarted = true;
 			final Thread t = new Thread(mRunnableRecorder, "AudioProducerThread");
-			// t.setPriority(Thread.MAX_PRIORITY);
+			//t.setPriority(Thread.MAX_PRIORITY);
 			t.start();
 			return 0;
 		}
@@ -154,7 +154,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		@Override
 		public void run() {
 			Log.d(TAG, "===== Audio Recorder (Start) ===== ");
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
 			
 			mAudioRecord.startRecording();
 			final int nSize = mAudioFrame.capacity();
@@ -204,33 +204,30 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	};
 	
 	
-	/**
-	 * MyProxyAudioProducerCallback
-	 */
 	static class MyProxyAudioProducerCallback extends ProxyAudioProducerCallback
     {
         final NgnProxyAudioProducer myProducer;
-
+        
         public MyProxyAudioProducerCallback(NgnProxyAudioProducer producer){
         	super();
             myProducer = producer;
         }
-
+        
         @Override
         public int prepare(int ptime, int rate, int channels){
             return myProducer.prepareCallback(ptime, rate, channels);
         }
-
+        
         @Override
         public int start(){
             return myProducer.startCallback();
         }
-
+        
         @Override
         public int pause(){
             return myProducer.pauseCallback();
         }
-
+        
         @Override
         public int stop(){
             return myProducer.stopCallback();
