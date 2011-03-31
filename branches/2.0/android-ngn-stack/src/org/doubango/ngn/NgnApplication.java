@@ -329,18 +329,21 @@ public class NgnApplication extends Application{
     	return model.startsWith("htc");
     }
     
+    public static boolean isZTE(){
+    	final String model = Build.MODEL.toLowerCase();
+    	return model.startsWith("zte");
+    }
+    
     public static boolean isAudioRecreateRequired(){
     	return false;
     }
     
     public static boolean isSetModeAllowed(){
-    	final String model = Build.MODEL;
-    	return model.equalsIgnoreCase("ZTE-U V880");
+    	return isZTE();
     }
     
     public static boolean isBuggyProximitySensor(){
-    	final String model = Build.MODEL;
-    	return model.equalsIgnoreCase("ZTE-U V880");
+    	return isZTE();
     }
     
     public static boolean isAGCSupported(){

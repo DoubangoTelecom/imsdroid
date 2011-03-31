@@ -202,6 +202,7 @@ implements INgnSipService, tinyWRAPConstants {
 
 	@Override
 	public boolean register(Context context) {
+		Log.d(TAG,"register()");
 		mPreferences.setRealm(mConfigurationService.getString(NgnConfigurationEntry.NETWORK_REALM, 
 				NgnConfigurationEntry.DEFAULT_NETWORK_REALM));
 		mPreferences.setIMPI(mConfigurationService.getString(NgnConfigurationEntry.IDENTITY_IMPI, 
