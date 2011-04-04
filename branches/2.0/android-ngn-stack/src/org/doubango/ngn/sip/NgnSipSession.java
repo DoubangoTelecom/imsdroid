@@ -138,7 +138,7 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
      * @sa @ref removeCaps()
      * @code
      * mSipSession.addCaps("+g.3gpp.smsip");
-     * @andcode
+     * @endcode
      */
     public boolean addCaps(String name){
     	return getSession().addCaps(name);
@@ -153,7 +153,7 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
      * @sa @ref removeCaps()
      * @code
      * mSipSession.addCaps("+g.3gpp.icsi-ref", "\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
-     * @andcode
+     * @endcode
      */
     public boolean addCaps(String name, String value){
     	return getSession().addCaps(name, value);

@@ -48,67 +48,6 @@ public class Main extends Activity {
 		mEngine = NgnEngine.getInstance();
 		mConfigurationService = mEngine.getConfigurationService();
 		mSipService = mEngine.getSipService();
-		
-		
-//		final String realm = "sip:doubango.org";
-//		final String privateIdentity = "001";
-//		final String publicIdentity = "sip:001@doubango.org";
-//		final String password = "my secret";
-//		final String proxyHost = "192.168.0.1";
-//		RegistrationSession registrationSession;
-//		// Sip Callback
-//		final SipCallback callback = new SipCallback(){
-//			@Override
-//			public int OnDialogEvent(DialogEvent e) {
-//				final SipSession sipSession = e.getBaseSession();
-//				final long sipSessionId = sipSession.getId();
-//				final short code = e.getCode();
-//				switch (code){
-//					case tinyWRAPConstants.tsip_event_code_dialog_connecting:
-//						if(registrationSession != null && registrationSession.getId() == sipSessionId){
-//							// Registration in progress
-//						}
-//						break;
-//					case tinyWRAPConstants.tsip_event_code_dialog_connected:
-//						if(registrationSession != null && registrationSession.getId() == sipSessionId){
-//							// You are registered
-//						}
-//						break;
-//					case tinyWRAPConstants.tsip_event_code_dialog_terminating:
-//						if(registrationSession != null && registrationSession.getId() == sipSessionId){
-//							// You are unregistering
-//						}
-//						break;
-//					case tinyWRAPConstants.tsip_event_code_dialog_terminated:
-//						if(registrationSession != null && registrationSession.getId() == sipSessionId){
-//							// You are unregistered
-//						}
-//						break;
-//				}
-//					
-//				return 0;
-//			}
-//
-//			@Override
-//			public int OnRegistrationEvent(RegistrationEvent e) {
-//				// low level events
-//				return 0;
-//			}
-//		};
-//		// Create the SipStack
-//		SipStack sipStack = new SipStack(callback, realm, privateIdentity, publicIdentity);
-//		// Set Proxy Host and port
-//		sipStack.setProxyCSCF(proxyHost, 5060, "UDP", "IPv4");
-//		// Set password
-//		sipStack.setPassword(password);
-//		if(sipStack.isValid()){
-//			if(sipStack.start()){
-//				registrationSession = new RegistrationSession(sipStack);
-//				registrationSession.setFromUri(publicIdentity);
-//				// Send SIP register request
-//				registrationSession.register_();
-//			}
-//		}
 	}
 	
     @Override

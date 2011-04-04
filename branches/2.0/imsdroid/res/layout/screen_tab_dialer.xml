@@ -28,8 +28,8 @@
 	            <include android:id="@+id/screen_tab_dialer_button_sharp" layout="@layout/view_dialer_button_text" android:layout_weight="2" android:layout_margin="2px" android:layout_height="fill_parent" android:layout_width="fill_parent"/>
 	        </LinearLayout>
 	        <LinearLayout android:layout_width="fill_parent" android:layout_weight="2" android:weightSum="6" android:layout_height="fill_parent">
-	            <include android:id="@+id/screen_tab_dialer_button_chat" layout="@layout/view_dialer_button_image" android:layout_weight="2" android:layout_margin="2px" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
-	            <include android:id="@+id/screen_tab_dialer_button_call" layout="@layout/view_dialer_button_image" android:layout_weight="2" android:layout_margin="2px" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
+	            <include layout="@layout/view_dialer_button_image" android:layout_weight="2" android:layout_margin="2px" android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/screen_tab_dialer_button_video"/>
+	            <include layout="@layout/view_dialer_button_image" android:layout_weight="2" android:layout_margin="2px" android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/screen_tab_dialer_button_audio"/>
 	            <include android:id="@+id/screen_tab_dialer_button_del" layout="@layout/view_dialer_button_image" android:layout_weight="2" android:layout_margin="2px" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
 	        </LinearLayout>
 	    </LinearLayout>
