@@ -48,8 +48,8 @@ public class ScreenTabDialer  extends BaseScreen {
 		DialerUtils.setDialerTextButton(this, R.id.screen_tab_dialer_button_star, "*", "", DialerUtils.TAG_STAR, mOnDialerClick);
 		DialerUtils.setDialerTextButton(this, R.id.screen_tab_dialer_button_sharp, "#", "", DialerUtils.TAG_SHARP, mOnDialerClick);
 		
-		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_chat, R.drawable.sym_action_chat_48, DialerUtils.TAG_CHAT, mOnDialerClick);
-		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_call, R.drawable.ic_menu_call_48, DialerUtils.TAG_AUDIO_CALL, mOnDialerClick);
+		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_audio, R.drawable.ic_menu_call_48, DialerUtils.TAG_AUDIO_CALL, mOnDialerClick);
+		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_video, R.drawable.ic_menu_call_48, DialerUtils.TAG_VIDEO_CALL, mOnDialerClick);
 		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_del, R.drawable.ic_input_delete_48, DialerUtils.TAG_DELETE, mOnDialerClick);
 		
 		mEtNumber.setInputType(InputType.TYPE_NULL);
@@ -102,6 +102,12 @@ public class ScreenTabDialer  extends BaseScreen {
 			else if(tag == DialerUtils.TAG_AUDIO_CALL){
 				if(mSipService.isRegistered() && !NgnStringUtils.isNullOrEmpty(number)){
 					ScreenAV.makeCall(number, NgnMediaType.Audio);
+					mEtNumber.setText(NgnStringUtils.emptyValue());
+				}
+			}
+			else if(tag == DialerUtils.TAG_VIDEO_CALL){
+				if(mSipService.isRegistered() && !NgnStringUtils.isNullOrEmpty(number)){
+					ScreenAV.makeCall(number, NgnMediaType.AudioVideo);
 					mEtNumber.setText(NgnStringUtils.emptyValue());
 				}
 			}

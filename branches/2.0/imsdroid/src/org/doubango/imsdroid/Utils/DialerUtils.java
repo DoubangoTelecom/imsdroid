@@ -22,7 +22,8 @@ public class DialerUtils {
 	public static final int TAG_SHARP = 11;
 	public static final int TAG_CHAT = 12;
 	public static final int TAG_AUDIO_CALL = 13;
-	public static final int TAG_DELETE = 14;
+	public static final int TAG_VIDEO_CALL = 14;
+	public static final int TAG_DELETE = 15;
 	
 	public static void setDialerTextButton(View view, String num, String text, int tag, View.OnClickListener listener){
 		view.setTag(tag);

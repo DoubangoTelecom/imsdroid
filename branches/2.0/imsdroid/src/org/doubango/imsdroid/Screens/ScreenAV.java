@@ -2,7 +2,6 @@ package org.doubango.imsdroid.Screens;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
 import java.util.TimerTask;
 
 import org.doubango.imsdroid.Engine;
@@ -18,11 +17,12 @@ import org.doubango.ngn.model.NgnContact;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
-import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.sip.NgnSipStack;
+import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnGraphicsUtils;
 import org.doubango.ngn.utils.NgnStringUtils;
+import org.doubango.ngn.utils.NgnTimer;
 import org.doubango.ngn.utils.NgnUriUtils;
 
 import android.app.KeyguardManager;
@@ -73,9 +73,9 @@ public class ScreenAV extends BaseScreen{
 	private View mViewTermwait;
 	private View mViewProxSensor;
 	
-	private final Timer mTimerInCall;
-	private final Timer mTimerSuicide;
-	private final Timer mTimerBlankPacket;
+	private final NgnTimer mTimerInCall;
+	private final NgnTimer mTimerSuicide;
+	private final NgnTimer mTimerBlankPacket;
 	private NgnAVSession mAVSession;
 	private boolean mIsVideoCall;
 	
@@ -96,7 +96,7 @@ public class ScreenAV extends BaseScreen{
 	private final static int MENU_SHARE_CONTENT = 4;
 	private final static int MENU_SPEAKER = 5;
 	
-	private static boolean SHOW_SIP_PHRASE = false;
+	private static boolean SHOW_SIP_PHRASE = true;
 	
 	private static enum ViewType{
 		ViewNone,
@@ -111,9 +111,9 @@ public class ScreenAV extends BaseScreen{
 		
 		mCurrentView = ViewType.ViewNone;
 		
-		mTimerInCall = new Timer();
-		mTimerSuicide = new Timer();
-		mTimerBlankPacket = new Timer();
+		mTimerInCall = new NgnTimer();
+		mTimerSuicide = new NgnTimer();
+		mTimerBlankPacket = new NgnTimer();
 	}
 
 	@Override
@@ -528,12 +528,8 @@ public class ScreenAV extends BaseScreen{
 					if(mAVSession != null && mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video){
 						mTimerBlankPacket.schedule(mTimerTaskBlankPacket, 0, 250);
 					}
-					try{
-						mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
-					}
-					catch(IllegalStateException ise){
-						Log.d(TAG, ise.toString());
-					}
+					mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
+					
 					// release power lock
 					if(mWakeLock != null && mWakeLock.isHeld()){
 						mWakeLock.release();
@@ -542,12 +538,7 @@ public class ScreenAV extends BaseScreen{
 					
 				case TERMINATING:
 				case TERMINATED:
-					try{
-						mTimerSuicide.schedule(mTimerTaskSuicide, new Date(new Date().getTime() + 1500));
-					}
-					catch(IllegalStateException ise){
-						Log.d(TAG, ise.toString());
-					}
+					mTimerSuicide.schedule(mTimerTaskSuicide, new Date(new Date().getTime() + 1500));
 					mTimerTaskInCall.cancel();
 					mTimerBlankPacket.cancel();
 					loadTermView(SHOW_SIP_PHRASE ? args.getPhrase() : null);

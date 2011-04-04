@@ -75,8 +75,105 @@ import android.util.Log;
  * - One2One and Group Chat
  * - File Transfer and Content sharing
  * 
+ * 
+ * @page page__Setting_Up_NGN_project Setting up NGN project
+ * @anchor anchor_Setting_Up_NGN_project
+ * This section explain how to setup a NGN project using Eclipse.<br />
+ * 
+ * <h2>Checking out the source code</h2>
+ * To check out the source code of the NGN library you will need a SVN client.<br />
+ * Use this command to anonymously check out the last project source:
+ * @code
+ * svn checkout http://imsdroid.googlecode.com/svn imsdroid
+ * @endcode
+ * The source code of the library is under:
+ * @code
+ * imsdroid/branches/2.0/android-ngn-stack
+ * @endcode
+ * 
+ * <h2>Importing the NGN project into Eclipse</h2>
+ * The NGN project is the Next Generation Network library.
+ * - Open eclipse
+ * - Go to File -> Import -> General -> Existing Project into workspace
+ * - Select <b> android-ngn-stack </b> folder and click <b>Finish</b>
+ * 
+ * @image html ngn_eclipse_import.png "Importing project into your workspace"
+ * 
+ * <h2>Creating you first NGN application using Eclipse</h2>
+ * - Open Eclipse and select File -> New -> Android Project
+ * - From the next window (<b>"New Android Project"</b>) fill the text fields like this:<br />
+ * 		- Project name: <b>myFirstApp</b><br />
+ * 		- Location: < set any path ><br />
+ * 		- Build Target: <b>Android 2.0</b> (at least)<br />
+ * 		- Application name: <b>myFirstApp</b><br />
+ * 		- Package name: <b>org.doubango.test</b><br />
+ * 		- Check <b>"Create Activity"</b> and name it <b>"Main"</b><br />
+ * 
+ * @image html ngn_eclipse_newproj.png "Create your first NGN application"
+ * - Click on Finish to create the project
+ * - From the Eclipse package explorer, right click on <b>myFirstApp</b> and select <b>"Properties"</b> then "Android" from the left<br/><br/>
+ * @image html ngn_eclipse_properties_1.png "NGN application properties"
+ * - From the properties window, select <b>"Add"</b> button then select <b>android-ngn-stack</b> from the list of the available libraries<br/><br/>
+ * @image html ngn_eclipse_properties_2.png "Add dependencies"
+ * - Select <b>"Java Compiler"</b> from the left and change the version from 1.5 to 1.6<br/><br/>
+ * @image html ngn_eclipse_jdk_version.png "Java Compiler version"
+ * - Select <b>"Java Build Path"</b> from the left, then <b>"Libraries"</b><br/><br/>
+ * @image html ngn_eclipse_java_buil_path_1.png "Java Build Path 1/2"
+ * - From "Java Build Path 1/2", select <b>"Add JARs..."</b> then <b>android-ngn-stack/libs/simple-xml-2.3.4.jar</b>, then <b>"OK"</b> to close the window<br/><br/>
+ * @image html ngn_eclipse_java_buil_path_2.png "Java Build Path 2/2"
+ * - Click on <b>"OK"</b> to close the window
+ * 
+ * <h2>Setting up Android Permissions</h2>
+ * In order to use the framework you must enable some user-permission in your Android manifest. <br />
+ * Open <b>myFirstApp/AndroidManifest.xml</b>, then add this:
+ * @code
+ * <uses-permission android:name="android.permission.INTERNET" />
+ * <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+ * <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+ * <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+ * <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+ * 
+ * <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+ * <uses-permission android:name="android.permission.CAMERA" />
+ * <uses-permission android:name="android.permission.WAKE_LOCK" />
+ * <uses-permission android:name="android.permission.RECORD_AUDIO" />
+ * <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+ * <uses-permission android:name="android.permission.VIBRATE" />
+ * <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+ * 
+ * <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+ * <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+ * <uses-permission android:name="android.permission.READ_CONTACTS"/>
+ * <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+ * <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+ * <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+ * <uses-permission android:name="android.permission.CALL_PHONE" />
+ * <uses-permission android:name="android.permission.RAISED_THREAD_PRIORITY"/>
+ *  @endcode
+ *  ... just before @code </manifest> @endcode
+ * 
+ * <h2>Loading native libraries</h2>
+ * The NGN library contain native (C/C++) libraries from Doubango Framework. These libraries contain the signaling protocols (sip, sdp, rtp, xcap, msrp,...),
+ * codecs (h264,theora,speex,gsm,g729,...), ...<br />
+ * You must load these libraries before calling any function from the NGN library. We recommend using a static block in your main activity like this:<br>
+ * @code
+ * // Load native libraries (the shared libraries are from 'android-ngn-stack' project)
+ * static {
+ * 	System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class.getPackage().getName()));
+ * 	NgnEngine.initialize();
+ * }
+ * @endcode
+ * 
+ * <h2>Declaring your app as NGN</h2>
+ * Decalaring your app as NGN is recommended if your are programming at <b>high</b> level. <br />
+ * - From the Eclipse package explorer, open <b>AndroidManifest.xml</b> and select <b>Application</b> tab from below
+ * - Click on <b>browse</b> (on the right of <b>Name</b>) then, select <b>"NgnApplication"</b> from the list<br/><br/>
+ * @image html ngn_eclipse_declaring_ngn_app.png "Declaring your app as NGN"
+ * 
+ * 
  * @page Architecture
  * The stack offers three levels of programming: <b>Low</b>, <b>Medium</b> and <b>High</b>.<br />
+ * Before building and running your project, you should take a look at the section @ref anchor_Setting_Up_NGN_project "explaining how to setup a NGN project".
  * <h2>Low level</h2>
  * This level allow you to directly have access to doubango functions through JNI.
  * This level is the most flexible one but is out of scoop because it's too difficult to manage. <br />
@@ -180,52 +277,26 @@ import android.util.Log;
  * @endcode
  * Starting/Stopping the engine will start/stop all underlying services.
  * 
- * <h2>License</h2>
  * 
- * <i>Copyright © 2011 Mamadou Diop <diopmamadou {AT} doubango.org></i><br />
- * <i>android-ngn-stack v2.0</i> is a free software: you can redistribute it and/or modify it under the terms of the GNU
- * General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.<br />
- * <i>android-ngn-stack v2.0</i> is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE. See the GNU General Public License for more details.<br />
- * You should have received a copy of the GNU General Public Licence along with doubango. If not,
- * see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.<br />
- * <br />
- * 
- * 
- * <a href="http://code.google.com/p/imsdroid/">android-ngn-stack</a> is a NGN (Next Generation Network) stack to develop IMS/RCS/VoLTE applications for Android devices.
- * The stack is based on <a href="http://doubango.org">Doubango</a> project.
- * 
- * <h2>Android Permissions</h2>
- * In order to use the framework you must enable some user-permission in your Android manifest. <br />
- * Required permissions:
- * @code
- * 
- * 	<uses-permission android:name="android.permission.INTERNET" />
- *  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
- *  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
- *  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
- *  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
- *  
- *  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
- *  <uses-permission android:name="android.permission.CAMERA" />
- *  <uses-permission android:name="android.permission.WAKE_LOCK" />
- *  <uses-permission android:name="android.permission.RECORD_AUDIO" />
- *  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
- *  <uses-permission android:name="android.permission.VIBRATE" />
- *  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
- *  
- *  <uses-permission android:name="android.permission.WRITE_SETTINGS" />
- *  <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
- *  <uses-permission android:name="android.permission.READ_CONTACTS"/>
- *  <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
- *  <uses-permission android:name="android.permission.READ_PHONE_STATE" />
- *  <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
- *  <uses-permission android:name="android.permission.CALL_PHONE" />
- *  <uses-permission android:name="android.permission.RAISED_THREAD_PRIORITY"/>
- *  @endcode
- */
+// */
+// * <h2>License</h2>
+// * 
+// * <i>Copyright © 2011 Mamadou Diop <diopmamadou {AT} doubango.org></i><br />
+// * <i>android-ngn-stack v2.0</i> is a free software: you can redistribute it and/or modify it under the terms of the GNU
+// * General Public License as published by the Free Software Foundation, either version 3 of the
+// * License, or (at your option) any later version.<br />
+// * <i>android-ngn-stack v2.0</i> is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+// * PURPOSE. See the GNU General Public License for more details.<br />
+// * You should have received a copy of the GNU General Public Licence along with doubango. If not,
+// * see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.<br />
+// * <br />
+// * 
+// * 
+// * <a href="http://code.google.com/p/imsdroid/">android-ngn-stack</a> is a NGN (Next Generation Network) stack to develop IMS/RCS/VoLTE applications for Android devices.
+// * The stack is based on <a href="http://doubango.org">Doubango</a> project.
+// * 
+// */
 
 
 /**
