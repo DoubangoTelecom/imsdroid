@@ -53,16 +53,22 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
     }
     
 	// Very important: Must be done in the UI thread
-	public final View startPreview(){
-		if(mPreview == null){
+	public final View startPreview(Context context){
+		mContext = context == null ? mContext : context;
+		if(mPreview == null && mContext != null){
 			mPreview = new MyProxyVideoProducerPreview(this);
 		}
-		
-		mPreview.setVisibility(View.VISIBLE);
-		mPreview.getHolder().setSizeFromLayout();
-		mPreview.bringToFront();
+		if(mPreview != null){
+			mPreview.setVisibility(View.VISIBLE);
+			mPreview.getHolder().setSizeFromLayout();
+			mPreview.bringToFront();
+		}
 		
 		return mPreview;
+	}
+	
+	public final View startPreview(){
+		return startPreview(null);
 	}
 	
 	public void pushBlankPacket(){

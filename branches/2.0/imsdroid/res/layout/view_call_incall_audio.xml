@@ -10,12 +10,12 @@
       </RelativeLayout>
     <TextView android:layout_height="wrap_content" android:text="John Doe" android:textStyle="bold" android:textColor="@color/color_white" android:gravity="center_horizontal" android:layout_width="fill_parent" android:id="@+id/view_call_incall_audio_textView_remote" android:layout_alignRight="@+id/view_call_incall_audio_relativeLayout_avatar" android:layout_below="@+id/view_call_incall_audio_relativeLayout_avatar" android:layout_alignLeft="@+id/view_call_incall_audio_relativeLayout_avatar" android:textSize="25dp" android:layout_marginBottom="5px" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:layout_marginTop="10px"></TextView>
     <LinearLayout android:layout_width="fill_parent" android:weightSum="2" android:id="@+id/view_call_trying_linearLayout_pick_or_hang" android:layout_height="wrap_content" android:layout_margin="3px" android:layout_below="@+id/view_call_incall_audio_textView_remote" android:gravity="center_horizontal">
-        <ImageButton android:id="@+id/view_call_incall_audio_imageButton_hang" android:layout_width="fill_parent" android:layout_height="45dp" android:layout_margin="20dp" android:background="@drawable/sel_red"></ImageButton>
+        <ImageButton android:id="@+id/view_call_incall_audio_imageButton_hang" android:layout_margin="20dp" android:src="@drawable/phone_hang_up_64" android:layout_height="fill_parent" android:layout_width="fill_parent"></ImageButton>
     </LinearLayout>
     <SlidingDrawer android:layout_width="fill_parent" android:layout_height="fill_parent" android:handle="@+id/handle" android:content="@+id/content" android:layout_below="@+id/sview_call_trying_imageView_avatar" android:layout_alignLeft="@+id/sview_call_trying_imageView_avatar" android:layout_alignRight="@+id/sview_call_trying_imageView_avatar" android:id="@+id/view_call_incall_audio_slidingDrawer" android:visibility="invisible">
         <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/handle" android:visibility="invisible"></Button>
         <LinearLayout android:id="@+id/content" android:layout_width="fill_parent" android:layout_height="fill_parent">
-        <include android:id="@+id/view_call_incall_audio_keyboard" layout="@layout/view_dialer_buttons" android:layout_weight="2" android:layout_margin="2px" android:layout_height="fill_parent" android:layout_width="fill_parent"/>
+        <include android:id="@+id/view_call_incall_audio_keyboard" layout="@layout/view_dialer_buttons" android:layout_weight="2" android:layout_margin="2px" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
         </LinearLayout>
     </SlidingDrawer>
 </RelativeLayout>

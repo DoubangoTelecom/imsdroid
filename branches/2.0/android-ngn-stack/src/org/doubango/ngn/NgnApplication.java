@@ -405,12 +405,17 @@ public class NgnApplication extends Application{
     	return model.startsWith("zte");
     }
     
+    public static boolean isLG(){
+    	final String model = Build.MODEL.toLowerCase();
+    	return model.startsWith("lg-");
+    }
+    
     public static boolean isAudioRecreateRequired(){
     	return false;
     }
     
     public static boolean isSetModeAllowed(){
-    	return isZTE();
+    	return isZTE() || isLG();
     }
     
     public static boolean isBuggyProximitySensor(){

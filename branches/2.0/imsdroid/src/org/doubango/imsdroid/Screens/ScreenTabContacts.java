@@ -47,7 +47,8 @@ public class ScreenTabContacts extends BaseScreen {
 	
 	private final ActionItem mAItemVoiceCall;
 	private final ActionItem mAItemVideoCall;
-	private final ActionItem mAItemMessaging;
+	private final ActionItem mAItemChat;
+	private final ActionItem mAItemSMS;
 	
 	private NgnContact mSelectedContact;
 	private QuickAction mLasQuickAction;
@@ -86,12 +87,24 @@ public class ScreenTabContacts extends BaseScreen {
 			}
 		});
 		
-		mAItemMessaging = new ActionItem();
-		mAItemMessaging.setTitle("Chat");
-		mAItemMessaging.setOnClickListener(new View.OnClickListener() {
+		mAItemChat = new ActionItem();
+		mAItemChat.setTitle("Chat");
+		mAItemChat.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// ScreenChat.startChat(mSelectedContact.getPrimaryNumber());
+				ScreenChat.startChat(mSelectedContact.getPrimaryNumber(), false);
+				if(mLasQuickAction != null){
+					mLasQuickAction.dismiss();
+				}
+			}
+		});
+		
+		mAItemSMS = new ActionItem();
+		mAItemSMS.setTitle("SMS");
+		mAItemSMS.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ScreenChat.startChat(mSelectedContact.getPrimaryNumber(), true);
 				if(mLasQuickAction != null){
 					mLasQuickAction.dismiss();
 				}
@@ -124,7 +137,7 @@ public class ScreenTabContacts extends BaseScreen {
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
 						mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
-					// mLasQuickAction.addActionItem(mAItemMessaging);
+					mLasQuickAction.addActionItem(mAItemSMS);
 				}
 				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 				mLasQuickAction.show();
@@ -147,7 +160,7 @@ public class ScreenTabContacts extends BaseScreen {
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
 						// mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
-					// mLasQuickAction.addActionItem(mAItemMessaging);
+					mLasQuickAction.addActionItem(mAItemSMS);
 				}
 				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 				mLasQuickAction.show();

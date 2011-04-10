@@ -7,6 +7,8 @@ public class NgnSubscriptionEventArgs extends NgnEventArgs{
 	
 	public static final String ACTION_SUBSCRIBTION_EVENT = TAG + ".ACTION_SUBSCRIBTION_EVENT";
 	
+	public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
+	
 	public NgnSubscriptionEventArgs(){
 		super();
 	}

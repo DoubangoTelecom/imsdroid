@@ -33,6 +33,7 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 	public static enum SCREEN_TYPE {
 		// Well-Known
 		ABOUT_T,
+		CHAT_T,
 		CODECS_T,
 		CONTACTS_T,
 		DIALER_T,

@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
-import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnInviteEventTypes;
 import org.doubango.ngn.events.NgnMessagingEventArgs;
@@ -17,14 +16,14 @@ import org.doubango.ngn.services.INgnNetworkService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.sip.NgnInviteSession;
-import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.sip.NgnMessagingSession;
 import org.doubango.ngn.sip.NgnPresenceStatus;
 import org.doubango.ngn.sip.NgnRegistrationSession;
 import org.doubango.ngn.sip.NgnSipPrefrences;
 import org.doubango.ngn.sip.NgnSipSession;
-import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 import org.doubango.ngn.sip.NgnSipStack;
+import org.doubango.ngn.sip.NgnInviteSession.InviteState;
+import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 import org.doubango.ngn.sip.NgnSipStack.STACK_STATE;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnContentType;
@@ -423,19 +422,19 @@ implements INgnSipService, tinyWRAPConstants {
 	
 	private void broadcastRegistrationEvent(NgnRegistrationEventArgs args){
 		final Intent intent = new Intent(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT);
-		intent.putExtra(NgnEventArgs.EXTRA_EMBEDDED, args);
+		intent.putExtra(NgnRegistrationEventArgs.EXTRA_EMBEDDED, args);
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	
 	private void broadcastInviteEvent(NgnInviteEventArgs args){
 		final Intent intent = new Intent(NgnInviteEventArgs.ACTION_INVITE_EVENT);
-		intent.putExtra(NgnEventArgs.EXTRA_EMBEDDED, args);
+		intent.putExtra(NgnInviteEventArgs.EXTRA_EMBEDDED, args);
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	
 	private void broadcastMessagingEvent(NgnMessagingEventArgs args){
 		final Intent intent = new Intent(NgnMessagingEventArgs.ACTION_MESSAGING_EVENT);
-		intent.putExtra(NgnEventArgs.EXTRA_EMBEDDED, args);
+		intent.putExtra(NgnMessagingEventArgs.EXTRA_EMBEDDED, args);
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	

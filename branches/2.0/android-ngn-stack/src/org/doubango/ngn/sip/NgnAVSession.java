@@ -366,7 +366,7 @@ public class NgnAVSession extends NgnInviteSession{
 	 */
 	public final View startVideoConsumerPreview(){
 		if(mVideoConsumer != null){
-			return mVideoConsumer.startPreview();
+			return mVideoConsumer.startPreview(mContext);
 		}
 		return null;
 	}
@@ -381,7 +381,7 @@ public class NgnAVSession extends NgnInviteSession{
 	 */
 	public final View startVideoProducerPreview(){
 		if(mVideoProducer != null){
-			return mVideoProducer.startPreview();
+			return mVideoProducer.startPreview(mContext);
 		}
 		return null;
 	}
@@ -479,6 +479,7 @@ public class NgnAVSession extends NgnInviteSession{
 				break;
 				
 			case INPROGRESS:
+				setModeInCall(true);
 				mHistoryEvent.setStatus(StatusType.Outgoing);
 				initializeConsumersAndProducers();
 				break;

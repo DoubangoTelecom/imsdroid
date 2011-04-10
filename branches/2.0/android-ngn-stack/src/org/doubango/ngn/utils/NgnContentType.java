@@ -12,6 +12,7 @@ public class NgnContentType {
 	public final static String REG_INFO = "application/reginfo+xml";
 	public final static String RLMI = "application/rlmi+xml";
 	public final static String RPID = "application/rpid+xml";
+	public final static String CPIM = "message/CPIM";
 	
 	public final static String WATCHER_INFO = "application/watcherinfo+xml";
 	public final static String XCAP_DIFF = "application/xcap-diff+xml";	

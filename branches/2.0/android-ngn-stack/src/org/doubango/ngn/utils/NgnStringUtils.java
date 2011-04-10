@@ -18,6 +18,18 @@ public class NgnStringUtils {
 		return ((s == null) || ("".equals(s)));
 	}
 	
+	public static boolean startsWith(String s, String prefix, boolean ignoreCase){
+		if(s != null && prefix != null){
+			if(ignoreCase){
+				return s.toLowerCase().startsWith(prefix.toLowerCase());
+			}
+			else{
+				return s.startsWith(prefix);
+			}
+		}
+		return s==null && prefix==null;
+	}
+	
 	public static boolean equals(String s1, String s2, boolean ignoreCase){
 		if(s1 != null && s2 != null){
 			if(ignoreCase){

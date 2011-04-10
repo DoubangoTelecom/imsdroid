@@ -13,6 +13,8 @@ public class NgnStackEventArgs extends NgnEventArgs{
 
     public static final String ACTION_STACK_EVENT = TAG + ".ACTION_STACK_EVENT";
     
+    public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
+    
     public NgnStackEventArgs(NgnStackEventTypes type, String phrase){
     	super();
         mType = type;

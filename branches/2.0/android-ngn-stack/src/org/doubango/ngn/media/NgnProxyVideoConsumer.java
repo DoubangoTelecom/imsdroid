@@ -56,8 +56,9 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     	mContext = context;
     }
     
-	public final View startPreview(){
-		if(mPreview == null && mContext != null){
+    public final View startPreview(Context context){
+    	mContext = context == null ? mContext : context;
+    	if(mPreview == null && mContext != null){
 			if(mLooper != null){
 				mLooper.quit();
 				mLooper = null;
@@ -117,6 +118,10 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 			Log.e(TAG, "Invalid state");
 		}
 		return mPreview;
+    }
+    
+	public final View startPreview(){
+		return startPreview(null);
 	}
     
     private int prepareCallback(int width, int height, int fps){
