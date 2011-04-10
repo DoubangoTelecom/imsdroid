@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:background="@color/color_white" android:orientation="vertical">
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/screen_chat_linearLayout_top" android:layout_width="fill_parent" android:padding="3px" android:background="@drawable/grad_dark" android:weightSum="6">
+        <Button android:layout_weight="2" android:textColor="@color/color_black" android:textStyle="bold" android:layout_height="wrap_content" android:focusable="false" android:focusableInTouchMode="false" android:text="Visio Call" android:id="@+id/screen_chat_button_visio_call" android:layout_width="wrap_content" android:layout_margin="2px"></Button>
+        <Button android:textColor="@color/color_black" android:textStyle="bold" android:layout_weight="2" android:layout_height="wrap_content" android:focusable="false" android:focusableInTouchMode="false" android:text="Voice Call" android:id="@+id/screen_chat_button_voice_call" android:layout_width="wrap_content" android:layout_margin="2px"></Button>
+        <Button android:textColor="@color/color_black" android:textStyle="bold" android:layout_weight="2" android:layout_height="wrap_content" android:focusable="false" android:focusableInTouchMode="false" android:id="@+id/screen_chat_button_share_content" android:layout_width="wrap_content" android:layout_margin="2px" android:text="Share"></Button>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/screen_chat_linearLayout_middle" android:layout_below="@+id/screen_chat_linearLayout_top" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent" android:weightSum="2">
+        <LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_weight="2">
+        	<ListView android:id="@+id/screen_chat_listView" android:layout_width="fill_parent" android:background="@color/color_white" android:clickable="false" android:divider="@color/color_white" android:layout_height="wrap_content"></ListView>
+        </LinearLayout>
+        <LinearLayout android:layout_height="wrap_content" android:weightSum="2" android:layout_width="fill_parent" android:id="@+id/screen_chat_linearLayout_bottom" android:gravity="center" android:layout_gravity="center" android:padding="8px" android:background="@drawable/grad_dark">
+            <EditText android:layout_height="wrap_content" android:id="@+id/screen_chat_editText_compose" android:layout_weight="2" android:gravity="bottom" android:layout_width="wrap_content" android:layout_marginLeft="5px" android:layout_gravity="center" android:inputType="textImeMultiLine" android:maxLength="256"></EditText>
+            <Button android:id="@+id/screen_chat_button_send" android:textColor="@color/color_white" android:textSize="16dp" android:layout_marginRight="5px" android:background="@drawable/sel_green" android:gravity="center" android:layout_gravity="center" android:layout_height="wrap_content" android:layout_width="wrap_content" android:padding="10dp" android:layout_marginLeft="7px" android:focusable="false" android:focusableInTouchMode="false" android:text="Send"></Button>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

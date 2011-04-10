@@ -12,6 +12,8 @@ public class NgnRegistrationEventArgs extends NgnEventArgs {
     
 	public static final String ACTION_REGISTRATION_EVENT = TAG + ".ACTION_REGISTRATION_CHANGED";
 	
+	public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
+	
     public NgnRegistrationEventArgs(NgnRegistrationEventTypes type, short sipCode, String phrase){
     	super();
     	mType = type;

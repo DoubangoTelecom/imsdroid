@@ -48,8 +48,8 @@ public class ScreenTabDialer  extends BaseScreen {
 		DialerUtils.setDialerTextButton(this, R.id.screen_tab_dialer_button_star, "*", "", DialerUtils.TAG_STAR, mOnDialerClick);
 		DialerUtils.setDialerTextButton(this, R.id.screen_tab_dialer_button_sharp, "#", "", DialerUtils.TAG_SHARP, mOnDialerClick);
 		
-		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_audio, R.drawable.ic_menu_call_48, DialerUtils.TAG_AUDIO_CALL, mOnDialerClick);
-		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_video, R.drawable.ic_menu_call_48, DialerUtils.TAG_VIDEO_CALL, mOnDialerClick);
+		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_audio, R.drawable.voice_call_48, DialerUtils.TAG_AUDIO_CALL, mOnDialerClick);
+		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_video, R.drawable.visio_call_48, DialerUtils.TAG_VIDEO_CALL, mOnDialerClick);
 		DialerUtils.setDialerImageButton(this, R.id.screen_tab_dialer_button_del, R.drawable.ic_input_delete_48, DialerUtils.TAG_DELETE, mOnDialerClick);
 		
 		mEtNumber.setInputType(InputType.TYPE_NULL);
@@ -117,6 +117,16 @@ public class ScreenTabDialer  extends BaseScreen {
 			}
 		}
 	};
+	
+	@Override
+	public boolean hasBack(){
+		return true;
+	}
+	
+	@Override
+	public boolean back(){
+		return mScreenService.show(ScreenHome.class);
+	}
 	
 	private void appendText(String textToAppend){
 		final int selStart = mEtNumber.getSelectionStart();

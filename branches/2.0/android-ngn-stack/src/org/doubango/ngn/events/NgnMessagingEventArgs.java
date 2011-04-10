@@ -12,6 +12,7 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
 
     public static final String ACTION_MESSAGING_EVENT = TAG + ".ACTION_MESSAGING_EVENT";
     
+    public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
     public static final String EXTRA_SESSION = TAG + "session";
     public static final String EXTRA_CODE = TAG + "code";
     public static final String EXTRA_REMOTE_PARTY = TAG + "from";

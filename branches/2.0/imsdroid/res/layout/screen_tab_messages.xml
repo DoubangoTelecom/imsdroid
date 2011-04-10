@@ -2,5 +2,7 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
+  android:layout_height="fill_parent" android:orientation="vertical">
+  <TextView android:layout_height="wrap_content" android:textSize="25dp" android:textStyle="bold" android:padding="10px" android:layout_width="fill_parent" android:gravity="center" android:textColor="@color/color_white" android:text="Messages" android:background="@drawable/grad_dark"></TextView>
+  <ListView android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/screen_tab_messages_listView" android:layout_marginTop="3px"></ListView>
 </LinearLayout>

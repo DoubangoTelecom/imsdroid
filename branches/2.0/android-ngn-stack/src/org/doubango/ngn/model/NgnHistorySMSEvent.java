@@ -40,7 +40,7 @@ public class NgnHistorySMSEvent extends NgnHistoryEvent{
 		
 		@Override
 		public boolean apply(NgnHistoryEvent event) {
-			if (event != null && (event.getMediaType() == NgnMediaType.SMS)){
+			if (event != null && (event.getMediaType() == NgnMediaType.SMS || event.getMediaType() == NgnMediaType.Chat)){
 				if(!mRemoteParties.contains(event.getRemoteParty())){
 					mRemoteParties.add(event.getRemoteParty());
 					return true;
@@ -53,7 +53,7 @@ public class NgnHistorySMSEvent extends NgnHistoryEvent{
 	public static class HistoryEventSMSFilter implements NgnPredicate<NgnHistoryEvent>{
 		@Override
 		public boolean apply(NgnHistoryEvent event) {
-			return (event != null && (event.getMediaType() == NgnMediaType.SMS));
+			return (event != null && (event.getMediaType() == NgnMediaType.SMS || event.getMediaType() == NgnMediaType.Chat));
 		}
 	}
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="fill_parent" android:layout_width="fill_parent" android:weightSum="6" android:background="@color/color_white" android:orientation="vertical">
+    
+    <TextView android:layout_height="wrap_content" android:id="@+id/screen_chat_item_textView_date" android:layout_width="fill_parent" android:layout_gravity="center_horizontal" android:gravity="center_horizontal" android:textColor="@color/color_gray" android:textStyle="bold" android:text="Vendredi 25, 2001 8:09 PM" android:textSize="10dp" android:layout_margin="3px"></TextView>
+    
+    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginLeft="3px" android:layout_marginRight="3px">
+	    <LinearLayout android:id="@+id/screen_chat_item_linearLayout_left" android:layout_height="wrap_content" android:layout_width="80dp">
+	    </LinearLayout>
+	    
+	    <LinearLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:orientation="vertical" android:layout_weight="6">
+		    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="horizontal" android:weightSum="6">
+		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_left" android:background="@drawable/grad_dark" android:layout_height="wrap_content" android:layout_width="wrap_content"> </ImageView>
+		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="6" android:background="@drawable/grad_dark"> </ImageView>
+		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_right" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
+			</LinearLayout>
+			
+			<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="horizontal" android:weightSum="6">
+				<ImageView android:id="@+id/screen_chat_item_imageView_middle_left" android:layout_width="wrap_content" android:layout_height="fill_parent" android:background="@drawable/grad_dark"> </ImageView>
+				<TextView android:id="@+id/screen_chat_item_textView" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="TextView" android:textColor="@color/color_black" android:layout_weight="6" android:textSize="14dp" android:background="@drawable/grad_dark"></TextView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_middle_right" android:layout_height="fill_parent" android:layout_width="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
+			</LinearLayout>
+			<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="horizontal" android:weightSum="6">
+				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_left" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_center" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="6" android:background="@drawable/grad_dark"> </ImageView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_right" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
+			</LinearLayout>
+		</LinearLayout>
+		
+		<LinearLayout android:id="@+id/screen_chat_item_linearLayout_right" android:layout_height="wrap_content" android:layout_width="80dp">
+	    </LinearLayout>
+	</LinearLayout>
+</LinearLayout>

@@ -8,11 +8,14 @@ import android.os.Parcelable;
  */
 public class NgnInviteEventArgs extends NgnEventArgs{
 	private final static String TAG = NgnInviteEventArgs.class.getCanonicalName();
+	
 	private long mSessionId;
     private NgnInviteEventTypes mType;
     private String mPhrase;
     
     public static final String ACTION_INVITE_EVENT = TAG + ".ACTION_INVITE_EVENT";
+    
+    public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
     public static final String EXTRA_SESSION = "session";
 
     public NgnInviteEventArgs(long sessionId, NgnInviteEventTypes type, String phrase){

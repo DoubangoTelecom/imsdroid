@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="wrap_content">
+	<LinearLayout
+	  xmlns:android="http://schemas.android.com/apk/res/android"
+	  android:layout_width="fill_parent"
+	  android:orientation="horizontal" android:layout_height="wrap_content" android:background="@drawable/grad_dark">
+	    
+	    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:weightSum="2" android:orientation="horizontal" android:background="@color/color_black" android:layout_marginBottom="1px" android:paddingTop="5px" android:paddingLeft="5px" android:paddingRight="1px" android:paddingBottom="10px">
+		    <LinearLayout android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="2" android:layout_width="fill_parent">
+		    	<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:weightSum="2" android:id="@+id/screen_tab_messages_item_linearLayout_top">
+		    		<TextView android:layout_alignParentLeft="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/screen_tab_messages_item_textView_remote" android:text="John Doe" android:layout_weight="2" android:textSize="20dp" android:textColor="@color/color_white" android:textStyle="bold"></TextView>
+		    		<TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Yesterday" android:id="@+id/screen_tab_messages_item_textView_date" android:textColor="@color/color_white" android:textSize="12dp"></TextView>
+		    	</LinearLayout>
+		    	<TextView android:layout_height="wrap_content" android:text="TextView" android:layout_below="@+id/screen_tab_messages_item_linearLayout_top" android:layout_width="fill_parent" android:id="@+id/screen_tab_messages_item_textView_content" android:textColor="@color/color_white"></TextView>
+		    </LinearLayout>
+		    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="3px" android:src="@drawable/expand"></ImageView>
+		</LinearLayout>
+	</LinearLayout>
+	<TextView android:background="@drawable/grad_redcircle" android:layout_height="32dp" android:layout_width="32dp" android:textStyle="bold" android:textColor="@color/color_white" android:textSize="20dp" android:id="@+id/screen_tab_messages_item_textView_unseen" android:text="0" android:gravity="center" android:visibility="invisible"></TextView>
+</RelativeLayout>

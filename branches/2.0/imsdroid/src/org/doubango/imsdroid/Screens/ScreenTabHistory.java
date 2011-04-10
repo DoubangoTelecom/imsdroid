@@ -45,7 +45,8 @@ public class ScreenTabHistory extends BaseScreen {
 	
 	private final ActionItem mAItemVoiceCall;
 	private final ActionItem mAItemVideoCall;
-	private final ActionItem mAItemMessaging;
+	private final ActionItem mAItemChat;
+	private final ActionItem mAItemSMS;
 	
 	private NgnHistoryEvent mSelectedEvent;
 	private QuickAction mLasQuickAction;
@@ -84,13 +85,27 @@ public class ScreenTabHistory extends BaseScreen {
 			}
 		});
 		
-		mAItemMessaging = new ActionItem();
-		mAItemMessaging.setTitle("Chat");
-		mAItemMessaging.setOnClickListener(new View.OnClickListener() {
+		mAItemChat = new ActionItem();
+		mAItemChat.setTitle("Chat");
+		mAItemChat.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if(mSelectedEvent != null){
-					// ScreenChat.startChat(mSelectedEvent.getRemoteParty());
+					ScreenChat.startChat(mSelectedEvent.getRemoteParty(), false);
+					if(mLasQuickAction != null){
+						mLasQuickAction.dismiss();
+					}
+				}
+			}
+		});
+		
+		mAItemSMS = new ActionItem();
+		mAItemSMS.setTitle("SMS");
+		mAItemSMS.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(mSelectedEvent != null){
+					ScreenChat.startChat(mSelectedEvent.getRemoteParty(), true);
 					if(mLasQuickAction != null){
 						mLasQuickAction.dismiss();
 					}
@@ -135,7 +150,8 @@ public class ScreenTabHistory extends BaseScreen {
 						mLasQuickAction.addActionItem(mAItemVoiceCall);
 						mLasQuickAction.addActionItem(mAItemVideoCall);
 					}
-					mLasQuickAction.addActionItem(mAItemMessaging);
+					mLasQuickAction.addActionItem(mAItemChat);
+					mLasQuickAction.addActionItem(mAItemSMS);
 				}
 				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 				mLasQuickAction.show();

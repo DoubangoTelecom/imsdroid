@@ -196,7 +196,7 @@ public class ScreenHome extends BaseScreen {
     		new ScreenHomeItem(R.drawable.dialer_48, "Dialer", ScreenTabDialer.class),
     		new ScreenHomeItem(R.drawable.eab2_48, "Address Book", ScreenTabContacts.class),
     		new ScreenHomeItem(R.drawable.history_48, "History", ScreenTabHistory.class),
-    		new ScreenHomeItem(R.drawable.chat_48, "Messages", ScreenMessaging.class),
+    		new ScreenHomeItem(R.drawable.chat_48, "Messages", ScreenTabMessages.class),
 		};
 		
 		private final LayoutInflater mInflater;

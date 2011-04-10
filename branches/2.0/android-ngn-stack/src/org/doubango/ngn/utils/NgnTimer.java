@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.doubango.ngn.services.impl.NgnContactService;
-
 import android.util.Log;
 
 public class NgnTimer extends Timer{

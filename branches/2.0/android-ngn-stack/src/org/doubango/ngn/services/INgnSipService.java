@@ -1,8 +1,8 @@
 package org.doubango.ngn.services;
 
 import org.doubango.ngn.sip.NgnPresenceStatus;
-import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 import org.doubango.ngn.sip.NgnSipStack;
+import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 
 import android.content.Context;
 
@@ -11,6 +11,68 @@ import android.content.Context;
  * An instance of this service could be retrieved like this:
  * @code
  * final INgnSipService mSipService = NgnEngine.getInstance().getSipService();
+ * @endcode
+ * 
+ * <h1>Audio/Video calls</h1>
+ * <h2>Making audio call</h2>
+ * To get notified about the audio/video call state please see @ref anchor_Listening_for_audio_video_call_state "here"<br/>
+ * @code
+ * final String remoteUri = "+33600000000";
+ * final String validUri = NgnUriUtils.makeValidSipUri(remoteUri); // sip:+33600000000"@doubango.org
+ * NgnAVSession avSession = NgnAVSession.createOutgoingSession(mSipService.getSipStack(), NgnMediaType.Audio);
+ * if(avSession.makeCall(validUri)){
+ * 	Log.d(TAG,"all is ok");
+ * }
+ * else{
+ * Log.e(TAG,"Failed to place the call");
+ * }
+ * @endcode
+ * <h2>Making video call</h2>
+ * To get notified about the audio/video call state please see @ref anchor_Listening_for_audio_video_call_state "here"<br/>
+ * @code
+ * final String remoteUri = "+33600000000";
+ * final String validUri = NgnUriUtils.makeValidSipUri(remoteUri); // sip:+33600000000"@doubango.org
+ * NgnAVSession avSession = NgnAVSession.createOutgoingSession(mSipService.getSipStack(), NgnMediaType.AudioVideo);
+ * if(avSession.makeCall(validUri)){
+ * 	Log.d(TAG,"all is ok");
+ * }
+ * else{
+ * Log.e(TAG,"Failed to place the call");
+ * }
+ * @endcode
+ * 
+ * <h1>SMS and Chat</h1>
+ * <h2>3GPP Binary SMS</h2>
+ * @code
+ * final String SMSC = "sip:+3310000000@doubango.org"; // SMS Center
+ * final String remotePartyUri = "sip:+336000000@doubango.org"; // remote party
+ * final String textToSend = "hello world!";
+ * final NgnMessagingSession imSession = NgnMessagingSession.createOutgoingSession(mSipService.getSipStack(), 
+ * remotePartyUri);
+ * if(!imSession.SendBinaryMessage(textToSend,SMSC)){
+ * 	Log.e(TAG,"Failed to send");
+ * }
+ * else{
+ * Log.d(TAG,"Message sent");
+ * }
+ * // release session
+ * NgnMessagingSession.releaseSession(imSession);
+ * @endcode
+ * 
+ * <h2>Pager Mode IM</h2>
+ * @code
+ * final String textToSend = "hello world!";
+ * final String remotePartyUri = "sip:+336000000@doubango.org"; // remote party
+ * final NgnMessagingSession imSession = NgnMessagingSession.createOutgoingSession(mSipService.getSipStack(), 
+ * remotePartyUri);
+ * if(!imSession.sendTextMessage(textToSend)){
+ * 	Log.e(TAG,"Failed to send");
+ * }
+ * else{
+ * Log.d(TAG,"Message sent");
+ * }
+ * // release session
+ * NgnMessagingSession.releaseSession(imSession);
  * @endcode
  * 
  * <h1>Listening to events</h1>
@@ -60,6 +122,66 @@ import android.content.Context;
  * 		final IntentFilter intentFilter = new IntentFilter();
  * 		intentFilter.addAction(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT);
  * 	    registerReceiver(mSipBroadCastRecv, intentFilter);
+ * @endcode
+ * 
+ * <h2>Listening for audio/video call state change</h2>
+ *  @anchor anchor_Listening_for_audio_video_call_state
+ * You can listen to the audio/video call state change in order to get notified when the call state change (incoming, incall, outgoing, terminated, ...).
+ * @code
+ * final BroadcastReceiver mSipBroadCastRecv = new BroadcastReceiver() {
+ * 		@Override
+ * 		public void onReceive(Context context, Intent intent) {
+ * 			InviteState state;
+ * 			final String action = intent.getAction();
+ * 			if(NgnInviteEventArgs.ACTION_INVITE_EVENT.equals(action)){
+ * 				NgnInviteEventArgs args = intent.getParcelableExtra(NgnEventArgs.EXTRA_EMBEDDED);
+ * 				if(args == null){
+ * 					Log.e(TAG, "Invalid event args");
+ * 					return;
+ * 				}
+ * 				Log.d(TAG, "This is an event for session number "+args.getSessionId());		
+ * 				// Retrieve the session from the store
+ * 				NgnAVSession avSession = NgnAVSession.getSession(args.getSessionId());
+ * 				if(avSession == null){
+ * 					Log.e(TAG, "Cannot find session");
+ * 					return;
+ * 				}
+ * 				switch((state = avSession.getState())){
+ * 					case NONE:
+ * 					default:
+ * 						break;
+ * 						
+ * 					case INCOMING:
+ * 						Log.i(TAG, "Incoming call");
+ * 						break;
+ * 						
+ * 					case INPROGRESS:
+ * 						Log.i(TAG, "Call in progress");
+ * 						break;
+ * 						
+ * 					case REMOTE_RINGING:
+ * 						Log.i(TAG, "Remote party is ringing");
+ * 						break;
+ * 						
+ * 					case EARLY_MEDIA:
+ * 						Log.i(TAG, "Early media started");
+ * 						break;
+ * 						
+ * 					case INCALL:
+ * 						Log.i(TAG, "Call connected");
+ * 						break;
+ * 						
+ * 					case TERMINATING:
+ * 						Log.i(TAG, "Call terminating");
+ * 						break;
+ * 						
+ * 					case TERMINATED:
+ * 						Log.i(TAG, "Call terminated");
+ * 						break;
+ * 				}
+ * 			}
+ * 		}
+ * 	};
  * @endcode
  * 
  * <h1>Configuration</h1>
