@@ -225,12 +225,7 @@ public class ScreenAV extends BaseScreen{
 		}
 		
 		 if(mAVSession.getState() == InviteState.INCALL){
-        	try{
-				mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
-			}
-			catch(IllegalStateException ise){
-				Log.d(TAG, ise.toString());
-			}
+			mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
 	     }
 	}
 
@@ -435,7 +430,7 @@ public class ScreenAV extends BaseScreen{
 	public static boolean makeCall(String remoteUri, NgnMediaType mediaType){
 		final INgnSipService sipService = ((Engine)Engine.getInstance()).getSipService();
 		final INgnConfigurationService configurationService = ((Engine)Engine.getInstance()).getConfigurationService();
-		final IScreenService screeneService = ((Engine)Engine.getInstance()).getScreenService();
+		final IScreenService screenService = ((Engine)Engine.getInstance()).getScreenService();
 		final String validUri = NgnUriUtils.makeValidSipUri(remoteUri);
 		if(validUri == null){
 			Log.e(TAG, "failed to normalize sip uri '" + remoteUri + "'");
@@ -462,7 +457,7 @@ public class ScreenAV extends BaseScreen{
 		
 		NgnAVSession avSession = NgnAVSession.createOutgoingSession(sipService.getSipStack(), mediaType);
 		avSession.setRemotePartyUri(remoteUri); // HACK
-		screeneService.show(ScreenAV.class, Long.toString(avSession.getId()));	
+		screenService.show(ScreenAV.class, Long.toString(avSession.getId()));	
 		
 		// Hold the active call
 		final NgnAVSession activeCall = NgnAVSession.getFirstActiveCallAndNot(avSession.getId());
