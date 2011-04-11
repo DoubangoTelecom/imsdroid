@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:orientation="vertical" android:layout_gravity="center" android:gravity="center">
+    <TextView android:text="TextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/call_screen_textView_info"></TextView>
+    <TextView android:text="TextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/callscreen_textView_remote" android:layout_margin="20px"></TextView>
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/callscreen_button_hangup" android:text="End Call"></Button>
+</LinearLayout>

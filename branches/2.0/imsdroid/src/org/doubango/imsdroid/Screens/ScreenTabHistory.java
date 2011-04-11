@@ -165,9 +165,9 @@ public class ScreenTabHistory extends BaseScreen {
 		}
 	};
 	
-	/**
-	 * ScreenTabHistoryAdapter
-	 */
+	//
+	// ScreenTabHistoryAdapter
+	//
 	static class ScreenTabHistoryAdapter extends BaseAdapter implements Observer {
 		private List<NgnHistoryEvent> mEvents;
 		private final LayoutInflater mInflater;
