@@ -14,7 +14,9 @@ import org.doubango.ngn.events.NgnMsrpEventArgs;
 import org.doubango.ngn.events.NgnMsrpEventTypes;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.utils.NgnContentType;
+import org.doubango.ngn.utils.NgnListUtils;
 import org.doubango.ngn.utils.NgnObservableHashMap;
+import org.doubango.ngn.utils.NgnPredicate;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.MediaContent;
@@ -49,7 +51,9 @@ public class NgnMsrpSession extends NgnInviteSession {
 	private Context mContext;
 	private final MsrpSession mSession;
 	private final NgnMsrpCallback mCallback;
+	private final long[] mStart, mEnd, mTotal;
 	private String mFilePath;
+	private String mFileName;
 	private String mFileType;
 	private boolean mFailureReport;
 	private boolean mSuccessReport;
@@ -59,6 +63,12 @@ public class NgnMsrpSession extends NgnInviteSession {
 
 	private final static NgnObservableHashMap<Long, NgnMsrpSession> sSessions = new NgnObservableHashMap<Long, NgnMsrpSession>(
 			true);
+	
+	public final static NgnObservableHashMap<Long, NgnMsrpSession> getSessions(){
+		synchronized(sSessions){
+			return sSessions;
+		}
+	}
 
 	public static NgnMsrpSession takeIncomingSession(NgnSipStack sipStack, MsrpSession session, SipMessage message){
 		NgnMsrpSession msrpSession = null;
@@ -107,6 +117,7 @@ public class NgnMsrpSession extends NgnInviteSession {
             msrpSession = NgnMsrpSession.createIncomingSession(sipStack, session, mediaType, fromUri);
             msrpSession.mFilePath = String.format("%s/%s", NgnEngine.getInstance().getStorageService().getContentShareDir(), name);
             msrpSession.mFileType = type;
+            msrpSession.mFileName = name;
         }
 
         return msrpSession;
@@ -114,7 +125,7 @@ public class NgnMsrpSession extends NgnInviteSession {
 
 	public static NgnMsrpSession createIncomingSession(NgnSipStack sipStack, MsrpSession session, NgnMediaType mediaType, String remoteUri) {
 		if (mediaType == NgnMediaType.FileTransfer || mediaType == NgnMediaType.Chat) {
-			NgnMsrpSession msrpSession = new NgnMsrpSession(sipStack, session,mediaType, remoteUri);
+			NgnMsrpSession msrpSession = new NgnMsrpSession(sipStack, session,mediaType, remoteUri, InviteState.INCOMING);
 			sSessions.put(msrpSession.getId(), msrpSession);
 			return msrpSession;
 		}
@@ -123,7 +134,7 @@ public class NgnMsrpSession extends NgnInviteSession {
 
 	public static NgnMsrpSession createOutgoingSession(NgnSipStack sipStack, NgnMediaType mediaType, String remoteUri) {
 		if (mediaType == NgnMediaType.FileTransfer || mediaType == NgnMediaType.Chat) {
-			NgnMsrpSession msrpSession = new NgnMsrpSession(sipStack, null, mediaType, remoteUri);
+			NgnMsrpSession msrpSession = new NgnMsrpSession(sipStack, null, mediaType, remoteUri, InviteState.INPROGRESS);
 			sSessions.put(msrpSession.getId(), msrpSession);
 			return msrpSession;
 		}
@@ -164,6 +175,24 @@ public class NgnMsrpSession extends NgnInviteSession {
 			return sSessions.size();
 		}
 	}
+	
+	public static int getSize(NgnPredicate<NgnMsrpSession> predicate) {
+		synchronized (sSessions) {
+			return NgnListUtils.filter(sSessions.values(), predicate).size();
+		}
+	}
+	
+	public static boolean hasActiveSession(NgnPredicate<NgnMsrpSession> predicate){
+    	synchronized (sSessions){
+    		final List<NgnMsrpSession> mysessions = NgnListUtils.filter(sSessions.values(), predicate);
+	    	for(NgnMsrpSession session : mysessions){
+	    		if(session.isActive()){
+	    			return true;
+	    		}
+	    	}
+    	}
+    	return false;
+    }
 
 	public static boolean hasSession(long id) {
 		synchronized (sSessions) {
@@ -171,8 +200,11 @@ public class NgnMsrpSession extends NgnInviteSession {
 		}
 	}
 
-	protected NgnMsrpSession(NgnSipStack sipStack, MsrpSession session, NgnMediaType mediaType, String toUri) {
+	protected NgnMsrpSession(NgnSipStack sipStack, MsrpSession session, NgnMediaType mediaType, String toUri, InviteState callState) {
 		super(sipStack);
+		mStart = new long[1];
+		mEnd = new long[1];
+		mTotal = new long[1];
 		super.mMediaType = mediaType;
 		mCallback = new NgnMsrpCallback(this);
 		if (session == null) {
@@ -186,6 +218,7 @@ public class NgnMsrpSession extends NgnInviteSession {
 		super.init();
 		super.setSigCompId(sipStack.getSigCompId());
 		super.setToUri(toUri);
+		super.setState(callState);
 	}
 
 	@Override
@@ -212,6 +245,22 @@ public class NgnMsrpSession extends NgnInviteSession {
 		return mContext;
 	}
 	
+	public long getStart(){
+		return mStart[0];
+	}
+	
+	public long getEnd(){
+		return mEnd[0];
+	}
+	
+	public long getTotal(){
+		return mTotal[0];
+	}
+	
+	public String getFileName(){
+        return mFileName;
+	}
+
 	public String getFilePath() {
 		return mFilePath;
 	}
@@ -296,31 +345,21 @@ public class NgnMsrpSession extends NgnInviteSession {
 		}
 
 		final File file = new File(path);
+		mFileName = file.getName();
 		mFilePath = file.getAbsolutePath();
 		mFileType = getFileType(mFilePath);
-		String fileSelector = String.format("name:\"%s\" type:%s size:%d", file
-				.getName(), mFileType, file.length());
+		String fileSelector = String.format("name:\"%s\" type:%s size:%d", mFileName, mFileType, file.length());
 
 		ActionConfig config = new ActionConfig();
-		config.setMediaString(twrap_media_type_t.twrap_media_msrp, "file-path",
-				this.mFilePath).setMediaString(
-				twrap_media_type_t.twrap_media_msrp, "file-selector",
-				fileSelector).setMediaString(
-				twrap_media_type_t.twrap_media_msrp, "accept-types",
-				FILE_ACCEPT_TYPES).setMediaString(
-				twrap_media_type_t.twrap_media_msrp, "accept-wrapped-types",
-				FILE_ACCEPT_WRAPPED_TYPES).setMediaString(
-				twrap_media_type_t.twrap_media_msrp, "file-disposition",
-				"attachment").setMediaString(
-				twrap_media_type_t.twrap_media_msrp, "file-icon",
-				"cid:test@doubango.org").setMediaString(
-				twrap_media_type_t.twrap_media_msrp, "Failure-Report",
-				mFailureReport ? "yes" : "no").setMediaString(
-				twrap_media_type_t.twrap_media_msrp, "Success-Report",
-				mSuccessReport ? "yes" : "no").setMediaInt(
-				twrap_media_type_t.twrap_media_msrp, "chunck-duration",
-				CHUNK_DURATION);
-
+		config.setMediaString(twrap_media_type_t.twrap_media_msrp, "file-path",mFilePath)
+			.setMediaString(twrap_media_type_t.twrap_media_msrp, "file-selector",fileSelector)
+			.setMediaString(twrap_media_type_t.twrap_media_msrp, "accept-types",FILE_ACCEPT_TYPES)
+			.setMediaString(twrap_media_type_t.twrap_media_msrp, "accept-wrapped-types", FILE_ACCEPT_WRAPPED_TYPES)
+			.setMediaString(twrap_media_type_t.twrap_media_msrp, "file-disposition", "attachment")
+			.setMediaString(twrap_media_type_t.twrap_media_msrp, "file-icon","cid:test@doubango.org")
+			.setMediaString(twrap_media_type_t.twrap_media_msrp, "Failure-Report", mFailureReport ? "yes" : "no")
+			.setMediaString(twrap_media_type_t.twrap_media_msrp, "Success-Report", mSuccessReport ? "yes" : "no")
+			.setMediaInt(twrap_media_type_t.twrap_media_msrp, "chunck-duration", CHUNK_DURATION);
 		boolean ret = mSession.callMsrp(super.getRemotePartyUri(), config);
 		config.delete();
 		return ret;
@@ -497,21 +536,20 @@ public class NgnMsrpSession extends NgnInviteSession {
 		}
 		
 		private void processResponse(MsrpMessage message) {
+			final short code = message.getCode();
+			final boolean bIsFileTransfer = mSession.getMediaType() == NgnMediaType.FileTransfer;
 			if(mSession.mContext != null){
 				synchronized (mSession.mContext) {
-					short code = message.getCode();
-
 					if (code >= 200 && code <= 299) {
 						// File Transfer => ProgressBar
-						if (mSession.getMediaType() == NgnMediaType.FileTransfer) {
-							long[] start = new long[1], end = new long[1], total = new long[1];
-							message.getByteRange(start, end, total);
+						if (bIsFileTransfer) {
+							message.getByteRange(mSession.mStart, mSession.mEnd, mSession.mTotal);
 							NgnMsrpEventArgs eargs = new NgnMsrpEventArgs(getSessionId(),NgnMsrpEventTypes.SUCCESS_2XX);
 							final Intent intent = new Intent(NgnMsrpEventArgs.ACTION_MSRP_EVENT);
 							intent.putExtra(NgnMsrpEventArgs.EXTRA_EMBEDDED,eargs);
-							intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_START,start[0]);
-							intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_END,end[0]);
-							intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_TOTAL,total[0]);
+							intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_START,mSession.mStart[0]);
+							intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_END,mSession.mEnd[0]);
+							intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_TOTAL,mSession.mTotal[0]);
 							intent.putExtra(NgnMsrpEventArgs.EXTRA_RESPONSE_CODE, code);
 							mSession.mContext.sendBroadcast(intent);
 						}
@@ -524,6 +562,16 @@ public class NgnMsrpSession extends NgnInviteSession {
 					}
 				}
 			}
+			// HangUp session if required
+			if(code >199 && code <300){                
+                if(mSession.mEnd[0]>=0 && mSession.mEnd[0] == mSession.mTotal[0]){
+                    if(bIsFileTransfer && mSession.isOutgoing()){
+                         mSession.hangUp();
+                    }
+                }
+	        } else if(code>=300){
+	        	mSession.hangUp();
+	        }
 		}
 		
 		private void processRequest(MsrpMessage message){
@@ -566,14 +614,13 @@ public class NgnMsrpSession extends NgnInviteSession {
                         if (mSession.getMediaType() == NgnMediaType.FileTransfer){
                         	if(mSession.mContext != null){
                         		synchronized (mSession.mContext) {
-                        			long[] start = new long[1], end = new long[1], total = new long[1];
-    	                            message.getByteRange(start, end, total);
+    	                            message.getByteRange(mSession.mStart, mSession.mEnd, mSession.mTotal);
     	                            NgnMsrpEventArgs eargs = new NgnMsrpEventArgs(getSessionId(),NgnMsrpEventTypes.DATA);
     								final Intent intent = new Intent(NgnMsrpEventArgs.ACTION_MSRP_EVENT);
     								intent.putExtra(NgnMsrpEventArgs.EXTRA_EMBEDDED,eargs);
-    								intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_START, start[0]);
-    								intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_END, end[0]);
-    								intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_TOTAL, total[0]);
+    								intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_START, mSession.mStart[0]);
+    								intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_END, mSession.mEnd[0]);
+    								intent.putExtra(NgnMsrpEventArgs.EXTRA_BYTE_RANGE_TOTAL, mSession.mTotal[0]);
     								intent.putExtra(NgnMsrpEventArgs.EXTRA_REQUEST_TYPE, "SEND");
     								mSession.mContext.sendBroadcast(intent);
 								}
@@ -700,7 +747,7 @@ public class NgnMsrpSession extends NgnInviteSession {
                 default:
                     break;
             }
-
+            mSession.setChangedAndNotifyObservers(null);
             return 0;
         }
     }

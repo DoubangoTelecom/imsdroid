@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/screen_filetrans_view_relativeLayout"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+  
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical" android:layout_gravity="center" android:isScrollContainer="true">
+		<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginTop="5px" android:id="@+id/screen_filetrans_view_textView_cname" android:text="unknown.3gp" android:textStyle="bold" android:ellipsize="end" android:textSize="20px" android:gravity="right" android:textColor="@color/color_white" android:background="@color/color_light"></TextView>
+		<TextView android:layout_height="wrap_content" android:id="@+id/screen_filetrans_view_textView_remoteParty" android:text="sip:unknown@open-ims.test" android:layout_width="fill_parent" android:ellipsize="end" android:textStyle="bold" android:textColor="@color/color_white"></TextView>
+		<LinearLayout android:layout_weight="3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="5px">
+			<ImageView android:id="@+id/screen_filetrans_view_imageView_preview" android:layout_width="fill_parent" android:scaleType="centerInside" android:layout_height="fill_parent"></ImageView>
+		</LinearLayout>
+		<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10px" android:orientation="vertical">
+			<TextView android:layout_height="wrap_content" android:id="@+id/screen_filetrans_view_textView_info" android:text="Sending content..." android:textStyle="bold" android:layout_width="fill_parent" android:layout_marginBottom="3px" android:textSize="16px" android:layout_marginLeft="5px" android:textColor="@color/color_white" android:background="@color/color_dark"></TextView>
+			<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_filetrans_view_textView_byteRange" android:text="*-*/*" android:layout_marginLeft="5px"></TextView>
+			<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="horizontal" android:weightSum="3" android:gravity="center">
+				<ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_height="wrap_content" android:id="@+id/screen_filetrans_view_progressBar" android:layout_marginBottom="3px" android:layout_width="fill_parent" android:layout_weight="3"></ProgressBar>
+				<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:layout_marginLeft="5px" android:orientation="horizontal">
+					<Button android:id="@+id/screen_filetrans_view_button_accept" android:text="Accept" android:background="@drawable/sel_green" android:layout_width="70dp" android:layout_height="60dp" android:layout_margin="2px" android:textColor="@color/color_white" android:textSize="15dp" android:textStyle="bold"></Button>
+					<Button android:id="@+id/screen_filetrans_view_button_abort" android:text="Abort" android:layout_width="70dp" android:layout_height="60dp" android:layout_margin="2px" android:background="@drawable/sel_red" android:textColor="@color/color_white" android:textSize="15dp" android:textStyle="bold"></Button>
+				</LinearLayout>
+			</LinearLayout>
+	
+		</LinearLayout>
+	</LinearLayout>
+
+</RelativeLayout>

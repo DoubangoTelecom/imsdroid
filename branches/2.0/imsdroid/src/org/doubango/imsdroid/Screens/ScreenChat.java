@@ -188,7 +188,7 @@ private InputMethodManager mInputMethodManager;
 	public boolean back(){
 		boolean ret =  mScreenService.show(ScreenTabMessages.class);
 		if(ret){
-			mScreenService.destroy(ScreenChat.class.getCanonicalName());
+			mScreenService.destroy(getId());
 		}
 		return ret;
 	}

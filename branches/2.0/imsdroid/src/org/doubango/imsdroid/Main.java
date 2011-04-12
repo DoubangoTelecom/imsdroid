@@ -4,6 +4,7 @@ import org.doubango.imsdroid.Screens.BaseScreen;
 import org.doubango.imsdroid.Screens.BaseScreen.SCREEN_TYPE;
 import org.doubango.imsdroid.Screens.IBaseScreen;
 import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenSplash;
 import org.doubango.imsdroid.Services.IScreenService;
@@ -28,6 +29,7 @@ public class Main extends ActivityGroup {
 	public static final int ACTION_NONE = 0;
 	public static final int ACTION_RESTORE_LAST_STATE = 1;
 	public static final int ACTION_SHOW_AVSCREEN = 2;
+	public static final int ACTION_SHOW_CONTSHARE_SCREEN = 3;
 	
 	private static final int RC_SPLASH = 0;
 	
@@ -195,6 +197,11 @@ public class Main extends ActivityGroup {
 						mScreenService.show(ScreenHome.class);
 					}
 				}
+				break;
+				
+			// Show Content Share Queue
+			case Main.ACTION_SHOW_CONTSHARE_SCREEN:
+				mScreenService.show(ScreenFileTransferQueue.class);
 				break;
 		}
 	}

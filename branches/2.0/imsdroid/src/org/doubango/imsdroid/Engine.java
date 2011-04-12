@@ -4,7 +4,10 @@ import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.Impl.ScreenService;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.NgnNativeService;
+import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.sip.NgnAVSession;
+import org.doubango.ngn.sip.NgnMsrpSession;
+import org.doubango.ngn.utils.NgnPredicate;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -20,6 +23,7 @@ public class Engine extends NgnEngine{
 	@SuppressWarnings("unused")
 	private static final int NOTIF_SMS_ID = 19833893;
 	private static final int NOTIF_APP_ID = 19833894;
+	private static final int NOTIF_CONTSHARE_ID = 19833895;
 	
 	private IScreenService mScreenService;
 	
@@ -65,6 +69,11 @@ public class Engine extends NgnEngine{
         		intent.putExtra("notif-type", "reg");
         		break;
         		
+        	case NOTIF_CONTSHARE_ID:
+                intent.putExtra("action", Main.ACTION_SHOW_CONTSHARE_SCREEN);
+                notification.defaults |= Notification.DEFAULT_SOUND;
+                break;
+                
         	case NOTIF_AVCALL_ID:
         		tickerText = String.format("%s (%d)", tickerText, NgnAVSession.getSize());
         		intent.putExtra("action", Main.ACTION_SHOW_AVSCREEN);
@@ -99,13 +108,42 @@ public class Engine extends NgnEngine{
     		mNotifManager.cancel(NOTIF_AVCALL_ID);
     	}
     }
-    
+	
 	public void refreshAVCallNotif(int drawableId){
-    	if(!NgnAVSession.hasActiveSession()){
+		if(!NgnAVSession.hasActiveSession()){
     		mNotifManager.cancel(NOTIF_AVCALL_ID);
     	}
     	else{
     		showNotification(NOTIF_AVCALL_ID, drawableId, "In Call");
+    	}
+    }
+	
+	public void showContentShareNotif(int drawableId, String tickerText){
+    	showNotification(NOTIF_CONTSHARE_ID, drawableId, tickerText);
+    }
+	
+	public void cancelContentShareNotif(){
+    	if(!NgnMsrpSession.hasActiveSession(new NgnPredicate<NgnMsrpSession>() {
+			@Override
+			public boolean apply(NgnMsrpSession session) {
+				return session != null && session.getMediaType() == NgnMediaType.FileTransfer;
+			}}))
+    	{
+    		mNotifManager.cancel(NOTIF_CONTSHARE_ID);
+    	}
+    }
+    
+	public void refreshContentShareNotif(int drawableId){
+		if(!NgnMsrpSession.hasActiveSession(new NgnPredicate<NgnMsrpSession>() {
+			@Override
+			public boolean apply(NgnMsrpSession session) {
+				return session != null && session.getMediaType() == NgnMediaType.FileTransfer;
+			}}))
+    	{
+    		mNotifManager.cancel(NOTIF_CONTSHARE_ID);
+    	}
+    	else{
+    		showNotification(NOTIF_CONTSHARE_ID, drawableId, "Content sharing");
     	}
     }
 	

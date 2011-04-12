@@ -5,6 +5,8 @@
     <uses-sdk android:minSdkVersion="5" />
 
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:persistent="true" android:name="IMSDroid">
+    	<service android:name=".NativeService"></service>
+    
         <activity android:name=".Main"
                   android:label="@string/app_name" android:launchMode="singleTop">
             <intent-filter>
@@ -20,7 +22,13 @@
         <activity android:name=".Screens.ScreenTabContacts"></activity>
         <activity android:name=".Screens.ScreenTabOnline"></activity>
         <activity android:name=".Screens.ScreenAV"></activity>
-        <service android:name=".NativeService"></service>
+        <activity android:name=".Screens.ScreenInterceptCall">
+        	<intent-filter>
+<!--                <action android:name="android.intent.action.CALL" />-->
+<!--                <category android:name="android.intent.category.DEFAULT"/>-->
+<!--                <data android:scheme="sip" />-->
+            </intent-filter>
+        </activity> 
         <activity android:name=".Screens.ScreenSettings"></activity>
         <activity android:name=".Screens.ScreenTabMessages"></activity>
         <activity android:name=".Screens.ScreenGeneral"></activity>
@@ -35,6 +43,8 @@
         <activity android:name=".Screens.ScreenQoS"></activity>
         <activity android:name=".Screens.ScreenAbout"></activity>
         <activity android:name=".Screens.ScreenChat"></activity>
+        <activity android:name=".Screens.ScreenFileTransferQueue"></activity>
+        <activity android:name=".Screens.ScreenFileTransferView"></activity>
         
 
     </application>
@@ -60,7 +70,9 @@
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 	<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
 	<uses-permission android:name="android.permission.CALL_PHONE" />
-	 <uses-permission android:name="android.permission.RAISED_THREAD_PRIORITY"/>
+	<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+	<uses-permission android:name="android.permission.CALL_PHONE" />
+	<uses-permission android:name="android.permission.RAISED_THREAD_PRIORITY"/>
 	
 	<uses-feature android:name="android.hardware.camera" />
 </manifest>

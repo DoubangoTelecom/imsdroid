@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content" android:padding="5px">
+  	<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/document_up_48" android:id="@+id/screen_filetrans_queue_item_imageView"></ImageView>
+  	<TextView android:layout_height="wrap_content" android:text="arc_de_triomphe.3gp" android:textStyle="bold" android:layout_width="fill_parent" android:id="@+id/screen_filetrans_queue_item_textView_name" android:layout_toRightOf="@+id/screen_filetrans_queue_item_imageView" android:textColor="@color/color_white" android:background="@color/color_light" android:padding="1px"></TextView>
+  	<TextView android:layout_height="wrap_content" android:id="@+id/screen_filetrans_queue_item_textView_remoteUri" android:layout_below="@+id/screen_filetrans_queue_item_textView_name" android:layout_toRightOf="@+id/screen_filetrans_queue_item_imageView" android:layout_width="fill_parent" android:text="sip:unknown@open-ims.test"></TextView>
+  	<ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_height="wrap_content" android:layout_toRightOf="@+id/screen_filetrans_queue_item_imageView" android:id="@+id/screen_filetrans_queue_item_progressBar" android:layout_below="@+id/screen_filetrans_queue_item_textView_remoteUri" android:layout_width="fill_parent"></ProgressBar>
+</RelativeLayout>

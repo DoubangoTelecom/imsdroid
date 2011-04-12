@@ -7,6 +7,7 @@ import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnMessagingEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventTypes;
+import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.sip.NgnAVSession;
 
 import android.content.BroadcastReceiver;
@@ -113,46 +114,63 @@ public class NativeService extends NgnNativeService {
 						return;
 					}
 					
-					final NgnAVSession avSession = NgnAVSession.getSession(args.getSessionId());
+					final NgnMediaType mediaType = args.getMediaType();
 					
 					switch(args.getEventType()){							
 						case TERMWAIT:
 						case TERMINATED:
-							//if(avSession != null){ //FIXME: could be removed by SipService.OnDialogEvent()
-							mEngine.refreshAVCallNotif(R.drawable.phone_call_25);
-							//}
-							mEngine.getSoundService().stopRingBackTone();
-							mEngine.getSoundService().stopRingTone();
+							if(NgnMediaType.isAudioVideoType(mediaType)){
+								mEngine.refreshAVCallNotif(R.drawable.phone_call_25);
+								mEngine.getSoundService().stopRingBackTone();
+								mEngine.getSoundService().stopRingTone();
+							}
+							else if(NgnMediaType.isFileTransfer(mediaType)){
+								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
+							}
 							break;
 							
 						case INCOMING:
-							if(avSession != null){
-								mEngine.showAVCallNotif(R.drawable.phone_call_25, getString(R.string.string_call_incoming));
-								ScreenAV.receiveCall(avSession);
-								if(mWakeLock != null && !mWakeLock.isHeld()){
-									mWakeLock.acquire(1);
+							if(NgnMediaType.isAudioVideoType(mediaType)){
+								final NgnAVSession avSession = NgnAVSession.getSession(args.getSessionId());
+								if(avSession != null){
+									mEngine.showAVCallNotif(R.drawable.phone_call_25, getString(R.string.string_call_incoming));
+									ScreenAV.receiveCall(avSession);
+									if(mWakeLock != null && !mWakeLock.isHeld()){
+										mWakeLock.acquire(1);
+									}
+									mEngine.getSoundService().startRingTone();
+								}
+								else{
+									Log.e(TAG, String.format("Failed to find session with id=%ld", args.getSessionId()));
 								}
 							}
-							mEngine.getSoundService().startRingTone();
+							else if(NgnMediaType.isFileTransfer(mediaType)){
+								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
+							}
 							break;
 							
 						case INPROGRESS:
-							if(avSession != null){
+							if(NgnMediaType.isAudioVideoType(mediaType)){
 								mEngine.showAVCallNotif(R.drawable.phone_call_25, getString(R.string.string_call_outgoing));
+							}
+							else if(NgnMediaType.isFileTransfer(mediaType)){
+								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
 							}
 							break;
 							
 						case RINGING:
-							mEngine.getSoundService().startRingBackTone();
+							if(NgnMediaType.isAudioVideoType(mediaType)){
+								mEngine.getSoundService().startRingBackTone();
+							}
 							break;
 						
 						case CONNECTED:
 						case EARLY_MEDIA:
-							if(avSession != null){
+							if(NgnMediaType.isAudioVideoType(mediaType)){
 								mEngine.showAVCallNotif(R.drawable.phone_call_25, getString(R.string.string_incall));
+								mEngine.getSoundService().stopRingBackTone();
+								mEngine.getSoundService().stopRingTone();
 							}
-							mEngine.getSoundService().stopRingBackTone();
-							mEngine.getSoundService().stopRingTone();
 							break;
 						default: break;
 					}

@@ -10,14 +10,16 @@ import org.doubango.imsdroid.QuickAction.ActionItem;
 import org.doubango.imsdroid.QuickAction.QuickAction;
 import org.doubango.imsdroid.Utils.DateTimeUtils;
 import org.doubango.ngn.media.NgnMediaType;
-import org.doubango.ngn.model.NgnHistoryAVCallEvent.HistoryEventAVFilter;
 import org.doubango.ngn.model.NgnHistoryEvent;
+import org.doubango.ngn.model.NgnHistoryAVCallEvent.HistoryEventAVFilter;
 import org.doubango.ngn.services.INgnHistoryService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,16 +28,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 public class ScreenTabHistory extends BaseScreen {
-	private static String TAG = ScreenTabHistory.class.getCanonicalName();
+	private static final String TAG = ScreenTabHistory.class.getCanonicalName();
+	private static final int SELECT_CONTENT = 1;
 	
 	private final INgnHistoryService mHistorytService;
 	private final INgnSipService mSipService;
@@ -47,6 +50,7 @@ public class ScreenTabHistory extends BaseScreen {
 	private final ActionItem mAItemVideoCall;
 	private final ActionItem mAItemChat;
 	private final ActionItem mAItemSMS;
+	private final ActionItem mAItemShare;
 	
 	private NgnHistoryEvent mSelectedEvent;
 	private QuickAction mLasQuickAction;
@@ -112,6 +116,24 @@ public class ScreenTabHistory extends BaseScreen {
 				}
 			}
 		});
+		
+		mAItemShare = new ActionItem();
+		mAItemShare.setTitle("Share");
+		mAItemShare.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(mSelectedEvent != null){
+					Intent intent = new Intent();
+                    intent.setType("*/*")
+                    	.addCategory(Intent.CATEGORY_OPENABLE)
+                    	.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "Select content"), SELECT_CONTENT);   
+					if(mLasQuickAction != null){
+						mLasQuickAction.dismiss();
+					}
+				}
+			}
+		});
 	}
 
 	@Override
@@ -152,6 +174,7 @@ public class ScreenTabHistory extends BaseScreen {
 					}
 					mLasQuickAction.addActionItem(mAItemChat);
 					mLasQuickAction.addActionItem(mAItemSMS);
+					mLasQuickAction.addActionItem(mAItemShare);
 				}
 				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 				mLasQuickAction.show();
@@ -164,6 +187,24 @@ public class ScreenTabHistory extends BaseScreen {
 			return false;
 		}
 	};
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (resultCode == RESULT_OK) {
+			switch (requestCode) {
+				case SELECT_CONTENT:
+					if (mSelectedEvent != null) {
+						Uri selectedContentUri = data.getData();
+						String selectedContentPath = super.getPath(selectedContentUri);
+						ScreenFileTransferView.sendFile(mSelectedEvent.getRemoteParty(), selectedContentPath);
+					}
+					break;
+			}
+		}
+	}
+
 	
 	//
 	// ScreenTabHistoryAdapter
@@ -234,8 +275,7 @@ public class ScreenTabHistory extends BaseScreen {
 
 		@Override
 		public void update(Observable observable, Object data) {
-			mEvents = mBaseScreen.mHistorytService.getObservableEvents()
-					.filter(new HistoryEventAVFilter());
+			mEvents = mBaseScreen.mHistorytService.getObservableEvents().filter(new HistoryEventAVFilter());
 			if(Thread.currentThread() == Looper.getMainLooper().getThread()){
 				notifyDataSetChanged();
 			}

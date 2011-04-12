@@ -11,8 +11,11 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -20,13 +23,13 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public abstract class BaseScreen extends Activity implements IBaseScreen {
 	private static final String TAG = BaseScreen.class.getCanonicalName();
@@ -37,8 +40,11 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 		CODECS_T,
 		CONTACTS_T,
 		DIALER_T,
+		FILETRANSFER_QUEUE_T,
+		FILETRANSFER_VIEW_T,
 		HOME_T,
 		IDENTITY_T,
+		INTERCEPT_CALL_T,
 		GENERAL_T,
 		MESSAGING_T,
 		NATT_T,
@@ -246,6 +252,22 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 		});
 	}
 
+    protected String getPath(Uri uri) {
+    	try{
+	        String[] projection = { MediaStore.Images.Media.DATA };
+	        Cursor cursor = managedQuery(uri, projection, null, null, null);
+	        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+	        cursor.moveToFirst();
+	        final String path = cursor.getString(column_index);
+	        cursor.close();
+	        return path;
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		return null;
+    	}
+    }
+    
 	public static boolean processKeyDown(int keyCode, KeyEvent event) {
 		final IScreenService screenService = ((Engine)Engine.getInstance()).getScreenService();
 		final IBaseScreen currentScreen = screenService.getCurrentScreen();
