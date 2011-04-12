@@ -279,7 +279,7 @@ public class NgnAVSession extends NgnInviteSession{
 	    super.addHeader("P-Preferred-Service", "urn:urn-7:3gpp-service.ims.icsi.mmtel");
 	    
 	    mHistoryEvent = new NgnHistoryAVCallEvent((mediaType == NgnMediaType.AudioVideo || mediaType == NgnMediaType.Video), null);
-	    setState(callState);
+	    super.setState(callState);
 	}
     
 	@Override

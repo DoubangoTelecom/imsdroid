@@ -1,5 +1,7 @@
 package org.doubango.ngn.events;
 
+import org.doubango.ngn.media.NgnMediaType;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,7 +12,8 @@ public class NgnInviteEventArgs extends NgnEventArgs{
 	private final static String TAG = NgnInviteEventArgs.class.getCanonicalName();
 	
 	private long mSessionId;
-    private NgnInviteEventTypes mType;
+    private NgnInviteEventTypes mEventType;
+    private NgnMediaType mMediaType;
     private String mPhrase;
     
     public static final String ACTION_INVITE_EVENT = TAG + ".ACTION_INVITE_EVENT";
@@ -18,10 +21,11 @@ public class NgnInviteEventArgs extends NgnEventArgs{
     public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
     public static final String EXTRA_SESSION = "session";
 
-    public NgnInviteEventArgs(long sessionId, NgnInviteEventTypes type, String phrase){
+    public NgnInviteEventArgs(long sessionId, NgnInviteEventTypes eventType, NgnMediaType mediaType, String phrase){
     	super();
     	mSessionId = sessionId;
-    	mType = type;
+    	mEventType = eventType;
+    	mMediaType = mediaType;
     	mPhrase = phrase;
     }
 
@@ -44,7 +48,11 @@ public class NgnInviteEventArgs extends NgnEventArgs{
     }
 
     public NgnInviteEventTypes getEventType(){
-        return mType;
+        return mEventType;
+    }
+    
+    public NgnMediaType getMediaType(){
+        return mMediaType;
     }
 
     public String getPhrase(){
@@ -54,14 +62,16 @@ public class NgnInviteEventArgs extends NgnEventArgs{
     @Override
 	protected void readFromParcel(Parcel in) {
     	mSessionId = (short)in.readLong();
-		mType = Enum.valueOf(NgnInviteEventTypes.class, in.readString());
+		mEventType = Enum.valueOf(NgnInviteEventTypes.class, in.readString());
+		mMediaType = Enum.valueOf(NgnMediaType.class, in.readString());
 		mPhrase = in.readString();
 	}
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeLong(mSessionId);
-		dest.writeString(mType.toString());
+		dest.writeString(mEventType.toString());
+		dest.writeString(mMediaType.toString());
 		dest.writeString(mPhrase);
 	}
 }

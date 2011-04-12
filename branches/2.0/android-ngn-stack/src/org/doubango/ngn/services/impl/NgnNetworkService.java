@@ -8,6 +8,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 
 import org.doubango.ngn.NgnApplication;
@@ -27,11 +28,11 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
 import android.net.wifi.WifiConfiguration.GroupCipher;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -46,6 +47,7 @@ import android.widget.Toast;
  */
 public class NgnNetworkService  extends NgnBaseService implements INgnNetworkService {
 	private static final String TAG = NgnNetworkService.class.getCanonicalName();
+	private static final String OPENVPN_INTERFACE_NAME = "tun0";
 	
 	private WifiManager mWifiManager;
 	private WifiLock mWifiLock;
@@ -134,23 +136,26 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 
 	@Override
 	public String getLocalIP(boolean ipv6) {
-		// From Interfaces
+		final HashMap<String, String> addressMap = new HashMap<String, String>();
 		try {
-			for (Enumeration<NetworkInterface> en = NetworkInterface
-					.getNetworkInterfaces(); en.hasMoreElements();) {
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
 				NetworkInterface intf = en.nextElement();
-				for (Enumeration<InetAddress> enumIpAddr = intf
-						.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 					InetAddress inetAddress = enumIpAddr.nextElement();
-					Log.d(NgnNetworkService.TAG, inetAddress.getHostAddress()
-							.toString());
+					Log.d(NgnNetworkService.TAG, inetAddress.getHostAddress().toString());
 					if (!inetAddress.isLoopbackAddress()) {
-						if (((inetAddress instanceof Inet4Address) && !ipv6)
-								|| ((inetAddress instanceof Inet6Address) && ipv6)) {
-							return inetAddress.getHostAddress().toString();
+						if (((inetAddress instanceof Inet4Address) && !ipv6) || ((inetAddress instanceof Inet6Address) && ipv6)) {
+							addressMap.put(intf.getName(), inetAddress.getHostAddress().toString());
 						}
 					}
 				}
+			}
+			if(addressMap.size() > 0){
+				final String openvpn = addressMap.get(OPENVPN_INTERFACE_NAME);
+				if(!NgnStringUtils.isNullOrEmpty(openvpn)){
+					return openvpn;
+				}
+				return addressMap.values().iterator().next();
 			}
 		} catch (SocketException ex) {
 			Log.e(NgnNetworkService.TAG, ex.toString());
@@ -158,8 +163,7 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 
 		// Hack
 		try {
-			java.net.Socket socket = new java.net.Socket(
-					ipv6 ? "ipv6.google.com" : "google.com", 80);
+			java.net.Socket socket = new java.net.Socket(ipv6 ? "ipv6.google.com" : "google.com", 80);
 			Log.d(NgnNetworkService.TAG, socket.getLocalAddress().getHostAddress());
 			return socket.getLocalAddress().getHostAddress();
 		} catch (UnknownHostException e) {

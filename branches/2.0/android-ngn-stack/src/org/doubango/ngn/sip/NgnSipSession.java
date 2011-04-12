@@ -95,6 +95,10 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
         return mId;
     }
 
+    public boolean isOutgoing(){
+    	return mOutgoing;
+    }
+    
     /**
      * Gets the associated SIP stack
      * @return a SIP stack

@@ -10,7 +10,6 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
-import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnContact;
@@ -130,7 +129,7 @@ public class ScreenAV extends BaseScreen{
 		}
 		mAVSession = NgnAVSession.getSession(NgnStringUtils.parseLong(super.mId, -1));
 		if(mAVSession == null){
-			Log.e(TAG, "Cannot find audio/video session");
+			Log.e(TAG, String.format("Cannot find audio/video session with id=%s", super.mId));
 			finish(); 
 			mScreenService.show(ScreenHome.class);
 			return;
@@ -428,9 +427,10 @@ public class ScreenAV extends BaseScreen{
 	}
 	
 	public static boolean makeCall(String remoteUri, NgnMediaType mediaType){
-		final INgnSipService sipService = ((Engine)Engine.getInstance()).getSipService();
-		final INgnConfigurationService configurationService = ((Engine)Engine.getInstance()).getConfigurationService();
-		final IScreenService screenService = ((Engine)Engine.getInstance()).getScreenService();
+		final Engine engine = (Engine)Engine.getInstance();
+		final INgnSipService sipService = engine.getSipService();
+		final INgnConfigurationService configurationService = engine.getConfigurationService();
+		final IScreenService screenService = engine.getScreenService();
 		final String validUri = NgnUriUtils.makeValidSipUri(remoteUri);
 		if(validUri == null){
 			Log.e(TAG, "failed to normalize sip uri '" + remoteUri + "'");
@@ -455,7 +455,7 @@ public class ScreenAV extends BaseScreen{
 			}
 		}
 		
-		NgnAVSession avSession = NgnAVSession.createOutgoingSession(sipService.getSipStack(), mediaType);
+		final NgnAVSession avSession = NgnAVSession.createOutgoingSession(sipService.getSipStack(), mediaType);
 		avSession.setRemotePartyUri(remoteUri); // HACK
 		screenService.show(ScreenAV.class, Long.toString(avSession.getId()));	
 		
@@ -491,7 +491,7 @@ public class ScreenAV extends BaseScreen{
 		}
 		final String action = intent.getAction();
 		if(NgnInviteEventArgs.ACTION_INVITE_EVENT.equals(action)){
-			NgnInviteEventArgs args = intent.getParcelableExtra(NgnEventArgs.EXTRA_EMBEDDED);
+			NgnInviteEventArgs args = intent.getParcelableExtra(NgnInviteEventArgs.EXTRA_EMBEDDED);
 			if(args == null){
 				Log.e(TAG, "Invalid event args");
 				return;
