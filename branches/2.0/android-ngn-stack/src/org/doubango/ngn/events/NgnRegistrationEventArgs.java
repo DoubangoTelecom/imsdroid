@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public class NgnRegistrationEventArgs extends NgnEventArgs {
 	private final static String TAG = NgnRegistrationEventArgs.class.getCanonicalName();
 	
+	private long mSessionId;
 	private NgnRegistrationEventTypes mType;
 	private short mSipCode;
 	private String mPhrase;
@@ -14,8 +15,9 @@ public class NgnRegistrationEventArgs extends NgnEventArgs {
 	
 	public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
 	
-    public NgnRegistrationEventArgs(NgnRegistrationEventTypes type, short sipCode, String phrase){
+    public NgnRegistrationEventArgs(long sessionId, NgnRegistrationEventTypes type, short sipCode, String phrase){
     	super();
+    	mSessionId = sessionId;
     	mType = type;
     	mSipCode = sipCode;
     	mPhrase = phrase;
@@ -35,6 +37,10 @@ public class NgnRegistrationEventArgs extends NgnEventArgs {
         }
     };
 
+    public long getSessionId(){
+    	return mSessionId;
+    }
+    
     public NgnRegistrationEventTypes getEventType(){
         return mType;
     }
@@ -49,6 +55,7 @@ public class NgnRegistrationEventArgs extends NgnEventArgs {
 
 	@Override
 	protected void readFromParcel(Parcel in) {
+		mSessionId = in.readLong();
 		mType = Enum.valueOf(NgnRegistrationEventTypes.class, in.readString());
 		mSipCode = (short)in.readInt();
 		mPhrase = in.readString();
@@ -56,6 +63,7 @@ public class NgnRegistrationEventArgs extends NgnEventArgs {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(mSessionId);
 		dest.writeString(mType.toString());
 		dest.writeInt(mSipCode);
 		dest.writeString(mPhrase);

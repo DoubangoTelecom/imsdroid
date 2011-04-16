@@ -40,7 +40,8 @@ import android.view.View;
  * Audio/Video call session
  */
 public class NgnAVSession extends NgnInviteSession{
-
+	private static final String TAG = NgnAVSession.class.getCanonicalName();
+	
 	private CallSession mSession;
 	private boolean mConsumersAndProducersInitialzed;
 	private NgnProxyVideoConsumer mVideoConsumer;
