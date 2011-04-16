@@ -9,8 +9,11 @@ import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnInviteEventTypes;
 import org.doubango.ngn.events.NgnMessagingEventArgs;
 import org.doubango.ngn.events.NgnMessagingEventTypes;
+import org.doubango.ngn.events.NgnPublicationEventArgs;
+import org.doubango.ngn.events.NgnPublicationEventTypes;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventTypes;
+import org.doubango.ngn.events.NgnSubscriptionEventArgs;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnNetworkService;
 import org.doubango.ngn.services.INgnSipService;
@@ -19,10 +22,12 @@ import org.doubango.ngn.sip.NgnInviteSession;
 import org.doubango.ngn.sip.NgnMessagingSession;
 import org.doubango.ngn.sip.NgnMsrpSession;
 import org.doubango.ngn.sip.NgnPresenceStatus;
+import org.doubango.ngn.sip.NgnPublicationSession;
 import org.doubango.ngn.sip.NgnRegistrationSession;
 import org.doubango.ngn.sip.NgnSipPrefrences;
 import org.doubango.ngn.sip.NgnSipSession;
 import org.doubango.ngn.sip.NgnSipStack;
+import org.doubango.ngn.sip.NgnSubscriptionSession;
 import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 import org.doubango.ngn.sip.NgnSipStack.STACK_STATE;
@@ -198,7 +203,9 @@ implements INgnSipService, tinyWRAPConstants {
 
 	@Override
 	public boolean stopStack() {
-		// TODO Auto-generated method stub
+		if(mSipStack != null){
+			mSipStack.stop();
+		}
 		return false;
 	}
 
@@ -443,6 +450,19 @@ implements INgnSipService, tinyWRAPConstants {
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	
+	private void broadcastPublicationEvent(NgnPublicationEventArgs args){
+		final Intent intent = new Intent(NgnPublicationEventArgs.ACTION_PUBLICATION_EVENT);
+		intent.putExtra(NgnPublicationEventArgs.EXTRA_EMBEDDED, args);
+		NgnApplication.getContext().sendBroadcast(intent);
+	}
+	
+	@SuppressWarnings("unused")
+	private void broadcastSubscriptionEvent(NgnSubscriptionEventArgs args){
+		final Intent intent = new Intent(NgnSubscriptionEventArgs.ACTION_SUBSCRIBTION_EVENT);
+		intent.putExtra(NgnSubscriptionEventArgs.EXTRA_EMBEDDED, args);
+		NgnApplication.getContext().sendBroadcast(intent);
+	}
+	
 	/**
 	 * MySipCallback
 	 */
@@ -474,10 +494,10 @@ implements INgnSipService, tinyWRAPConstants {
 				//== Connecting ==
 				case tinyWRAPConstants.tsip_event_code_dialog_connecting:
 				{
-					// Connecting //
+					// Registration
                     if (mSipService.mRegSession != null && mSipService.mRegSession.getId() == sessionId){
                     	mSipService.mRegSession.setConnectionState(ConnectionState.CONNECTING);
-                    	mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(NgnRegistrationEventTypes.REGISTRATION_INPROGRESS, 
+                    	mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.REGISTRATION_INPROGRESS, 
                     			code, phrase));
                     }
                     // Audio/Video/MSRP(Chat, FileTransfer)
@@ -486,6 +506,16 @@ implements INgnSipService, tinyWRAPConstants {
                         ((NgnInviteSession)mySession).setState(InviteState.INPROGRESS);
                         mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.INPROGRESS, ((NgnInviteSession)mySession).getMediaType(), phrase));
                     } 
+                    // Publication
+                    else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.CONNECTING);
+                    	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.PUBLICATION_INPROGRESS, 
+                    			code, phrase));
+                    }
+                    // Subscription
+                    else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.CONNECTING);
+                    }
 
 					break;
 				}
@@ -501,7 +531,7 @@ implements INgnSipService, tinyWRAPConstants {
                         if (!NgnStringUtils.isNullOrEmpty(_defaultIdentity)){
                         	mSipService.setDefaultIdentity(_defaultIdentity);
                         }
-                        mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(NgnRegistrationEventTypes.REGISTRATION_OK, 
+                        mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.REGISTRATION_OK, 
                         		code, phrase));
                     }
                     // Audio/Video/MSRP(Chat, FileTransfer)
@@ -509,6 +539,16 @@ implements INgnSipService, tinyWRAPConstants {
                     	mySession.setConnectionState(ConnectionState.CONNECTED);
                     	((NgnInviteSession)mySession).setState(InviteState.INCALL);
                         mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.CONNECTED, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                    }
+                    // Publication
+                    else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.CONNECTED);
+                    	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.PUBLICATION_OK, 
+                    			code, phrase));
+                    }
+                    // Subscription
+                    else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.CONNECTED);
                     }
 
 					break;
@@ -520,7 +560,7 @@ implements INgnSipService, tinyWRAPConstants {
 					// Registration
 					if (mSipService.mRegSession != null && mSipService.mRegSession.getId() == sessionId){
 						mSipService.mRegSession.setConnectionState(ConnectionState.TERMINATING);
-						mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(NgnRegistrationEventTypes.UNREGISTRATION_INPROGRESS, 
+						mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.UNREGISTRATION_INPROGRESS, 
 								code, phrase));
 					}
 					// Audio/Video/MSRP(Chat, FileTransfer)
@@ -528,6 +568,16 @@ implements INgnSipService, tinyWRAPConstants {
                     	mySession.setConnectionState(ConnectionState.TERMINATING);
                     	((NgnInviteSession)mySession).setState(InviteState.TERMINATING);
                     	mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.TERMWAIT, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                    }
+					// Publication
+                    else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.TERMINATING);
+                    	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.UNPUBLICATION_INPROGRESS, 
+                    			code, phrase));
+                    }
+                    // Subscription
+                    else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.TERMINATING);
                     }
 
 					break;
@@ -539,7 +589,7 @@ implements INgnSipService, tinyWRAPConstants {
 					// Registration
 					if (mSipService.mRegSession != null && mSipService.mRegSession.getId() == sessionId){
 						mSipService.mRegSession.setConnectionState(ConnectionState.TERMINATED);
-						mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(NgnRegistrationEventTypes.UNREGISTRATION_OK, code, phrase));
+						mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.UNREGISTRATION_OK, code, phrase));
 						/* Stop the stack (as we are already in the stack-thread, then do it in a new thread) */
 						new Thread(new Runnable(){
 							public void run() {	
@@ -561,6 +611,16 @@ implements INgnSipService, tinyWRAPConstants {
                         if(mySession instanceof NgnAVSession){
                         	NgnAVSession.releaseSession((NgnAVSession)mySession);
                         }
+                    }
+					// Publication
+                    else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.TERMINATED);
+                    	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.UNPUBLICATION_OK, 
+                    			code, phrase));
+                    }
+                    // Subscription
+                    else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
+                    	mySession.setConnectionState(ConnectionState.TERMINATED);
                     }
 					break;
 				}

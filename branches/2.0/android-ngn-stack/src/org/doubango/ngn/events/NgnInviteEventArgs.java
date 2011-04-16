@@ -61,7 +61,7 @@ public class NgnInviteEventArgs extends NgnEventArgs{
 
     @Override
 	protected void readFromParcel(Parcel in) {
-    	mSessionId = (short)in.readLong();
+    	mSessionId = in.readLong();
 		mEventType = Enum.valueOf(NgnInviteEventTypes.class, in.readString());
 		mMediaType = Enum.valueOf(NgnMediaType.class, in.readString());
 		mPhrase = in.readString();

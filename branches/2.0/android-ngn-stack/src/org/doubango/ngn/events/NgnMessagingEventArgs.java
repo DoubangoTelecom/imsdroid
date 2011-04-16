@@ -59,7 +59,7 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
 
 	@Override
 	protected void readFromParcel(Parcel in) {
-		mSessionId = (short)in.readLong();
+		mSessionId = in.readLong();
 		mEventType = Enum.valueOf(NgnMessagingEventTypes.class, in.readString());
 		mPhrase = in.readString();
 		mPayload = in.createByteArray();

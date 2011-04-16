@@ -11,7 +11,7 @@ import android.util.Log;
  * Abstract class defining a SIP Session (Registration, Subscription, Publication, Call, ...)
  */
 public abstract class NgnSipSession extends NgnObservableObject implements Comparable<NgnSipSession>{
-	protected static final String TAG = NgnSipSession.class.getCanonicalName();
+	private static final String TAG = NgnSipSession.class.getCanonicalName();
 	
 	protected NgnSipStack mSipStack;
     protected boolean mOutgoing;

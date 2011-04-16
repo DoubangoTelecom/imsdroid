@@ -51,7 +51,7 @@ public class NgnMsrpEventArgs extends NgnEventArgs{
 
 	@Override
 	protected void readFromParcel(Parcel in) {
-		mSessionId = (short)in.readLong();
+		mSessionId = in.readLong();
 		mEventType = Enum.valueOf(NgnMsrpEventTypes.class, in.readString());
 	}
 

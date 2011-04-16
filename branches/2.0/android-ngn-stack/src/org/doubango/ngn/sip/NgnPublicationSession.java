@@ -9,7 +9,7 @@ import org.doubango.tinyWRAP.SipSession;
 import android.util.Log;
 
 public class NgnPublicationSession extends NgnSipSession {
-	private static String TAG = NgnPublicationSession.class.getCanonicalName();
+	private final static String TAG = NgnPublicationSession.class.getCanonicalName();
 
 	private final PublicationSession mSession;
 
