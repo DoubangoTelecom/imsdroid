@@ -7,7 +7,7 @@ public class NgnMsrpEventArgs extends NgnEventArgs{
 	private final static String TAG = NgnMsrpEventArgs.class.getCanonicalName();
 	
 	private long mSessionId;
-    private NgnMsrpEventTypes mType;
+    private NgnMsrpEventTypes mEventType;
     
     public static final String ACTION_MSRP_EVENT = TAG + ".ACTION_MSRP_EVENT";
     
@@ -24,7 +24,7 @@ public class NgnMsrpEventArgs extends NgnEventArgs{
     public NgnMsrpEventArgs(long sessionId, NgnMsrpEventTypes type){
     	super();
     	mSessionId = sessionId;
-    	mType = type;
+    	mEventType = type;
     }
 
     public NgnMsrpEventArgs(Parcel in){
@@ -46,18 +46,18 @@ public class NgnMsrpEventArgs extends NgnEventArgs{
     }
 
     public NgnMsrpEventTypes getEventType(){
-        return mType;
+        return mEventType;
     }
 
 	@Override
 	protected void readFromParcel(Parcel in) {
 		mSessionId = (short)in.readLong();
-		mType = Enum.valueOf(NgnMsrpEventTypes.class, in.readString());
+		mEventType = Enum.valueOf(NgnMsrpEventTypes.class, in.readString());
 	}
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeLong(mSessionId);
-		dest.writeString(mType.toString());
+		dest.writeString(mEventType.toString());
 	}
 }

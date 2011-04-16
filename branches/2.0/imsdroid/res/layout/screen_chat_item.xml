@@ -11,20 +11,20 @@
 	    
 	    <LinearLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:orientation="vertical" android:layout_weight="6">
 		    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="horizontal" android:weightSum="6">
-		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_left" android:background="@drawable/grad_dark" android:layout_height="wrap_content" android:layout_width="wrap_content"> </ImageView>
-		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="6" android:background="@drawable/grad_dark"> </ImageView>
-		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_right" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
+		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_left" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/baloon_in_top_left"> </ImageView>
+		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="6" android:background="@drawable/baloon_in_top_center"> </ImageView>
+		    	<ImageView android:id="@+id/screen_chat_item_imageView_top_right" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/baloon_in_top_right"> </ImageView>
 			</LinearLayout>
 			
 			<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="horizontal" android:weightSum="6">
-				<ImageView android:id="@+id/screen_chat_item_imageView_middle_left" android:layout_width="wrap_content" android:layout_height="fill_parent" android:background="@drawable/grad_dark"> </ImageView>
-				<TextView android:id="@+id/screen_chat_item_textView" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="TextView" android:textColor="@color/color_black" android:layout_weight="6" android:textSize="14dp" android:background="@drawable/grad_dark"></TextView>
-				<ImageView android:id="@+id/screen_chat_item_imageView_middle_right" android:layout_height="fill_parent" android:layout_width="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_middle_left" android:layout_width="wrap_content" android:background="@drawable/baloon_in_middle_left" android:layout_height="fill_parent"> </ImageView>
+				<TextView android:id="@+id/screen_chat_item_textView" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="TextView" android:textColor="@color/color_black" android:background="@drawable/baloon_in_middle_center" android:layout_weight="6" android:textSize="14dp"></TextView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_middle_right" android:layout_height="fill_parent" android:layout_width="wrap_content" android:background="@drawable/baloon_in_middle_right"> </ImageView>
 			</LinearLayout>
 			<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="horizontal" android:weightSum="6">
-				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_left" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
-				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_center" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="6" android:background="@drawable/grad_dark"> </ImageView>
-				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_right" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/grad_dark"> </ImageView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_left" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/baloon_in_bottom_left"> </ImageView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_center" android:layout_height="wrap_content" android:layout_width="wrap_content" android:background="@drawable/baloon_in_bottom_center" android:layout_weight="6"> </ImageView>
+				<ImageView android:id="@+id/screen_chat_item_imageView_bottom_right" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/baloon_in_bottom_right"> </ImageView>
 			</LinearLayout>
 		</LinearLayout>
 		

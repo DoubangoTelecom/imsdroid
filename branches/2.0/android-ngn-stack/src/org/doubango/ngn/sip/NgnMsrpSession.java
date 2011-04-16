@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnMsrpEventArgs;
 import org.doubango.ngn.events.NgnMsrpEventTypes;
@@ -167,6 +168,12 @@ public class NgnMsrpSession extends NgnInviteSession {
 				return sSessions.get(id);
 			else
 				return null;
+		}
+	}
+	
+	public static NgnMsrpSession getSession(NgnPredicate<NgnMsrpSession> predicate) {
+		synchronized (sSessions) {
+			return NgnListUtils.getFirstOrDefault(sSessions.values(), predicate);
 		}
 	}
 
@@ -370,8 +377,7 @@ public class NgnMsrpSession extends NgnInviteSession {
 		return sendMessage(message, null, null);
 	}
 
-	public boolean sendMessage(String message, String contentType,
-			String wContentType) {
+	public boolean sendMessage(String message, String contentType, String wContentType) {
 		if (NgnStringUtils.isNullOrEmpty(message)) {
 			Log.e(TAG, "Null or empty message");
 			return false;
@@ -385,12 +391,10 @@ public class NgnMsrpSession extends NgnInviteSession {
 		if (super.isConnected()) {
 			ActionConfig config = new ActionConfig();
 			if (!NgnStringUtils.isNullOrEmpty(contentType)) {
-				config.setMediaString(twrap_media_type_t.twrap_media_msrp,
-						"content-type", contentType);
+				config.setMediaString(twrap_media_type_t.twrap_media_msrp, "content-type", contentType);
 			}
 			if (!NgnStringUtils.isNullOrEmpty(wContentType)) {
-				config.setMediaString(twrap_media_type_t.twrap_media_msrp,
-						"w-content-type", wContentType);
+				config.setMediaString(twrap_media_type_t.twrap_media_msrp, "w-content-type", wContentType);
 			}
 			// config.setMediaString(twrap_media_type_t.twrap_media_msrp,
 			// "content-type", contentType);
@@ -400,11 +404,9 @@ public class NgnMsrpSession extends NgnInviteSession {
 			// .setMediaString(twrap_media_type_t.twrap_media_msrp,
 			// "w-content-type", "text/plain");
 			byte[] payload = message.getBytes();
-			final ByteBuffer byteBuffer = ByteBuffer
-					.allocateDirect(payload.length);
+			final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(payload.length);
 			byteBuffer.put(payload);
-			boolean ret = mSession.sendMessage(byteBuffer,
-					(long) payload.length, config);
+			boolean ret = mSession.sendMessage(byteBuffer, (long) payload.length, config);
 			config.delete();
 			return ret;
 		} else {
@@ -488,6 +490,7 @@ public class NgnMsrpSession extends NgnInviteSession {
 	//
 	static class NgnMsrpCallback extends MsrpCallback {
 		final NgnMsrpSession mSession;
+		final Context mAppContext;
 		private ByteBuffer mTempBuffer;
 		private ByteArrayOutputStream mChatStream;
 		private String mContentType;
@@ -498,6 +501,7 @@ public class NgnMsrpSession extends NgnInviteSession {
 		NgnMsrpCallback(NgnMsrpSession session) {
 			super();
 			mSession = session;
+			mAppContext = NgnApplication.getContext();
 			mSessionId = -1;
 		}
 		
@@ -629,15 +633,16 @@ public class NgnMsrpSession extends NgnInviteSession {
 
                         if(message.isLastChunck()){
                             if(mSession.getMediaType() == NgnMediaType.Chat && mChatStream != null){
-                            	if(mSession.mContext != null){
-                            		synchronized (mSession.mContext) {
+                            	final Context context = mSession.mContext == null ? mAppContext : mSession.mContext;
+                            	if(context != null){
+                            		synchronized (context) {
                             			NgnMsrpEventArgs eargs = new NgnMsrpEventArgs(getSessionId(),NgnMsrpEventTypes.DATA);
                             			final Intent intent = new Intent(NgnMsrpEventArgs.ACTION_MSRP_EVENT);
         								intent.putExtra(NgnMsrpEventArgs.EXTRA_EMBEDDED,eargs);
         								intent.putExtra(NgnMsrpEventArgs.EXTRA_CONTENT_TYPE, mContentType);
         								intent.putExtra(NgnMsrpEventArgs.EXTRA_WRAPPED_CONTENT_TYPE, mWContentType);
         								intent.putExtra(NgnMsrpEventArgs.EXTRA_DATA, mChatStream.toByteArray());
-        								mSession.mContext.sendBroadcast(intent);
+        								context.sendBroadcast(intent);
                             		}
                             	}
                             	mChatStream.reset();

@@ -20,7 +20,9 @@ import org.doubango.ngn.utils.NgnObservableList;
 import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -38,6 +40,7 @@ import android.widget.TextView;
 
 public class ScreenTabContacts extends BaseScreen {
 	private static String TAG = ScreenTabContacts.class.getCanonicalName();
+	private static final int SELECT_CONTENT = 1;
 	  
 	@SuppressWarnings("unused")
 	private final INgnContactService mContactService;
@@ -49,6 +52,7 @@ public class ScreenTabContacts extends BaseScreen {
 	private final ActionItem mAItemVideoCall;
 	private final ActionItem mAItemChat;
 	private final ActionItem mAItemSMS;
+	private final ActionItem mAItemShare;
 	
 	private NgnContact mSelectedContact;
 	private QuickAction mLasQuickAction;
@@ -110,6 +114,24 @@ public class ScreenTabContacts extends BaseScreen {
 				}
 			}
 		});
+		
+		mAItemShare = new ActionItem();
+		mAItemShare.setTitle("Share");
+		mAItemShare.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(mSelectedContact != null){
+					Intent intent = new Intent();
+                    intent.setType("*/*")
+                    	.addCategory(Intent.CATEGORY_OPENABLE)
+                    	.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "Select content"), SELECT_CONTENT);   
+					if(mLasQuickAction != null){
+						mLasQuickAction.dismiss();
+					}
+				}
+			}
+		});
 	}
 
 	@Override
@@ -125,8 +147,29 @@ public class ScreenTabContacts extends BaseScreen {
 	    mListView.setOnItemLongClickListener(mOnItemListViewLongClickListener);
 	    registerForContextMenu(mListView);
 	    
+	    mAItemVoiceCall.setIcon(getResources().getDrawable(R.drawable.voice_call_25));
+		mAItemVideoCall.setIcon(getResources().getDrawable(R.drawable.visio_call_25));
+		mAItemChat.setIcon(getResources().getDrawable(R.drawable.chat_25));
+		mAItemSMS.setIcon(getResources().getDrawable(R.drawable.sms_25));
+		mAItemShare.setIcon(getResources().getDrawable(R.drawable.image_gallery_25));  
 	}
 	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (resultCode == RESULT_OK) {
+			switch (requestCode) {
+				case SELECT_CONTENT:
+					if (mSelectedContact != null) {
+						Uri selectedContentUri = data.getData();
+						String selectedContentPath = super.getPath(selectedContentUri);
+						ScreenFileTransferView.sendFile(mSelectedContact.getPrimaryNumber(), selectedContentPath);
+					}
+					break;
+			}
+		}
+	}
 	private final OnItemClickListener mOnItemListViewClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			mSelectedContact = (NgnContact)parent.getItemAtPosition(position);

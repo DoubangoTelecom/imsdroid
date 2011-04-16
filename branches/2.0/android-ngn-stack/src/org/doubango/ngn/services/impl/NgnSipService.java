@@ -28,6 +28,7 @@ import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 import org.doubango.ngn.sip.NgnSipStack.STACK_STATE;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnContentType;
+import org.doubango.ngn.utils.NgnDateTimeUtils;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.CallSession;
@@ -434,8 +435,10 @@ implements INgnSipService, tinyWRAPConstants {
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	
-	private void broadcastMessagingEvent(NgnMessagingEventArgs args){
+	private void broadcastMessagingEvent(NgnMessagingEventArgs args, String remoteParty, String date){
 		final Intent intent = new Intent(NgnMessagingEventArgs.ACTION_MESSAGING_EVENT);
+		intent.putExtra(NgnMessagingEventArgs.EXTRA_REMOTE_PARTY, remoteParty);
+		intent.putExtra(NgnMessagingEventArgs.EXTRA_DATE, date);
 		intent.putExtra(NgnMessagingEventArgs.EXTRA_EMBEDDED, args);
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
@@ -654,6 +657,7 @@ implements INgnSipService, tinyWRAPConstants {
                 case tsip_m_local_hold_ok:
                     {
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+                    		((NgnInviteSession)mySession).setLocalHold(true);
                     		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.LOCAL_HOLD_OK, ((NgnInviteSession)mySession).getMediaType(), phrase));
                     	}
                         break;
@@ -668,6 +672,7 @@ implements INgnSipService, tinyWRAPConstants {
                 case tsip_m_local_resume_ok:
                     {
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+                    		((NgnInviteSession)mySession).setLocalHold(false);
                     		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.LOCAL_RESUME_OK, ((NgnInviteSession)mySession).getMediaType(), phrase));
                     	}
                         break;
@@ -682,6 +687,7 @@ implements INgnSipService, tinyWRAPConstants {
                 case tsip_m_remote_hold:
                     {
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+                    		((NgnInviteSession)mySession).setRemoteHold(true);
                     		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.REMOTE_HOLD, ((NgnInviteSession)mySession).getMediaType(), phrase));
                     	}
                         break;
@@ -689,6 +695,7 @@ implements INgnSipService, tinyWRAPConstants {
                 case tsip_m_remote_resume:
                     {
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+                    		((NgnInviteSession)mySession).setRemoteHold(false);
                     		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.REMOTE_RESUME, ((NgnInviteSession)mySession).getMediaType(), phrase));
                     	}
                         break;
@@ -702,20 +709,21 @@ implements INgnSipService, tinyWRAPConstants {
 		public int OnMessagingEvent(MessagingEvent e) {
 			final tsip_message_event_type_t type = e.getType();
 			MessagingSession _session;
+			final SipMessage message;
 			
 			switch(type){
 				case tsip_ao_message:
 					_session = e.getSession();
+					message = e.getSipMessage();
 					short code = e.getCode();
-					if(_session != null && code>=200){
-						
+					if(_session != null && code>=200 && message != null){
 						mSipService.broadcastMessagingEvent(new NgnMessagingEventArgs(_session.getId(), 
 								(code >=200 && code<=299) ? NgnMessagingEventTypes.SUCCESS : NgnMessagingEventTypes.FAILURE, 
-								e.getPhrase(), new byte[0]));
+								e.getPhrase(), new byte[0]), message.getSipHeaderValue("f"), NgnDateTimeUtils.now());
 					}
 					break;
 				case tsip_i_message:
-					final SipMessage message = e.getSipMessage();
+					message = e.getSipMessage();
 					_session = e.getSession();
 					NgnMessagingSession imSession;
 					if (_session == null){
@@ -851,10 +859,8 @@ implements INgnSipService, tinyWRAPConstants {
 					
 					/* Alert the user and add the message to the history */
 					if(content != null){
-						mSipService.broadcastMessagingEvent(new NgnMessagingEventArgs(_session.getId(), 
-								NgnMessagingEventTypes.INCOMING, 
-								e.getPhrase(), 
-								content));
+						mSipService.broadcastMessagingEvent(new NgnMessagingEventArgs(_session.getId(), NgnMessagingEventTypes.INCOMING, 
+								e.getPhrase(), content), from, NgnDateTimeUtils.now());
 					}
 					
 					break;

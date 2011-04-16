@@ -20,7 +20,6 @@ public class Engine extends NgnEngine{
 	private static final String CONTENT_TITLE = "IMSDroid";
 	
 	private static final int NOTIF_AVCALL_ID = 19833892;
-	@SuppressWarnings("unused")
 	private static final int NOTIF_SMS_ID = 19833893;
 	private static final int NOTIF_APP_ID = 19833894;
 	private static final int NOTIF_CONTSHARE_ID = 19833895;
@@ -72,6 +71,13 @@ public class Engine extends NgnEngine{
         	case NOTIF_CONTSHARE_ID:
                 intent.putExtra("action", Main.ACTION_SHOW_CONTSHARE_SCREEN);
                 notification.defaults |= Notification.DEFAULT_SOUND;
+                break;
+                
+        	case NOTIF_SMS_ID:
+                notification.flags |= Notification.FLAG_AUTO_CANCEL;
+                notification.defaults |= Notification.DEFAULT_SOUND;
+                notification.tickerText = tickerText;
+                intent.putExtra("action", Main.ACTION_SHOW_SMS);
                 break;
                 
         	case NOTIF_AVCALL_ID:
@@ -145,6 +151,10 @@ public class Engine extends NgnEngine{
     	else{
     		showNotification(NOTIF_CONTSHARE_ID, drawableId, "Content sharing");
     	}
+    }
+	
+	public void showSMSNotif(int drawableId, String tickerText){
+    	showNotification(NOTIF_SMS_ID, drawableId, tickerText);
     }
 	
 	public IScreenService getScreenService(){

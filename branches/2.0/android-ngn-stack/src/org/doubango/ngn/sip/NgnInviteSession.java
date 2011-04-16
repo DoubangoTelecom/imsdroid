@@ -14,6 +14,8 @@ public abstract class NgnInviteSession extends NgnSipSession{
 	protected NgnMediaType mMediaType;
     protected MediaSessionMgr mMediaSessionMgr = null;
     protected InviteState mState;
+    protected boolean mRemoteHold;
+    protected boolean mLocalHold;
 
     public enum InviteState{
         NONE,
@@ -70,6 +72,22 @@ public abstract class NgnInviteSession extends NgnSipSession{
          && mState != InviteState.TERMINATED;
      }
 
+	public boolean isLocalHeld() {
+		return mLocalHold;
+	}
+	
+	public void setLocalHold(boolean localHold){
+ 		mLocalHold = localHold;
+ 	}
+	
+	public boolean isRemoteHeld(){
+		return mRemoteHold;
+	}
+	
+	public void setRemoteHold(boolean remoteHold){
+		mRemoteHold = remoteHold;
+	}
+     
      /**
       * Gets the media session manager associated to this session
       * @return the media session manager
