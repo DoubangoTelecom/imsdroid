@@ -36,6 +36,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -275,14 +276,16 @@ public class ScreenAV extends BaseScreen{
 		
 		MenuItem itemSendStopVideo = null;
 		
-		MenuItem itemPickUp = menu.add(0, ScreenAV.MENU_PICKUP, 0, getString(R.string.string_answer));
-		MenuItem itemHangUp = menu.add(0, ScreenAV.MENU_HANGUP, 0, getString(R.string.string_endcall));
-		MenuItem itemHoldResume = menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, getString(R.string.string_hold));
+		MenuItem itemPickUp = menu.add(0, ScreenAV.MENU_PICKUP, 0, getString(R.string.string_answer)).setIcon(R.drawable.phone_pick_up_48);
+		MenuItem itemHangUp = menu.add(0, ScreenAV.MENU_HANGUP, 0, getString(R.string.string_endcall)).setIcon(R.drawable.phone_hang_up_48);
+		MenuItem itemHoldResume = menu.add(0, ScreenAV.MENU_HOLD_RESUME, 0, mAVSession.isLocalHeld() ? getString(R.string.string_resume) : getString(R.string.string_hold))
+			.setIcon(mAVSession.isLocalHeld() ? R.drawable.phone_resume_48 : R.drawable.phone_hold_48);
 		if(mIsVideoCall){
 			itemSendStopVideo = menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, getString(R.string.string_send_video));
 		}
-		// MenuItem itemShareContent = menu.add(1, ScreenAV.MENU_SHARE_CONTENT, 0, "Share Content");
-		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, IMSDroid.getAudioManager().isSpeakerphoneOn() ? getString(R.string.string_speaker_off) : getString(R.string.string_speaker_on));
+		MenuItem itemShareContent = menu.add(1, ScreenAV.MENU_SHARE_CONTENT, 0, "Share Content").setIcon(R.drawable.image_gallery_48);
+		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, IMSDroid.getAudioManager().isSpeakerphoneOn() ? getString(R.string.string_speaker_off) : getString(R.string.string_speaker_on))
+			.setIcon(R.drawable.phone_speaker_48);
 		
 		switch(mAVSession.getState()){
 			case INCOMING:
@@ -294,7 +297,7 @@ public class ScreenAV extends BaseScreen{
 				if(itemSendStopVideo != null){
 					itemSendStopVideo.setEnabled(false);
 				}
-				// itemShareContent.setEnabled(false);
+				itemShareContent.setEnabled(false);
 				break;
 			}
 			
@@ -307,7 +310,7 @@ public class ScreenAV extends BaseScreen{
 				if(itemSendStopVideo != null){
 					itemSendStopVideo.setEnabled(false);
 				}
-				//itemShareContent.setEnabled(false);
+				itemShareContent.setEnabled(false);
 				break;
 			}
 			
@@ -328,9 +331,7 @@ public class ScreenAV extends BaseScreen{
 				else{
 					itemPickUp.setEnabled(false);
 				}
-				//itemShareContent.setEnabled(true);
-				itemHoldResume.setTitle(mAVSession.isLocalHeld()? getString(R.string.string_resume) : getString(R.string.string_hold));
-			
+				itemShareContent.setEnabled(true);
 				break;
 			}
 				
@@ -344,7 +345,7 @@ public class ScreenAV extends BaseScreen{
 				if(itemSendStopVideo != null){
 					itemSendStopVideo.setEnabled(false);
 				}
-				//itemShareContent.setEnabled(false);
+				itemShareContent.setEnabled(false);
 				break;
 			}
 		}
@@ -399,7 +400,7 @@ public class ScreenAV extends BaseScreen{
 			{
 				 Intent intent = new Intent();
 				 intent.setType("*/*").addCategory(Intent.CATEGORY_OPENABLE).setAction(Intent.ACTION_GET_CONTENT);
-				 startActivityForResult(Intent.createChooser(intent, "Select content"), ScreenAV.SELECT_CONTENT);
+				 startActivityForResult(Intent.createChooser(intent, "Select content"), SELECT_CONTENT);
 				break;
 			}
 			
@@ -410,6 +411,23 @@ public class ScreenAV extends BaseScreen{
 			}
 		}
 		return true;
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (resultCode == RESULT_OK) {
+			switch (requestCode) {
+				case SELECT_CONTENT:
+					if (mAVSession != null) {
+						Uri selectedContentUri = data.getData();
+						String selectedContentPath = super.getPath(selectedContentUri);
+						ScreenFileTransferView.sendFile(mAVSession.getRemotePartyUri(), selectedContentPath);
+					}
+					break;
+			}
+		}
 	}
 	
 	public boolean onVolumeChanged(boolean bDown){

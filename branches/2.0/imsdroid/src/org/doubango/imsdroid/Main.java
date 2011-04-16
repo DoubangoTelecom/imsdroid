@@ -1,12 +1,13 @@
 package org.doubango.imsdroid;
 
 import org.doubango.imsdroid.Screens.BaseScreen;
-import org.doubango.imsdroid.Screens.BaseScreen.SCREEN_TYPE;
 import org.doubango.imsdroid.Screens.IBaseScreen;
 import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenSplash;
+import org.doubango.imsdroid.Screens.ScreenTabMessages;
+import org.doubango.imsdroid.Screens.BaseScreen.SCREEN_TYPE;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.utils.NgnStringUtils;
@@ -30,6 +31,7 @@ public class Main extends ActivityGroup {
 	public static final int ACTION_RESTORE_LAST_STATE = 1;
 	public static final int ACTION_SHOW_AVSCREEN = 2;
 	public static final int ACTION_SHOW_CONTSHARE_SCREEN = 3;
+	public static final int ACTION_SHOW_SMS = 4;
 	
 	private static final int RC_SPLASH = 0;
 	
@@ -187,6 +189,11 @@ public class Main extends ActivityGroup {
 				}
 				break;
 				
+			// Notify for new SMSs
+			case Main.ACTION_SHOW_SMS:
+                mScreenService.show(ScreenTabMessages.class);
+                break;
+               
 			// Show Audio/Video Calls
 			case Main.ACTION_SHOW_AVSCREEN:
 				id = bundle.getString("session-id");

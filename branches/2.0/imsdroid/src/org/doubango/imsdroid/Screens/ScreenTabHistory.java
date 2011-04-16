@@ -146,6 +146,12 @@ public class ScreenTabHistory extends BaseScreen {
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(mOnItemListViewClickListener);
 		mListView.setOnItemLongClickListener(mOnItemListViewLongClickListener);
+		
+		mAItemVoiceCall.setIcon(getResources().getDrawable(R.drawable.voice_call_25));
+		mAItemVideoCall.setIcon(getResources().getDrawable(R.drawable.visio_call_25));
+		mAItemChat.setIcon(getResources().getDrawable(R.drawable.chat_25));
+		mAItemSMS.setIcon(getResources().getDrawable(R.drawable.sms_25));
+		mAItemShare.setIcon(getResources().getDrawable(R.drawable.image_gallery_25));
 	}
 	
 	@Override

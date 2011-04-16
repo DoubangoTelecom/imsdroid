@@ -6,7 +6,7 @@ import android.os.Parcelable;
 public class NgnMessagingEventArgs extends NgnEventArgs{
 	private final static String TAG = NgnMessagingEventArgs.class.getCanonicalName();
 	private long mSessionId;
-    private NgnMessagingEventTypes mType;
+    private NgnMessagingEventTypes mEventType;
     private String mPhrase;
     private byte[] mPayload;
 
@@ -22,7 +22,7 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
     public NgnMessagingEventArgs(long sessionId, NgnMessagingEventTypes type, String phrase, byte[] payload){
     	super();
         mSessionId = sessionId;
-        mType = type;
+        mEventType = type;
         mPhrase = phrase;
         mPayload = payload;
     }
@@ -46,7 +46,7 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
     }
 
     public NgnMessagingEventTypes getEventType(){
-        return mType;
+        return mEventType;
     }
 
     public String getPhrase(){
@@ -60,7 +60,7 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
 	@Override
 	protected void readFromParcel(Parcel in) {
 		mSessionId = (short)in.readLong();
-		mType = Enum.valueOf(NgnMessagingEventTypes.class, in.readString());
+		mEventType = Enum.valueOf(NgnMessagingEventTypes.class, in.readString());
 		mPhrase = in.readString();
 		mPayload = in.createByteArray();
 	}
@@ -68,7 +68,7 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeLong(mSessionId);
-		dest.writeString(mType.toString());
+		dest.writeString(mEventType.toString());
 		dest.writeString(mPhrase);
 		dest.writeByteArray(mPayload);
 	}

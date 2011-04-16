@@ -1,6 +1,7 @@
 package org.doubango.ngn.media;
 
 public enum NgnMediaType {
+	None,
 	Audio,
 	Video,
 	AudioVideo,

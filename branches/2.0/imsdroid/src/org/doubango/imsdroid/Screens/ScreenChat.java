@@ -18,6 +18,7 @@ import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
 import org.doubango.ngn.services.INgnHistoryService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnMessagingSession;
+import org.doubango.ngn.sip.NgnMsrpSession;
 import org.doubango.ngn.utils.NgnPredicate;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
@@ -51,6 +52,7 @@ private InputMethodManager mInputMethodManager;
 	
 	private static String sRemoteParty;
 	
+	private NgnMsrpSession mSession;
 	private NgnMediaType mMediaType;
 	private ScreenChatAdapter mAdapter;
 	private EditText mEtCompose;
@@ -63,7 +65,7 @@ private InputMethodManager mInputMethodManager;
 	public ScreenChat() {
 		super(SCREEN_TYPE.CHAT_T, TAG);
 		
-		mMediaType = NgnMediaType.SMS;
+		mMediaType = NgnMediaType.None;
 		mHistorytService = getEngine().getHistoryService();
 		mSipService = getEngine().getSipService();
 	}
@@ -162,7 +164,9 @@ private InputMethodManager mInputMethodManager;
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
+		if(mMediaType != NgnMediaType.None){
+			initialize(mMediaType);
+		}
 		mAdapter.refresh();
 	}
 	
@@ -177,6 +181,11 @@ private InputMethodManager mInputMethodManager;
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		
+		if(mSession != null){
+			mSession.decRef();
+			mSession = null;
+		}
 	}
 
 	@Override
@@ -193,6 +202,40 @@ private InputMethodManager mInputMethodManager;
 		return ret;
 	}
 	
+	private void initialize(NgnMediaType mediaType){
+		final boolean bIsNewScreen = mMediaType == NgnMediaType.None;
+		mMediaType = mediaType;
+		if(mMediaType == NgnMediaType.Chat){
+			final String validUri = NgnUriUtils.makeValidSipUri(sRemoteParty);
+			if(!NgnStringUtils.isNullOrEmpty(validUri)){
+				mSession = NgnMsrpSession.getSession(new NgnPredicate<NgnMsrpSession>() {
+					@Override
+					public boolean apply(NgnMsrpSession session) {
+						if(session != null && session.getMediaType() == NgnMediaType.Chat){
+							return NgnStringUtils.equals(session.getRemotePartyUri(), validUri, false);
+						}
+						return false;
+					}
+				});
+				if(mSession == null){
+					if((mSession = NgnMsrpSession.createOutgoingSession(mSipService.getSipStack(), NgnMediaType.Chat, validUri)) == null){
+						Log.e(TAG, "Failed to create MSRP session");
+						finish();
+						return;
+					}
+				}
+				if(bIsNewScreen && mSession != null){
+					mSession.incRef();
+				}
+			}
+			else{
+				Log.e(TAG, "makeValidSipUri("+sRemoteParty+") has failed");
+				finish();
+				return;
+			}
+		}
+	}
+	
 	private boolean sendMessage(){
 		boolean ret = false;
 		final String content = mEtCompose.getText().toString();
@@ -204,6 +247,12 @@ private InputMethodManager mInputMethodManager;
 			return false;
 		}
 		if(mMediaType == NgnMediaType.Chat){
+			if(mSession != null){
+				ret = mSession.SendMessage(content);
+			}else{
+				Log.e(TAG,"MSRP session is null");
+				return false;
+			}
 		}
 		else{
 			final String remotePartyUri = NgnUriUtils.makeValidSipUri(sRemoteParty);
@@ -220,7 +269,8 @@ private InputMethodManager mInputMethodManager;
 		return ret;
 	}
 	
-	public static void startChat(String remoteParty, boolean bPagerMode){
+	public static void startChat(String remoteParty, boolean bIsPagerMode){
+		final Engine engine = (Engine)NgnEngine.getInstance();
 		if(!NgnStringUtils.isNullOrEmpty(remoteParty) && remoteParty.startsWith("sip:")){
 			remoteParty = NgnUriUtils.getUserName(remoteParty);
 		}
@@ -230,10 +280,10 @@ private InputMethodManager mInputMethodManager;
 			return;
 		}
 		
-		if(((Engine)Engine.getInstance()).getScreenService().show(ScreenChat.class)){
-			final IBaseScreen screen = ((Engine)NgnEngine.getInstance()).getScreenService().getScreen(ScreenChat.class.getCanonicalName());
+		if(engine.getScreenService().show(ScreenChat.class)){
+			final IBaseScreen screen = engine.getScreenService().getScreen(TAG);
 			if(screen instanceof ScreenChat){
-				((ScreenChat)screen).mMediaType = bPagerMode? NgnMediaType.SMS : NgnMediaType.Chat;
+				((ScreenChat)screen).initialize(bIsPagerMode ? NgnMediaType.SMS : NgnMediaType.Chat);
 			}
 		}
 	}
@@ -351,29 +401,29 @@ private InputMethodManager mInputMethodManager;
 			
 			TextView textView = (TextView) view.findViewById(R.id.screen_chat_item_textView);
 			textView.setText(content == null ? NgnStringUtils.emptyValue() : content);
-			textView.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			textView.setBackgroundResource(bIncoming ? R.drawable.baloon_in_middle_center : R.drawable.baloon_out_middle_center);
 			
 			((TextView)view.findViewById(R.id.screen_chat_item_textView_date))
 				.setText(DateTimeUtils.getFriendlyDateString(new Date(event.getStartTime())));
 			
 			view.findViewById(R.id.screen_chat_item_imageView_top_left)
-			.setBackgroundResource(bIncoming? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming? R.drawable.baloon_in_top_left : R.drawable.baloon_out_top_left);
 			view.findViewById(R.id.screen_chat_item_imageView_top_center)
-			.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming ? R.drawable.baloon_in_top_center : R.drawable.baloon_out_top_center);
 			view.findViewById(R.id.screen_chat_item_imageView_top_right)
-			.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming ? R.drawable.baloon_in_top_right : R.drawable.baloon_out_top_right);
 			
 			view.findViewById(R.id.screen_chat_item_imageView_middle_left)
-			.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming ? R.drawable.baloon_in_middle_left : R.drawable.baloon_out_middle_left);
 			view.findViewById(R.id.screen_chat_item_imageView_middle_right)
-			.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming ? R.drawable.baloon_in_middle_right : R.drawable.baloon_out_middle_right);
 			
 			view.findViewById(R.id.screen_chat_item_imageView_bottom_left)
-			.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming ? R.drawable.baloon_in_bottom_left : R.drawable.baloon_out_bottom_left);
 			view.findViewById(R.id.screen_chat_item_imageView_bottom_center)
-			.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming ? R.drawable.baloon_in_bottom_center : R.drawable.baloon_out_bottom_center);
 			view.findViewById(R.id.screen_chat_item_imageView_bottom_right)
-			.setBackgroundResource(bIncoming ? R.drawable.grad_dark : R.drawable.grad_light);
+			.setBackgroundResource(bIncoming ? R.drawable.baloon_in_bottom_right : R.drawable.baloon_out_bottom_right);
 			
 			view.findViewById(R.id.screen_chat_item_linearLayout_left)
 			.setVisibility(bIncoming ? View.VISIBLE : View.GONE);

@@ -5,10 +5,17 @@ import org.doubango.ngn.NgnNativeService;
 import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnMessagingEventArgs;
+import org.doubango.ngn.events.NgnMsrpEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventTypes;
 import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.model.NgnHistorySMSEvent;
+import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
 import org.doubango.ngn.sip.NgnAVSession;
+import org.doubango.ngn.sip.NgnMsrpSession;
+import org.doubango.ngn.utils.NgnDateTimeUtils;
+import org.doubango.ngn.utils.NgnStringUtils;
+import org.doubango.ngn.utils.NgnUriUtils;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -55,7 +62,7 @@ public class NativeService extends NgnNativeService {
 			public void onReceive(Context context, Intent intent) {
 				final String action = intent.getAction();
 				
-				// Registration Event
+				// Registration Events
 				if(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT.equals(action)){
 					NgnRegistrationEventArgs args = intent.getParcelableExtra(NgnEventArgs.EXTRA_EMBEDDED);
 					final NgnRegistrationEventTypes type;
@@ -84,29 +91,55 @@ public class NativeService extends NgnNativeService {
 					}
 				}
 				
-				// Messaging Event
+				// PagerMode Messaging Events
 				if(NgnMessagingEventArgs.ACTION_MESSAGING_EVENT.equals(action)){
-					NgnMessagingEventArgs args = intent.getParcelableExtra(NgnEventArgs.EXTRA_EMBEDDED);
+					NgnMessagingEventArgs args = intent.getParcelableExtra(NgnMessagingEventArgs.EXTRA_EMBEDDED);
 					if(args == null){
 						Log.e(TAG, "Invalid event args");
 						return;
 					}
 					switch(args.getEventType()){
 						case INCOMING:
-//							String dateString = intent.getStringExtra(NgnMessagingEventArgs.EXTRA_DATE);
-//							String remoteParty = intent.getStringExtra(NgnMessagingEventArgs.EXTRA_REMOTE_PARTY);
-//							if(NgnStringUtils.isNullOrEmpty(remoteParty)){
-//								remoteParty = NgnStringUtils.nullValue();
-//							}
-//							NgnHistorySMSEvent event = new NgnHistorySMSEvent(remoteParty, StatusType.Incoming);
-//							event.setContent(new String(args.getPayload()));
-//							event.setStartTime(DateTimeUtils.parseKASDate(dateString).getTime());
-//							mEngine.getHistoryService().addEvent(event);
+							String dateString = intent.getStringExtra(NgnMessagingEventArgs.EXTRA_DATE);
+							String remoteParty = intent.getStringExtra(NgnMessagingEventArgs.EXTRA_REMOTE_PARTY);
+							if(NgnStringUtils.isNullOrEmpty(remoteParty)){
+								remoteParty = NgnStringUtils.nullValue();
+							}
+							remoteParty = NgnUriUtils.getUserName(remoteParty);
+							NgnHistorySMSEvent event = new NgnHistorySMSEvent(remoteParty, StatusType.Incoming);
+							event.setContent(new String(args.getPayload()));
+							event.setStartTime(NgnDateTimeUtils.parseDate(dateString).getTime());
+							mEngine.getHistoryService().addEvent(event);
+							mEngine.showSMSNotif(R.drawable.sms_25, "New message");
 							break;
 					}
 				}
 				
-				// Invite Event
+				// MSRP chat Events
+				// For performance reasons, file transfer events will be handled by the owner of the context
+				if(NgnMsrpEventArgs.ACTION_MSRP_EVENT.equals(action)){
+					NgnMsrpEventArgs args = intent.getParcelableExtra(NgnMsrpEventArgs.EXTRA_EMBEDDED);
+					if(args == null){
+						Log.e(TAG, "Invalid event args");
+						return;
+					}
+					switch(args.getEventType()){
+						case DATA:
+							final NgnMsrpSession session = NgnMsrpSession.getSession(args.getSessionId());
+							if(session == null){
+								Log.e(TAG, "Failed to find MSRP session with id="+args.getSessionId());
+								return;
+							}
+							final byte[]content = intent.getByteArrayExtra(NgnMsrpEventArgs.EXTRA_DATA);
+							NgnHistorySMSEvent event = new NgnHistorySMSEvent(NgnUriUtils.getUserName(session.getRemotePartyUri()), StatusType.Incoming);
+							event.setContent(content==null ? NgnStringUtils.nullValue() : new String(content));
+							mEngine.getHistoryService().addEvent(event);
+							mEngine.showSMSNotif(R.drawable.sms_25, "New message");
+							break;
+					}
+				}
+				
+				// Invite Events
 				else if(NgnInviteEventArgs.ACTION_INVITE_EVENT.equals(action)){
 					NgnInviteEventArgs args = intent.getParcelableExtra(NgnEventArgs.EXTRA_EMBEDDED);
 					if(args == null){
@@ -181,6 +214,7 @@ public class NativeService extends NgnNativeService {
 		intentFilter.addAction(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT);
 		intentFilter.addAction(NgnInviteEventArgs.ACTION_INVITE_EVENT);
 		intentFilter.addAction(NgnMessagingEventArgs.ACTION_MESSAGING_EVENT);
+		intentFilter.addAction(NgnMsrpEventArgs.ACTION_MSRP_EVENT);
 		registerReceiver(mBroadcastReceiver, intentFilter);
 		
 		if(intent != null){

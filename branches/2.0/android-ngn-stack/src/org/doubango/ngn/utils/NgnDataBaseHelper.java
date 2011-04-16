@@ -13,7 +13,7 @@ public class NgnDataBaseHelper {
 	private final String mDataBaseName;
 	private final int mDataBaseVersion;
 	private final NgnDataBaseOpenHelper mDataBaseOpenHelper;
-	private final SQLiteDatabase mSQLiteDatabase;
+	private SQLiteDatabase mSQLiteDatabase;
 	
 	public NgnDataBaseHelper(Context context, String dataBaseName, int dataBaseVersion, String[][] createTableSt){
 		mContext = context;
@@ -22,6 +22,26 @@ public class NgnDataBaseHelper {
 		
 		mDataBaseOpenHelper = new NgnDataBaseOpenHelper(mContext, mDataBaseName, mDataBaseVersion, createTableSt);
 		mSQLiteDatabase = mDataBaseOpenHelper.getWritableDatabase();
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		close();
+		super.finalize();
+	}
+
+	public boolean close(){
+		try{
+			if(mSQLiteDatabase != null){
+				mSQLiteDatabase.close();
+				mSQLiteDatabase = null;
+			}
+			return true;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public boolean isFreshDataBase(){

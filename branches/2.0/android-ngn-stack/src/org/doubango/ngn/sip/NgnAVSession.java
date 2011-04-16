@@ -15,7 +15,10 @@ import org.doubango.ngn.media.NgnProxyVideoConsumer;
 import org.doubango.ngn.media.NgnProxyVideoProducer;
 import org.doubango.ngn.model.NgnHistoryAVCallEvent;
 import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
+import org.doubango.ngn.services.INgnConfigurationService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnObservableHashMap;
+import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.CallSession;
@@ -23,6 +26,9 @@ import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyPlugin;
 import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
+import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
+import org.doubango.tinyWRAP.tmedia_qos_strength_t;
+import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.content.Context;
@@ -44,9 +50,8 @@ public class NgnAVSession extends NgnInviteSession{
 	private Context mContext;
 	
 	private final NgnHistoryAVCallEvent mHistoryEvent;
+	private final INgnConfigurationService mConfigurationService;
 	
-	private boolean mRemoteHold;
-	private boolean mLocalHold;
 	private boolean mSendingVideo;
 	
     private final static NgnObservableHashMap<Long, NgnAVSession> sSessions = new NgnObservableHashMap<Long, NgnAVSession>(true);
@@ -217,6 +222,11 @@ public class NgnAVSession extends NgnInviteSession{
         super.setToUri(remoteUri);
 
         ActionConfig config = new ActionConfig();
+        String level = mConfigurationService.getString(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH,
+        		NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH);
+        tmedia_bandwidth_level_t bl = getBandwidthLevel(level);
+        config.setMediaInt(twrap_media_type_t.twrap_media_audiovideo, "bandwidth-level", bl.swigValue());
+        
         switch (super.getMediaType())
         {
             case AudioVideo:
@@ -255,14 +265,30 @@ public class NgnAVSession extends NgnInviteSession{
 		super(sipStack);
 		mSession = (session == null) ? new CallSession(sipStack) : session;
 	    super.mMediaType = mediaType;
-	
+	    
+	    mConfigurationService = NgnEngine.getInstance().getConfigurationService();
+	    
 	    // commons
 	    super.init();
 	    // SigComp
 	    super.setSigCompId(sipStack.getSigCompId());
 	    // 100rel
-	    mSession.set100rel(true); // will add "Supported: 100rel"
-	
+	    mSession.set100rel(true); // will add "Supported: 100rel"        
+        // Session timers
+        if(mConfigurationService.getBoolean(NgnConfigurationEntry.QOS_USE_SESSION_TIMERS, NgnConfigurationEntry.DEFAULT_QOS_USE_SESSION_TIMERS)){
+			mSession.setSessionTimer((long) mConfigurationService.getInt(
+					NgnConfigurationEntry.QOS_SIP_CALLS_TIMEOUT,
+					NgnConfigurationEntry.DEFAULT_QOS_SIP_CALLS_TIMEOUT),
+					mConfigurationService.getString(NgnConfigurationEntry.QOS_REFRESHER,
+							NgnConfigurationEntry.DEFAULT_QOS_REFRESHER));
+        }
+        // Precondition
+		mSession.setQoS(tmedia_qos_stype_t.valueOf(mConfigurationService
+				.getString(NgnConfigurationEntry.QOS_PRECOND_TYPE,
+						NgnConfigurationEntry.DEFAULT_QOS_PRECOND_TYPE)),
+				tmedia_qos_strength_t.valueOf(mConfigurationService.getString(NgnConfigurationEntry.QOS_PRECOND_STRENGTH,
+						NgnConfigurationEntry.DEFAULT_QOS_PRECOND_STRENGTH)));
+
 	    /* 3GPP TS 24.173
 	        *
 	        * 5.1 IMS communication service identifier
@@ -557,13 +583,15 @@ public class NgnAVSession extends NgnInviteSession{
 	 * @return true if locally held and false otherwise
 	 * @sa @ref isRemoteHeld()
 	 */
+	@Override
 	public boolean isLocalHeld(){
-		return mLocalHold;
+		return super.isLocalHeld();
 	}
 	
+	@Override
 	public void setLocalHold(boolean localHold){
 		final boolean changed = mLocalHold!= localHold;
-		mLocalHold = localHold;
+		super.setLocalHold(localHold);
 		
 		if(mVideoProducer != null){
 			mVideoProducer.setOnPause(mLocalHold || mRemoteHold);
@@ -582,13 +610,15 @@ public class NgnAVSession extends NgnInviteSession{
 	 * @return true if the call is remotely held and false otherwise
 	 * @sa @ref isLocalHeld()
 	 */
+	@Override
 	public boolean isRemoteHeld(){
-		return mRemoteHold;
+		return super.isRemoteHeld();
 	}
 	
+	@Override
 	public void setRemoteHold(boolean remoteHold){
 		final boolean changed = mRemoteHold != remoteHold;
-		mRemoteHold = remoteHold;
+		super.setRemoteHold(remoteHold);
 		
 		if(mVideoProducer != null){
 			mVideoProducer.setOnPause(mLocalHold || mRemoteHold);
@@ -610,5 +640,17 @@ public class NgnAVSession extends NgnInviteSession{
      */
     public boolean sendDTMF(int digit){
         return mSession.sendDTMF(digit);
+    }
+    
+    private static tmedia_bandwidth_level_t getBandwidthLevel(String level){
+        if(NgnStringUtils.equals(level, "Medium", true)){
+             return tmedia_bandwidth_level_t.tmedia_bl_medium;
+        }
+        if(NgnStringUtils.equals(level, "High", true)){
+            return tmedia_bandwidth_level_t.tmedia_bl_hight;
+        }
+        else{
+           return tmedia_bandwidth_level_t.tmedia_bl_low;
+        }
     }
 }
