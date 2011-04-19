@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingBottom="5px">
+	<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_chat_queue_item_imageView" android:src="@drawable/messaging_48" android:layout_marginRight="3px"></ImageView>
+	<TextView android:layout_height="wrap_content" android:layout_toRightOf="@+id/screen_chat_queue_item_imageView" android:id="@+id/screen_chat_queue_item_textView_remote" android:text="sip:bob@open-ims.test" android:layout_marginLeft="5px" android:textStyle="bold" android:layout_width="fill_parent" android:textSize="16dp"></TextView>
+	<TextView android:layout_height="wrap_content" android:layout_below="@+id/screen_chat_queue_item_textView_remote" android:layout_toRightOf="@+id/screen_chat_queue_item_imageView" android:layout_marginLeft="5px" android:id="@+id/screen_chat_queue_item_textView_info" android:layout_width="fill_parent" android:text="Connected"></TextView>
+</RelativeLayout>

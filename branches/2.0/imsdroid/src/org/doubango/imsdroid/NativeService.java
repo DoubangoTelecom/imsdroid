@@ -160,6 +160,9 @@ public class NativeService extends NgnNativeService {
 							else if(NgnMediaType.isFileTransfer(mediaType)){
 								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
 							}
+							else if(NgnMediaType.isChat(mediaType)){
+								mEngine.refreshChatNotif(R.drawable.chat_25);
+							}
 							break;
 							
 						case INCOMING:
@@ -169,7 +172,7 @@ public class NativeService extends NgnNativeService {
 									mEngine.showAVCallNotif(R.drawable.phone_call_25, getString(R.string.string_call_incoming));
 									ScreenAV.receiveCall(avSession);
 									if(mWakeLock != null && !mWakeLock.isHeld()){
-										mWakeLock.acquire(1);
+										mWakeLock.acquire(10);
 									}
 									mEngine.getSoundService().startRingTone();
 								}
@@ -179,6 +182,15 @@ public class NativeService extends NgnNativeService {
 							}
 							else if(NgnMediaType.isFileTransfer(mediaType)){
 								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
+								if(mWakeLock != null && !mWakeLock.isHeld()){
+									mWakeLock.acquire(10);
+								}
+							}
+							else if(NgnMediaType.isChat(mediaType)){
+								mEngine.refreshChatNotif(R.drawable.chat_25);
+								if(mWakeLock != null && !mWakeLock.isHeld()){
+									mWakeLock.acquire(10);
+								}
 							}
 							break;
 							
@@ -189,11 +201,20 @@ public class NativeService extends NgnNativeService {
 							else if(NgnMediaType.isFileTransfer(mediaType)){
 								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
 							}
+							else if(NgnMediaType.isChat(mediaType)){
+								mEngine.refreshChatNotif(R.drawable.chat_25);
+							}
 							break;
 							
 						case RINGING:
 							if(NgnMediaType.isAudioVideoType(mediaType)){
 								mEngine.getSoundService().startRingBackTone();
+							}
+							else if(NgnMediaType.isFileTransfer(mediaType)){
+								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
+							}
+							else if(NgnMediaType.isChat(mediaType)){
+								mEngine.refreshChatNotif(R.drawable.chat_25);
 							}
 							break;
 						
@@ -203,6 +224,12 @@ public class NativeService extends NgnNativeService {
 								mEngine.showAVCallNotif(R.drawable.phone_call_25, getString(R.string.string_incall));
 								mEngine.getSoundService().stopRingBackTone();
 								mEngine.getSoundService().stopRingTone();
+							}
+							else if(NgnMediaType.isFileTransfer(mediaType)){
+								mEngine.refreshContentShareNotif(R.drawable.image_gallery_25);
+							}
+							else if(NgnMediaType.isChat(mediaType)){
+								mEngine.refreshChatNotif(R.drawable.chat_25);
 							}
 							break;
 						default: break;
