@@ -46,6 +46,7 @@
         <activity android:name=".Screens.ScreenFileTransferQueue"></activity>
         <activity android:name=".Screens.ScreenFileTransferView"></activity>
         <activity android:name=".Screens.ScreenAVQueue"></activity>
+        <activity android:name=".Screens.ScreenChatQueue"></activity>
         
 
     </application>

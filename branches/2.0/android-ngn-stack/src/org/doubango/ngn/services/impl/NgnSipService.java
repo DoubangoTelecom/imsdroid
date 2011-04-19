@@ -611,6 +611,9 @@ implements INgnSipService, tinyWRAPConstants {
                         if(mySession instanceof NgnAVSession){
                         	NgnAVSession.releaseSession((NgnAVSession)mySession);
                         }
+                        else if(mySession instanceof NgnMsrpSession){
+                        	NgnMsrpSession.releaseSession((NgnMsrpSession)mySession);
+                        }
                     }
 					// Publication
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){

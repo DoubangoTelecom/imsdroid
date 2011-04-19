@@ -4,6 +4,7 @@ import org.doubango.imsdroid.Screens.BaseScreen;
 import org.doubango.imsdroid.Screens.IBaseScreen;
 import org.doubango.imsdroid.Screens.ScreenAV;
 import org.doubango.imsdroid.Screens.ScreenAVQueue;
+import org.doubango.imsdroid.Screens.ScreenChatQueue;
 import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenSplash;
@@ -34,6 +35,7 @@ public class Main extends ActivityGroup {
 	public static final int ACTION_SHOW_AVSCREEN = 2;
 	public static final int ACTION_SHOW_CONTSHARE_SCREEN = 3;
 	public static final int ACTION_SHOW_SMS = 4;
+	public static final int ACTION_SHOW_CHAT_SCREEN = 5;
 	
 	private static final int RC_SPLASH = 0;
 	
@@ -175,7 +177,7 @@ public class Main extends ActivityGroup {
 		switch(bundle.getInt("action", Main.ACTION_NONE)){
 			// Default or ACTION_RESTORE_LAST_STATE
 			default:
-			case Main.ACTION_RESTORE_LAST_STATE:
+			case ACTION_RESTORE_LAST_STATE:
 				id = bundle.getString("screen-id");
 				final String screenTypeStr = bundle.getString("screen-type");
 				final SCREEN_TYPE screenType = NgnStringUtils.isNullOrEmpty(screenTypeStr) ? SCREEN_TYPE.HOME_T :
@@ -193,12 +195,12 @@ public class Main extends ActivityGroup {
 				break;
 				
 			// Notify for new SMSs
-			case Main.ACTION_SHOW_SMS:
+			case ACTION_SHOW_SMS:
                 mScreenService.show(ScreenTabMessages.class);
                 break;
                
 			// Show Audio/Video Calls
-			case Main.ACTION_SHOW_AVSCREEN:
+			case ACTION_SHOW_AVSCREEN:
 				Log.d(TAG, "Main.ACTION_SHOW_AVSCREEN");
 				
 				final int activeSessionsCount = NgnAVSession.getSize(new NgnPredicate<NgnAVSession>() {
@@ -239,8 +241,13 @@ public class Main extends ActivityGroup {
 				break;
 				
 			// Show Content Share Queue
-			case Main.ACTION_SHOW_CONTSHARE_SCREEN:
+			case ACTION_SHOW_CONTSHARE_SCREEN:
 				mScreenService.show(ScreenFileTransferQueue.class);
+				break;
+				
+			// Show Chat Queue
+			case ACTION_SHOW_CHAT_SCREEN:
+				mScreenService.show(ScreenChatQueue.class);
 				break;
 		}
 	}

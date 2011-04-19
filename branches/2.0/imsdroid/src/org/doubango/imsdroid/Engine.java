@@ -23,6 +23,7 @@ public class Engine extends NgnEngine{
 	private static final int NOTIF_SMS_ID = 19833893;
 	private static final int NOTIF_APP_ID = 19833894;
 	private static final int NOTIF_CONTSHARE_ID = 19833895;
+	private static final int NOTIF_CHAT_ID = 19833896;
 	
 	private IScreenService mScreenService;
 	
@@ -85,6 +86,17 @@ public class Engine extends NgnEngine{
         		intent.putExtra("action", Main.ACTION_SHOW_AVSCREEN);
         		break;
         		
+        	case NOTIF_CHAT_ID:
+        		notification.defaults |= Notification.DEFAULT_SOUND;
+        		tickerText = String.format("%s (%d)", tickerText, NgnMsrpSession.getSize(new NgnPredicate<NgnMsrpSession>() {
+					@Override
+					public boolean apply(NgnMsrpSession session) {
+						return session != null && NgnMediaType.isChat(session.getMediaType());
+					}
+				}));
+        		intent.putExtra("action", Main.ACTION_SHOW_CHAT_SCREEN);
+        		break;
+        		
        		default:
        			
        			break;
@@ -132,7 +144,7 @@ public class Engine extends NgnEngine{
     	if(!NgnMsrpSession.hasActiveSession(new NgnPredicate<NgnMsrpSession>() {
 			@Override
 			public boolean apply(NgnMsrpSession session) {
-				return session != null && session.getMediaType() == NgnMediaType.FileTransfer;
+				return session != null && NgnMediaType.isFileTransfer(session.getMediaType());
 			}}))
     	{
     		mNotifManager.cancel(NOTIF_CONTSHARE_ID);
@@ -143,13 +155,42 @@ public class Engine extends NgnEngine{
 		if(!NgnMsrpSession.hasActiveSession(new NgnPredicate<NgnMsrpSession>() {
 			@Override
 			public boolean apply(NgnMsrpSession session) {
-				return session != null && session.getMediaType() == NgnMediaType.FileTransfer;
+				return session != null && NgnMediaType.isFileTransfer(session.getMediaType());
 			}}))
     	{
     		mNotifManager.cancel(NOTIF_CONTSHARE_ID);
     	}
     	else{
     		showNotification(NOTIF_CONTSHARE_ID, drawableId, "Content sharing");
+    	}
+    }
+	
+	public void showContentChatNotif(int drawableId, String tickerText){
+    	showNotification(NOTIF_CHAT_ID, drawableId, tickerText);
+    }
+	
+	public void cancelChatNotif(){
+    	if(!NgnMsrpSession.hasActiveSession(new NgnPredicate<NgnMsrpSession>() {
+			@Override
+			public boolean apply(NgnMsrpSession session) {
+				return session != null && NgnMediaType.isChat(session.getMediaType());
+			}}))
+    	{
+    		mNotifManager.cancel(NOTIF_CHAT_ID);
+    	}
+    }
+    
+	public void refreshChatNotif(int drawableId){
+		if(!NgnMsrpSession.hasActiveSession(new NgnPredicate<NgnMsrpSession>() {
+			@Override
+			public boolean apply(NgnMsrpSession session) {
+				return session != null && NgnMediaType.isChat(session.getMediaType());
+			}}))
+    	{
+    		mNotifManager.cancel(NOTIF_CHAT_ID);
+    	}
+    	else{
+    		showNotification(NOTIF_CHAT_ID, drawableId, "Chat");
     	}
     }
 	

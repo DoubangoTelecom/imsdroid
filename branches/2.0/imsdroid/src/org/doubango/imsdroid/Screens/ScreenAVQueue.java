@@ -151,98 +151,97 @@ public class ScreenAVQueue extends BaseScreen{
 	//
 	// ScreenAVQueueAdapter
 	//
-     class ScreenAVQueueAdapter extends BaseAdapter implements Observer {
-            
-            private NgnObservableHashMap<Long, NgnAVSession> mAVSessions;
-            private final LayoutInflater mInflater;
-            private final Handler mHandler;
-            
-            ScreenAVQueueAdapter(Context context) {
-            	mHandler = new Handler();
-                mInflater = LayoutInflater.from(context);
-                mAVSessions = NgnAVSession.getSessions();
-                mAVSessions.addObserver(this);
+    private class ScreenAVQueueAdapter extends BaseAdapter implements Observer { 
+        private NgnObservableHashMap<Long, NgnAVSession> mAVSessions;
+        private final LayoutInflater mInflater;
+        private final Handler mHandler;
+        
+        ScreenAVQueueAdapter(Context context) {
+        	mHandler = new Handler();
+            mInflater = LayoutInflater.from(context);
+            mAVSessions = NgnAVSession.getSessions();
+            mAVSessions.addObserver(this);
+        }
+        
+        @Override
+        public int getCount() {
+                return mAVSessions.size();
+        }
+        
+        @Override
+        public Object getItem(int position) {
+                return mAVSessions.getAt(position);
+        }
+        
+        @Override
+        public long getItemId(int position) {
+                return position;
+        }
+        
+        @Override
+        public void update(Observable observable, Object data) {
+        	mAVSessions = NgnAVSession.getSessions();
+            if(Thread.currentThread() == Looper.getMainLooper().getThread()){
+                    notifyDataSetChanged();
             }
-            
-            @Override
-            public int getCount() {
-                    return mAVSessions.size();
+            else{
+                mHandler.post(new Runnable(){
+                        @Override
+                        public void run() {
+                            notifyDataSetChanged();
+                        }
+                });
             }
+        }
+        
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {    
+            View view = convertView;
+            NgnAVSession session;
             
-            @Override
-            public Object getItem(int position) {
-                    return mAVSessions.getAt(position);
+            if (view == null) {
+                view = mInflater.inflate(R.layout.screen_av_queue_item, null);
             }
+            session = (NgnAVSession)getItem(position);
             
-            @Override
-            public long getItemId(int position) {
-                    return position;
-            }
-            
-            @Override
-            public void update(Observable observable, Object data) {
-            	mAVSessions = NgnAVSession.getSessions();
-                if(Thread.currentThread() == Looper.getMainLooper().getThread()){
-                        notifyDataSetChanged();
+            if(session != null){
+                final ImageView imageView = (ImageView) view.findViewById(R.id.screen_av_queue_item_imageView);
+                final TextView tvRemoteParty = (TextView) view.findViewById(R.id.screen_av_queue_item_textView_remote);
+                final TextView tvInfo = (TextView) view.findViewById(R.id.screen_av_queue_item_textView_info);
+                
+                if(session.isLocalHeld() || session.isRemoteHeld()){
+                    imageView.setImageResource(R.drawable.phone_hold_48);
+                    tvInfo.setText("Held");
                 }
                 else{
-                    mHandler.post(new Runnable(){
-                            @Override
-                            public void run() {
-                                notifyDataSetChanged();
-                            }
-                    });
+                    imageView.setImageResource(R.drawable.phone_resume_48);
+					switch (session.getState()) {
+						case INCOMING:
+							tvInfo.setText("Incoming");
+							break;
+						case INPROGRESS:
+							tvInfo.setText("In Progress");
+							break;
+						case INCALL:
+						default:
+							tvInfo.setText("In Call");
+							break;
+						case TERMINATED:
+							tvInfo.setText("Terminated");
+							break;
+					}
+                }                               
+                
+                final String remoteParty = session.getRemotePartyDisplayName();
+                if(remoteParty != null){
+                    tvRemoteParty.setText(remoteParty);
+                }
+                else{
+                   tvRemoteParty.setText(NgnStringUtils.nullValue());
                 }
             }
             
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {    
-                View view = convertView;
-                NgnAVSession session;
-                
-                if (view == null) {
-                    view = mInflater.inflate(R.layout.screen_av_queue_item, null);
-                }
-                session = (NgnAVSession)getItem(position);
-                
-                if(session != null){
-                    final ImageView imageView = (ImageView) view.findViewById(R.id.screen_av_queue_item_imageView);
-                    final TextView tvRemoteParty = (TextView) view.findViewById(R.id.screen_av_queue_item_textView_remote);
-                    final TextView tvInfo = (TextView) view.findViewById(R.id.screen_av_queue_item_textView_info);
-                    
-                    if(session.isLocalHeld() || session.isRemoteHeld()){
-                        imageView.setImageResource(R.drawable.phone_hold_48);
-                        tvInfo.setText("Held");
-                    }
-                    else{
-                        imageView.setImageResource(R.drawable.phone_resume_48);
-						switch (session.getState()) {
-							case INCOMING:
-								tvInfo.setText("Incoming");
-								break;
-							case INPROGRESS:
-								tvInfo.setText("In Progress");
-								break;
-							case INCALL:
-							default:
-								tvInfo.setText("In Call");
-								break;
-							case TERMINATED:
-								tvInfo.setText("Terminated");
-								break;
-						}
-                    }                               
-                    
-                    final String remoteParty = session.getRemotePartyDisplayName();
-                    if(remoteParty != null){
-                        tvRemoteParty.setText(remoteParty);
-                    }
-                    else{
-                       tvRemoteParty.setText(NgnStringUtils.nullValue());
-                    }
-                }
-                
-                return view;
-            }
+            return view;
+        }
     }
 }
