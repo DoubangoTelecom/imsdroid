@@ -10,7 +10,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,6 +35,7 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 	public static enum SCREEN_TYPE {
 		// Well-Known
 		ABOUT_T,
+		AV_QUEUE_T,
 		CHAT_T,
 		CODECS_T,
 		CONTACTS_T,
@@ -88,7 +88,6 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
 		mHanler = new Handler();
 	}

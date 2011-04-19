@@ -324,8 +324,7 @@ private InputMethodManager mInputMethodManager;
 			mBaseScreen = baseSceen;
 			mHandler = new Handler();
 			mInflater = LayoutInflater.from(mBaseScreen);
-			mEvents = mBaseScreen.mHistorytService.getObservableEvents()
-					.filter(new HistoryEventChatFilter());
+			mEvents = mBaseScreen.mHistorytService.getObservableEvents().filter(new HistoryEventChatFilter());
 			Collections.sort(mEvents, new DateComparator());
 			mBaseScreen.mHistorytService.getObservableEvents().addObserver(this);
 		}

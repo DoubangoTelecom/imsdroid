@@ -14,7 +14,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Screens.ScreenSplash" android:screenOrientation="portrait"/>
+        <activity android:name=".Screens.ScreenSplash"/>
         <activity android:name=".Screens.ScreenHome"/>
         <activity android:name=".Screens.ScreenTabDialer"></activity>
         <activity android:name=".Screens.ScreenTabHistory"></activity>
@@ -45,6 +45,7 @@
         <activity android:name=".Screens.ScreenChat"></activity>
         <activity android:name=".Screens.ScreenFileTransferQueue"></activity>
         <activity android:name=".Screens.ScreenFileTransferView"></activity>
+        <activity android:name=".Screens.ScreenAVQueue"></activity>
         
 
     </application>

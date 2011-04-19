@@ -10,6 +10,7 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
+import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnContact;
@@ -43,6 +44,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -84,6 +87,7 @@ public class ScreenAV extends BaseScreen{
 	
 	private MyProxSensor mProxSensor;
 	private KeyguardLock mKeyguardLock;
+	private OrientationEventListener mListener;
 	
 	private PowerManager.WakeLock mWakeLock;
 	
@@ -166,6 +170,32 @@ public class ScreenAV extends BaseScreen{
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(NgnInviteEventArgs.ACTION_INVITE_EVENT);
 	    registerReceiver(mSipBroadCastRecv, intentFilter);
+	    
+	    mListener = new OrientationEventListener(IMSDroid.getContext(), SensorManager.SENSOR_DELAY_NORMAL) {
+			@Override
+			public void onOrientationChanged(int orient) {
+				try {
+					final boolean bFipVideo = NgnEngine.getInstance().getConfigurationService().getBoolean(
+									NgnConfigurationEntry.GENERAL_VIDEO_FLIP, NgnConfigurationEntry.DEFAULT_GENERAL_FLIP_VIDEO);					
+					if ((orient > 0) && (orient < 50)) {
+						mAVSession.setRotation(bFipVideo ? 90 : 0);
+					} else if ((orient > 50) && (orient < 120)) {
+						mAVSession.setRotation(0);
+					} else if ((orient > 120) && (orient < 200)) {
+						mAVSession.setRotation(0);
+					} else if ((orient > 200) && (orient < 290)) {
+						mAVSession.setRotation(0);
+					} else if ((orient > 270) && (orient < 360)) {
+						mAVSession.setRotation(bFipVideo ? 90 : 0);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		if(!mListener.canDetectOrientation()){
+			Log.w(TAG, "canDetectOrientation() is equal to false");
+		}
 		
 		mMainLayout = (RelativeLayout)findViewById(R.id.screen_av_relativeLayout);
         loadView();
@@ -213,6 +243,10 @@ public class ScreenAV extends BaseScreen{
 		if(mWakeLock != null && mWakeLock.isHeld()){
 			mWakeLock.release();
 		}
+		
+		if (mListener.canDetectOrientation()) {
+			mListener.disable();
+		}
 	}
 
 	@Override
@@ -224,9 +258,13 @@ public class ScreenAV extends BaseScreen{
 			mProxSensor.start();
 		}
 		
-		 if(mAVSession.getState() == InviteState.INCALL){
+		if (mAVSession.getState() == InviteState.INCALL) {
 			mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
-	     }
+		}
+
+		if (mListener.canDetectOrientation()) {
+			mListener.enable();
+		}
 	}
 
 	@Override
@@ -674,8 +712,8 @@ public class ScreenAV extends BaseScreen{
 		Log.d(TAG, "loadInCallVideoView()");
 		if(mViewInCallVideo == null){
 			mViewInCallVideo = mInflater.inflate(R.layout.view_call_incall_video, null);
-			mViewLocalVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_linearLayout_local_video);
-			mViewRemoteVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_linearLayout_remote_video);
+			mViewLocalVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_local_video);
+			mViewRemoteVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_remote_video);
 		}
 		
         mTvDuration = null;
@@ -829,6 +867,9 @@ public class ScreenAV extends BaseScreen{
 					final ViewParent viewParent = localPreview.getParent();
 					if(viewParent != null && viewParent instanceof ViewGroup){
 						((ViewGroup)(viewParent)).removeView(localPreview);
+					}
+					if(localPreview instanceof SurfaceView){
+						((SurfaceView)localPreview).setZOrderOnTop(true);
 					}
 					mViewLocalVideoPreview.addView(localPreview);
 					mViewLocalVideoPreview.bringChildToFront(localPreview);

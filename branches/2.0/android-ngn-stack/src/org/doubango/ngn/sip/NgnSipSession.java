@@ -252,7 +252,7 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
     public String getRemotePartyDisplayName(){
     	if (NgnStringUtils.isNullOrEmpty(mRemotePartyDisplayName)){
             mRemotePartyDisplayName = NgnUriUtils.getDisplayName(getRemotePartyUri());
-            mRemotePartyDisplayName = NgnStringUtils.isNullOrEmpty(this.mRemotePartyDisplayName) ? "(null)" : this.mRemotePartyDisplayName;
+            mRemotePartyDisplayName = NgnStringUtils.isNullOrEmpty(mRemotePartyDisplayName) ? "(null)" : mRemotePartyDisplayName;
         }
         return mRemotePartyDisplayName;
     }
