@@ -7,9 +7,10 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 public class ScreenAbout extends BaseScreen {
-
+	private static final String TAG = ScreenAbout.class.getCanonicalName();
+	
 	public ScreenAbout() {
-		super(SCREEN_TYPE.ABOUT_T, ScreenAbout.class.getCanonicalName());
+		super(SCREEN_TYPE.ABOUT_T, TAG);
 	}
 
 	@Override

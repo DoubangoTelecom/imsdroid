@@ -3,6 +3,7 @@ package org.doubango.imsdroid;
 import org.doubango.imsdroid.Screens.BaseScreen;
 import org.doubango.imsdroid.Screens.IBaseScreen;
 import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.imsdroid.Screens.ScreenAVQueue;
 import org.doubango.imsdroid.Screens.ScreenFileTransferQueue;
 import org.doubango.imsdroid.Screens.ScreenHome;
 import org.doubango.imsdroid.Screens.ScreenSplash;
@@ -10,6 +11,7 @@ import org.doubango.imsdroid.Screens.ScreenTabMessages;
 import org.doubango.imsdroid.Screens.BaseScreen.SCREEN_TYPE;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.ngn.sip.NgnAVSession;
+import org.doubango.ngn.utils.NgnPredicate;
 import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.app.Activity;
@@ -36,13 +38,15 @@ public class Main extends ActivityGroup {
 	private static final int RC_SPLASH = 0;
 	
 	private Handler mHanler;
+	private final Engine mEngine;
 	private final IScreenService mScreenService;
 	
 	public Main(){
 		super();
 		
 		// Sets main activity (should be done before starting services)
-    	Engine.getInstance().setMainActivity(this);
+		mEngine = (Engine)Engine.getInstance();
+		mEngine.setMainActivity(this);
     	mScreenService = ((Engine)Engine.getInstance()).getScreenService();
 	}
 	
@@ -62,7 +66,6 @@ public class Main extends ActivityGroup {
         }
         
         Bundle bundle = savedInstanceState;
-        final IScreenService screenService = ((Engine)(Engine.getInstance())).getScreenService();
         if(bundle == null){
 	        Intent intent = getIntent();
 	        bundle = intent == null ? null : intent.getExtras();
@@ -70,8 +73,8 @@ public class Main extends ActivityGroup {
         if(bundle != null && bundle.getInt("action", Main.ACTION_NONE) != Main.ACTION_NONE){
         	handleAction(bundle);
         }
-        else if(screenService != null){
-        	screenService.show(ScreenHome.class);
+        else if(mScreenService != null){
+        	mScreenService.show(ScreenHome.class);
         }
     }
     
@@ -196,12 +199,41 @@ public class Main extends ActivityGroup {
                
 			// Show Audio/Video Calls
 			case Main.ACTION_SHOW_AVSCREEN:
-				id = bundle.getString("session-id");
-				final NgnAVSession avSession = NgnStringUtils.isNullOrEmpty(id) ? NgnAVSession.getFirstActiveCallAndNot(-1):
-					NgnAVSession.getSession(NgnStringUtils.parseLong(id, -1));
-				if(avSession != null){
-					if(!mScreenService.show(ScreenAV.class, Long.toString(avSession.getId()))){
+				Log.d(TAG, "Main.ACTION_SHOW_AVSCREEN");
+				
+				final int activeSessionsCount = NgnAVSession.getSize(new NgnPredicate<NgnAVSession>() {
+					@Override
+					public boolean apply(NgnAVSession session) {
+						return session != null && session.isActive();
+					}
+				});
+				if(activeSessionsCount > 1){
+					mScreenService.show(ScreenAVQueue.class);
+				}
+				else{
+					NgnAVSession avSession = NgnAVSession.getSession(new NgnPredicate<NgnAVSession>() {
+						@Override
+						public boolean apply(NgnAVSession session) {
+							return session != null && session.isActive() && !session.isLocalHeld() && !session.isRemoteHeld();
+						}
+					});
+					if(avSession == null){
+						avSession = NgnAVSession.getSession(new NgnPredicate<NgnAVSession>() {
+							@Override
+							public boolean apply(NgnAVSession session) {
+								return session != null && session.isActive();
+							}
+						});
+					}
+					if(avSession != null){
+						if(!mScreenService.show(ScreenAV.class, Long.toString(avSession.getId()))){
+							mScreenService.show(ScreenHome.class);
+						}
+					}
+					else{
+						Log.e(TAG,"Failed to find associated audio/video session");
 						mScreenService.show(ScreenHome.class);
+						mEngine.refreshAVCallNotif(R.drawable.phone_call_25);
 					}
 				}
 				break;

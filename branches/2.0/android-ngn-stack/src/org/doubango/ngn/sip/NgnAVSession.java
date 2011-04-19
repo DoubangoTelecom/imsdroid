@@ -17,7 +17,9 @@ import org.doubango.ngn.model.NgnHistoryAVCallEvent;
 import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.ngn.utils.NgnListUtils;
 import org.doubango.ngn.utils.NgnObservableHashMap;
+import org.doubango.ngn.utils.NgnPredicate;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.ActionConfig;
@@ -108,6 +110,10 @@ public class NgnAVSession extends NgnInviteSession{
         }
     }
 
+	public static NgnObservableHashMap<Long, NgnAVSession> getSessions(){
+		return sSessions;
+	}
+	
 	/**
 	 * Retrieves an audio/video session by id.
 	 * @param id the id of the audio/video session to retrieve
@@ -121,6 +127,12 @@ public class NgnAVSession extends NgnInviteSession{
 				return null;
 		}
 	}
+	
+	public static NgnAVSession getSession(NgnPredicate<NgnAVSession> predicate) {
+		synchronized (sSessions) {
+			return NgnListUtils.getFirstOrDefault(sSessions.values(), predicate);
+		}
+	}
 
 	/**
 	 * Gets the number of pending audio/video sessions. These sessions could be active or not.
@@ -132,6 +144,12 @@ public class NgnAVSession extends NgnInviteSession{
             return sSessions.size();
         }
     }
+	
+	public static int getSize(NgnPredicate<NgnAVSession> predicate) {
+		synchronized (sSessions) {
+			return NgnListUtils.filter(sSessions.values(), predicate).size();
+		}
+	}
 	
 	/**
 	 * Checks whether we already have an audio/video session with the specified id.
@@ -170,7 +188,7 @@ public class NgnAVSession extends NgnInviteSession{
 		NgnAVSession session;
 		for(Map.Entry<Long, NgnAVSession> entry : sSessions.entrySet()) {
 			session = entry.getValue();
-			if(session.getId() != id && session.isConnected() && !session.isLocalHeld() && !session.isRemoteHeld()){
+			if(session.getId() != id && session.isActive() && !session.isLocalHeld() && !session.isRemoteHeld()){
 				return session;
 			}
 		}

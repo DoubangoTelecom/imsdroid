@@ -14,7 +14,6 @@ import org.doubango.ngn.model.NgnHistoryEvent;
 import org.doubango.ngn.model.NgnHistoryAVCallEvent.HistoryEventAVFilter;
 import org.doubango.ngn.services.INgnHistoryService;
 import org.doubango.ngn.services.INgnSipService;
-import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 
@@ -174,10 +173,8 @@ public class ScreenTabHistory extends BaseScreen {
 			if(mSelectedEvent != null){
 				mLasQuickAction = new QuickAction(view);
 				if(!NgnStringUtils.isNullOrEmpty(mSelectedEvent.getRemoteParty())){
-					if(!NgnAVSession.hasActiveSession()){
-						mLasQuickAction.addActionItem(mAItemVoiceCall);
-						mLasQuickAction.addActionItem(mAItemVideoCall);
-					}
+					mLasQuickAction.addActionItem(mAItemVoiceCall);
+					mLasQuickAction.addActionItem(mAItemVideoCall);
 					mLasQuickAction.addActionItem(mAItemChat);
 					mLasQuickAction.addActionItem(mAItemSMS);
 					mLasQuickAction.addActionItem(mAItemShare);

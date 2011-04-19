@@ -14,7 +14,6 @@ import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnContact;
 import org.doubango.ngn.services.INgnContactService;
 import org.doubango.ngn.services.INgnSipService;
-import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.utils.NgnGraphicsUtils;
 import org.doubango.ngn.utils.NgnObservableList;
 import org.doubango.ngn.utils.NgnStringUtils;
@@ -31,12 +30,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 public class ScreenTabContacts extends BaseScreen {
 	private static String TAG = ScreenTabContacts.class.getCanonicalName();
@@ -69,7 +68,7 @@ public class ScreenTabContacts extends BaseScreen {
 			@Override
 			public void onClick(View v) {
 				if(mSelectedContact != null){
-					ScreenAV.makeCall(mSelectedContact.getPrimaryNumber(),NgnMediaType.Audio);
+					ScreenAV.makeCall(mSelectedContact.getPrimaryNumber(), NgnMediaType.Audio);
 					if(mLasQuickAction != null){
 						mLasQuickAction.dismiss();
 					}
@@ -176,11 +175,11 @@ public class ScreenTabContacts extends BaseScreen {
 			if(mSelectedContact != null){
 				mLasQuickAction = new QuickAction(view);
 				if(!NgnStringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
-					if(!NgnAVSession.hasActiveSession()){
-						mLasQuickAction.addActionItem(mAItemVoiceCall);
-						mLasQuickAction.addActionItem(mAItemVideoCall);
-					}
+					mLasQuickAction.addActionItem(mAItemVoiceCall);
+					mLasQuickAction.addActionItem(mAItemVideoCall);
+					mLasQuickAction.addActionItem(mAItemChat);
 					mLasQuickAction.addActionItem(mAItemSMS);
+					mLasQuickAction.addActionItem(mAItemShare);
 				}
 				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 				mLasQuickAction.show();
@@ -199,11 +198,11 @@ public class ScreenTabContacts extends BaseScreen {
 			if(mSelectedContact != null){
 				mLasQuickAction = new QuickAction(view);
 				if(!NgnStringUtils.isNullOrEmpty(mSelectedContact.getPrimaryNumber())){
-					if(!NgnAVSession.hasActiveSession()){
-						mLasQuickAction.addActionItem(mAItemVoiceCall);
-						// mLasQuickAction.addActionItem(mAItemVideoCall);
-					}
+					mLasQuickAction.addActionItem(mAItemVoiceCall);
+					mLasQuickAction.addActionItem(mAItemVideoCall);
+					mLasQuickAction.addActionItem(mAItemChat);
 					mLasQuickAction.addActionItem(mAItemSMS);
+					mLasQuickAction.addActionItem(mAItemShare);
 				}
 				mLasQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 				mLasQuickAction.show();

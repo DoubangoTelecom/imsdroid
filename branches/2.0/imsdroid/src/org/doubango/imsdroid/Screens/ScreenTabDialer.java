@@ -6,7 +6,6 @@ import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.utils.NgnStringUtils;
 
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -22,7 +21,7 @@ public class ScreenTabDialer  extends BaseScreen {
 	private final INgnSipService mSipService;
 	
 	public ScreenTabDialer() {
-		super(SCREEN_TYPE.HOME_T, TAG);
+		super(SCREEN_TYPE.DIALER_T, TAG);
 		
 		mSipService = getEngine().getSipService();
 	}
@@ -31,7 +30,6 @@ public class ScreenTabDialer  extends BaseScreen {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screen_tab_dialer);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
 		mEtNumber = (EditText)findViewById(R.id.screen_tab_dialer_editText_number);
 		
