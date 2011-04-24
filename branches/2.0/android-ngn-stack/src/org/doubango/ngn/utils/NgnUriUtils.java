@@ -75,6 +75,15 @@ public class NgnUriUtils {
 		}
 	}
 	
+	public static SipUri makeValidSipUriObj(String uri){
+		SipUri sipUri = new SipUri(makeValidSipUri(uri));
+		if(sipUri.isValid()){
+			return sipUri;
+		}
+		sipUri.delete();
+		return null;
+	}
+	
 	public static String getValidPhoneNumber(String uri){
 		if(uri != null && (uri.startsWith("sip:") || uri.startsWith("sip:") || uri.startsWith("tel:"))){
 			SipUri sipUri = new SipUri(uri);
