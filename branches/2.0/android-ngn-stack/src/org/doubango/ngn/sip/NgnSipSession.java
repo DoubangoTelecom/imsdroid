@@ -4,6 +4,7 @@ import org.doubango.ngn.utils.NgnObservableObject;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.SipSession;
+import org.doubango.tinyWRAP.SipUri;
 
 import android.util.Log;
 
@@ -226,6 +227,15 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
         return true;
     }
     
+    public boolean setFromUri(SipUri uri){
+    	if (!getSession().setFromUri(uri)){
+            Log.e(TAG, "Failed to set FromUri");
+            return false;
+        }
+        mFromUri = String.format("%s:%s@%s", uri.getScheme(), uri.getUserName(), uri.getHost());
+        return true;
+    }
+    
     public String getToUri(){
     	return mToUri;
     }
@@ -236,6 +246,14 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
             return;
         }
     	mToUri = uri;
+    }
+    
+    public void setToUri(SipUri uri){
+    	if (!getSession().setToUri(uri)){
+            Log.e(TAG, "Failed to set ToUri");
+            return;
+        }
+    	mToUri = String.format("%s:%s@%s", uri.getScheme(), uri.getUserName(), uri.getHost());
     }
     
     public String getRemotePartyUri(){
