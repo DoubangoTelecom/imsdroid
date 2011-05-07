@@ -122,6 +122,7 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 	public boolean load(){
 		mLoading = true;
 		boolean bOK = false;
+		Cursor managedCursor = null;
 		
 		if(mOnBeginLoadCallback != null){
 			mOnBeginLoadCallback.callback(this);
@@ -145,7 +146,7 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 							android.provider.ContactsContract.Contacts.PHOTO_ID,
 							android.provider.ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
 							};
-					Cursor managedCursor = activity.managedQuery(android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+					managedCursor = activity.managedQuery(android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
 							projection, // Which columns to return
 							null,       // Which rows to return (all rows)
 							null,       // Selection arguments (none)
@@ -194,6 +195,11 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 			
 			mLoading = false;
 			mReady = false;
+		}
+		finally{
+			if(managedCursor != null){
+				managedCursor.close();
+			}
 		}
 		
 		if(mOnEndLoadCallback != null){
