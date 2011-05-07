@@ -339,10 +339,7 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 		NetworkInfo networkInfo = NgnApplication.getConnectivityManager().getActiveNetworkInfo();
 
 		if (networkInfo == null) {
-			Toast.makeText(NgnApplication.getContext(),
-					"Failed to get Network information", Toast.LENGTH_LONG)
-					.show();
-			Log.d(NgnNetworkService.TAG, "Failed to get Network information");
+			Log.e(NgnNetworkService.TAG, "Failed to get Network information");
 			return false;
 		}
 
