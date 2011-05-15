@@ -1,3 +1,23 @@
+/* Copyright (C) 2010-2011, Mamadou Diop.
+*  Copyright (C) 2011, Doubango Telecom.
+*
+* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
+*	
+* This file is part of imsdroid Project (http://code.google.com/p/imsdroid)
+*
+* imsdroid is free software: you can redistribute it and/or modify it under the terms of 
+* the GNU General Public License as published by the Free Software Foundation, either version 3 
+* of the License, or (at your option) any later version.
+*	
+* imsdroid is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU General Public License for more details.
+*	
+* You should have received a copy of the GNU General Public License along 
+* with this program; if not, write to the Free Software Foundation, Inc., 
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
+
 package org.doubango.ngn;
 import org.doubango.ngn.utils.NgnStringUtils;
 
@@ -278,25 +298,6 @@ import android.util.Log;
  * Starting/Stopping the engine will start/stop all underlying services.
  * 
  * 
-// */
-// * <h2>License</h2>
-// * 
-// * <i>Copyright © 2011 Mamadou Diop <diopmamadou {AT} doubango.org></i><br />
-// * <i>android-ngn-stack v2.0</i> is a free software: you can redistribute it and/or modify it under the terms of the GNU
-// * General Public License as published by the Free Software Foundation, either version 3 of the
-// * License, or (at your option) any later version.<br />
-// * <i>android-ngn-stack v2.0</i> is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-// * PURPOSE. See the GNU General Public License for more details.<br />
-// * You should have received a copy of the GNU General Public Licence along with doubango. If not,
-// * see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.<br />
-// * <br />
-// * 
-// * 
-// * <a href="http://code.google.com/p/imsdroid/">android-ngn-stack</a> is a NGN (Next Generation Network) stack to develop IMS/RCS/VoLTE applications for Android devices.
-// * The stack is based on <a href="http://doubango.org">Doubango</a> project.
-// * 
-// */
 
 
 /**
