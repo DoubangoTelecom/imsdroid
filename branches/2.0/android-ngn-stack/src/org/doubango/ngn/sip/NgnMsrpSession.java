@@ -33,6 +33,8 @@ import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnMsrpEventArgs;
 import org.doubango.ngn.events.NgnMsrpEventTypes;
 import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.model.NgnHistoryEvent;
+import org.doubango.ngn.model.NgnHistoryMsrpEvent;
 import org.doubango.ngn.utils.NgnContentType;
 import org.doubango.ngn.utils.NgnListUtils;
 import org.doubango.ngn.utils.NgnObservableHashMap;
@@ -80,6 +82,8 @@ public class NgnMsrpSession extends NgnInviteSession {
 	private boolean mOmaFinalDeliveryReport;
 	private OutputStream mOutFileStream;
 	private List<PendingMessage> mPendingMessages;
+	
+	private final NgnHistoryMsrpEvent mHistoryEvent;
 
 	private final static NgnObservableHashMap<Long, NgnMsrpSession> sSessions = new NgnObservableHashMap<Long, NgnMsrpSession>(
 			true);
@@ -241,6 +245,17 @@ public class NgnMsrpSession extends NgnInviteSession {
 			mSession = session;
 			mSession.setCallback(mCallback);
 		}
+		
+		switch (mediaType){
+		    case Chat:
+		    default:
+		       mHistoryEvent = null;//new NgnHistoryChatEvent(toUri);
+		       break;
+		    case FileTransfer:
+		        mHistoryEvent = null;//new NgnHistoryFileTransferEvent(toUri);
+		        break; 
+		}
+		
 		super.init();
 		super.setSigCompId(sipStack.getSigCompId());
 		super.setToUri(toUri);
@@ -261,6 +276,11 @@ public class NgnMsrpSession extends NgnInviteSession {
 	@Override
 	protected SipSession getSession() {
 		return mSession;
+	}
+	
+	@Override
+	protected  NgnHistoryEvent getHistoryEvent(){
+		 return mHistoryEvent;
 	}
 	
 	public void setContext(Context context){

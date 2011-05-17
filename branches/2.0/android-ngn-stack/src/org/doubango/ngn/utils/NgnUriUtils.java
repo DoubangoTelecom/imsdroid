@@ -70,7 +70,7 @@ public class NgnUriUtils {
 		if(NgnStringUtils.isNullOrEmpty(uri)){
 			return NgnUriUtils.INVALID_SIP_URI;
 		}
-		if(uri.startsWith("sip:") || uri.startsWith("sip:")){
+		if(uri.startsWith("sip:") || uri.startsWith("sips:")){
 			return uri.replace("#", "%23");
 		}
 		else if(uri.startsWith("tel:")){
