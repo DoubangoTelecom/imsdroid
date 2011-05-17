@@ -20,7 +20,6 @@
 package org.doubango.ngn.sip;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
 import org.doubango.ngn.NgnApplication;
@@ -33,7 +32,7 @@ import org.doubango.ngn.media.NgnProxyPluginMgr;
 import org.doubango.ngn.media.NgnProxyVideoConsumer;
 import org.doubango.ngn.media.NgnProxyVideoProducer;
 import org.doubango.ngn.model.NgnHistoryAVCallEvent;
-import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
+import org.doubango.ngn.model.NgnHistoryEvent;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnListUtils;
@@ -351,6 +350,11 @@ public class NgnAVSession extends NgnInviteSession{
 		return mSession;
 	}
 	
+	@Override
+	protected  NgnHistoryEvent getHistoryEvent(){
+		 return mHistoryEvent;
+	}
+	
 	private boolean initializeConsumersAndProducers(){
 		Log.d(TAG, "initializeConsumersAndProducers()");
 		if(mConsumersAndProducersInitialzed){
@@ -538,32 +542,21 @@ public class NgnAVSession extends NgnInviteSession{
 		
 		switch(state){
 			case INCOMING:
-				mHistoryEvent.setStatus(StatusType.Incoming);
 				initializeConsumersAndProducers();
 				break;
 				
 			case INPROGRESS:
 				setModeInCall(true);
-				mHistoryEvent.setStatus(StatusType.Outgoing);
 				initializeConsumersAndProducers();
 				break;
 				
 			case INCALL:
 				setModeInCall(true);
-				mHistoryEvent.setStartTime(new Date().getTime());
 				initializeConsumersAndProducers();
 				break;
 			
 			case TERMINATED:
 				setModeInCall(false);
-				if (mHistoryEvent.getStartTime() == mHistoryEvent.getEndTime() 
-						&& mHistoryEvent.getStatus() == StatusType.Incoming) {
-					mHistoryEvent.setStatus(StatusType.Missed);
-				} else {
-					mHistoryEvent.setEndTime(new Date().getTime());
-				}
-				mHistoryEvent.setRemoteParty(getRemotePartyUri());
-				NgnEngine.getInstance().getHistoryService().addEvent(mHistoryEvent);
 				deInitializeMediaSession();
 				break;
 		}

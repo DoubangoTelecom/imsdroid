@@ -19,7 +19,12 @@
 */
 package org.doubango.ngn.sip;
 
+import java.util.Date;
+
+import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.model.NgnHistoryEvent;
+import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
 import org.doubango.tinyWRAP.InviteSession;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 
@@ -35,6 +40,8 @@ public abstract class NgnInviteSession extends NgnSipSession{
     protected InviteState mState;
     protected boolean mRemoteHold;
     protected boolean mLocalHold;
+    private boolean mEventAdded;
+    private boolean mEventIncoming;
 
     public enum InviteState{
         NONE,
@@ -57,6 +64,8 @@ public abstract class NgnInviteSession extends NgnSipSession{
 		mState = InviteState.NONE;
 	}
 	
+	protected abstract NgnHistoryEvent getHistoryEvent();
+	
 	/**
 	 * Gets the media type
 	 * @return the media type
@@ -78,7 +87,37 @@ public abstract class NgnInviteSession extends NgnSipSession{
       * @param state the new session state
       */
      public void setState(InviteState state){
-    	 mState = state;
+		mState = state;
+		NgnHistoryEvent historyEvent = getHistoryEvent();
+		switch (state) {
+		case INCOMING:
+			mEventIncoming = true;
+			break;
+
+		case INPROGRESS:
+			mEventIncoming = false;
+			break;
+
+		case INCALL:
+			if(historyEvent != null){
+				historyEvent.setStartTime(new Date().getTime());
+				historyEvent.setEndTime(historyEvent.getEndTime());
+				historyEvent.setStatus(mEventIncoming ? StatusType.Incoming : StatusType.Outgoing);
+			}
+			break;
+
+		case TERMINATED:
+		case TERMINATING:
+			if(historyEvent != null && !mEventAdded){
+				mEventAdded = true;
+				if(historyEvent.getStatus() != StatusType.Missed){
+					historyEvent.setEndTime(new Date().getTime());
+				}
+				historyEvent.setRemoteParty(getRemotePartyUri());
+				NgnEngine.getInstance().getHistoryService().addEvent(historyEvent);
+			}
+			break;
+		}
      }
 
      /**
