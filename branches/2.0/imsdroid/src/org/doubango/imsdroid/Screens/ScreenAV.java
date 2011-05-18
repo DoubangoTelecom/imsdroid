@@ -606,7 +606,7 @@ public class ScreenAV extends BaseScreen{
 					mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
 					
 					// release power lock if not video call
-					if(mIsVideoCall && mWakeLock != null && mWakeLock.isHeld()){
+					if(!mIsVideoCall && mWakeLock != null && mWakeLock.isHeld()){
 						mWakeLock.release();
 			        }
 					break;
