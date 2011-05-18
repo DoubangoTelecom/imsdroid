@@ -77,7 +77,8 @@ import android.widget.TextView;
 public class ScreenAV extends BaseScreen{
 	private static final String TAG = ScreenAV.class.getCanonicalName();
 	private static final SimpleDateFormat sDurationTimerFormat = new SimpleDateFormat("mm:ss");
-	private static int sCountBlankPacket=0;
+	private static int sCountBlankPacket = 0;
+	private static int sLastRotation = 1;
 	
 	private String mRemotePartyDisplayName;
 	private Bitmap mRemotePartyPhoto;
@@ -196,16 +197,18 @@ public class ScreenAV extends BaseScreen{
 				try {
 					final boolean bFipVideo = NgnEngine.getInstance().getConfigurationService().getBoolean(
 									NgnConfigurationEntry.GENERAL_VIDEO_FLIP, NgnConfigurationEntry.DEFAULT_GENERAL_FLIP_VIDEO);					
-					if ((orient > 0) && (orient < 50)) {
-						mAVSession.setRotation(bFipVideo ? 90 : 0);
-					} else if ((orient > 50) && (orient < 120)) {
-						mAVSession.setRotation(0);
-					} else if ((orient > 120) && (orient < 200)) {
-						mAVSession.setRotation(0);
-					} else if ((orient > 200) && (orient < 290)) {
-						mAVSession.setRotation(0);
-					} else if ((orient > 270) && (orient < 360)) {
-						mAVSession.setRotation(bFipVideo ? 90 : 0);
+					if (bFipVideo){
+						if ((orient > 345 || orient <15)  ||
+								(orient > 75 && orient <105)   ||
+								(orient > 165 && orient < 195) ||
+								(orient > 255 && orient < 285)){
+							int rotation = mAVSession.compensCamRotation(true);
+							if (rotation != sLastRotation){
+								Log.d(ScreenAV.TAG,"Received Screen Orientation Change setRotation["+String.valueOf(rotation)+"]");
+								sLastRotation = rotation ; 
+								mAVSession.setRotation(rotation);
+							}
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

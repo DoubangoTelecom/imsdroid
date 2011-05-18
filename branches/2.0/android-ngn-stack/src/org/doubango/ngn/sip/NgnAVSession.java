@@ -16,6 +16,8 @@
 * You should have received a copy of the GNU General Public License along 
 * with this program; if not, write to the Free Software Foundation, Inc., 
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+* 
+* @contributors: See $(DOUBANGO_HOME)\contributors.txt
 */
 package org.doubango.ngn.sip;
 
@@ -479,6 +481,20 @@ public class NgnAVSession extends NgnInviteSession{
 		if(mVideoProducer != null){
 			mVideoProducer.toggleCamera();
 		}
+	}
+	
+	public boolean isFrontFacingCameraEnabled() {
+		if(mVideoProducer != null){
+			return mVideoProducer.isFrontFacingCameraEnabled();
+		}
+		return false ;
+	}
+	
+	public int compensCamRotation(boolean preview){
+		if(mVideoProducer != null){
+			return mVideoProducer.compensCamRotation(preview);
+		}
+		return 0;
 	}
 	
 	/**
