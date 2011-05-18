@@ -411,6 +411,11 @@ public class NgnApplication extends Application{
     	return model.startsWith("lg-");
     }
     
+    public static boolean isToshiba(){
+    	final String model = Build.MODEL.toLowerCase();
+    	return model.startsWith("toshiba");
+    }
+    
     public static boolean isAudioRecreateRequired(){
     	return false;
     }

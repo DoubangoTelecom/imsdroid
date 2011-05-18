@@ -16,6 +16,8 @@
 * You should have received a copy of the GNU General Public License along 
 * with this program; if not, write to the Free Software Foundation, Inc., 
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+* 
+* @contributors: See $(DOUBANGO_HOME)\contributors.txt
 */
 package org.doubango.ngn.media;
 
@@ -109,6 +111,68 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		}
 	}
 	
+	public int getTerminalRotation(){
+		android.content.res.Configuration conf = NgnApplication.getContext().getResources().getConfiguration();
+		int     terminalRotation  = 0 ;
+		switch(conf.orientation){
+		case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
+			terminalRotation = 0;//The starting position is 0 (landscape).
+			break;
+		case android.content.res.Configuration.ORIENTATION_PORTRAIT:
+			terminalRotation = 90 ;
+			break;
+		}
+		return terminalRotation;
+	}
+
+	public int getNativeCameraHardRotation(boolean preview){
+		int     terminalRotation   = getTerminalRotation();
+		boolean isFront            = NgnCameraProducer.isFrontFacingCameraEnabled();
+		if (NgnApplication.isSamsung()){
+			if (preview){
+				if (isFront){
+					if (terminalRotation == 0) return 0;
+					else return 90;
+				}
+				else return 0 ;
+			}
+			else{
+				if (isFront){
+					if (terminalRotation == 0) return -270;
+					else return 90;
+				}
+				else{
+					if (terminalRotation == 0) return 0;
+					else return 0;
+				}
+			}
+		}
+		else if (NgnApplication.isToshiba()){
+			if (preview){
+				if (terminalRotation == 0) return 0;
+				else return 270;
+			}
+			else{
+				return 0;
+			}
+		}
+		else{
+			return 0 ;
+		}
+	}
+
+	public int compensCamRotation(boolean preview){
+		int     cameraHardRotation = getNativeCameraHardRotation(preview) ;
+		int     rotation           = 0;
+		int     terminalRotation   = getTerminalRotation();
+		rotation = (terminalRotation-cameraHardRotation) % 360;
+		return rotation;  
+	}
+
+	public boolean isFrontFacingCameraEnabled() {
+		return NgnCameraProducer.isFrontFacingCameraEnabled();
+	}
+
 	public void setRotation(int rot){
 		if(mProducer != null && super.mValid){
 			mProducer.setRotation(rot);
@@ -175,6 +239,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
     private void startCameraPreview(Camera camera){
 		if(camera != null && mProducer != null && mVideoFrame != null){
 			try{
+				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", mWidth, mHeight));
 				Camera.Parameters parameters = camera.getParameters();
 				parameters.setPreviewSize(mWidth, mHeight);
 				camera.setParameters(parameters);
@@ -182,18 +247,23 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				Log.e(TAG, e.toString());
 			}
 								
-			android.content.res.Configuration conf = NgnApplication.getContext().getResources().getConfiguration();
-			// Camera Orientation
-			switch(conf.orientation){
-				case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
-					NgnCameraProducer.setDisplayOrientation(camera, 0);
-					Log.d(TAG, "Orientation=landscape");
-					break;
-				case android.content.res.Configuration.ORIENTATION_PORTRAIT:
-					NgnCameraProducer.setDisplayOrientation(camera, 90);
-					Log.d(TAG, "Orientation=portrait");
-					break;
+			try {
+				int terminalRotation = getTerminalRotation();
+				Camera.Parameters parameters = camera.getParameters();
+				if (terminalRotation == 0) {
+					parameters.set("orientation", "landscape");
+				} else {
+					parameters.set("orientation", "portrait");
+				}
+				camera.setParameters(parameters);
+			} catch (Exception e) {
+				Log.e(TAG, e.toString());
 			}
+			
+			// Camera Orientation
+			int rotation = compensCamRotation(false);     
+			Log.d(TAG, String.format("setDisplayOrientation [%d] ",rotation ));
+			NgnCameraProducer.setDisplayOrientation(camera, rotation );
 			
 			// Callback Buffers
 			if(NgnProxyVideoProducer.sAddCallbackBufferSupported){
