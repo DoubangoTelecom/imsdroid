@@ -16,6 +16,8 @@
 * You should have received a copy of the GNU General Public License along 
 * with this program; if not, write to the Free Software Foundation, Inc., 
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+* 
+* @contributors: See $(DOUBANGO_HOME)\contributors.txt
 */
 package org.doubango.imsdroid.Screens;
 
@@ -598,13 +600,13 @@ public class ScreenAV extends BaseScreen{
 					//}
 					loadInCallView();
 					// Send blank packets to open NAT pinhole
-					if(mAVSession != null && mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video){
+					if(mAVSession != null && mIsVideoCall){
 						mTimerBlankPacket.schedule(mTimerTaskBlankPacket, 0, 250);
 					}
 					mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
 					
-					// release power lock
-					if(mWakeLock != null && mWakeLock.isHeld()){
+					// release power lock if not video call
+					if(mIsVideoCall && mWakeLock != null && mWakeLock.isHeld()){
 						mWakeLock.release();
 			        }
 					break;
