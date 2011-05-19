@@ -35,5 +35,6 @@ public enum NgnInviteEventTypes {
     LOCAL_RESUME_OK,
     LOCAL_RESUME_NOK,
     REMOTE_HOLD,
-    REMOTE_RESUME
+    REMOTE_RESUME,
+    SIP_RESPONSE,
 }

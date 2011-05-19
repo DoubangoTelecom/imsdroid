@@ -455,9 +455,17 @@ implements INgnSipService, tinyWRAPConstants {
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	
+	private void broadcastInviteEvent(NgnInviteEventArgs args, short sipCode){
+		final Intent intent = new Intent(NgnInviteEventArgs.ACTION_INVITE_EVENT);
+		intent.putExtra(NgnInviteEventArgs.EXTRA_EMBEDDED, args);
+		intent.putExtra(NgnInviteEventArgs.EXTRA_SIPCODE, sipCode);
+		NgnApplication.getContext().sendBroadcast(intent);
+	}
+	
 	private void broadcastInviteEvent(NgnInviteEventArgs args){
 		final Intent intent = new Intent(NgnInviteEventArgs.ACTION_INVITE_EVENT);
 		intent.putExtra(NgnInviteEventArgs.EXTRA_EMBEDDED, args);
+		intent.putExtra(NgnInviteEventArgs.EXTRA_SIPCODE, 0);
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	
@@ -507,7 +515,6 @@ implements INgnSipService, tinyWRAPConstants {
 			NgnSipSession mySession = null;
 			
 			Log.d(TAG, String.format("OnDialogEvent (%s,%d)", phrase,sessionId));
-			
 			
 			switch (code){
 				//== Connecting ==
@@ -715,9 +722,15 @@ implements INgnSipService, tinyWRAPConstants {
                     break;
 
                 case tsip_ao_request:
+                	// For backward compatibility keep both "RINGING" and "SIP_RESPONSE"
                     if (code == 180 && session != null){
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
                     		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(mySession.getId(), NgnInviteEventTypes.RINGING, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                    	}
+                    }
+                    if(session != null){
+                    	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+                    		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(mySession.getId(), NgnInviteEventTypes.SIP_RESPONSE, ((NgnInviteSession)mySession).getMediaType(), phrase), code);
                     	}
                     }
                     break;
