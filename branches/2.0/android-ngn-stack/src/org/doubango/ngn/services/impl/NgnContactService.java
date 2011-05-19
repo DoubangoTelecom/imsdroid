@@ -170,7 +170,7 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 							null,       // Which rows to return (all rows)
 							null,       // Selection arguments (none)
 							// Put the results in ascending order by name
-							"UPPER("+android.provider.ContactsContract.Contacts.DISPLAY_NAME + ") ASC"
+							"UPPER(" + android.provider.ContactsContract.Contacts.DISPLAY_NAME + ") ASC"
 						);
 					
 						
