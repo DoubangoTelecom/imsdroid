@@ -122,7 +122,7 @@ public class NgnDataBaseHelper {
 			if(mCreateTableSt != null){
 				for(String st[] : mCreateTableSt){
 					try{
-						db.execSQL(String.format("DROP TABLE IF EXISTS ", st[0]));
+						db.execSQL(String.format("DROP TABLE IF EXISTS %s", st[0]));
 					}
 					catch(SQLException e){
 						e.printStackTrace();
