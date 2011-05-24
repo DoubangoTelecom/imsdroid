@@ -141,8 +141,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		mPtime = ptime; mRate = rate; mChannels = channels;
 		
 		mAudioRecord = new AudioRecord(
-				// WiPhone.isAGCSupported() ? MediaRecorder.AudioSource.VOICE_RECOGNITION : MediaRecorder.AudioSource.MIC,
-				MediaRecorder.AudioSource.MIC,
+				MediaRecorder.AudioSource.VOICE_UPLINK,
 				rate, 
 				AudioFormat.CHANNEL_IN_MONO, 
 				AudioFormat.ENCODING_PCM_16BIT,
