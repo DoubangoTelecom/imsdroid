@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.model.NgnPhoneNumber.PhoneNumberFilterByAnyValid;
-import org.doubango.ngn.model.NgnPhoneNumber.PhoneNumberFilterOnlyWiPhone;
 import org.doubango.ngn.model.NgnPhoneNumber.PhoneType;
 import org.doubango.ngn.utils.NgnListUtils;
 import org.doubango.ngn.utils.NgnObservableObject;
@@ -46,6 +45,7 @@ public class NgnContact extends NgnObservableObject{
 	private final int mId;
 	private String mDisplayName;
 	private final List<NgnPhoneNumber> mPhoneNumbers;
+	private final List<NgnEmail> mEmails;
 	private int mPhotoId;
 	private Bitmap mPhoto;
 	
@@ -59,6 +59,7 @@ public class NgnContact extends NgnObservableObject{
 		mId = id;
 		mDisplayName = displayName;
 		mPhoneNumbers = new ArrayList<NgnPhoneNumber>();
+		mEmails = new ArrayList<NgnEmail>();
 	}
 	
 	/**
@@ -78,19 +79,19 @@ public class NgnContact extends NgnObservableObject{
 	}
 	
 	/**
+	 * Gets all emails associated to this contact
+	 * @return list of all emails associated to this contact
+	 */
+	public List<NgnEmail> getEmails(){
+		return mEmails;
+	}
+	
+	/**
 	 * Gets the default/primary phone number value. Most likely the mobile number
 	 * @return the contact's primary number
 	 */
 	public String getPrimaryNumber(){
 		final NgnPhoneNumber primaryNumber = NgnListUtils.getFirstOrDefault(mPhoneNumbers, new PhoneNumberFilterByAnyValid());
-		if(primaryNumber != null){
-			return primaryNumber.getNumber();
-		}
-		return null;
-	}
-	
-	public String getWiPhoneNumber(){
-		final NgnPhoneNumber primaryNumber = NgnListUtils.getFirstOrDefault(mPhoneNumbers, new PhoneNumberFilterOnlyWiPhone());
 		if(primaryNumber != null){
 			return primaryNumber.getNumber();
 		}
@@ -111,6 +112,16 @@ public class NgnContact extends NgnObservableObject{
 		else{
 			mPhoneNumbers.add(phoneNumber);
 		}
+	}
+	
+	/**
+	 * Attach a new email to this contact
+	 * @param type the type of the email to add
+	 * @param value the actual value of the email
+	 * @param description a short description
+	 */
+	public void addEmail(NgnEmail.EmailType type, String value, String description){
+		mEmails.add(new NgnEmail(type, value, description));
 	}
 	
 	/**
@@ -168,17 +179,6 @@ public class NgnContact extends NgnObservableObject{
 				}
 			}
 			return false;
-		}
-	}
-	
-	public static class ContactFilterByWiPhoneNumber implements NgnPredicate<NgnContact>{
-		private final String mWiPhoneNumber;
-		public ContactFilterByWiPhoneNumber(String wiPhoneNumber){
-			mWiPhoneNumber = wiPhoneNumber;
-		}
-		@Override
-		public boolean apply(NgnContact contact) {
-			return (contact != null && NgnStringUtils.equals(contact.getWiPhoneNumber(), mWiPhoneNumber, false));
 		}
 	}
 }

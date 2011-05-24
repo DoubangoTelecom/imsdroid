@@ -22,9 +22,7 @@ package org.doubango.ngn.model;
 import org.doubango.ngn.utils.NgnPredicate;
 import org.doubango.ngn.utils.NgnStringUtils;
 
-public class NgnPhoneNumber {
-	private static final String WIPHONE_NUMBER_PREFIX = "55";
-	
+public class NgnPhoneNumber {	
 	public static enum PhoneType{
 	    CUSTOM, //Put the actual type in LABEL.
 	    
@@ -70,14 +68,6 @@ public class NgnPhoneNumber {
 	
 	public String getDescription(){
 		return mDescription;
-	}
-	
-	public boolean isWiPhoneNumber(){
-		return mNumber != null && mNumber.startsWith(WIPHONE_NUMBER_PREFIX);
-	}
-	
-	public static boolean isWiPhoneNumber(String number){
-		return number != null && number.startsWith(WIPHONE_NUMBER_PREFIX);
 	}
 	
 	public static PhoneType fromAndroid2LocalType(int androidType){
@@ -151,16 +141,6 @@ public class NgnPhoneNumber {
 		@Override
 		public boolean apply(NgnPhoneNumber phoneNumber) {
 			return (phoneNumber != null && !NgnStringUtils.isNullOrEmpty(phoneNumber.getNumber()));
-		}
-	}
-	
-	/**
-	 * PhoneNumberFilterOnlyWiPhone
-	 */
-	public static class PhoneNumberFilterOnlyWiPhone implements NgnPredicate<NgnPhoneNumber>{
-		@Override
-		public boolean apply(NgnPhoneNumber phoneNumber) {
-			return (phoneNumber != null && phoneNumber.isWiPhoneNumber());
 		}
 	}
 }

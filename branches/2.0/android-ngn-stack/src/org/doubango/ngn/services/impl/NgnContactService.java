@@ -22,6 +22,7 @@ package org.doubango.ngn.services.impl;
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.model.NgnContact;
+import org.doubango.ngn.model.NgnEmail;
 import org.doubango.ngn.model.NgnPhoneNumber;
 import org.doubango.ngn.services.INgnContactService;
 import org.doubango.ngn.utils.NgnCallbackFunc;
@@ -36,6 +37,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.util.Log;
 
@@ -178,11 +180,11 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 					
 						
 					 while(managedCursor.moveToNext()){
-						 id = managedCursor.getInt(managedCursor.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-						 type = managedCursor.getInt(managedCursor .getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.TYPE));
-						 label = managedCursor.getString(managedCursor.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.LABEL));
-						 phoneNumber = managedCursor.getString(managedCursor.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER));
-						 photoId = managedCursor.getInt(managedCursor .getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.PHOTO_ID));
+						 id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+						 type = managedCursor.getInt(managedCursor .getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
+						 label = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL));
+						 phoneNumber = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+						 photoId = managedCursor.getInt(managedCursor .getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_ID));
 						 contact = NgnListUtils.getFirstOrDefault(mContacts.getList(), new ContactFilterById(id));
 						 
 						 if(NgnStringUtils.isNullOrEmpty(label)){
@@ -192,8 +194,25 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 						 if(phoneNumber != null){
 							 phoneNumber = phoneNumber.replace("-", "");
 							 if(contact == null){
-								displayName = managedCursor.getString(managedCursor.getColumnIndex(android.provider.ContactsContract.Contacts.DISPLAY_NAME));
+								displayName = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 								contact = newContact(id, displayName);
+								
+								// Query for email addresses
+								Cursor emailCursor = activity.managedQuery( 
+					                    ContactsContract.CommonDataKinds.Email.CONTENT_URI, 
+					                    null,
+					                    ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", 
+					                    new String[]{ Integer.toString(id) }, null); 
+								
+								while (emailCursor.moveToNext()) { 
+									 String emailValue = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+					                 if(!NgnStringUtils.isNullOrEmpty(emailValue)){
+					                	 String description = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DISPLAY_NAME));
+					                	 contact.addEmail(NgnEmail.EmailType.None, emailValue, description);
+					                 }
+								} 
+								emailCursor.close(); 
+								
 								mContacts.add(contact);
 							 }
 							 contact.addPhoneNumber(NgnPhoneNumber.fromAndroid2LocalType(type), phoneNumber, label);
@@ -269,7 +288,6 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 	public NgnContact getContactByPhoneNumber(String anyPhoneNumber) {
 		return NgnListUtils.getFirstOrDefault(mContacts.getList(), new NgnContact.ContactFilterByAnyPhoneNumber(anyPhoneNumber));
 	}
-	
 	
 	/**
 	 * ContactFilterById
