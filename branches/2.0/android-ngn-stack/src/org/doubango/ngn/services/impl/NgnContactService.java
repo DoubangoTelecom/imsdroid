@@ -49,8 +49,9 @@ import android.util.Log;
  */
 public class NgnContactService  extends NgnBaseService implements INgnContactService{
 	private final static String TAG = NgnContactService.class.getCanonicalName();
+	public final static String PARAM_ARG_CONTACT = "NgnContact";
 	
-	protected final NgnObservableList<NgnContact> mContacts;
+	protected NgnObservableList<NgnContact> mContacts;
 	protected boolean mLoading;
 	protected boolean mReady;
 	protected Looper mLocalContactObserverLooper;
@@ -62,13 +63,15 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 	
 	public NgnContactService(){
 		super();
-		
-		mContacts = new NgnObservableList<NgnContact>(true);
 	}
 	
 	@Override
 	public boolean start() {
 		Log.d(TAG, "starting...");
+		
+		if(mContacts == null){
+			mContacts = getObservableContacts();
+		}
 		
 		if(mLocalContactObserver == null && mLocalContactObserverLooper == null){
 			new Thread(new Runnable() { // avoid locking calling thread
@@ -190,7 +193,7 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 							 phoneNumber = phoneNumber.replace("-", "");
 							 if(contact == null){
 								displayName = managedCursor.getString(managedCursor.getColumnIndex(android.provider.ContactsContract.Contacts.DISPLAY_NAME));
-								contact = new NgnContact(id, displayName);
+								contact = newContact(id, displayName);
 								mContacts.add(contact);
 							 }
 							 contact.addPhoneNumber(NgnPhoneNumber.fromAndroid2LocalType(type), phoneNumber, label);
@@ -239,10 +242,18 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 	}
 	
 	@Override
-	public NgnObservableList<NgnContact> getObservableContacts() {
+	public NgnObservableList <NgnContact> getObservableContacts() {
+		if(mContacts == null){
+			mContacts = new NgnObservableList<NgnContact>(true);
+		}
 		return mContacts;
 	}
 
+	@Override
+	public NgnContact newContact(int id, String displayName){
+		return new NgnContact(id, displayName);
+	}
+	
 	@Override
 	public NgnContact getContactByUri(String uri) {
 		final SipUri sipUri = new SipUri(uri);
