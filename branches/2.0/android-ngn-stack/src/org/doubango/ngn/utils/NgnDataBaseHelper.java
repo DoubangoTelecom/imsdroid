@@ -96,24 +96,30 @@ public class NgnDataBaseHelper {
 			mCreateTableSt = createTableSt;
 		}
 
-		boolean isFreshDataBase(){
+		private boolean isFreshDataBase(){
 			return mFreshDataBase;
 		}
 		
-		@Override
-		public void onCreate(SQLiteDatabase db) {
-			Log.d(TAG, "NgnDataBaseOpenHelper.onCreate()");
+		private boolean createDataBase(SQLiteDatabase db){
 			mFreshDataBase = true;
 			if(mCreateTableSt != null){
 				for(String st[] : mCreateTableSt){
 					try{
 						db.execSQL(String.format("CREATE TABLE %s(%s)", st[0], st[1]));
+						return true;
 					}
 					catch(SQLException e){
 						e.printStackTrace();
 					}
 				}
 			}
+			return false;
+		}
+		
+		@Override
+		public void onCreate(SQLiteDatabase db) {
+			Log.d(TAG, "NgnDataBaseOpenHelper.onCreate()");
+			createDataBase(db);
 		}
 
 		@Override
@@ -123,6 +129,7 @@ public class NgnDataBaseHelper {
 				for(String st[] : mCreateTableSt){
 					try{
 						db.execSQL(String.format("DROP TABLE IF EXISTS %s", st[0]));
+						createDataBase(db);
 					}
 					catch(SQLException e){
 						e.printStackTrace();
