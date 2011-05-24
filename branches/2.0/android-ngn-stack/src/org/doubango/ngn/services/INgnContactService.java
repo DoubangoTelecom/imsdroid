@@ -31,6 +31,7 @@ public interface INgnContactService extends INgnBaseService{
 	boolean isLoading();
 	boolean isReady();
 	
+	NgnContact newContact(int id, String displayName);
 	NgnContact getContactByUri(String uri);
 	NgnContact getContactByPhoneNumber(String anyPhoneNumber);
 	
