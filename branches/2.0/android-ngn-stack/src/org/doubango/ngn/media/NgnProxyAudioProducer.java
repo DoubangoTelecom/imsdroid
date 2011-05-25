@@ -172,7 +172,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		@Override
 		public void run() {
 			Log.d(TAG, "===== Audio Recorder (Start) ===== ");
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			
 			mAudioRecord.startRecording();
 			final int nSize = mAudioFrame.capacity();
