@@ -55,8 +55,20 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		return true;
 	}
 	
+	// FIXME: refactor
 	public void add(T objects[]){
 		for(T object : objects){
+			mList.add(object);
+			if(mWatchValueChanged && object instanceof Observable){
+				((Observable)object).addObserver(this);
+			}
+		}
+		super.setChangedAndNotifyObservers(null);
+	}
+	
+	// FIXME: refactor
+	public void add(Collection<T> list){
+		for(T object : list){
 			mList.add(object);
 			if(mWatchValueChanged && object instanceof Observable){
 				((Observable)object).addObserver(this);
