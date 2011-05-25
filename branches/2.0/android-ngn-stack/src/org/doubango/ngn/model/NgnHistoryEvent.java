@@ -22,6 +22,7 @@ package org.doubango.ngn.model;
 import java.util.Date;
 
 import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.utils.NgnUriUtils;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -49,6 +50,8 @@ public abstract class NgnHistoryEvent  implements Comparable<NgnHistoryEvent> {
 	protected boolean mSeen;
 	@Element(name = "status", required = true)
 	protected StatusType mStatus;
+	
+	private String mDisplayName;
 	
 	
 	protected NgnHistoryEvent(NgnMediaType mediaType, String remoteParty){
@@ -101,6 +104,17 @@ public abstract class NgnHistoryEvent  implements Comparable<NgnHistoryEvent> {
 	
 	public void setStatus(StatusType status){
 		mStatus = status;
+	}
+	
+	public void setDisplayName(String displayName){
+		mDisplayName = displayName;
+	}
+	
+	public String getDisplayName(){
+		if(mDisplayName == null){
+			mDisplayName = NgnUriUtils.getDisplayName(getRemoteParty());
+		}
+		return mDisplayName;
 	}
 	
 	@Override

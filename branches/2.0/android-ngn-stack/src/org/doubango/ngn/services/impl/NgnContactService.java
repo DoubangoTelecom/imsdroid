@@ -19,10 +19,12 @@
 */
 package org.doubango.ngn.services.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.model.NgnContact;
-import org.doubango.ngn.model.NgnEmail;
 import org.doubango.ngn.model.NgnPhoneNumber;
 import org.doubango.ngn.services.INgnContactService;
 import org.doubango.ngn.utils.NgnCallbackFunc;
@@ -33,6 +35,7 @@ import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.tinyWRAP.SipUri;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Handler;
@@ -144,9 +147,20 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 	
 	@Override
 	public boolean load(){
+		/*new Thread(new Runnable() {
+			@Override
+			public void run() {
+				load2();
+			}
+		}).start();*/
+		return load2();
+	}
+	
+	public boolean load2(){
 		mLoading = true;
 		boolean bOK = false;
 		Cursor managedCursor = null;
+		final List<NgnContact> contactsCopy = new ArrayList<NgnContact>();
 		
 		if(mOnBeginLoadCallback != null){
 			mOnBeginLoadCallback.callback(this);
@@ -154,14 +168,14 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 		
 		try{
 			String phoneNumber, displayName, label;
-			NgnContact contact;
+			NgnContact contact = null;
 			int id, type, photoId;
 			final Activity activity = NgnEngine.getInstance().getMainActivity();
+			final Resources res = NgnApplication.getContext().getResources();
 			
 			if(NgnApplication.getSDKVersion() >=5 && activity != null){
-				synchronized(mContacts){
-					mContacts.clear();
-					final String[] projection = new String[] { 
+				/*synchronized(mContacts)*/{
+					final String[] projectionContacts = new String[] { 
 							android.provider.BaseColumns._ID,
 							android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER,
 							android.provider.ContactsContract.CommonDataKinds.Phone.TYPE,
@@ -170,55 +184,46 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 							android.provider.ContactsContract.Contacts.PHOTO_ID,
 							android.provider.ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
 							};
+					
 					managedCursor = activity.managedQuery(android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-							projection, // Which columns to return
+							projectionContacts, // Which columns to return
 							null,       // Which rows to return (all rows)
 							null,       // Selection arguments (none)
 							// Put the results in ascending order by name
 							"UPPER(" + android.provider.ContactsContract.Contacts.DISPLAY_NAME + ") ASC"
 						);
 					
-						
+					
+					int indexPhoneContactId = managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
+					int indexPhoneType = managedCursor .getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE);
+					int indexPhoneLabel = managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL);
+					int indexPhoneNumber = managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+					int indexPhonePhotoId = managedCursor .getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_ID);
+					
+					int indexContactDisplayName = managedCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+					
 					 while(managedCursor.moveToNext()){
-						 id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-						 type = managedCursor.getInt(managedCursor .getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
-						 label = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL));
-						 phoneNumber = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-						 photoId = managedCursor.getInt(managedCursor .getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_ID));
-						 contact = NgnListUtils.getFirstOrDefault(mContacts.getList(), new ContactFilterById(id));
+						 id = managedCursor.getInt(indexPhoneContactId);
+						 type = managedCursor.getInt(indexPhoneType);
+						 label = managedCursor.getString(indexPhoneLabel);
+						 phoneNumber = managedCursor.getString(indexPhoneNumber);
+						 photoId = managedCursor.getInt(indexPhonePhotoId);
 						 
-						 if(NgnStringUtils.isNullOrEmpty(label)){
-							 final int resId = android.provider.ContactsContract.CommonDataKinds.Phone.getTypeLabelResource(type);
-							 label = NgnApplication.getContext().getResources().getString(resId);
-						 }
 						 if(phoneNumber != null){
 							 phoneNumber = phoneNumber.replace("-", "");
-							 if(contact == null){
-								displayName = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+							if(NgnStringUtils.isNullOrEmpty(label)){
+								final int resId = android.provider.ContactsContract.CommonDataKinds.Phone.getTypeLabelResource(type);
+								label = res.getString(resId);
+							}
+							 if(contact == null || contact.getId() != id){
+								displayName = managedCursor.getString(indexContactDisplayName);
 								contact = newContact(id, displayName);
-								
-								// Query for email addresses
-								Cursor emailCursor = activity.managedQuery( 
-					                    ContactsContract.CommonDataKinds.Email.CONTENT_URI, 
-					                    null,
-					                    ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", 
-					                    new String[]{ Integer.toString(id) }, null); 
-								
-								while (emailCursor.moveToNext()) { 
-									 String emailValue = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-					                 if(!NgnStringUtils.isNullOrEmpty(emailValue)){
-					                	 String description = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DISPLAY_NAME));
-					                	 contact.addEmail(NgnEmail.EmailType.None, emailValue, description);
-					                 }
-								} 
-								emailCursor.close(); 
-								
-								mContacts.add(contact);
+								if(photoId != 0){
+									 contact.setPhotoId(photoId);
+								}
+								contactsCopy.add(contact);
 							 }
 							 contact.addPhoneNumber(NgnPhoneNumber.fromAndroid2LocalType(type), phoneNumber, label);
-							 if(photoId != 0){
-								 contact.setPhotoId(photoId);
-							 }
 							 if(mOnNewPhoneNumberCallback != null){
 								 mOnNewPhoneNumberCallback.callback(phoneNumber);
 							 }
@@ -240,6 +245,13 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 		finally{
 			if(managedCursor != null){
 				managedCursor.close();
+			}
+		}
+		
+		if(bOK){
+			synchronized(mContacts){
+				mContacts.clear();
+				mContacts.add(contactsCopy);
 			}
 		}
 		

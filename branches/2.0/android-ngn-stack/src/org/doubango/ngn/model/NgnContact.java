@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.doubango.ngn.NgnApplication;
+import org.doubango.ngn.NgnEngine;
+import org.doubango.ngn.model.NgnEmail.EmailType;
 import org.doubango.ngn.model.NgnPhoneNumber.PhoneNumberFilterByAnyValid;
 import org.doubango.ngn.model.NgnPhoneNumber.PhoneType;
 import org.doubango.ngn.utils.NgnListUtils;
@@ -31,10 +33,13 @@ import org.doubango.ngn.utils.NgnObservableObject;
 import org.doubango.ngn.utils.NgnPredicate;
 import org.doubango.ngn.utils.NgnStringUtils;
 
+import android.app.Activity;
 import android.content.ContentUris;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 
 /**
@@ -45,7 +50,7 @@ public class NgnContact extends NgnObservableObject{
 	private final int mId;
 	private String mDisplayName;
 	private final List<NgnPhoneNumber> mPhoneNumbers;
-	private final List<NgnEmail> mEmails;
+	private List<NgnEmail> mEmails;
 	private int mPhotoId;
 	private Bitmap mPhoto;
 	
@@ -59,7 +64,6 @@ public class NgnContact extends NgnObservableObject{
 		mId = id;
 		mDisplayName = displayName;
 		mPhoneNumbers = new ArrayList<NgnPhoneNumber>();
-		mEmails = new ArrayList<NgnEmail>();
 	}
 	
 	/**
@@ -83,6 +87,26 @@ public class NgnContact extends NgnObservableObject{
 	 * @return list of all emails associated to this contact
 	 */
 	public List<NgnEmail> getEmails(){
+		// For performance reasons we only query for emails if requested
+		final Activity activity = NgnEngine.getInstance().getMainActivity();
+		if(mEmails == null && activity != null){
+			mEmails = new ArrayList<NgnEmail>();
+			Cursor emailCursor = activity.managedQuery( 
+	                ContactsContract.CommonDataKinds.Email.CONTENT_URI, 
+	                null,
+	                ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", 
+	                new String[]{ Integer.toString(mId) }, null); 
+			
+			while (emailCursor.moveToNext()) { 
+				 String emailValue = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+	             if(!NgnStringUtils.isNullOrEmpty(emailValue)){
+	            	 String description = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DISPLAY_NAME));
+	            	 this.addEmail(EmailType.None, emailValue, description);
+	             }
+			} 
+			emailCursor.close();
+		}
+		
 		return mEmails;
 	}
 	
