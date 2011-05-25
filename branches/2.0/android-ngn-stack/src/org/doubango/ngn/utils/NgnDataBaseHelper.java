@@ -106,14 +106,14 @@ public class NgnDataBaseHelper {
 				for(String st[] : mCreateTableSt){
 					try{
 						db.execSQL(String.format("CREATE TABLE %s(%s)", st[0], st[1]));
-						return true;
 					}
 					catch(SQLException e){
 						e.printStackTrace();
+						return false;
 					}
 				}
 			}
-			return false;
+			return true;
 		}
 		
 		@Override
@@ -129,13 +129,13 @@ public class NgnDataBaseHelper {
 				for(String st[] : mCreateTableSt){
 					try{
 						db.execSQL(String.format("DROP TABLE IF EXISTS %s", st[0]));
-						createDataBase(db);
 					}
 					catch(SQLException e){
 						e.printStackTrace();
 					}
 				}
 			}
+			createDataBase(db);
 		}
 	}
 }
