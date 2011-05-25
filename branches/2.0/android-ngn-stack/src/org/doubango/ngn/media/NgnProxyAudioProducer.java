@@ -141,7 +141,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		mPtime = ptime; mRate = rate; mChannels = channels;
 		
 		mAudioRecord = new AudioRecord(
-				MediaRecorder.AudioSource.VOICE_UPLINK,
+				MediaRecorder.AudioSource.MIC,
 				rate, 
 				AudioFormat.CHANNEL_IN_MONO, 
 				AudioFormat.ENCODING_PCM_16BIT,
