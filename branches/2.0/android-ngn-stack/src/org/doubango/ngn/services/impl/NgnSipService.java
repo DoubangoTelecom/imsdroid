@@ -745,6 +745,7 @@ implements INgnSipService, tinyWRAPConstants {
                 case tsip_m_early_media:
                     {
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+                    		((NgnInviteSession)mySession).setState(InviteState.EARLY_MEDIA);
                     		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.EARLY_MEDIA, ((NgnInviteSession)mySession).getMediaType(), phrase));
                     	}
                         break;
