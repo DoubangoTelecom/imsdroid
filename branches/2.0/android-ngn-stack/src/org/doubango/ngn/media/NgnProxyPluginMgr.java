@@ -22,12 +22,14 @@ package org.doubango.ngn.media;
 import java.math.BigInteger;
 import java.util.Hashtable;
 
+import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 import org.doubango.tinyWRAP.ProxyPluginMgr;
 import org.doubango.tinyWRAP.ProxyPluginMgrCallback;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
+import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_chroma_t;
 import org.doubango.tinyWRAP.twrap_proxy_plugin_type_t;
 
@@ -46,6 +48,12 @@ public class NgnProxyPluginMgr {
         ProxyVideoConsumer.setDefaultChroma(tmedia_chroma_t.tmedia_rgb565le);
         ProxyVideoConsumer.setDefaultAutoResizeDisplay(true);
         ProxyVideoProducer.setDefaultChroma(tmedia_chroma_t.tmedia_nv21);
+        
+        MediaSessionMgr.defaultsSetAgcEnabled(false);
+        MediaSessionMgr.defaultsSetBandwidthLevel(tmedia_bandwidth_level_t.tmedia_bl_unrestricted);
+        MediaSessionMgr.defaultsSetEchoSuppEnabled(false);
+        MediaSessionMgr.defaultsSetVadEnabled(false);
+        MediaSessionMgr.defaultsSetNoiseSuppEnabled(true);
 	}
 	
 	private NgnProxyPluginMgr(){
