@@ -6,7 +6,7 @@
 ==2.0.419-preview==
  * Improve video quality by adding the notion of "unrestricted" bandwidth
  * Add support for noise suppression (thanks to *speexdsp*)
- * Fix issues: issue 232, issue 233, issue 230, issue 11, issue 84, issue 135, issue 157, issue 192 and issue 217.
+ * Fix issues: issue 232, issue 233, issue 230, issue 111, issue 84, issue 135, issue 157 and issue 192.
 
 ==2.0.395-preview==
 Based on *Doubango v2.x*.
