@@ -21,6 +21,7 @@ package org.doubango.ngn.utils;
 
 import org.doubango.ngn.sip.NgnPresenceStatus;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
+import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 
@@ -70,7 +71,7 @@ public class NgnConfigurationEntry {
 	public static final String NATT_STUN_PORT = "NATT_STUN_PORT." + TAG;
 	
 	// QoS
-	public static final String QOS_PRECOND_BANDWIDTH = "QOS_PRECOND_BANDWIDTH." + TAG;
+	public static final String QOS_PRECOND_BANDWIDTH_LEVEL = "QOS_PRECOND_BANDWIDTH_LEVEL." + TAG;
 	public static final String QOS_PRECOND_STRENGTH = "QOS_PRECOND_STRENGTH." + TAG;
     public static final String QOS_PRECOND_TYPE = "QOS_PRECOND_TYPE." + TAG;
     public static final String QOS_REFRESHER = "QOS_REFRESHER." + TAG;
@@ -158,7 +159,7 @@ public class NgnConfigurationEntry {
 	public static final int DEFAULT_NATT_STUN_PORT = 3478;
 	
 	// QoS
-    public static final String DEFAULT_QOS_PRECOND_BANDWIDTH = "Low";
+    public static final int DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL = tmedia_bandwidth_level_t.tmedia_bl_unrestricted.swigValue();
     public static final String DEFAULT_QOS_PRECOND_STRENGTH = tmedia_qos_strength_t.tmedia_qos_strength_none.toString();
     public static final String DEFAULT_QOS_PRECOND_TYPE = tmedia_qos_stype_t.tmedia_qos_stype_none.toString();
     public static final String DEFAULT_QOS_REFRESHER = "none";

@@ -25,17 +25,29 @@ import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.utils.NgnStringUtils;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 public class ScreenTabDialer  extends BaseScreen {
 	private static String TAG = ScreenTabDialer.class.getCanonicalName();
 	
 	private EditText mEtNumber;
+	private ImageButton mIbInputType;
+	
+	static enum PhoneInputType{
+		Numbers,
+		Text
+	}
+	
+	private PhoneInputType mInputType;
+	private InputMethodManager mInputMethodManager;
 	
 	private final INgnSipService mSipService;
 	
@@ -43,6 +55,8 @@ public class ScreenTabDialer  extends BaseScreen {
 		super(SCREEN_TYPE.DIALER_T, TAG);
 		
 		mSipService = getEngine().getSipService();
+		
+		mInputType = PhoneInputType.Numbers;
 	}
 
 	@Override
@@ -50,7 +64,10 @@ public class ScreenTabDialer  extends BaseScreen {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screen_tab_dialer);
 		
+		mInputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		
 		mEtNumber = (EditText)findViewById(R.id.screen_tab_dialer_editText_number);
+		mIbInputType = (ImageButton) findViewById(R.id.screen_tab_dialer_imageButton_input_type);
 		
 		DialerUtils.setDialerTextButton(this, R.id.screen_tab_dialer_button_0, "0", "+", DialerUtils.TAG_0, mOnDialerClick);
 		DialerUtils.setDialerTextButton(this, R.id.screen_tab_dialer_button_1, "1", "", DialerUtils.TAG_1, mOnDialerClick);
@@ -76,9 +93,11 @@ public class ScreenTabDialer  extends BaseScreen {
 			public void afterTextChanged(Editable s) {}
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				final boolean bShowCaret = mEtNumber.getText().toString().length() > 0;
-				mEtNumber.setFocusableInTouchMode(bShowCaret);
-				mEtNumber.setFocusable(bShowCaret);
+				if(mInputType == PhoneInputType.Numbers){
+					final boolean bShowCaret = mEtNumber.getText().toString().length() > 0;
+					mEtNumber.setFocusableInTouchMode(bShowCaret);
+					mEtNumber.setFocusable(bShowCaret);
+				}
 			}
         });
 		
@@ -87,6 +106,35 @@ public class ScreenTabDialer  extends BaseScreen {
 			public boolean onLongClick(View v) {
 				appendText("+");
 				return true;
+			}
+		});
+		
+		mIbInputType.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				switch(mInputType){
+					case Numbers:
+						mInputType = PhoneInputType.Text;
+						mIbInputType.setImageResource(R.drawable.input_text);
+						mEtNumber.setInputType(InputType.TYPE_CLASS_TEXT);
+						
+						mEtNumber.setFocusableInTouchMode(true);
+						mEtNumber.setFocusable(true);
+						mInputMethodManager.showSoftInput(mEtNumber, 0);
+						break;
+						
+					case Text:
+					default:
+						mInputType = PhoneInputType.Numbers;
+						mIbInputType.setImageResource(R.drawable.input_numbers);
+						mEtNumber.setInputType(InputType.TYPE_NULL);
+						
+						final boolean bShowCaret = mEtNumber.getText().toString().length() > 0;
+						mEtNumber.setFocusableInTouchMode(bShowCaret);
+						mEtNumber.setFocusable(bShowCaret);
+						mInputMethodManager.hideSoftInputFromWindow(mEtNumber.getWindowToken(), 0);
+						break;
+				}
 			}
 		});
 	}
@@ -142,7 +190,11 @@ public class ScreenTabDialer  extends BaseScreen {
 	
 	@Override
 	public boolean back(){
-		return mScreenService.show(ScreenHome.class);
+		boolean ret = mScreenService.show(ScreenHome.class);
+		if(ret){
+			mScreenService.destroy(getId());
+		}
+		return ret;
 	}
 	
 	private void appendText(String textToAppend){

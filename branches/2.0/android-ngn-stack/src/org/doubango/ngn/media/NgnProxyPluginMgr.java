@@ -49,6 +49,8 @@ public class NgnProxyPluginMgr {
         ProxyVideoConsumer.setDefaultAutoResizeDisplay(true);
         ProxyVideoProducer.setDefaultChroma(tmedia_chroma_t.tmedia_nv21);
         
+        // these values will be updated by the engine using ones stored using the
+        // configuration service
         MediaSessionMgr.defaultsSetAgcEnabled(false);
         MediaSessionMgr.defaultsSetBandwidthLevel(tmedia_bandwidth_level_t.tmedia_bl_unrestricted);
         MediaSessionMgr.defaultsSetEchoSuppEnabled(false);

@@ -299,7 +299,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 			mHolder = getHolder();
 			mHolder.addCallback(this);
 			// You don't need to enable GPU or Hardware acceleration by yourself
-			mHolder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
+			mHolder.setType(SurfaceHolder.SURFACE_TYPE_HARDWARE);
 			mRatio = (float)width/(float)height;
 			
 			if(mHolder != null){

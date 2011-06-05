@@ -563,7 +563,6 @@ public class ScreenAV extends BaseScreen{
 	}
 	
 	private void handleSipEvent(Intent intent){
-		@SuppressWarnings("unused")
 		InviteState state;
 		if(mAVSession == null){
 			Log.e(TAG, "Invalid session object");
@@ -598,7 +597,9 @@ public class ScreenAV extends BaseScreen{
 						getEngine().getSoundService().stopRingTone();
 						mAVSession.setSpeakerphoneOn(false);
 					//}
-					loadInCallView();
+					if(state == InviteState.INCALL){
+						loadInCallView();
+					}
 					// Send blank packets to open NAT pinhole
 					if(mAVSession != null && mIsVideoCall){
 						mTimerBlankPacket.schedule(mTimerTaskBlankPacket, 0, 250);

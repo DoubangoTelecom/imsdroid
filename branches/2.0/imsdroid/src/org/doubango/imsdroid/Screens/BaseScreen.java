@@ -205,6 +205,15 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 		}
 		return 0;
 	}
+	
+	protected int getSpinnerIndex(int value, int[] values) {
+		for (int i = 0; i < values.length; i++) {
+			if (value == values[i]) {
+				return i;
+			}
+		}
+		return 0;
+	}
 
 	protected void showInProgress(String text, boolean bIndeterminate,
 			boolean bCancelable) {

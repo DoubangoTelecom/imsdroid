@@ -40,7 +40,6 @@ import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnListUtils;
 import org.doubango.ngn.utils.NgnObservableHashMap;
 import org.doubango.ngn.utils.NgnPredicate;
-import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.CallSession;
@@ -261,9 +260,11 @@ public class NgnAVSession extends NgnInviteSession{
         super.setToUri(remoteUri);
 
         ActionConfig config = new ActionConfig();
-        String level = mConfigurationService.getString(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH,
-        		NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH);
-        tmedia_bandwidth_level_t bl = getBandwidthLevel(level);
+        // this just to show how to use parameters which only apply to the current
+        // action (call)
+        int level = mConfigurationService.getInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL,
+        		NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL);
+        tmedia_bandwidth_level_t bl = tmedia_bandwidth_level_t.swigToEnum(level);
         config.setMediaInt(twrap_media_type_t.twrap_media_audiovideo, "bandwidth-level", bl.swigValue());
         
         switch (super.getMediaType())
@@ -687,17 +688,5 @@ public class NgnAVSession extends NgnInviteSession{
      */
     public boolean sendDTMF(int digit){
         return mSession.sendDTMF(digit);
-    }
-    
-    private static tmedia_bandwidth_level_t getBandwidthLevel(String level){
-        if(NgnStringUtils.equals(level, "Medium", true)){
-             return tmedia_bandwidth_level_t.tmedia_bl_medium;
-        }
-        if(NgnStringUtils.equals(level, "High", true)){
-            return tmedia_bandwidth_level_t.tmedia_bl_hight;
-        }
-        else{
-           return tmedia_bandwidth_level_t.tmedia_bl_low;
-        }
     }
 }
