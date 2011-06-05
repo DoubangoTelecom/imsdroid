@@ -3,6 +3,21 @@
 
 <wiki:toc max_depth="2" />
 
+==2.0.419-preview==
+ * Improve video quality by adding the notion of "unrestricted" bandwidth
+ * Add support for noise suppression (thanks to *speexdsp*)
+ * Fix issues: issue 232, issue 233, issue 230, issue 11, issue 84, issue 135, issue 157, issue 192 and issue 217.
+
+==2.0.395-preview==
+Based on *Doubango v2.x*.
+ * The SIP/IMS Stack (version 2) is 7 times faster
+ * NGN (Next Generation Network) stack for developers (android-ngn-stack)
+ * Better audio quality (Adaptive jitter buffer, automatic resampling, gain control, ...)
+ * Better video quality (low latency, low cpu usage, ...)
+ * Multi-line
+ * MSRP chat
+ * Fix many issues (see logs)
+
 ==1.2.366==
  * Fix issue 158, issue 165
  * Add support for 4-way conference call using [http://code.google.com/p/openvcs/ OpenVCS]
