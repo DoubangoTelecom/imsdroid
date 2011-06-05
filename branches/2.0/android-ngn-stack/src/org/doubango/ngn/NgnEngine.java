@@ -36,10 +36,13 @@ import org.doubango.ngn.services.impl.NgnNetworkService;
 import org.doubango.ngn.services.impl.NgnSipService;
 import org.doubango.ngn.services.impl.NgnSoundService;
 import org.doubango.ngn.services.impl.NgnStorageService;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
+import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -104,8 +107,17 @@ public class NgnEngine {
 		if(applicationContext != null){
 			mNotifManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		}
-		else mNotifManager = null;
+		else{ 
+			mNotifManager = null;
+		}
 		mVibrator = null;
+		
+		// Apply defaults using the values stored in the configuration service
+		MediaSessionMgr.defaultsSetBandwidthLevel(
+							tmedia_bandwidth_level_t.swigToEnum(getConfigurationService().getInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL, NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL)
+				));
+		// codecs, AEC, NoiseSuppression, Echo cancellation, ....
+		// to be continued...
 	}
 	
 	/**

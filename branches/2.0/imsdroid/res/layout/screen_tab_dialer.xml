@@ -2,11 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent">
 	<LinearLayout
 	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent" android:orientation="vertical" android:weightSum="3" android:layout_alignParentBottom="true" android:layout_alignParentTop="true">
-	    <LinearLayout android:layout_height="wrap_content" android:layout_alignParentTop="true" android:layout_width="fill_parent" android:id="@+id/screen_tab_dialer_linearLayout_top">
-	        <EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_margin="3px" android:id="@+id/screen_tab_dialer_editText_number" android:textColor="@color/color_white" android:textSize="40dp" android:inputType="phone" android:background="@color/color_black" android:gravity="center"></EditText>
+	  android:layout_height="fill_parent" android:orientation="vertical" android:layout_alignParentBottom="true" android:layout_alignParentTop="true" android:weightSum="2">
+	    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_tab_dialer_linearLayout_top" android:weightSum="2" android:gravity="center" android:background="@color/color_dark">
+	        <EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_tab_dialer_editText_number" android:textColor="@color/color_white" android:inputType="phone" android:gravity="center" android:layout_margin="3px" android:layout_weight="2" android:background="@color/color_dark" android:textSize="45dp"></EditText>
+	        <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_tab_dialer_imageButton_input_type" android:background="@color/color_white" android:layout_margin="2px" android:src="@drawable/input_numbers"></ImageButton>
 	    </LinearLayout>
-	    <LinearLayout android:id="@+id/screen_tab_dialer_linearLayout_keyboard" android:layout_below="@+id/screen_tab_dialer_linearLayout_info" android:layout_width="fill_parent" android:gravity="center_horizontal" android:orientation="vertical" android:layout_margin="3px" android:layout_height="wrap_content" android:layout_weight="3" android:weightSum="10">
+	    <LinearLayout android:id="@+id/screen_tab_dialer_linearLayout_keyboard" android:layout_below="@+id/screen_tab_dialer_linearLayout_info" android:layout_width="fill_parent" android:gravity="center_horizontal" android:orientation="vertical" android:layout_margin="3px" android:layout_height="wrap_content" android:weightSum="10" android:layout_weight="2">
 	        <LinearLayout android:layout_width="fill_parent" android:layout_weight="2" android:weightSum="6" android:layout_height="fill_parent">
 	            <include android:id="@+id/screen_tab_dialer_button_1" layout="@layout/view_dialer_button_text" android:layout_weight="2" android:layout_margin="2px" android:layout_height="fill_parent" android:layout_width="fill_parent"/>
 	            <include android:id="@+id/screen_tab_dialer_button_2" layout="@layout/view_dialer_button_text" android:layout_weight="2" android:layout_margin="2px" android:layout_height="fill_parent" android:layout_width="fill_parent"/>

@@ -22,6 +22,8 @@ package org.doubango.imsdroid.Screens;
 import org.doubango.imsdroid.R;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.tinyWRAP.MediaSessionMgr;
+import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 
@@ -58,7 +60,18 @@ public class ScreenQoS  extends BaseScreen {
 		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_segmented, "Segmented"),
 		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_e2e, "End2End")
 		};
-	private final static String[] sSpinnerPrecondBandwidthItems = new String[] {NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH, "Medium", "High"};
+	private final static int[] sSpinnerPrecondBandwidthItems = new int[] {
+		tmedia_bandwidth_level_t.tmedia_bl_low.swigValue(), 
+		tmedia_bandwidth_level_t.tmedia_bl_medium.swigValue(), 
+		tmedia_bandwidth_level_t.tmedia_bl_hight.swigValue(), 
+		NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL
+		};
+	private final static String[] sSpinnerPrecondBandwidthItemsStrings = new String[] {
+		"Low", 
+		"Medium", 
+		"High", 
+		"Unrestricted"
+		};
 	
 	private final INgnConfigurationService mConfigurationService;
 	
@@ -95,7 +108,7 @@ public class ScreenQoS  extends BaseScreen {
         adapterType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpPrecondType.setAdapter(adapterType);
         
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.sSpinnerPrecondBandwidthItems);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.sSpinnerPrecondBandwidthItemsStrings);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpPrecondBandwidth.setAdapter(adapter);
         
@@ -117,8 +130,8 @@ public class ScreenQoS  extends BaseScreen {
 				NgnConfigurationEntry.DEFAULT_QOS_PRECOND_TYPE))));
 		
 		mSpPrecondBandwidth.setSelection(getSpinnerIndex(
-				mConfigurationService.getString(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH,
-						sSpinnerPrecondBandwidthItems[0]),
+				mConfigurationService.getInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL,
+						NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL),
 						sSpinnerPrecondBandwidthItems));
 		
 		mRlSessionTimers.setVisibility(mCbEnableSessionTimers.isChecked() ? View.VISIBLE : View.INVISIBLE);
@@ -148,12 +161,16 @@ public class ScreenQoS  extends BaseScreen {
 					sSpinnerPrecondStrengthItems[mSpPrecondStrength.getSelectedItemPosition()].mStrength.toString());
 			mConfigurationService.putString(NgnConfigurationEntry.QOS_PRECOND_TYPE, 
 					sSpinnerPrecondTypeItems[mSpPrecondType.getSelectedItemPosition()].mType.toString());
-			mConfigurationService.putString(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH, 
+			mConfigurationService.putInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL, 
 					sSpinnerPrecondBandwidthItems[mSpPrecondBandwidth.getSelectedItemPosition()]);
 			
 			// Compute
 			if(!mConfigurationService.commit()){
 				Log.e(TAG, "Failed to commit() configuration");
+			}
+			else{
+				tmedia_bandwidth_level_t newBandwidthLevel = tmedia_bandwidth_level_t.swigToEnum(sSpinnerPrecondBandwidthItems[mSpPrecondBandwidth.getSelectedItemPosition()]);
+				MediaSessionMgr.defaultsSetBandwidthLevel(newBandwidthLevel);
 			}
 			
 			super.mComputeConfiguration = false;

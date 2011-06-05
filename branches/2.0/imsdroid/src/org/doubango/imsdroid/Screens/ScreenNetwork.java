@@ -134,5 +134,5 @@ public class ScreenNetwork extends BaseScreen {
 			super.mComputeConfiguration = false;
 		}
 		super.onPause();
-	}	
+	}
 }
