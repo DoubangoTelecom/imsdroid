@@ -29,6 +29,8 @@ public class NgnSubscriptionSession extends NgnSipSession{
 	private final EventPackageType mPackage;
 	
 	public enum EventPackageType {
+		None,
+		
 	    Conference, 
 	    Dialog, 
 	    MessageSummary, 

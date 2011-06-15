@@ -33,6 +33,7 @@ import org.doubango.ngn.events.NgnPublicationEventTypes;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventTypes;
 import org.doubango.ngn.events.NgnSubscriptionEventArgs;
+import org.doubango.ngn.events.NgnSubscriptionEventTypes;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnNetworkService;
 import org.doubango.ngn.services.INgnSipService;
@@ -50,6 +51,7 @@ import org.doubango.ngn.sip.NgnSubscriptionSession;
 import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 import org.doubango.ngn.sip.NgnSipStack.STACK_STATE;
+import org.doubango.ngn.sip.NgnSubscriptionSession.EventPackageType;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnContentType;
 import org.doubango.ngn.utils.NgnDateTimeUtils;
@@ -73,10 +75,13 @@ import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.StackEvent;
+import org.doubango.tinyWRAP.SubscriptionEvent;
+import org.doubango.tinyWRAP.SubscriptionSession;
 import org.doubango.tinyWRAP.tinyWRAPConstants;
 import org.doubango.tinyWRAP.tsip_invite_event_type_t;
 import org.doubango.tinyWRAP.tsip_message_event_type_t;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
+import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 import org.doubango.tinyWRAP.twrap_sms_type_t;
 
@@ -483,7 +488,6 @@ implements INgnSipService, tinyWRAPConstants {
 		NgnApplication.getContext().sendBroadcast(intent);
 	}
 	
-	@SuppressWarnings("unused")
 	private void broadcastSubscriptionEvent(NgnSubscriptionEventArgs args){
 		final Intent intent = new Intent(NgnSubscriptionEventArgs.ACTION_SUBSCRIBTION_EVENT);
 		intent.putExtra(NgnSubscriptionEventArgs.EXTRA_EMBEDDED, args);
@@ -989,6 +993,58 @@ implements INgnSipService, tinyWRAPConstants {
 			return 0;
 		}
 
+		@Override
+		public int OnSubscriptionEvent(SubscriptionEvent e) {
+			final tsip_subscribe_event_type_t type = e.getType();
+			SubscriptionSession _session = e.getSession();
+			
+			switch(type)
+			{
+				case tsip_i_notify:
+				{
+					 final short code = e.getCode();
+                     final String phrase = e.getPhrase();
+                     final SipMessage message = e.getSipMessage();
+                     if(message == null || _session == null){
+                         return 0;
+                     }
+                     final String contentType = message.getSipHeaderValue("c");
+                     final byte[] content = message.getSipContent();
+                     
+                     if(NgnStringUtils.equals(contentType, NgnContentType.REG_INFO, true)){
+                          //mReginfo = content;
+                     }
+                     else if(NgnStringUtils.equals(contentType, NgnContentType.WATCHER_INFO, true)){
+                          // mWInfo = content;
+                     }
+                     
+                     NgnSubscriptionSession ngnSession = NgnSubscriptionSession.getSession(_session.getId());
+                     NgnSubscriptionEventArgs eargs = new NgnSubscriptionEventArgs(_session.getId(), 
+                    		 NgnSubscriptionEventTypes.INCOMING_NOTIFY, 
+                    		 code, 
+                    		 phrase, 
+                    		 content, 
+                    		 contentType, 
+                    		 ngnSession==null ? EventPackageType.None : ngnSession.getEventPackage());
+                     mSipService.broadcastSubscriptionEvent(eargs);
+                     
+                     break;
+				}
+				
+				case tsip_ao_notify:
+				case tsip_i_subscribe:
+				case tsip_ao_subscribe:
+				case tsip_i_unsubscribe:
+				case tsip_ao_unsubscribe:
+				default:
+				{
+					break;
+				}
+			}
+			
+			return 0;
+		}
+		
 		@Override
 		public int OnOptionsEvent(OptionsEvent e) {
 			final tsip_options_event_type_t type = e.getType();
