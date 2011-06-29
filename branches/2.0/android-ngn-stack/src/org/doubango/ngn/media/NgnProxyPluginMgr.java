@@ -74,7 +74,7 @@ public class NgnProxyPluginMgr {
 		MyProxyPluginMgrCallback(){
 			super();
 		}
-
+		
 		@Override
 		public int OnPluginCreated(BigInteger id, twrap_proxy_plugin_type_t type) {
 			Log.d(TAG, "OnPluginCreated("+id+","+ type+")");

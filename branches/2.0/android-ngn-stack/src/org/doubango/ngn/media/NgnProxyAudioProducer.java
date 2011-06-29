@@ -49,6 +49,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private final ProxyAudioProducer mProducer;
 	private boolean mRoutingChanged;
 	
+	private Thread mProducerThread;
 	private AudioRecord mAudioRecord;
 	private ByteBuffer mAudioFrame;
 	private int mPtime, mRate, mChannels;
@@ -101,9 +102,9 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
     	Log.d(NgnProxyAudioProducer.TAG, "startCallback");
     	if(mPrepared && mAudioRecord != null){
 			super.mStarted = true;
-			final Thread t = new Thread(mRunnableRecorder, "AudioProducerThread");
-			//t.setPriority(Thread.MAX_PRIORITY);
-			t.start();
+			mProducerThread = new Thread(mRunnableRecorder, "AudioProducerThread");
+			//mProducerThread.setPriority(Thread.MAX_PRIORITY);
+			mProducerThread.start();
 			return 0;
 		}
         return -1;
@@ -118,8 +119,13 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private int stopCallback(){
     	Log.d(NgnProxyAudioProducer.TAG, "stopCallback");
     	super.mStarted = false;
-		if(mAudioRecord != null){
-			return 0;
+		if(mProducerThread != null){
+			try {
+				mProducerThread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			mProducerThread = null;
 		}
 		return -1;
     }
@@ -159,11 +165,13 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	
 	private synchronized void unprepare(){
 		if(mAudioRecord != null){
-			if(super.mPrepared){ // only call stop() is the AudioRecord is in initialized state
-				mAudioRecord.stop();
+			synchronized(mAudioRecord){
+				if(super.mPrepared){ // only call stop() is the AudioRecord is in initialized state
+					mAudioRecord.stop();
+				}
+				mAudioRecord.release();
+				mAudioRecord = null;
 			}
-			mAudioRecord.release();
-			mAudioRecord = null;
 		}
 		super.mPrepared = false;
 	}
@@ -188,28 +196,29 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 				if(mAudioRecord == null){
 					break;
 				}
-				
-				if(mRoutingChanged){
-					Log.d(TAG, "Routing changed: restart() recorder");
-					mRoutingChanged = false;
-					unprepare();
-					if(prepare(mPtime, mRate, mChannels) != 0){
-						break;
-					}
-					if(!NgnProxyAudioProducer.super.mPaused){
-						mAudioRecord.startRecording();
-					}
-				}
-				
-				// To avoid overrun read data even if on pause
-				if((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0){
-					if(!NgnProxyAudioProducer.super.mPaused){
-						if(nRead != nSize){
-							mProducer.push(mAudioFrame, nRead);
-							Log.w(TAG, "BufferOverflow?");
+				synchronized(mAudioRecord){
+					if(mRoutingChanged){
+						Log.d(TAG, "Routing changed: restart() recorder");
+						mRoutingChanged = false;
+						unprepare();
+						if(prepare(mPtime, mRate, mChannels) != 0){
+							break;
 						}
-						else{
-							mProducer.push();
+						if(!NgnProxyAudioProducer.super.mPaused){
+							mAudioRecord.startRecording();
+						}
+					}
+					
+					// To avoid overrun read data even if on pause
+					if((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0){
+						if(!NgnProxyAudioProducer.super.mPaused){
+							if(nRead != nSize){
+								mProducer.push(mAudioFrame, nRead);
+								Log.w(TAG, "BufferOverflow?");
+							}
+							else{
+								mProducer.push();
+							}
 						}
 					}
 				}

@@ -47,6 +47,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	private final MyProxyAudioConsumerCallback mCallback;
 	private final ProxyAudioConsumer mConsumer;
 	private boolean mRoutingChanged;
+	private Thread mConsumerThread;
 	
 	private int mBufferSize;
 	private AudioTrack mAudioTrack;
@@ -126,9 +127,9 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 		Log.d(TAG, "startCallback");
 		if(mPrepared && this.mAudioTrack != null){
 			super.mStarted = true;
-			final Thread t = new Thread(mRunnablePlayer, "AudioConsumerThread");
-			// t.setPriority(Thread.MAX_PRIORITY);
-			t.start();
+			mConsumerThread = new Thread(mRunnablePlayer, "AudioConsumerThread");
+			// mConsumerThread.setPriority(Thread.MAX_PRIORITY);
+			mConsumerThread.start();
 			return 0;
 		}
 		return -1;
@@ -137,8 +138,10 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	private int pauseCallback() {
 		Log.d(TAG, "pauseCallback");
 		if(mAudioTrack != null){
-			mAudioTrack.pause();
-			super.mPaused = true;
+			synchronized(mAudioTrack){
+				mAudioTrack.pause();
+				super.mPaused = true;
+			}
 			return 0;
 		}
 		return -1;
@@ -147,10 +150,15 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	private int stopCallback() {
 		Log.d(TAG, "stopCallback");
 		super.mStarted = false;
-		if(mAudioTrack != null){
-			return 0;
+		if(mConsumerThread != null){
+			try {
+				mConsumerThread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			mConsumerThread = null;
 		}
-		return -1;
+		return 0;
 	}
 	
 	private synchronized int prepare(int ptime, int rate, int channels){
@@ -196,11 +204,13 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	
 	private synchronized void unprepare(){
 		if(mAudioTrack != null){
-			if(super.mPrepared){
-				mAudioTrack.stop();
+			synchronized(mAudioTrack){
+				if(super.mPrepared){
+					mAudioTrack.stop();
+				}
+				mAudioTrack.release();
+				mAudioTrack = null;
 			}
-			mAudioTrack.release();
-			mAudioTrack = null;
 		}
 		super.mPrepared = false;
 	}
@@ -231,6 +241,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 					break;
 				}
 				
+			
 				if(mRoutingChanged){
 					Log.d(TAG, "Routing changed: restart() player");
 					mRoutingChanged = false;
@@ -260,10 +271,14 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 					nWritten += nFrameLength;
 				}
 				
-				mAudioTrack.write(aAudioBytes, 0, aAudioBytes.length);
-				if(!bPlaying && nWritten>mBufferSize){
-					mAudioTrack.play();
-					bPlaying = true;
+				if(mAudioTrack != null){
+					synchronized(mAudioTrack){
+						mAudioTrack.write(aAudioBytes, 0, aAudioBytes.length);
+						if(!bPlaying && nWritten>mBufferSize){
+							mAudioTrack.play();
+							bPlaying = true;
+						}
+					}
 				}
 			}
 			
