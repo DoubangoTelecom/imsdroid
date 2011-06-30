@@ -271,14 +271,10 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 					nWritten += nFrameLength;
 				}
 				
-				if(mAudioTrack != null){
-					synchronized(mAudioTrack){
-						mAudioTrack.write(aAudioBytes, 0, aAudioBytes.length);
-						if(!bPlaying && nWritten>mBufferSize){
-							mAudioTrack.play();
-							bPlaying = true;
-						}
-					}
+				mAudioTrack.write(aAudioBytes, 0, aAudioBytes.length);
+				if(!bPlaying && nWritten>mBufferSize){
+					mAudioTrack.play();
+					bPlaying = true;
 				}
 			}
 			
