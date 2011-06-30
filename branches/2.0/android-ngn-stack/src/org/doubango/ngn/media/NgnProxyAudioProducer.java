@@ -196,29 +196,27 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 				if(mAudioRecord == null){
 					break;
 				}
-				synchronized(mAudioRecord){
-					if(mRoutingChanged){
-						Log.d(TAG, "Routing changed: restart() recorder");
-						mRoutingChanged = false;
-						unprepare();
-						if(prepare(mPtime, mRate, mChannels) != 0){
-							break;
-						}
-						if(!NgnProxyAudioProducer.super.mPaused){
-							mAudioRecord.startRecording();
-						}
+				if(mRoutingChanged){
+					Log.d(TAG, "Routing changed: restart() recorder");
+					mRoutingChanged = false;
+					unprepare();
+					if(prepare(mPtime, mRate, mChannels) != 0){
+						break;
 					}
-					
-					// To avoid overrun read data even if on pause
-					if((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0){
-						if(!NgnProxyAudioProducer.super.mPaused){
-							if(nRead != nSize){
-								mProducer.push(mAudioFrame, nRead);
-								Log.w(TAG, "BufferOverflow?");
-							}
-							else{
-								mProducer.push();
-							}
+					if(!NgnProxyAudioProducer.super.mPaused){
+						mAudioRecord.startRecording();
+					}
+				}
+				
+				// To avoid overrun read data even if on pause
+				if((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0){
+					if(!NgnProxyAudioProducer.super.mPaused){
+						if(nRead != nSize){
+							mProducer.push(mAudioFrame, nRead);
+							Log.w(TAG, "BufferOverflow?");
+						}
+						else{
+							mProducer.push();
 						}
 					}
 				}
