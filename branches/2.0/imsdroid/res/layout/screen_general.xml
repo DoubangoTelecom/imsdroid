@@ -1,10 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_width="fill_parent" android:layout_height="fill_parent">
+
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:isScrollContainer="true" 
+  android:scrollbars="vertical" >
+ 
+<CheckBox 
+    android:layout_height="wrap_content" 
+    android:text="Anti echo" 
+    android:id="@+id/screen_general_checkBox_AEC" 
+    android:layout_width="fill_parent">
+</CheckBox>
 
-<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_general_checkBox_autoStart" android:text="Launch when system starts"></CheckBox>
+<CheckBox 
+    android:layout_height="wrap_content" 
+    android:layout_below="@+id/screen_general_checkBox_AEC" 
+    android:text="Voice activity detector" 
+    android:id="@+id/screen_general_checkBox_VAD" 
+    android:layout_width="fill_parent">
+</CheckBox>
+
+<CheckBox 
+    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    android:text="Noise reduction" 
+    android:id="@+id/screen_general_checkBox_NR" 
+    android:layout_below="@+id/screen_general_checkBox_VAD">
+</CheckBox>
+
+<CheckBox android:layout_width="wrap_content" android:layout_below="@+id/screen_general_checkBox_NR"  android:layout_height="wrap_content" android:id="@+id/screen_general_checkBox_autoStart" android:text="Launch when system starts"></CheckBox>
 <CheckBox android:layout_height="wrap_content" android:layout_below="@+id/screen_general_checkBox_autoStart" android:text="Intercept Outgoing Calls" android:id="@+id/screen_general_checkBox_interceptCall" android:layout_width="fill_parent"></CheckBox><CheckBox android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Enable Video Full-Screen Mode" android:id="@+id/screen_general_checkBox_fullscreen" android:layout_below="@+id/screen_general_checkBox_interceptCall"></CheckBox>
 <CheckBox android:layout_height="wrap_content" android:layout_below="@+id/screen_general_checkBox_fullscreen" android:id="@+id/screen_general_checkBox_ffc" android:text="Enable Front Facing Camera" android:layout_width="fill_parent"></CheckBox><CheckBox android:layout_below="@+id/screen_general_checkBox_ffc" android:layout_height="wrap_content" android:id="@+id/screen_general_checkBox_videoflip" android:text="Enable Video Flip" android:layout_width="fill_parent"></CheckBox><TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Audio PLayback Level" android:id="@+id/screen_general_textView_playback_level" android:textSize="16px" android:layout_below="@+id/screen_general_checkBox_videoflip"></TextView>
 <Spinner android:layout_height="wrap_content" android:layout_below="@+id/screen_general_textView_playback_level" android:id="@+id/screen_general_spinner_playback_level" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:layout_marginRight="5px" android:layout_marginTop="2px"></Spinner>
@@ -14,3 +41,4 @@
 
 
 </RelativeLayout>
+</ScrollView>

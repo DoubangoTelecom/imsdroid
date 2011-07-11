@@ -33,6 +33,7 @@ import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnInviteEventArgs;
+import org.doubango.ngn.events.NgnMediaPluginEventArgs;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnContact;
 import org.doubango.ngn.services.INgnConfigurationService;
@@ -88,7 +89,7 @@ public class ScreenAV extends BaseScreen{
 	private ViewType mCurrentView;
 	private LayoutInflater mInflater;
 	private RelativeLayout mMainLayout;
-	private BroadcastReceiver mSipBroadCastRecv;
+	private BroadcastReceiver mBroadCastRecv;
 	
 	private View mViewTrying;
 	private View mViewInAudioCall;
@@ -183,15 +184,21 @@ public class ScreenAV extends BaseScreen{
 		
 		mInflater = LayoutInflater.from(this);
 		
-		mSipBroadCastRecv = new BroadcastReceiver() {
+		mBroadCastRecv = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				handleSipEvent(intent);
+				if(NgnInviteEventArgs.ACTION_INVITE_EVENT.equals(intent.getAction())){
+					handleSipEvent(intent);
+				}
+				else if(NgnMediaPluginEventArgs.ACTION_MEDIA_PLUGIN_EVENT.equals(intent.getAction())){
+					handleMediaEvent(intent);
+				}
 			}
 		};
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(NgnInviteEventArgs.ACTION_INVITE_EVENT);
-	    registerReceiver(mSipBroadCastRecv, intentFilter);
+		intentFilter.addAction(NgnMediaPluginEventArgs.ACTION_MEDIA_PLUGIN_EVENT);
+	    registerReceiver(mBroadCastRecv, intentFilter);
 	    
 	    mListener = new OrientationEventListener(IMSDroid.getContext(), SensorManager.SENSOR_DELAY_NORMAL) {
 			@Override
@@ -304,9 +311,9 @@ public class ScreenAV extends BaseScreen{
 	@Override
 	protected void onDestroy() {
 		Log.d(TAG,"onDestroy()");
-       if(mSipBroadCastRecv != null){
-    	   unregisterReceiver(mSipBroadCastRecv);
-    	   mSipBroadCastRecv = null;
+       if(mBroadCastRecv != null){
+    	   unregisterReceiver(mBroadCastRecv);
+    	   mBroadCastRecv = null;
        }
        
        mTimerInCall.cancel();
@@ -492,6 +499,20 @@ public class ScreenAV extends BaseScreen{
 		}
 	}
 	
+	@Override
+	public boolean hasBack(){
+		return true;
+	}
+	
+	@Override
+	public boolean back(){
+		boolean ret =  mScreenService.show(ScreenHome.class);
+		if(ret){
+			mScreenService.destroy(getId());
+		}
+		return ret;
+	}
+	
 	public boolean onVolumeChanged(boolean bDown){
 		if(mAVSession != null){
 			return mAVSession.onVolumeChanged(bDown);
@@ -560,6 +581,38 @@ public class ScreenAV extends BaseScreen{
 			return mAVSession.acceptCall();
 		}
 		return false;
+	}
+	
+	private void handleMediaEvent(Intent intent){
+		final String action = intent.getAction();
+	
+		if(NgnMediaPluginEventArgs.ACTION_MEDIA_PLUGIN_EVENT.equals(action)){
+			NgnMediaPluginEventArgs args = intent.getParcelableExtra(NgnMediaPluginEventArgs.EXTRA_EMBEDDED);
+			if(args == null){
+				Log.e(TAG, "Invalid event args");
+				return;
+			}
+			
+			switch(args.getEventType()){
+				case STARTED_OK: //started or restarted (e.g. reINVITE)
+				{
+					if(args.getMediaType() == NgnMediaType.Video && mCurrentView == ViewType.ViewInCall){
+						loadVideoPreview();
+					}
+					break;
+				}
+				case PREPARED_OK:
+				case PREPARED_NOK:
+				case STARTED_NOK:
+				case STOPPED_OK:
+				case STOPPED_NOK:
+				case PAUSED_OK:
+				case PAUSED_NOK:
+				{
+					break;
+				}
+			}
+		}
 	}
 	
 	private void handleSipEvent(Intent intent){
@@ -747,15 +800,8 @@ public class ScreenAV extends BaseScreen{
 		mMainLayout.addView(mViewInCallVideo);
 		
 		// Video Consumer
-		mViewRemoteVideoPreview.removeAllViews();
-        final View remotePreview = mAVSession.startVideoConsumerPreview();
-		if(remotePreview != null){
-            final ViewParent viewParent = remotePreview.getParent();
-            if(viewParent != null && viewParent instanceof ViewGroup){
-                    ((ViewGroup)(viewParent)).removeView(remotePreview);
-            }
-            mViewRemoteVideoPreview.addView(remotePreview);
-        }
+		loadVideoPreview();
+		
 		// Video Producer
 		startStopVideo(mAVSession.isSendingVideo());
 		
@@ -820,6 +866,18 @@ public class ScreenAV extends BaseScreen{
 	
 	private void loadTermView(){
 		loadTermView(null);
+	}
+	
+	private void loadVideoPreview(){
+		mViewRemoteVideoPreview.removeAllViews();
+        final View remotePreview = mAVSession.startVideoConsumerPreview();
+		if(remotePreview != null){
+            final ViewParent viewParent = remotePreview.getParent();
+            if(viewParent != null && viewParent instanceof ViewGroup){
+                  ((ViewGroup)(viewParent)).removeView(remotePreview);
+            }
+            mViewRemoteVideoPreview.addView(remotePreview);
+        }
 	}
 	
 	private final TimerTask mTimerTaskInCall = new TimerTask(){

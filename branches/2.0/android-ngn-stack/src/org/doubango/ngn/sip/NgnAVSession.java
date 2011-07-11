@@ -313,7 +313,7 @@ public class NgnAVSession extends NgnInviteSession{
 	    // SigComp
 	    super.setSigCompId(sipStack.getSigCompId());
 	    // 100rel
-	    mSession.set100rel(true); // will add "Supported: 100rel"        
+	    // mSession.set100rel(true); // will add "Supported: 100rel"   => Use defaults     
         // Session timers
         if(mConfigurationService.getBoolean(NgnConfigurationEntry.QOS_USE_SESSION_TIMERS, NgnConfigurationEntry.DEFAULT_QOS_USE_SESSION_TIMERS)){
 			mSession.setSessionTimer((long) mConfigurationService.getInt(

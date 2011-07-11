@@ -24,11 +24,13 @@ import android.os.Parcelable;
 
 public class NgnMessagingEventArgs extends NgnEventArgs{
 	private final static String TAG = NgnMessagingEventArgs.class.getCanonicalName();
+	
 	private long mSessionId;
     private NgnMessagingEventTypes mEventType;
     private String mPhrase;
     private byte[] mPayload;
-
+    private String mContentType;
+    
     public static final String ACTION_MESSAGING_EVENT = TAG + ".ACTION_MESSAGING_EVENT";
     
     public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
@@ -36,14 +38,14 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
     public static final String EXTRA_CODE = TAG + "code";
     public static final String EXTRA_REMOTE_PARTY = TAG + "from";
     public static final String EXTRA_DATE = TAG + "date";
-    public static final String EXTRA_CONTENT_TYPE = TAG + "content-Type";
 
-    public NgnMessagingEventArgs(long sessionId, NgnMessagingEventTypes type, String phrase, byte[] payload){
+    public NgnMessagingEventArgs(long sessionId, NgnMessagingEventTypes type, String phrase, byte[] payload, String contentType){
     	super();
         mSessionId = sessionId;
         mEventType = type;
         mPhrase = phrase;
         mPayload = payload;
+        mContentType = contentType;
     }
 
     public NgnMessagingEventArgs(Parcel in){
@@ -75,12 +77,17 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
     public byte[] getPayload(){
         return mPayload;
     }
+    
+    public String getContentType() {
+    	return mContentType;
+    }
 
 	@Override
 	protected void readFromParcel(Parcel in) {
 		mSessionId = in.readLong();
 		mEventType = Enum.valueOf(NgnMessagingEventTypes.class, in.readString());
 		mPhrase = in.readString();
+		mContentType = in.readString();
 		mPayload = in.createByteArray();
 	}
 
@@ -89,6 +96,7 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
 		dest.writeLong(mSessionId);
 		dest.writeString(mEventType.toString());
 		dest.writeString(mPhrase);
+		dest.writeString(mContentType);
 		dest.writeByteArray(mPayload);
 	}
 }

@@ -1,5 +1,6 @@
 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
+*  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
@@ -23,6 +24,8 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import org.doubango.ngn.NgnEngine;
+import org.doubango.ngn.events.NgnMediaPluginEventArgs;
+import org.doubango.ngn.events.NgnMediaPluginEventTypes;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoConsumerCallback;
@@ -62,13 +65,13 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     public NgnProxyVideoConsumer(BigInteger id, ProxyVideoConsumer consumer){
     	super(id, consumer);
     	mConsumer = consumer;
-        mCallback = new MyProxyVideoConsumerCallback(this);
-        mConsumer.setCallback(mCallback);
-        
-        // Initialize video stream parameters with default values
-        mWidth = NgnProxyVideoConsumer.DEFAULT_VIDEO_WIDTH;
-		mHeight = NgnProxyVideoConsumer.DEFAULT_VIDEO_HEIGHT;
-		mFps = NgnProxyVideoConsumer.DEFAULT_VIDEO_FPS;
+    	mCallback = new MyProxyVideoConsumerCallback(this);
+    	mConsumer.setCallback(mCallback);
+
+    	// Initialize video stream parameters with default values
+    	mWidth = NgnProxyVideoConsumer.DEFAULT_VIDEO_WIDTH;
+    	mHeight = NgnProxyVideoConsumer.DEFAULT_VIDEO_HEIGHT;
+    	mFps = NgnProxyVideoConsumer.DEFAULT_VIDEO_FPS;
     }
     
     public void setContext(Context context){
@@ -221,6 +224,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 			mLooper.quit();
 			mLooper = null;
 		}
+    	mPreview = null;
     	return 0;
     }
 	
@@ -256,12 +260,18 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
         
         @Override
         public int prepare(int width, int height, int fps){
-            return myConsumer.prepareCallback(width, height, fps);
+            int ret = myConsumer.prepareCallback(width, height, fps);
+            NgnMediaPluginEventArgs.broadcastEvent(new NgnMediaPluginEventArgs(myConsumer.mId, NgnMediaType.Video, 
+            		ret == 0 ? NgnMediaPluginEventTypes.PREPARED_OK : NgnMediaPluginEventTypes.PREPARED_NOK));
+            return ret;
         }
         
         @Override
         public int start(){
-            return myConsumer.startCallback();
+            int ret = myConsumer.startCallback();
+            NgnMediaPluginEventArgs.broadcastEvent(new NgnMediaPluginEventArgs(myConsumer.mId, NgnMediaType.Video, 
+            		ret == 0 ? NgnMediaPluginEventTypes.STARTED_OK : NgnMediaPluginEventTypes.STARTED_NOK));
+            return ret;
         }
 
         @Override
@@ -276,12 +286,18 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 
 		@Override
         public int pause(){
-            return myConsumer.pauseCallback();
+            int ret = myConsumer.pauseCallback();
+            NgnMediaPluginEventArgs.broadcastEvent(new NgnMediaPluginEventArgs(myConsumer.mId, NgnMediaType.Video, 
+            		ret == 0 ? NgnMediaPluginEventTypes.PAUSED_OK : NgnMediaPluginEventTypes.PAUSED_NOK));
+            return ret;
         }
         
         @Override
         public int stop(){
-            return myConsumer.stopCallback();
+            int ret = myConsumer.stopCallback();
+            NgnMediaPluginEventArgs.broadcastEvent(new NgnMediaPluginEventArgs(myConsumer.mId, NgnMediaType.Video, 
+            		ret == 0 ? NgnMediaPluginEventTypes.STOPPED_OK : NgnMediaPluginEventTypes.STOPPED_NOK));
+            return ret;
         }
     }
 	

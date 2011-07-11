@@ -509,18 +509,23 @@ implements INgnSipService, tinyWRAPConstants {
 		@Override
 		public int OnDialogEvent(DialogEvent e){
 			final String phrase = e.getPhrase();
-			final short code = e.getCode();
+			final short eventCode = e.getCode();
+			final short sipCode;
 			final SipSession session = e.getBaseSession();
+			
 			if(session == null){
 				return 0;
 			}
 			
 			final long sessionId = session.getId();
+			final SipMessage message = e.getSipMessage();
 			NgnSipSession mySession = null;
+			
+			sipCode = (message != null && message.isResponse()) ? message.getResponseCode() : eventCode;
 			
 			Log.d(TAG, String.format("OnDialogEvent (%s,%d)", phrase,sessionId));
 			
-			switch (code){
+			switch (eventCode){
 				//== Connecting ==
 				case tinyWRAPConstants.tsip_event_code_dialog_connecting:
 				{
@@ -528,7 +533,7 @@ implements INgnSipService, tinyWRAPConstants {
                     if (mSipService.mRegSession != null && mSipService.mRegSession.getId() == sessionId){
                     	mSipService.mRegSession.setConnectionState(ConnectionState.CONNECTING);
                     	mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.REGISTRATION_INPROGRESS, 
-                    			code, phrase));
+                    			eventCode, phrase));
                     }
                     // Audio/Video/MSRP(Chat, FileTransfer)
                     else if (((mySession = NgnAVSession.getSession(sessionId)) != null) || ((mySession = NgnMsrpSession.getSession(sessionId)) != null)){
@@ -540,11 +545,13 @@ implements INgnSipService, tinyWRAPConstants {
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.CONNECTING);
                     	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.PUBLICATION_INPROGRESS, 
-                    			code, phrase));
+                    			eventCode, phrase));
                     }
                     // Subscription
                     else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.CONNECTING);
+                    	mSipService.broadcastSubscriptionEvent(new NgnSubscriptionEventArgs(sessionId, NgnSubscriptionEventTypes.SUBSCRIPTION_INPROGRESS, 
+                    			eventCode, phrase, null, null, ((NgnSubscriptionSession)mySession).getEventPackage()));
                     }
 
 					break;
@@ -562,7 +569,7 @@ implements INgnSipService, tinyWRAPConstants {
                         	mSipService.setDefaultIdentity(_defaultIdentity);
                         }
                         mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.REGISTRATION_OK, 
-                        		code, phrase));
+                        		sipCode, phrase));
                     }
                     // Audio/Video/MSRP(Chat, FileTransfer)
                     else if (((mySession = NgnAVSession.getSession(sessionId)) != null) || ((mySession = NgnMsrpSession.getSession(sessionId)) != null)){
@@ -574,11 +581,13 @@ implements INgnSipService, tinyWRAPConstants {
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.CONNECTED);
                     	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.PUBLICATION_OK, 
-                    			code, phrase));
+                    			sipCode, phrase));
                     }
                     // Subscription
                     else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.CONNECTED);
+                    	mSipService.broadcastSubscriptionEvent(new NgnSubscriptionEventArgs(sessionId, NgnSubscriptionEventTypes.SUBSCRIPTION_OK, 
+                    			sipCode, phrase, null, null, ((NgnSubscriptionSession)mySession).getEventPackage()));
                     }
 
 					break;
@@ -591,7 +600,7 @@ implements INgnSipService, tinyWRAPConstants {
 					if (mSipService.mRegSession != null && mSipService.mRegSession.getId() == sessionId){
 						mSipService.mRegSession.setConnectionState(ConnectionState.TERMINATING);
 						mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.UNREGISTRATION_INPROGRESS, 
-								code, phrase));
+								eventCode, phrase));
 					}
 					// Audio/Video/MSRP(Chat, FileTransfer)
                     else if (((mySession = NgnAVSession.getSession(sessionId)) != null) || ((mySession = NgnMsrpSession.getSession(sessionId)) != null)){
@@ -603,11 +612,13 @@ implements INgnSipService, tinyWRAPConstants {
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.TERMINATING);
                     	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.UNPUBLICATION_INPROGRESS, 
-                    			code, phrase));
+                    			eventCode, phrase));
                     }
                     // Subscription
                     else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.TERMINATING);
+                    	mSipService.broadcastSubscriptionEvent(new NgnSubscriptionEventArgs(sessionId, NgnSubscriptionEventTypes.UNSUBSCRIPTION_INPROGRESS, 
+                    			eventCode, phrase, null, null, ((NgnSubscriptionSession)mySession).getEventPackage()));
                     }
 
 					break;
@@ -619,7 +630,7 @@ implements INgnSipService, tinyWRAPConstants {
 					// Registration
 					if (mSipService.mRegSession != null && mSipService.mRegSession.getId() == sessionId){
 						mSipService.mRegSession.setConnectionState(ConnectionState.TERMINATED);
-						mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.UNREGISTRATION_OK, code, phrase));
+						mSipService.broadcastRegistrationEvent(new NgnRegistrationEventArgs(sessionId, NgnRegistrationEventTypes.UNREGISTRATION_OK, sipCode, phrase));
 						/* Stop the stack (as we are already in the stack-thread, then do it in a new thread) */
 						new Thread(new Runnable(){
 							public void run() {	
@@ -647,13 +658,20 @@ implements INgnSipService, tinyWRAPConstants {
                     }
 					// Publication
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
+                    	ConnectionState previousConnState = mySession.getConnectionState();
                     	mySession.setConnectionState(ConnectionState.TERMINATED);
-                    	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, NgnPublicationEventTypes.UNPUBLICATION_OK, 
-                    			code, phrase));
+                    	mSipService.broadcastPublicationEvent(new NgnPublicationEventArgs(sessionId, 
+                    			(previousConnState == ConnectionState.TERMINATING) ? NgnPublicationEventTypes.UNPUBLICATION_OK : NgnPublicationEventTypes.PUBLICATION_NOK, 
+                    			sipCode, phrase));
                     }
                     // Subscription
                     else if(((mySession = NgnSubscriptionSession.getSession(sessionId)) != null)){
+                    	ConnectionState previousConnState = mySession.getConnectionState();
+                    	
                     	mySession.setConnectionState(ConnectionState.TERMINATED);
+                    	mSipService.broadcastSubscriptionEvent(new NgnSubscriptionEventArgs(sessionId, 
+                    			(previousConnState == ConnectionState.TERMINATING) ? NgnSubscriptionEventTypes.UNSUBSCRIPTION_OK : NgnSubscriptionEventTypes.SUBSCRIPTION_NOK, 
+                    			sipCode, phrase, null, null, ((NgnSubscriptionSession)mySession).getEventPackage()));
                     }
 					break;
 				}
@@ -819,7 +837,7 @@ implements INgnSipService, tinyWRAPConstants {
 					if(_session != null && code>=200 && message != null){
 						mSipService.broadcastMessagingEvent(new NgnMessagingEventArgs(_session.getId(), 
 								(code >=200 && code<=299) ? NgnMessagingEventTypes.SUCCESS : NgnMessagingEventTypes.FAILURE, 
-								e.getPhrase(), new byte[0]), message.getSipHeaderValue("f"), NgnDateTimeUtils.now());
+								e.getPhrase(), new byte[0], null), message.getSipHeaderValue("f"), NgnDateTimeUtils.now());
 					}
 					break;
 				case tsip_i_message:
@@ -960,7 +978,7 @@ implements INgnSipService, tinyWRAPConstants {
 					/* Alert the user and add the message to the history */
 					if(content != null){
 						mSipService.broadcastMessagingEvent(new NgnMessagingEventArgs(_session.getId(), NgnMessagingEventTypes.INCOMING, 
-								e.getPhrase(), content), from, NgnDateTimeUtils.now());
+								e.getPhrase(), content, contentType), from, NgnDateTimeUtils.now());
 					}
 					
 					break;

@@ -1,5 +1,6 @@
 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
+*  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
@@ -22,6 +23,7 @@ package org.doubango.imsdroid.Screens;
 import org.doubango.imsdroid.R;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.tinyWRAP.MediaSessionMgr;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -40,6 +42,9 @@ public class ScreenGeneral  extends BaseScreen {
 	private CheckBox mCbAutoStart;
 	private CheckBox mCbInterceptOutgoingCalls;
 	private EditText mEtEnumDomain;
+	private CheckBox mCbAEC;
+	private CheckBox mCbVAD;
+	private CheckBox mCbNR;
 	
 	private final INgnConfigurationService mConfigurationService;
 	
@@ -67,6 +72,9 @@ public class ScreenGeneral  extends BaseScreen {
         mCbAutoStart = (CheckBox)findViewById(R.id.screen_general_checkBox_autoStart);
         mSpAudioPlaybackLevel = (Spinner)findViewById(R.id.screen_general_spinner_playback_level);
         mEtEnumDomain = (EditText)findViewById(R.id.screen_general_editText_enum_domain);
+        mCbAEC = (CheckBox)this.findViewById(R.id.screen_general_checkBox_AEC);
+        mCbVAD = (CheckBox)this.findViewById(R.id.screen_general_checkBox_VAD);
+        mCbNR = (CheckBox)this.findViewById(R.id.screen_general_checkBox_NR);    
         
         // Audio Playback levels
         ArrayAdapter<AudioPlayBackLevel> adapter = new ArrayAdapter<AudioPlayBackLevel>(this, android.R.layout.simple_spinner_item, ScreenGeneral.sAudioPlaybackLevels);
@@ -78,6 +86,9 @@ public class ScreenGeneral  extends BaseScreen {
         mCbFFC.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_USE_FFC, NgnConfigurationEntry.DEFAULT_GENERAL_USE_FFC));
         mCbVflip.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_VIDEO_FLIP, NgnConfigurationEntry.DEFAULT_GENERAL_FLIP_VIDEO));
         mCbAutoStart.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_AUTOSTART, NgnConfigurationEntry.DEFAULT_GENERAL_AUTOSTART));
+        mCbAEC.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC,NgnConfigurationEntry.DEFAULT_GENERAL_AEC));
+        mCbVAD.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_VAD,NgnConfigurationEntry.DEFAULT_GENERAL_VAD));
+        mCbNR.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_NR,NgnConfigurationEntry.DEFAULT_GENERAL_NR));
         
         mSpAudioPlaybackLevel.setSelection(getSpinnerIndex(
 				mConfigurationService.getFloat(
@@ -92,6 +103,9 @@ public class ScreenGeneral  extends BaseScreen {
         super.addConfigurationListener(mCbAutoStart);
         super.addConfigurationListener(mEtEnumDomain);
         super.addConfigurationListener(mSpAudioPlaybackLevel);
+        super.addConfigurationListener(mCbAEC);
+        super.addConfigurationListener(mCbVAD);
+        super.addConfigurationListener(mCbNR);
 	}
 	
 	protected void onPause() {
@@ -104,10 +118,34 @@ public class ScreenGeneral  extends BaseScreen {
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_VIDEO_FLIP, mCbVflip.isChecked());
 			mConfigurationService.putFloat(NgnConfigurationEntry.GENERAL_AUDIO_PLAY_LEVEL, ((AudioPlayBackLevel)mSpAudioPlaybackLevel.getSelectedItem()).mValue);
 			mConfigurationService.putString(NgnConfigurationEntry.GENERAL_ENUM_DOMAIN, mEtEnumDomain.getText().toString());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_AEC, mCbAEC.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_VAD, mCbVAD.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_NR, mCbNR.isChecked());
 			
 			// Compute
 			if(!mConfigurationService.commit()){
 				Log.e(TAG, "Failed to commit() configuration");
+			}
+			else
+			{
+				// codecs, AEC, NoiseSuppression, Echo cancellation, ....
+				boolean aec        = mCbAEC.isChecked() ;
+				boolean vad        = mCbVAD.isChecked();
+				boolean nr          = mCbNR.isChecked() ;
+				int         echo_tail = mConfigurationService.getInt(NgnConfigurationEntry.GENERAL_ECHO_TAIL,NgnConfigurationEntry.DEFAULT_GENERAL_ECHO_TAIL);
+				Log.d(TAG,"Configure AEC["+aec+"/"+echo_tail+"] NoiseSuppression["+nr+"], Voice activity detection["+vad+"]");
+				if ( aec)
+				{
+					MediaSessionMgr.defaultsSetEchoSuppEnabled(true);
+					MediaSessionMgr.defaultsSetEchoTail(echo_tail); // 2s  == 100 packets of 20 ms 
+				}
+				else
+				{
+					MediaSessionMgr.defaultsSetEchoSuppEnabled(false);
+					MediaSessionMgr.defaultsSetEchoTail(0); 
+				}
+				MediaSessionMgr.defaultsSetVadEnabled(vad);
+				MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
 			}
 			
 			super.mComputeConfiguration = false;

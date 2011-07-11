@@ -1,5 +1,6 @@
 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
+*  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
@@ -55,6 +56,8 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	
 	private int mOutputRate;
 	private ByteBuffer mOutputBuffer;
+	private boolean mAec ;
+	private boolean mIsInit = false ;
 	
 	public NgnProxyAudioConsumer(BigInteger id, ProxyAudioConsumer consumer){
 		super(id, consumer);
@@ -98,20 +101,29 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	}
 	
 	private boolean changeVolume(boolean bDown, boolean bVolumeChanged){
+		Log.d(TAG,"changeVolume("+bDown+","+bVolumeChanged+ ") aec:"+mAec);
 		final AudioManager audioManager = NgnApplication.getAudioManager();
 		if(audioManager != null){
-			if(bVolumeChanged){
+			if( !mIsInit && mAec && NgnApplication.getAudioManager().isSpeakerphoneOn() ){
+				mIsInit = true ;
+				Log.d(TAG, "Consumer changeVolume HP on AEC");
+				return mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*0.5f, AudioTrack.getMaxVolume()*0.5f) == AudioTrack.SUCCESS;
+			}
+			else 
+				if(bVolumeChanged){
+				Log.d(TAG, "Consumer changeVolume VolumeChanged   bDown:"+bDown);
 				audioManager.adjustStreamVolume(AUDIO_STREAM_TYPE, bDown ? AudioManager.ADJUST_LOWER : AudioManager.ADJUST_RAISE, 
 					AudioManager.FLAG_SHOW_UI);
+				return true;
 			}
-			if(audioManager.isSpeakerphoneOn()){
-				return mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*1.0f, AudioTrack.getMaxVolume()*1.0f) == AudioTrack.SUCCESS;
-			}
-			else{
-				final float attenuation = mConfigurationService.getFloat(NgnConfigurationEntry.MEDIA_AUDIO_CONSUMER_ATTENUATION, 
-						NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_CONSUMER_ATTENUATION);
-				Log.d(TAG, "Consumer audio attenuation "+attenuation);
-				return mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*attenuation, AudioTrack.getMaxVolume()*attenuation) == AudioTrack.SUCCESS;
+			else
+			{
+//				final float attenuation = mConfigurationService.getFloat(NgnConfigurationEntry.MEDIA_AUDIO_CONSUMER_ATTENUATION, 
+//						NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_CONSUMER_ATTENUATION);
+				final float attenuation = mConfigurationService.getFloat(NgnConfigurationEntry.GENERAL_AUDIO_PLAY_LEVEL ,
+						NgnConfigurationEntry.DEFAULT_GENERAL_AUDIO_PLAY_LEVEL);
+				Log.d(TAG, "Consumer changeVolume audio attenuation "+attenuation);
+				return true ; //mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*attenuation, AudioTrack.getMaxVolume()*attenuation) == AudioTrack.SUCCESS;
 			}
 		}
 		return false;
@@ -184,6 +196,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 		final int shortsPerNotif = (mOutputRate * mPtime)/1000;
 		mBufferSize = ((minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * AUDIO_BUFFER_FACTOR);
 		mOutputBuffer = ByteBuffer.allocateDirect(shortsPerNotif*2);
+		mAec = mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
 		
 		// setSpeakerphoneOn(false);
 		mAudioTrack = new AudioTrack(AUDIO_STREAM_TYPE,
@@ -226,14 +239,22 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 			final int nFramesCount = 1; // Number of 20ms' to copy
 			final byte[] aAudioBytes = new byte[nFrameLength*nFramesCount];
 			int i, nGapSize;
-			long lSizeInBytes;
+			long lSizeInBytes = 0 ;
 			boolean bPlaying = false;
 			int nWritten = 0;
 			
 			if(NgnProxyAudioConsumer.super.mValid){
 				mConsumer.setPullBuffer(mOutputBuffer, mOutputBuffer.capacity());
-				mConsumer.setGain(NgnEngine.getInstance().getConfigurationService().getInt(NgnConfigurationEntry.MEDIA_AUDIO_CONSUMER_GAIN, 
-						NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_CONSUMER_GAIN));
+				if ( NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC , NgnConfigurationEntry.DEFAULT_GENERAL_AEC) )
+				{
+					// Perhaps it's not util because gain is apply after aec process on doubango TODO ....
+					mConsumer.setGain(0);
+				}
+				else
+				{
+					mConsumer.setGain(NgnEngine.getInstance().getConfigurationService().getInt(NgnConfigurationEntry.MEDIA_AUDIO_CONSUMER_GAIN, 
+							NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_CONSUMER_GAIN));
+				}
 			}
 			
 			while(NgnProxyAudioConsumer.super.mValid && NgnProxyAudioConsumer.super.mStarted){
@@ -241,7 +262,6 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 					break;
 				}
 				
-			
 				if(mRoutingChanged){
 					Log.d(TAG, "Routing changed: restart() player");
 					mRoutingChanged = false;
