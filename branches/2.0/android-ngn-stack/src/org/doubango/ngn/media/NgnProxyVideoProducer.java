@@ -1,5 +1,6 @@
 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
+*  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	

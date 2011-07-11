@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 
 import org.doubango.ngn.utils.NgnContentType;
 import org.doubango.ngn.utils.NgnObservableHashMap;
+import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.MessagingSession;
 import org.doubango.tinyWRAP.RPMessage;
@@ -163,14 +164,23 @@ public class NgnMessagingSession extends NgnSipSession {
 	 * @return true if succeed and false otherwise
 	 * @sa @ref SendBinaryMessage()
 	 */
-    public boolean sendTextMessage(String text){
-        super.addHeader("Content-Type", NgnContentType.TEXT_PLAIN);
+    public boolean sendTextMessage(String text, String contentType){
+    	if (!NgnStringUtils.isNullOrEmpty(contentType)) {
+            super.addHeader("Content-Type", contentType);
+    	}
+    	else {
+    		super.addHeader("Content-Type", NgnContentType.TEXT_PLAIN);
+    	}
         byte[] bytes = text.getBytes();
         ByteBuffer payload = ByteBuffer.allocateDirect(bytes.length);
         payload.put(bytes);
         return mSession.send(payload, payload.capacity());
     }
-    
+
+    public boolean sendTextMessage(String text){
+    	return sendTextMessage(text, null);    	
+    }
+
     /**
      * Accepts the message (sends 200 OK).
      * @return true if succeed and false otherwise

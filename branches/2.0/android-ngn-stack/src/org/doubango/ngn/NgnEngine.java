@@ -1,5 +1,6 @@
 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
+*  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
@@ -117,7 +118,23 @@ public class NgnEngine {
 							tmedia_bandwidth_level_t.swigToEnum(getConfigurationService().getInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL, NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL)
 				));
 		// codecs, AEC, NoiseSuppression, Echo cancellation, ....
-		// to be continued...
+		boolean aec         = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
+		boolean vad        = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_VAD, NgnConfigurationEntry.DEFAULT_GENERAL_VAD) ;
+		boolean nr          = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_NR, NgnConfigurationEntry.DEFAULT_GENERAL_NR) ;
+		int         echo_tail = mConfigurationService.getInt(NgnConfigurationEntry.GENERAL_ECHO_TAIL,NgnConfigurationEntry.DEFAULT_GENERAL_ECHO_TAIL);
+		
+		Log.d(TAG,"Configure AEC["+aec+"/"+echo_tail+"] NoiseSuppression["+nr+"], Voice activity detection["+vad+"]");
+		
+		if (aec){
+			MediaSessionMgr.defaultsSetEchoSuppEnabled(true);
+			MediaSessionMgr.defaultsSetEchoTail(echo_tail); // 2s  == 100 packets of 20 ms 
+		}
+		else{
+			MediaSessionMgr.defaultsSetEchoSuppEnabled(false);
+			MediaSessionMgr.defaultsSetEchoTail(0); 
+		}
+		MediaSessionMgr.defaultsSetVadEnabled(vad);
+		MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
 	}
 	
 	/**

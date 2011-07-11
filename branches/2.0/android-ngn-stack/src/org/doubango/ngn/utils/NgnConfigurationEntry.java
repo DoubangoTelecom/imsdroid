@@ -1,5 +1,6 @@
 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
+*  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
@@ -41,7 +42,10 @@ public class NgnConfigurationEntry {
 	public static final String GENERAL_VIDEO_FLIP = "GENERAL_VIDEO_FLIP." + TAG;
 	public static final String GENERAL_AUDIO_PLAY_LEVEL = "GENERAL_AUDIO_PLAY_LEVEL." + TAG;
 	public static final String GENERAL_ENUM_DOMAIN = "GENERAL_ENUM_DOMAIN." + TAG;
-	
+	public static final String GENERAL_AEC = "GENERAL_AEC."+ TAG ;
+	public static final String GENERAL_VAD = "GENERAL_VAD."+ TAG ;	
+	public static final String GENERAL_NR = "GENERAL_NR."+ TAG ;	
+	public static final String GENERAL_ECHO_TAIL = "GENERAL_ECHO_TAIL."+ TAG ;
 	// Identity
 	public static final String IDENTITY_DISPLAY_NAME = "IDENTITY_DISPLAY_NAME." + TAG;
 	public static final String IDENTITY_IMPU = "IDENTITY_IMPU." + TAG;
@@ -128,6 +132,10 @@ public class NgnConfigurationEntry {
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
 	public static final float DEFAULT_GENERAL_AUDIO_PLAY_LEVEL = 0.25f;
 	public static final String DEFAULT_GENERAL_ENUM_DOMAIN = "e164.org";
+	public static final boolean DEFAULT_GENERAL_AEC = true;
+	public static final boolean DEFAULT_GENERAL_VAD = false; // speex-dsp don't support VAD for fixed-point implementation
+	public static final boolean DEFAULT_GENERAL_NR = true;
+	public static final int DEFAULT_GENERAL_ECHO_TAIL = 100;
 	
 	//	Identity
 	public static final String DEFAULT_IDENTITY_DISPLAY_NAME = "John Doe";

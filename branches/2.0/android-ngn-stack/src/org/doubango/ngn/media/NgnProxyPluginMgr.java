@@ -55,7 +55,9 @@ public class NgnProxyPluginMgr {
         MediaSessionMgr.defaultsSetBandwidthLevel(tmedia_bandwidth_level_t.tmedia_bl_unrestricted);
         MediaSessionMgr.defaultsSetEchoSuppEnabled(false);
         MediaSessionMgr.defaultsSetVadEnabled(false);
-        MediaSessionMgr.defaultsSetNoiseSuppEnabled(true);
+
+        MediaSessionMgr.defaultsSetNoiseSuppEnabled(false);
+        MediaSessionMgr.defaultsSetEchoTail(0);
 	}
 	
 	private NgnProxyPluginMgr(){
