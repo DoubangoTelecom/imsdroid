@@ -24,11 +24,8 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
-import org.doubango.ngn.events.NgnRegistrationEventTypes;
 import org.doubango.ngn.services.INgnSipService;
-import org.doubango.ngn.sip.NgnSubscriptionSession;
 import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
-import org.doubango.ngn.sip.NgnSubscriptionSession.EventPackageType;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -44,11 +41,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
 
 public class ScreenHome extends BaseScreen {
@@ -140,11 +137,6 @@ public class ScreenHome extends BaseScreen {
 						default:
 							((ScreenHomeAdapter)mGridView.getAdapter()).refresh();
 							break;
-					}
-					
-					if(args.getEventType() == NgnRegistrationEventTypes.REGISTRATION_OK){
-						NgnSubscriptionSession session = NgnSubscriptionSession.createOutgoingSession(mSipService.getSipStack(), "sip:44@doubango.org", EventPackageType.Presence);
-						session.subscribe();
 					}
 				}
 			}
