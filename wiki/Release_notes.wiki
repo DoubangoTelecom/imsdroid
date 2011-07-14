@@ -6,7 +6,7 @@
 
 ==2.0.431-preview==
  * Enable echo cancellation (Thanks to Philippe Verney)
- * Fix issues: issue 256, issue 203, issue 119, issue 213 and issue 250
+ * Fix issues: issue 256, issue 203, issue 134, issue 119, issue 213 and issue 250
 
 ==2.0.419-preview==
  * Improve video quality by adding the notion of "unrestricted" bandwidth
