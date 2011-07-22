@@ -245,19 +245,37 @@ public class NgnCameraProducer {
 	private static Camera openFrontFacingCamera() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException{
 		Camera camera = null;
 		
-		//1. From mapper
+		// 1. Android 2.3 or later
+		if(NgnApplication.getSDKVersion() >= 9){
+			try {
+				Method getNumberOfCamerasMethod = Camera.class.getDeclaredMethod("getNumberOfCameras");
+				if(getNumberOfCamerasMethod != null){
+					Integer numberOfCameras = (Integer)getNumberOfCamerasMethod.invoke(null);
+					if(numberOfCameras > 1){
+						Method openMethod = Camera.class.getDeclaredMethod("open", int.class);
+						if((camera = (Camera)openMethod.invoke(null, (numberOfCameras - 1))) != null){
+							return camera;
+						}
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		//2. From mapper
 		if((camera = FrontFacingCameraMapper.getPreferredCamera()) != null){
 			return camera;
 		}
 		
-		//2. Use switcher
+		//3. Use switcher
 		if(FrontFacingCameraSwitcher.getSwitcher() != null){
 			camera = Camera.open();
 			FrontFacingCameraSwitcher.getSwitcher().invoke(camera, (int)1);
 			return camera;
 		}
 		
-		//3. Use parameters
+		//4. Use parameters
 		camera = Camera.open();
 		Camera.Parameters parameters = camera.getParameters();
 		parameters.set("camera-id", 2);
@@ -332,7 +350,7 @@ public class NgnCameraProducer {
 				return null;
 			}
 			
-			try{
+			try{				
 				Method method = Class.forName(FrontFacingCameraMapper.Map[FrontFacingCameraMapper.preferredIndex].className)
 				.getDeclaredMethod(FrontFacingCameraMapper.Map[FrontFacingCameraMapper.preferredIndex].methodName);
 				return (Camera)method.invoke(null);
