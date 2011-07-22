@@ -262,9 +262,9 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 			}
 			
 			// Camera Orientation
-			int rotation = compensCamRotation(false);     
+			int rotation = compensCamRotation(false);
 			Log.d(TAG, String.format("setDisplayOrientation [%d] ",rotation ));
-			NgnCameraProducer.setDisplayOrientation(camera, rotation );
+			NgnCameraProducer.setDisplayOrientation(camera, rotation);
 			
 			// Callback Buffers
 			if(NgnProxyVideoProducer.sAddCallbackBufferSupported){

@@ -508,6 +508,22 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 	
+	public boolean setProducerFliped(boolean flipped){
+		final MediaSessionMgr mediaMgr;
+		if((mediaMgr = super.getMediaSessionMgr()) != null){
+			return mediaMgr.producerSetInt32(twrap_media_type_t.twrap_media_video, "flip", 1);
+		}
+		return false;
+	}
+	
+	public boolean setConsumerFliped(boolean flipped){
+		final MediaSessionMgr mediaMgr;
+		if((mediaMgr = super.getMediaSessionMgr()) != null){
+			return mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_video, "flip", 1);
+		}
+		return false;
+	}
+
 	/**
 	 * Enables or disables the speakerphone
 	 * @param speakerOn true to enable the speakerphone and false to disable it
