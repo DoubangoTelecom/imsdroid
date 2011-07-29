@@ -59,6 +59,7 @@ class tinyWRAPJNI {
   public final static native int MediaSessionMgr_defaultsGetNoiseSuppLevel();
   public final static native boolean MediaSessionMgr_defaultsSet100relEnabled(boolean jarg1);
   public final static native boolean MediaSessionMgr_defaultsGet100relEnabled();
+  public final static native boolean MediaSessionMgr_defaultsSetScreenSize(int jarg1, int jarg2);
   public final static native void delete_MediaContent(long jarg1);
   public final static native String MediaContent_getType(long jarg1, MediaContent jarg1_);
   public final static native long MediaContent_getDataLength(long jarg1, MediaContent jarg1_);
@@ -333,7 +334,8 @@ class tinyWRAPJNI {
   public final static native void ProxyVideoProducerCallback_change_ownership(ProxyVideoProducerCallback obj, long cptr, boolean take_or_release);
   public final static native void delete_ProxyVideoProducer(long jarg1);
   public final static native int ProxyVideoProducer_getRotation(long jarg1, ProxyVideoProducer jarg1_);
-  public final static native void ProxyVideoProducer_setRotation(long jarg1, ProxyVideoProducer jarg1_, int jarg2);
+  public final static native boolean ProxyVideoProducer_setRotation(long jarg1, ProxyVideoProducer jarg1_, int jarg2);
+  public final static native boolean ProxyVideoProducer_setActualCameraOutputSize(long jarg1, ProxyVideoProducer jarg1_, long jarg2, long jarg3);
   public final static native int ProxyVideoProducer_push(long jarg1, ProxyVideoProducer jarg1_, java.nio.ByteBuffer jarg2, long jarg3);
   public final static native int ProxyVideoProducer_send(long jarg1, ProxyVideoProducer jarg1_, java.nio.ByteBuffer jarg2, long jarg3, long jarg4, boolean jarg5);
   public final static native void ProxyVideoProducer_setCallback(long jarg1, ProxyVideoProducer jarg1_, long jarg2, ProxyVideoProducerCallback jarg2_);

@@ -58,6 +58,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	private int mFps;
 	private ByteBuffer mVideoFrame;
 	private Bitmap mRGB565Bitmap;
+	private Bitmap mRGBCroppedBitmap;
 	private boolean mFullScreenRequired;
 	private Looper mLooper;
     private Handler mHandler;
@@ -110,9 +111,18 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 									return;
 								}
 								Log.d(TAG,"resizing the buffer nAvailableSize="+nAvailableSize+" and newWidth="+newWidth+" and newHeight="+newHeight);
+								if(mRGB565Bitmap != null){
+									mRGB565Bitmap.recycle();
+								}
+								if(mRGBCroppedBitmap != null){
+									mRGBCroppedBitmap.recycle();
+									// do not create the cropped bitmap, wait for drawFrame()
+								}
 								mRGB565Bitmap = Bitmap.createBitmap((int)newWidth, (int)newHeight, Bitmap.Config.RGB_565);
 								mVideoFrame = ByteBuffer.allocateDirect((int)nAvailableSize);
 								mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
+								mWidth = (int)newWidth;
+								mHeight = (int)newHeight;
 								return; // Draw the picture next time
 							}
 							
@@ -233,13 +243,37 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 		if (canvas != null){
 			mRGB565Bitmap.copyPixelsFromBuffer(mVideoFrame);
 			if(mFullScreenRequired){
-				canvas.drawBitmap(mRGB565Bitmap, null, mPreview.mSurfFrame, null);
+				// create new cropped image if doesn't exist yet
+				if(mRGBCroppedBitmap == null){
+					float ratio = Math.max(
+							(float)mPreview.mSurfFrame.width() / (float)mRGB565Bitmap.getWidth(), 
+							(float)mPreview.mSurfFrame.height() / (float)mRGB565Bitmap.getHeight());
+					
+					mRGBCroppedBitmap = Bitmap.createBitmap(
+							(int)(mPreview.mSurfFrame.width()/ratio), 
+							(int)(mPreview.mSurfFrame.height()/ratio), 
+							Bitmap.Config.RGB_565);
+				}
+				
+				// crop the image
+				Canvas _canvas = new Canvas(mRGBCroppedBitmap);
+				Bitmap copyOfOriginal = Bitmap.createBitmap(mRGB565Bitmap,
+						Math.abs((mRGBCroppedBitmap.getWidth() - mRGB565Bitmap.getWidth())/2),
+						Math.abs((mRGBCroppedBitmap.getHeight() - mRGB565Bitmap.getHeight())/2),
+						mRGBCroppedBitmap.getWidth(),
+						mRGBCroppedBitmap.getHeight(),
+						null, 
+						true);//FIXME: translate the original image instead of creating new one
+				_canvas.drawBitmap(copyOfOriginal, 0.f, 0.f, null);
+				copyOfOriginal.recycle();
+				// draw the cropped image
+				canvas.drawBitmap(mRGBCroppedBitmap, null, mPreview.mSurfFrame, null);
 			}
 			else{
 				// display while keeping the ratio
-				canvas.drawBitmap(mRGB565Bitmap, null, mPreview.mSurfDisplay, null);
+				// canvas.drawBitmap(mRGB565Bitmap, null, mPreview.mSurfDisplay, null);
 				// Or display "as is"
-				//canvas.drawBitmap(mRGB565Bitmap, 0, 0, null);
+				canvas.drawBitmap(mRGB565Bitmap, 0, 0, null);
 			}					
 			mPreview.mHolder.unlockCanvasAndPost(canvas);
 		}
@@ -307,6 +341,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	static class MyProxyVideoConsumerPreview extends SurfaceView implements SurfaceHolder.Callback {
 		private final SurfaceHolder mHolder;
 		private Rect mSurfFrame;
+		@SuppressWarnings("unused")
 		private Rect mSurfDisplay;
 		private final float mRatio;
 		MyProxyVideoConsumerPreview(Context context, int width, int height, int fps) {
