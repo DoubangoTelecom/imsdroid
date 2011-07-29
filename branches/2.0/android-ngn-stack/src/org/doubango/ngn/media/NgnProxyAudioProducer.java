@@ -40,7 +40,7 @@ import android.util.Log;
  */
 public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private static final String TAG = NgnProxyAudioProducer.class.getCanonicalName();
-	private final static int AUDIO_BUFFER_FACTOR = 3;
+	private final static int AUDIO_BUFFER_FACTOR = 2;
 	@SuppressWarnings("unused")
 	private final static int AUDIO_MIN_VALID_BUFFER_SIZE = 4096;
 	@SuppressWarnings("unused")
@@ -49,6 +49,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private final MyProxyAudioProducerCallback mCallback;
 	private final ProxyAudioProducer mProducer;
 	private boolean mRoutingChanged;
+	private boolean mOnMute;
 	
 	private Thread mProducerThread;
 	private AudioRecord mAudioRecord;
@@ -60,6 +61,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		mProducer = producer;
         mCallback = new MyProxyAudioProducerCallback(this);
         mProducer.setCallback(mCallback);
+        mOnMute = false;
 	}
 	
 	public void setOnPause(boolean pause){
@@ -75,6 +77,10 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		}
 		
 		super.mPaused = pause;
+	}
+	
+	public void setOnMute(boolean mute){
+		mOnMute = true;
 	}
 	
 	public void setSpeakerphoneOn(boolean speakerOn){
@@ -144,14 +150,14 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 //	    	bufferSize = AUDIO_DEFAULT_BUFFER_SIZE;
 //	     }
 
-		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
+		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif * 2);
 		mPtime = ptime; mRate = rate; mChannels = channels;
 		boolean aecEnabled = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
-		Log.d(TAG,"Configure aecEnabled:"+aecEnabled);
+		Log.d(TAG, "Configure aecEnabled:" +aecEnabled);
 		mAudioRecord = new AudioRecord(
 				aecEnabled ? MediaRecorder.AudioSource.VOICE_RECOGNITION : MediaRecorder.AudioSource.MIC,
-				rate, 
-				AudioFormat.CHANNEL_IN_MONO, 
+				rate,
+				AudioFormat.CHANNEL_IN_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize);
 		if(mAudioRecord.getState() == AudioRecord.STATE_INITIALIZED){
@@ -159,7 +165,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 			return 0;
 		}
 		else{
-			Log.e(TAG, "prepare("+mAudioRecord.getState()+") failed");
+			Log.e(TAG, "prepare(" + mAudioRecord.getState() + ") failed");
 			super.mPrepared = false;
 			return -1;
 		}
@@ -182,8 +188,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		@Override
 		public void run() {
 			Log.d(TAG, "===== Audio Recorder (Start) ===== ");
-			android.os.Process
-					.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
 			mAudioRecord.startRecording();
 			final int nSize = mAudioFrame.capacity();
@@ -191,13 +196,10 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 
 			if (NgnProxyAudioProducer.super.mValid) {
 				mProducer.setPushBuffer(mAudioFrame, mAudioFrame.capacity());
-				mProducer
-						.setGain(NgnEngine
+				mProducer.setGain(NgnEngine
 								.getInstance()
 								.getConfigurationService()
-								.getInt(
-										NgnConfigurationEntry.MEDIA_AUDIO_PRODUCER_GAIN,
-										NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_PRODUCER_GAIN));
+								.getInt(NgnConfigurationEntry.MEDIA_AUDIO_PRODUCER_GAIN, NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_PRODUCER_GAIN));
 			}
 
 			while (NgnProxyAudioProducer.super.mValid && mStarted) {

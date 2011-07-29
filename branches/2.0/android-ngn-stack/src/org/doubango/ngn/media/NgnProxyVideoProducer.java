@@ -96,7 +96,11 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	}
 	
 	public void pushBlankPacket(){
-		if(super.mValid && mProducer != null && mVideoFrame != null){
+		if(super.mValid && mProducer != null){
+			if(mVideoFrame == null){
+				final float capacity = (float)(mWidth * mHeight) * 1.5f/* (3/2) */;
+				mVideoFrame = ByteBuffer.allocateDirect((int)capacity);
+			}
 			final ByteBuffer buffer = ByteBuffer.allocateDirect(mVideoFrame .capacity());
 			mProducer.push(buffer, buffer.capacity());
 		}
