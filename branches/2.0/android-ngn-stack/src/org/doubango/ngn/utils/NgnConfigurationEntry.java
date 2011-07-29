@@ -132,7 +132,7 @@ public class NgnConfigurationEntry {
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
 	public static final float DEFAULT_GENERAL_AUDIO_PLAY_LEVEL = 0.25f;
 	public static final String DEFAULT_GENERAL_ENUM_DOMAIN = "e164.org";
-	public static final boolean DEFAULT_GENERAL_AEC = true;
+	public static final boolean DEFAULT_GENERAL_AEC = false;
 	public static final boolean DEFAULT_GENERAL_VAD = false; // speex-dsp don't support VAD for fixed-point implementation
 	public static final boolean DEFAULT_GENERAL_NR = true;
 	public static final int DEFAULT_GENERAL_ECHO_TAIL = 100;

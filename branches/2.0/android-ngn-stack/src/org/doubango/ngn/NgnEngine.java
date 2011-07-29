@@ -133,6 +133,7 @@ public class NgnEngine {
 			MediaSessionMgr.defaultsSetEchoSuppEnabled(false);
 			MediaSessionMgr.defaultsSetEchoTail(0); 
 		}
+		MediaSessionMgr.defaultsSetAgcEnabled(false);
 		MediaSessionMgr.defaultsSetVadEnabled(vad);
 		MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
 	}

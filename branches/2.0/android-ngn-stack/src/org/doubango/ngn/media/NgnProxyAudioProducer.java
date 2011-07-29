@@ -146,10 +146,10 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		mPtime = ptime; mRate = rate; mChannels = channels;
-		boolean haveAEC = NgnApplication.getSDKVersion() >= 7 && NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
-		Log.d(TAG,"Configure AudioRecord aec:"+haveAEC);
+		boolean aecEnabled = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
+		Log.d(TAG,"Configure aecEnabled:"+aecEnabled);
 		mAudioRecord = new AudioRecord(
-				haveAEC ? MediaRecorder.AudioSource.VOICE_RECOGNITION : MediaRecorder.AudioSource.MIC,
+				aecEnabled ? MediaRecorder.AudioSource.VOICE_RECOGNITION : MediaRecorder.AudioSource.MIC,
 				rate, 
 				AudioFormat.CHANNEL_IN_MONO, 
 				AudioFormat.ENCODING_PCM_16BIT,
@@ -178,108 +178,62 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		super.mPrepared = false;
 	}
 	
-	private Runnable mRunnableRecorder = new Runnable(){
+	private Runnable mRunnableRecorder = new Runnable() {
 		@Override
 		public void run() {
 			Log.d(TAG, "===== Audio Recorder (Start) ===== ");
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+			android.os.Process
+					.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
-			long currentTime = 0L ;
-			long tick = mPtime / 2L ; 
-			long edge = 0L ;
-			long time2send = 0L ;
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
-
-			//android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			mAudioRecord.startRecording();
 			final int nSize = mAudioFrame.capacity();
-			int nRead = 0 ;
-			
-			if(NgnProxyAudioProducer.super.mValid){
+			int nRead;
+
+			if (NgnProxyAudioProducer.super.mValid) {
 				mProducer.setPushBuffer(mAudioFrame, mAudioFrame.capacity());
-				if ( NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC , NgnConfigurationEntry.DEFAULT_GENERAL_AEC) )
-				{
-					// Perhaps it's not util because gain is apply after aec process on doubango TODO ....
-					mProducer.setGain(0);
-				}
-				else
-				{
-					mProducer.setGain(NgnEngine.getInstance().getConfigurationService().getInt(NgnConfigurationEntry.MEDIA_AUDIO_PRODUCER_GAIN, 
-							NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_PRODUCER_GAIN));
-				}
+				mProducer
+						.setGain(NgnEngine
+								.getInstance()
+								.getConfigurationService()
+								.getInt(
+										NgnConfigurationEntry.MEDIA_AUDIO_PRODUCER_GAIN,
+										NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_PRODUCER_GAIN));
 			}
-			
-			while( ( NgnProxyAudioProducer.super.mValid && mStarted ) &&  mStarted ){
-				try {
-					if(mAudioRecord == null){
+
+			while (NgnProxyAudioProducer.super.mValid && mStarted) {
+				if (mAudioRecord == null) {
+					break;
+				}
+				if (mRoutingChanged) {
+					Log.d(TAG, "Routing changed: restart() recorder");
+					mRoutingChanged = false;
+					unprepare();
+					if (prepare(mPtime, mRate, mChannels) != 0) {
 						break;
 					}
+					if (!NgnProxyAudioProducer.super.mPaused) {
+						mAudioRecord.startRecording();
+					}
+				}
 
-					if(mRoutingChanged){
-						Log.d(TAG, "Routing changed: restart() recorder");
-						mRoutingChanged = false;
-						unprepare();
-						if(prepare(mPtime, mRate, mChannels) != 0){
-							break;
-						}
-						if(!NgnProxyAudioProducer.super.mPaused){
-							mAudioRecord.startRecording();
-						}
-					}
-
-					currentTime = java.lang.System.currentTimeMillis() ;
-					// Log.d(NgnProxyAudioProducer.TAG,"tick  currentTime["+currentTime+"] time2send["+time2send+"] ");
-					if ( nRead == 0 ||  currentTime >= time2send   )
-					{
-						// To avoid overrun read data even if on pause
-						nRead = mAudioRecord.read(mAudioFrame, nSize);
-						if( nRead  > 0)
-						{
-							if ( time2send != 0L )
-								edge = currentTime - time2send ;
-							else
-								edge = 0L ;
-							if (edge > mPtime  ) edge = 0L ;
-							time2send = currentTime  + mPtime - edge ;
-							if(!NgnProxyAudioProducer.super.mPaused){
-								if(nRead != nSize){
-									mProducer.push(mAudioFrame, nRead);
-									Log.w(TAG, "BufferOverflow?");
-								}
-								else{
-									mProducer.push();
-								}
-							}
-							try  {
-								Thread.sleep(tick);
-							}catch(InterruptedException ie){
-								Log.e(NgnProxyAudioProducer.TAG ,"Audio record "+ ie.toString());
-								ie.printStackTrace();
-							};
+				// To avoid overrun read data even if on pause
+				if ((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0) {
+					if (!NgnProxyAudioProducer.super.mPaused) {
+						if (nRead != nSize) {
+							mProducer.push(mAudioFrame, nRead);
+							Log.w(TAG, "BufferOverflow?");
+						} else {
+							mProducer.push();
 						}
 					}
-					else
-					{
-						try  {
-							long delta = time2send - currentTime ;
-							long sleep = (delta > tick )? tick : delta ;
-							Thread.sleep(sleep);
-						}catch(InterruptedException ie){
-							Log.e(NgnProxyAudioProducer.TAG ,"Audio record "+ ie.toString());
-							ie.printStackTrace();
-						};
-					}
-				} catch(Throwable x) { 
-					Log.e(TAG,"Error reading voice audio",x);
-				} 	
+				}
 			}
-			
+
 			unprepare();
-			
+
 			Log.d(TAG, "===== Audio Recorder (Stop) ===== ");
 		}
-	};
-	
+	};	
 	
 	static class MyProxyAudioProducerCallback extends ProxyAudioProducerCallback
     {

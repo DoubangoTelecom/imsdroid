@@ -24,6 +24,7 @@ package org.doubango.ngn.media;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
@@ -32,6 +33,7 @@ import org.doubango.tinyWRAP.ProxyVideoProducerCallback;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -208,8 +210,6 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		mHeight = height;
 		mFps = fps;
 		
-		final float capacity = (float)(width*height)*1.5f/* (3/2) */;
-		mVideoFrame = ByteBuffer.allocateDirect((int)capacity);
 		super.mPrepared = true;
 		
 		return 0;
@@ -238,12 +238,31 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
     }
 	
     private void startCameraPreview(Camera camera){
-		if(camera != null && mProducer != null && mVideoFrame != null){
+		if(camera != null && mProducer != null){
 			try{
-				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", mWidth, mHeight));
+				int previewWidth = 320, previewHeight = 240; // default size: qVGA which is supported by all devices
 				Camera.Parameters parameters = camera.getParameters();
-				parameters.setPreviewSize(mWidth, mHeight);
+				
+				List<Size> supportedPreviewSizes = parameters.getSupportedPreviewSizes();
+				for(Size size : supportedPreviewSizes){
+					if(size.width <= mWidth && size.height <= mHeight){
+						previewWidth = size.width;
+						previewHeight = size.height;
+						break;
+					}
+				}
+				parameters.setPreviewSize(previewWidth, previewHeight);
 				camera.setParameters(parameters);
+				
+				// allocate buffer
+				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", previewWidth, previewHeight));
+				final float capacity = (float)(previewWidth * previewHeight)*1.5f/* (3/2) */;
+				mVideoFrame = ByteBuffer.allocateDirect((int)capacity);
+				
+				// alert the framework that we cannot respect the negotiated size
+				if(mProducer != null && super.isValid() && mWidth != previewWidth && mHeight != previewHeight){
+					mProducer.setActualCameraOutputSize(previewWidth, previewHeight);
+				}
 			} catch(Exception e){
 				Log.e(TAG, e.toString());
 			}
@@ -279,7 +298,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
     
 	private PreviewCallback previewCallback = new PreviewCallback() {
 	  public void onPreviewFrame(byte[] _data, Camera _camera) {
-		  if(NgnProxyVideoProducer.super.mValid){
+		  if(NgnProxyVideoProducer.super.mValid && mVideoFrame != null){
 			  mVideoFrame.put(_data);
 			  mProducer.push(mVideoFrame, mVideoFrame.capacity());
 			  mVideoFrame.rewind();
