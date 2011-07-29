@@ -31,6 +31,7 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
+import org.doubango.imsdroid.Utils.FitCenterFrameLayout;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnMediaPluginEventArgs;
@@ -63,6 +64,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -76,6 +78,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.FrameLayout.LayoutParams;
 
 public class ScreenAV extends BaseScreen{
 	private static final String TAG = ScreenAV.class.getCanonicalName();
@@ -94,7 +97,7 @@ public class ScreenAV extends BaseScreen{
 	private View mViewTrying;
 	private View mViewInAudioCall;
 	private View mViewInCallVideo;
-	private FrameLayout mViewLocalVideoPreview;
+	private FitCenterFrameLayout mViewLocalVideoPreview;
 	private FrameLayout mViewRemoteVideoPreview;
 	private View mViewTermwait;
 	private View mViewProxSensor;
@@ -790,7 +793,7 @@ public class ScreenAV extends BaseScreen{
 		Log.d(TAG, "loadInCallVideoView()");
 		if(mViewInCallVideo == null){
 			mViewInCallVideo = mInflater.inflate(R.layout.view_call_incall_video, null);
-			mViewLocalVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_local_video);
+			mViewLocalVideoPreview = (FitCenterFrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_local_video);
 			mViewRemoteVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_remote_video);
 		}
 		
