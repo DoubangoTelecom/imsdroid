@@ -64,7 +64,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -78,12 +77,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.FrameLayout.LayoutParams;
 
 public class ScreenAV extends BaseScreen{
 	private static final String TAG = ScreenAV.class.getCanonicalName();
 	private static final SimpleDateFormat sDurationTimerFormat = new SimpleDateFormat("mm:ss");
-	private static int sCountBlankPacket = 0;
+	private static int sCountBlankPacket = 3;
 	private static int sLastRotation = 1;
 	
 	private String mRemotePartyDisplayName;
@@ -145,7 +143,7 @@ public class ScreenAV extends BaseScreen{
 		mTimerSuicide = new NgnTimer();
 		mTimerBlankPacket = new NgnTimer();
 	}
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
