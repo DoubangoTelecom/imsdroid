@@ -6,8 +6,8 @@
     <FrameLayout android:id="@+id/view_call_incall_video_FrameLayout_remote_video" android:layout_width="fill_parent" android:orientation="horizontal" android:layout_gravity="bottom|right" android:gravity="bottom|right" android:layout_height="fill_parent" android:background="@color/color_black">
     </FrameLayout>
 
-	<FrameLayout android:layout_alignParentRight="true" android:layout_alignParentBottom="true" android:minHeight="90dp" android:minWidth="90dp" android:background="@drawable/grad_whiterounded" android:layout_margin="4dp" android:padding="4dp" android:layout_height="94dp" android:layout_width="94dp">
-        <FrameLayout android:layout_gravity="center" android:id="@+id/view_call_incall_video_FrameLayout_local_video" android:layout_height="fill_parent" android:layout_width="fill_parent"></FrameLayout>
+	<FrameLayout android:layout_alignParentRight="true" android:layout_alignParentBottom="true" android:background="@color/color_white" android:layout_height="91dp" android:layout_width="91dp" android:layout_margin="3dp">
+        <org.doubango.imsdroid.Utils.FitCenterFrameLayout android:layout_gravity="center" android:id="@+id/view_call_incall_video_FrameLayout_local_video" android:layout_height="fill_parent" android:layout_width="fill_parent" android:padding="2dp"></org.doubango.imsdroid.Utils.FitCenterFrameLayout>
     </FrameLayout>
 
 </RelativeLayout>
