@@ -81,7 +81,7 @@ import android.widget.TextView;
 public class ScreenAV extends BaseScreen{
 	private static final String TAG = ScreenAV.class.getCanonicalName();
 	private static final SimpleDateFormat sDurationTimerFormat = new SimpleDateFormat("mm:ss");
-	private static int sCountBlankPacket = 3;
+	private static int sCountBlankPacket = 0;
 	private static int sLastRotation = 1;
 	
 	private String mRemotePartyDisplayName;
