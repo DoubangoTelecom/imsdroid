@@ -127,7 +127,11 @@ public class NgnEngine {
 		
 		if (aec){
 			MediaSessionMgr.defaultsSetEchoSuppEnabled(true);
-			MediaSessionMgr.defaultsSetEchoTail(echo_tail); // 2s  == 100 packets of 20 ms 
+			// Very Important: EchoTail is in milliseconds
+			// When using WebRTC AEC, the maximum value is 500ms
+			// When using Speex-DSP, any number is valid but you should choose a multiple of 20ms.
+			MediaSessionMgr.defaultsSetEchoTail(echo_tail);
+			MediaSessionMgr.defaultsSetEchoSkew(0);
 		}
 		else{
 			MediaSessionMgr.defaultsSetEchoSuppEnabled(false);
