@@ -40,7 +40,7 @@ import android.util.Log;
  */
 public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private static final String TAG = NgnProxyAudioProducer.class.getCanonicalName();
-	private final static int AUDIO_BUFFER_FACTOR = 2;
+	private final static float AUDIO_BUFFER_FACTOR = 2.f;
 	@SuppressWarnings("unused")
 	private final static int AUDIO_MIN_VALID_BUFFER_SIZE = 4096;
 	@SuppressWarnings("unused")
@@ -81,6 +81,10 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	
 	public void setOnMute(boolean mute){
 		mOnMute = true;
+	}
+	
+	public boolean getOnMute(){
+		return mOnMute;
 	}
 	
 	public void setSpeakerphoneOn(boolean speakerOn){
@@ -142,17 +146,17 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 			Log.e(TAG,"already prepared");
 			return -1;
 		}
+		final boolean aecEnabled = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC);
 		
 		final int minBufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		final int shortsPerNotif = (rate * ptime)/1000;
-		int bufferSize = (minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * NgnProxyAudioProducer.AUDIO_BUFFER_FACTOR;
-//	    if(bufferSize <= AUDIO_MIN_VALID_BUFFER_SIZE){
-//	    	bufferSize = AUDIO_DEFAULT_BUFFER_SIZE;
-//	     }
-
+		// AEC won't work if there is too much delay
+		// Too short bufferSize will produce BufferOverflow errors but we don't have choice if we want AEC
+		final float bufferFactor = aecEnabled ? 1.f : NgnProxyAudioProducer.AUDIO_BUFFER_FACTOR;
+		final int bufferSize = Math.max((int)((float)minBufferSize * bufferFactor), shortsPerNotif*2);
+		
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif * 2);
 		mPtime = ptime; mRate = rate; mChannels = channels;
-		boolean aecEnabled = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
 		Log.d(TAG, "Configure aecEnabled:" +aecEnabled);
 		mAudioRecord = new AudioRecord(
 				aecEnabled ? MediaRecorder.AudioSource.VOICE_RECOGNITION : MediaRecorder.AudioSource.MIC,

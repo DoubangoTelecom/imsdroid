@@ -129,8 +129,16 @@ public class ScreenCodecs  extends BaseScreen{
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_amr_nb_be.swigValue(), "AMR-NB-BE", "AMR Narrow Band Bandwidth Efficient (8 KHz)"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_ilbc))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_ilbc.swigValue(), "iLBC", "internet Low Bitrate Codec (8 KHz)"));
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_speex_nb))
-	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_nb.swigValue(), "Speex-NB", "Speex Narrow Band (8 KHz)"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_speex_nb)){
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_nb.swigValue(), "Speex-NB", "Speex Narrow-Band (8 KHz)"));
+	        	// WebRTC AEC doesn't support WB and UWB codecs => bas voice quality
+	        	// these codecs will be re-enabled when WebRTC gives better quality.
+	        	// You have two choices: 
+	        	// 	1. Disable AEC
+	        	//	2. Use Speex-DSP AEC
+	        	// sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_wb.swigValue(), "Speex-WB", "Speex Wide-Band (16 KHz)"));
+	        	// sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_uwb.swigValue(), "Speex-UWB", "Speex Ultra Wide-Band (32 KHz)"));
+	        }
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g729ab))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_g729ab.swigValue(), "G.729", "G729 Annex A/B (8 KHz)"));
 	        // Video Codecs

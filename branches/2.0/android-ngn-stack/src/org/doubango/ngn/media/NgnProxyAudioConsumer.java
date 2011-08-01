@@ -41,7 +41,6 @@ import android.util.Log;
  */
 public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 	private static final String TAG = NgnProxyAudioConsumer.class.getCanonicalName();
-	private static final int AUDIO_BUFFER_FACTOR = 3;
 	private static final int AUDIO_STREAM_TYPE = AudioManager.STREAM_VOICE_CALL;
 	
 	private final INgnConfigurationService mConfigurationService;
@@ -194,7 +193,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 		
 		final int minBufferSize = AudioTrack.getMinBufferSize(mOutputRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		final int shortsPerNotif = (mOutputRate * mPtime)/1000;
-		mBufferSize = ((minBufferSize + (shortsPerNotif - (minBufferSize % shortsPerNotif))) * AUDIO_BUFFER_FACTOR);
+		mBufferSize = Math.max(minBufferSize, shortsPerNotif*2);
 		mOutputBuffer = ByteBuffer.allocateDirect(shortsPerNotif*2);
 		mAec = mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
 		
@@ -233,7 +232,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 		public void run() {
 			Log.d(TAG, "===== Audio Player Thread (Start) =====");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
 			
 			int nFrameLength = mOutputBuffer.capacity();
 			final int nFramesCount = 1; // Number of 20ms' to copy
@@ -245,16 +244,8 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 			
 			if(NgnProxyAudioConsumer.super.mValid){
 				mConsumer.setPullBuffer(mOutputBuffer, mOutputBuffer.capacity());
-				if ( NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC , NgnConfigurationEntry.DEFAULT_GENERAL_AEC) )
-				{
-					// Perhaps it's not util because gain is apply after aec process on doubango TODO ....
-					mConsumer.setGain(0);
-				}
-				else
-				{
-					mConsumer.setGain(NgnEngine.getInstance().getConfigurationService().getInt(NgnConfigurationEntry.MEDIA_AUDIO_CONSUMER_GAIN, 
-							NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_CONSUMER_GAIN));
-				}
+				mConsumer.setGain(NgnEngine.getInstance().getConfigurationService().getInt(NgnConfigurationEntry.MEDIA_AUDIO_CONSUMER_GAIN, 
+						NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_CONSUMER_GAIN));
 			}
 			
 			while(NgnProxyAudioConsumer.super.mValid && NgnProxyAudioConsumer.super.mStarted){
