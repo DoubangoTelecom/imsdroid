@@ -264,7 +264,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				mVideoFrame = ByteBuffer.allocateDirect((int)capacity);
 				
 				// alert the framework that we cannot respect the negotiated size
-				if(mProducer != null && super.isValid() && mWidth != previewWidth && mHeight != previewHeight){
+				if(mProducer != null && super.isValid() && (mWidth != previewWidth || mHeight != previewHeight)){
 					mProducer.setActualCameraOutputSize(previewWidth, previewHeight);
 				}
 			} catch(Exception e){
