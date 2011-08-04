@@ -87,7 +87,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 				mLooper = null;
 			}
 			
-			final Thread previewTread = new Thread() {
+			final Thread previewThread = new Thread() {
 				@Override
 				public void run() {
 					android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
@@ -116,6 +116,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 								}
 								if(mRGBCroppedBitmap != null){
 									mRGBCroppedBitmap.recycle();
+									mRGBCroppedBitmap = null;
 									// do not create the cropped bitmap, wait for drawFrame()
 								}
 								mRGB565Bitmap = Bitmap.createBitmap((int)newWidth, (int)newHeight, Bitmap.Config.RGB_565);
@@ -135,11 +136,11 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 					Log.d(TAG, "VideoConsumer::Looper::exit");
 				}
 			};
-			previewTread.setPriority(Thread.MAX_PRIORITY);
-			synchronized(previewTread) {
-				previewTread.start();
+			previewThread.setPriority(Thread.MAX_PRIORITY);
+			synchronized(previewThread) {
+				previewThread.start();
 				try {
-					previewTread.wait();
+					previewThread.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					return null;
@@ -240,7 +241,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	
     private void drawFrame(){
     	final Canvas canvas = mPreview.mHolder.lockCanvas();
-		if (canvas != null){
+		if (canvas != null && mPreview != null){
 			mRGB565Bitmap.copyPixelsFromBuffer(mVideoFrame);
 			if(mFullScreenRequired){
 				// create new cropped image if doesn't exist yet
