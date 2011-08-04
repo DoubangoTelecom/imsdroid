@@ -33,6 +33,8 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 /** @mainpage Foreword
  * 
@@ -515,6 +517,10 @@ public class NgnApplication extends Application{
     		sPowerManager = (PowerManager) getContext().getSystemService(POWER_SERVICE);
     	}
     	return sPowerManager;
+    }
+    
+    public static Display getDefaultDisplay(){
+    	return ((WindowManager)getContext().getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
     }
     
     public static boolean acquirePowerLock(){
