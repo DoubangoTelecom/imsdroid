@@ -24,7 +24,6 @@ package org.doubango.ngn.media;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
@@ -33,7 +32,6 @@ import org.doubango.tinyWRAP.ProxyVideoProducerCallback;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
-import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -244,29 +242,19 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
     private void startCameraPreview(Camera camera){
 		if(camera != null && mProducer != null){
 			try{
-				int previewWidth = 320, previewHeight = 240; // default size: qVGA which is supported by all devices
-				Camera.Parameters parameters = camera.getParameters();
-				
-				List<Size> supportedPreviewSizes = parameters.getSupportedPreviewSizes();
-				for(Size size : supportedPreviewSizes){
-					if(size.width <= mWidth && size.height <= mHeight){
-						previewWidth = size.width;
-						previewHeight = size.height;
-						break;
-					}
-				}
-				parameters.setPreviewSize(previewWidth, previewHeight);
-				camera.setParameters(parameters);
-				
 				// allocate buffer
-				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", previewWidth, previewHeight));
-				final float capacity = (float)(previewWidth * previewHeight)*1.5f/* (3/2) */;
+				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", mWidth, mHeight));
+				final float capacity = (float)(mWidth * mHeight)*1.5f/* (3/2) */;
 				mVideoFrame = ByteBuffer.allocateDirect((int)capacity);
 				
+				Camera.Parameters parameters = camera.getParameters();
+				parameters.setPreviewSize(mWidth, mHeight);
+				camera.setParameters(parameters);
+				
 				// alert the framework that we cannot respect the negotiated size
-				if(mProducer != null && super.isValid() && (mWidth != previewWidth || mHeight != previewHeight)){
-					mProducer.setActualCameraOutputSize(previewWidth, previewHeight);
-				}
+				//if(mProducer != null && super.isValid() && (mWidth != previewWidth || mHeight != previewHeight)){
+					//mProducer.setActualCameraOutputSize(previewWidth, previewHeight);
+				//}
 			} catch(Exception e){
 				Log.e(TAG, e.toString());
 			}
