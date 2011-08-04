@@ -31,7 +31,6 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
-import org.doubango.imsdroid.Utils.FitCenterFrameLayout;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnMediaPluginEventArgs;
@@ -40,8 +39,8 @@ import org.doubango.ngn.model.NgnContact;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
-import org.doubango.ngn.sip.NgnSipStack;
 import org.doubango.ngn.sip.NgnInviteSession.InviteState;
+import org.doubango.ngn.sip.NgnSipStack;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnGraphicsUtils;
 import org.doubango.ngn.utils.NgnStringUtils;
@@ -95,7 +94,7 @@ public class ScreenAV extends BaseScreen{
 	private View mViewTrying;
 	private View mViewInAudioCall;
 	private View mViewInCallVideo;
-	private FitCenterFrameLayout mViewLocalVideoPreview;
+	private FrameLayout mViewLocalVideoPreview;
 	private FrameLayout mViewRemoteVideoPreview;
 	private View mViewTermwait;
 	private View mViewProxSensor;
@@ -791,7 +790,7 @@ public class ScreenAV extends BaseScreen{
 		Log.d(TAG, "loadInCallVideoView()");
 		if(mViewInCallVideo == null){
 			mViewInCallVideo = mInflater.inflate(R.layout.view_call_incall_video, null);
-			mViewLocalVideoPreview = (FitCenterFrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_local_video);
+			mViewLocalVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_local_video);
 			mViewRemoteVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_remote_video);
 		}
 		
