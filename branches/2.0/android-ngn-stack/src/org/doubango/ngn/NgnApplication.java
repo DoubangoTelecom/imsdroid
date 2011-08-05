@@ -19,6 +19,8 @@
 */
 
 package org.doubango.ngn;
+import java.lang.reflect.Field;
+
 import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.app.Application;
@@ -521,6 +523,20 @@ public class NgnApplication extends Application{
     
     public static Display getDefaultDisplay(){
     	return ((WindowManager)getContext().getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+    }
+    
+    public static String getABI(){
+    	try {
+			Field field = android.os.Build.class.getField("CPU_ABI");
+			String abi = field.get(null).toString();
+			if(abi == null){
+				return "unknown";
+			}
+			return abi;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "unknown";
+		}
     }
     
     public static boolean acquirePowerLock(){
