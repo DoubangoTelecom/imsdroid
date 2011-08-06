@@ -152,7 +152,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		final int shortsPerNotif = (rate * ptime)/1000;
 		// AEC won't work if there is too much delay
 		// Too short bufferSize will produce BufferOverflow errors but we don't have choice if we want AEC
-		final float bufferFactor = aecEnabled ? 1.f : NgnProxyAudioProducer.AUDIO_BUFFER_FACTOR;
+		final float bufferFactor = aecEnabled ? NgnProxyAudioProducer.AUDIO_BUFFER_FACTOR : NgnProxyAudioProducer.AUDIO_BUFFER_FACTOR;
 		final int bufferSize = Math.max((int)((float)minBufferSize * bufferFactor), shortsPerNotif*2);
 		
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif * 2);
