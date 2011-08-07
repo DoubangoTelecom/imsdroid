@@ -180,11 +180,11 @@ public class SipStack extends SafeObject {
   }
 
   public static boolean setCodecPriority(tdav_codec_id_t codec_id, int priority) {
-    return tinyWRAPJNI.SipStack_setCodecPriority__SWIG_0(codec_id.swigValue(), priority);
+    return tinyWRAPJNI.SipStack_setCodecPriority(codec_id.swigValue(), priority);
   }
 
-  public static boolean setCodecPriority(int codec, int priority) {
-    return tinyWRAPJNI.SipStack_setCodecPriority__SWIG_1(codec, priority);
+  public static boolean setCodecPriority_2(int codec, int priority) {
+    return tinyWRAPJNI.SipStack_setCodecPriority_2(codec, priority);
   }
 
   public static boolean isCodecSupported(tdav_codec_id_t codec_id) {
