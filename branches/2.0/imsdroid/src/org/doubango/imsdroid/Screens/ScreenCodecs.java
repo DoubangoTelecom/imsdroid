@@ -136,8 +136,8 @@ public class ScreenCodecs  extends BaseScreen{
 	        	// You have two choices: 
 	        	// 	1. Disable AEC
 	        	//	2. Use Speex-DSP AEC
-	        	 // sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_wb.swigValue(), "Speex-WB", "Speex Wide-Band (16 KHz)"));
-	        	 // sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_uwb.swigValue(), "Speex-UWB", "Speex Ultra Wide-Band (32 KHz)"));
+	        	// sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_wb.swigValue(), "Speex-WB", "Speex Wide-Band (16 KHz)"));
+	        	// sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_uwb.swigValue(), "Speex-UWB", "Speex Ultra Wide-Band (32 KHz)"));
 	        }
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g729ab))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_g729ab.swigValue(), "G.729", "G729 Annex A/B (8 KHz)"));

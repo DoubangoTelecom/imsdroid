@@ -405,8 +405,8 @@ public class tinyWRAPJNI {
   public final static native boolean SipStack_stop(long jarg1, SipStack jarg1_);
   public final static native void SipStack_setCodecs(int jarg1);
   public final static native void SipStack_setCodecs_2(int jarg1);
-  public final static native boolean SipStack_setCodecPriority__SWIG_0(int jarg1, int jarg2);
-  public final static native boolean SipStack_setCodecPriority__SWIG_1(int jarg1, int jarg2);
+  public final static native boolean SipStack_setCodecPriority(int jarg1, int jarg2);
+  public final static native boolean SipStack_setCodecPriority_2(int jarg1, int jarg2);
   public final static native boolean SipStack_isCodecSupported(int jarg1);
   public final static native long new_XcapSelector(long jarg1, XcapStack jarg1_);
   public final static native void delete_XcapSelector(long jarg1);
