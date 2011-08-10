@@ -27,7 +27,7 @@ The project also depends on FFmpeg, x264, opencore-amr, libogg, libvorbis, libth
 
 === Checkout doubango ===
 {{{
-svn checkout ttp://doubango.googlecode.com/svn/branches/2.0/doubango doubango-read-only
+svn checkout http://doubango.googlecode.com/svn/branches/2.0/doubango doubango-read-only
 }}}
 
 === Adjusting *root.mk* ===
