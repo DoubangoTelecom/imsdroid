@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+
+<RelativeLayout android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/main_relativeLayout">
+
+<RelativeLayout android:id="@+id/main_relativeLayout_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@color/main_relativeLayout_top_color" android:gravity="top" android:visibility="visible">
+
+<RelativeLayout android:layout_height="wrap_content" android:id="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content">
+	<ImageView android:id="@+id/main_imageView_avatar" android:layout_height="48px" android:scaleType="fitXY" android:layout_width="48px" android:src="@drawable/avatar_48"></ImageView>
+	<TextView android:layout_height="wrap_content" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_displayname" android:layout_width="wrap_content" android:textColor="@color/white" android:textStyle="bold" android:ellipsize="end" android:text="John Doe" android:layout_marginLeft="5px"></TextView>
+	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/main_textView_displayname" android:layout_toRightOf="@+id/main_imageView_avatar" android:id="@+id/main_textView_freetext" android:text="Hello world" android:textColor="@color/white" android:textStyle="bold" android:layout_marginLeft="5px"></TextView>
+</RelativeLayout>
+
+
+<RelativeLayout android:layout_toRightOf="@+id/main_relativeLayout_top_left" android:layout_width="wrap_content" android:id="@+id/main_relativeLayout_topright" android:layout_alignParentRight="true" android:minHeight="24px" android:minWidth="24px" android:layout_height="wrap_content">
+	<ImageView android:layout_height="wrap_content" android:layout_below="@+id/main_imageView_connstate" android:layout_alignParentRight="true" android:id="@+id/main_imageView_status" android:src="@drawable/user_online_24" android:clickable="true" android:layout_width="wrap_content" android:minHeight="24px" android:minWidth="24px"></ImageView>
+	
+</RelativeLayout>
+
+</RelativeLayout>
+
+<LinearLayout android:minHeight="20px" android:id="@+id/main_linearLayout_principal" android:layout_width="fill_parent" android:layout_below="@+id/main_relativeLayout_top" android:gravity="top|fill_vertical|fill_horizontal" android:layout_height="fill_parent" android:layout_marginBottom="16px">
+
+
+</LinearLayout>
+
+<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_alignParentBottom="true" android:id="@+id/main_linearLayout_bottom" android:visibility="visible" android:layout_alignBottom="@+id/main_linearLayout_principal" android:minHeight="16px">
+
+
+
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/main_textView_title" android:text="Home"></TextView><TextView android:layout_width="fill_parent" android:id="@+id/main_textView_progressinfo" android:gravity="right|center_vertical" android:layout_height="wrap_content"></TextView>
+
+
+
+
+</LinearLayout>
+
+</RelativeLayout>
