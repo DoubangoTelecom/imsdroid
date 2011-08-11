@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+
+
+<LinearLayout android:layout_below="@+id/screen_smscomp_editText_Message" android:orientation="vertical" android:layout_height="fill_parent" android:layout_width="fill_parent" android:weightSum="2"><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sending SMS to Alice" android:textStyle="bold" android:textSize="16px" android:textColor="@color/white" android:layout_marginBottom="5px" android:id="@+id/screen_smscomp_textView_info"></TextView><EditText android:id="@+id/screen_smscomp_editText_Message" android:lines="5" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="2"></EditText><LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_gravity="center_vertical|fill_vertical|center_horizontal|fill_horizontal"><Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="0" android:id="@+id/screen_smscomp_button_cancel" android:text="Cancel" android:layout_marginRight="10px"></Button><Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_smscomp_button_send" android:text="Send"></Button></LinearLayout>
+
+
+</LinearLayout>
+
+</RelativeLayout>
