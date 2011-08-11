@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" android:weightSum="2">
+<Spinner android:layout_height="wrap_content" android:id="@+id/screen_contacts_spinner_Groups" android:layout_width="fill_parent" android:layout_marginTop="3px" android:visibility="gone"></Spinner>
+<GridView  android:id="@+id/screen_contacts_gridview" android:layout_width="fill_parent" android:scrollbars="vertical" android:stretchMode="columnWidth" android:gravity="fill_vertical|fill_horizontal" android:smoothScrollbar="true" android:isScrollContainer="true" android:layout_height="fill_parent" android:numColumns="1" android:horizontalSpacing="15px" android:padding="5px" android:layout_weight="2">
+
+
+</GridView>
+
+</LinearLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_messaging_textView_conf_factory" android:text="Ad-Hoc Conference Factory" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:layout_marginTop="5px"></TextView>
+<EditText android:layout_below="@+id/screen_messaging_textView_conf_factory" android:layout_height="wrap_content" android:text="sip:Conference-Factory@open-ims.test" android:layout_width="fill_parent" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:id="@+id/screen_messaging_editText_conf_fact"></EditText>
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_messaging_textView_psi" android:text="SMS Center (SMSC)" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:layout_below="@+id/screen_messaging_editText_conf_fact"></TextView>
+<EditText android:layout_below="@+id/screen_messaging_textView_psi" android:layout_height="wrap_content" android:id="@+id/screen_messaging_editText_psi" android:layout_width="fill_parent" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:text="sip:+33100000000@open-ims.test"></EditText>
+
+<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_binary_sms" android:layout_width="fill_parent" android:layout_below="@+id/screen_messaging_editText_psi" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:text="Enable Binary SMS (RP-DATA)"></CheckBox><CheckBox android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_msrp_success" android:layout_width="fill_parent" android:text="Enable MSRP Success Reports" android:layout_marginLeft="5px" android:layout_marginRight="5px" android:layout_below="@+id/screen_messaging_checkBox_binary_sms"></CheckBox><CheckBox android:layout_below="@+id/screen_messaging_checkBox_msrp_success" android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_msrp_failure" android:text="Enable MSRP Failure Reports" android:layout_width="fill_parent" android:layout_marginLeft="5px" android:layout_marginRight="5px"></CheckBox>
+<CheckBox android:layout_below="@+id/screen_messaging_checkBox_msrp_failure" android:layout_height="wrap_content" android:id="@+id/screen_messaging_checkBox_ofdr" android:text="Enable OMA Final Delivery Reports" android:layout_width="fill_parent" android:layout_marginLeft="5px" android:layout_marginRight="5px"></CheckBox>
+
+
+<CheckBox android:layout_height="wrap_content" android:layout_below="@+id/screen_messaging_checkBox_ofdr" android:layout_marginLeft="5px" android:layout_width="fill_parent" android:text="Subscribe to message waiting indication" android:id="@+id/screen_messaging_checkBox_mwi"></CheckBox>
+</RelativeLayout>
+
+</ScrollView>
