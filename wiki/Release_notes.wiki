@@ -3,6 +3,9 @@
 
 <wiki:toc max_depth="2" />
 
+==2.0.453-vp8==
+ * First beta version with support for VP8 video codec (AMRv7-a only)
+
 ==2.0.448-webrtc==
  * Fix issue 145, issue 184, issue 237, issue 261, issue 268, issue 267 and issue 263
 
