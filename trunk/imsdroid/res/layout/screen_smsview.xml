@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent" android:orientation="vertical" android:weightSum="3" android:layout_height="fill_parent" android:gravity="center" android:layout_gravity="center">
-<TextView android:layout_height="wrap_content" android:text="SMS From Alice" android:textStyle="bold" android:layout_width="fill_parent" android:id="@+id/screen_smsview_textView_info" android:textSize="20px" android:gravity="center" android:layout_gravity="center"></TextView><TextView android:layout_width="fill_parent" android:id="@+id/screen_smsview_textView_message" android:text="Your message here" android:layout_height="fill_parent" android:textSize="16px" android:textColor="@color/white" android:layout_marginTop="5px" android:layout_marginBottom="20px" android:layout_gravity="center" android:layout_weight="3" android:gravity="center"></TextView>
-
-<Button android:layout_height="wrap_content" android:id="@+id/screen_smsview_button_ok" android:text="OK" android:layout_width="200px"></Button>
-</LinearLayout>
