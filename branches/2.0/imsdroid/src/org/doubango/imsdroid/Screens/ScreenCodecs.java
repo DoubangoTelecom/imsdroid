@@ -142,6 +142,8 @@ public class ScreenCodecs  extends BaseScreen{
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g729ab))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_g729ab.swigValue(), "G.729", "G729 Annex A/B (8 KHz)"));
 	        // Video Codecs
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_vp8))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_vp8.swigValue(), "VP8", "Google's VP8"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_mp4ves_es))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_mp4ves_es.swigValue(), "MP4V-ES", "MPEG-4 Part 2"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_theora))

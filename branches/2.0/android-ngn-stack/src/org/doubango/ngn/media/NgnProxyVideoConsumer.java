@@ -275,8 +275,10 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 				// canvas.drawBitmap(mRGB565Bitmap, null, mPreview.mSurfDisplay, null);
 				// Or display "as is"
 				canvas.drawBitmap(mRGB565Bitmap, 0, 0, null);
-			}					
-			mPreview.mHolder.unlockCanvasAndPost(canvas);
+			}
+			if(mPreview != null){// yep it's possible (not synchronized)
+				mPreview.mHolder.unlockCanvasAndPost(canvas);
+			}
 		}
     }
     

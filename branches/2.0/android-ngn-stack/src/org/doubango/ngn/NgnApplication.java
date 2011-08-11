@@ -371,7 +371,7 @@ public class NgnApplication extends Application{
      */
     public static boolean useSetModeToHackSpeaker(){
     	final String model = Build.MODEL;
-        return  // isSamsung() ||
+        return  (isSamsung() && getSDKVersion() <= 7) ||
                 
                 model.equalsIgnoreCase("blade")    ||		// ZTE Blade
                 
