@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical" android:isScrollContainer="true" android:scrollbars="vertical">
-  <TextView  android:layout_height="wrap_content" android:id="@+id/screen_av_queue_textView_title" android:layout_width="fill_parent" android:gravity="center" android:textSize="20px" android:textStyle="bold" android:textColor="@color/white" android:text="Call Sessions">
-  </TextView>
-  
- <GridView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/screen_av_queue_gridView" android:layout_width="fill_parent" android:scrollbars="vertical" android:stretchMode="columnWidth" android:smoothScrollbar="true" android:isScrollContainer="true" android:layout_height="fill_parent" android:padding="5px" android:numColumns="1" android:horizontalSpacing="15px">
-</GridView>
-
-</LinearLayout>

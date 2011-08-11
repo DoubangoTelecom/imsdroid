@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<GridView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/screen_home_gridview" android:layout_width="fill_parent" android:numColumns="auto_fit" android:gravity="fill_vertical|fill_horizontal" android:isScrollContainer="true" android:scrollbars="vertical" android:smoothScrollbar="true" android:paddingTop="10dp" android:columnWidth="80dp" android:layout_height="wrap_content" android:stretchMode="columnWidth">
-</GridView>
