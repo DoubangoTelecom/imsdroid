@@ -696,6 +696,19 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 
+	public boolean isOnMute(){
+		if(mAudioProducer != null){
+			return mAudioProducer.isOnMute();
+		}
+		return false;
+	}
+	
+	public void setOnMute(boolean bOnMute){
+		if(mAudioProducer != null){
+			mAudioProducer.setOnMute(bOnMute);
+		}
+	}
+	
     /**
      * Sends DTMF digit. The session must be active (incoming, outgoing, incall, ...) in order to try
      * to send DTMF digits.
