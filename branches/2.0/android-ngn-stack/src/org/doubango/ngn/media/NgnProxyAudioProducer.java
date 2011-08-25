@@ -80,10 +80,10 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	}
 	
 	public void setOnMute(boolean mute){
-		mOnMute = true;
+		mOnMute = mute;
 	}
 	
-	public boolean getOnMute(){
+	public boolean isOnMute(){
 		return mOnMute;
 	}
 	
@@ -164,6 +164,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 				AudioFormat.CHANNEL_IN_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize);
+		
 		if(mAudioRecord.getState() == AudioRecord.STATE_INITIALIZED){
 			super.mPrepared = true;
 			return 0;
@@ -196,6 +197,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 
 			mAudioRecord.startRecording();
 			final int nSize = mAudioFrame.capacity();
+			byte silenceBuffer[] = new byte[nSize];
 			int nRead;
 
 			if (NgnProxyAudioProducer.super.mValid) {
@@ -222,14 +224,21 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 					}
 				}
 
-				// To avoid overrun read data even if on pause
+				// To avoid overrun read data even if on pause/mute we have to read
 				if ((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0) {
 					if (!NgnProxyAudioProducer.super.mPaused) {
-						if (nRead != nSize) {
-							mProducer.push(mAudioFrame, nRead);
-							Log.w(TAG, "BufferOverflow?");
-						} else {
-							mProducer.push();
+						if(mOnMute){ // workaround because Android's SetMicrophoneOnMute() is buggy
+							mAudioFrame.put(silenceBuffer);
+							mProducer.push(mAudioFrame, silenceBuffer.length);
+							mAudioFrame.rewind();
+						}
+						else{
+							if (nRead != nSize) {
+								mProducer.push(mAudioFrame, nRead);
+								Log.w(TAG, "BufferOverflow?");
+							} else {
+								mProducer.push();
+							}
 						}
 					}
 				}
