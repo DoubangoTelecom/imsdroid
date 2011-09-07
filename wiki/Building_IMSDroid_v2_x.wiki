@@ -111,6 +111,31 @@ You can add *NEON=yes* to enable neon optimization for armv7-a processors. You M
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
 The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *imsdroid\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
 
+=== Building GPL version ===
+If you are license owner then, you can build a GPL version of Doubango and iDoubs like this:
+{{{
+../bindings/java/android/gpl.sh
+}}}
+
+=== More options ===
+The options listed below are used with *buildAll.sh* build script. If you don't know which one to use then, used the pre-configured scripts: *commercial.sh*, *lgpl.sh* or *gpl.sh*<br /> 
+ * *LICENSE*: License type. Possible values: _gpl_ or _lgpl_<br /> 
+ * *NO_FREE*: Whether to include non free 3rd parties libraries (such as AMR or G.729). Possible values: yes or no<br /> 
+ * *FFMPEG*: Whether to enable FFmpeg (most of video features) or not. Possible values: _yes_ or _no_<br /> 
+ * *H264*: Whether to enable H.264 (x264 for now) or not. Possible values: _yes_ or _no_.<br /> 
+ * *THEORA*: Whether to enable Theora video codec or not. Possible values: _yes_ or _no_.<br /> 
+ * *OPENCORE_AMR*: Whether to enable AMR audio codec or not. Possible values: _yes_ or _no_.<br /> 
+ * *SPEEX_DSP*: Whether to enable Speex-DSP (echo cancelation, jitter buffer, Noise suppression...) or not. Possible values: yes or no<br /> 
+ * *SPEEX_JB*: Whether to enable Speex Jitter Buffer or not. Possible values: _yes_ or _no_<br /> 
+ * *SPEEX_RESAMPLER*: Whether to enable Speex-DSP audio Resampler or not. Possible values: yes or no<br /> 
+ * *SPEEX_DENOISE*: Whether to enable Speex-DSP denoiser or not. Possible values: _yes_ or _no_<br /> 
+ * *SPEEX*: Whether to enable Speex audio codec or not. Possible values: _yes_ or _no_<br /> 
+ * *ILBC*: Whether to enable iLBC audio codec or not. Possible values: _yes_ or _no_<br /> 
+ * *LIBGSM*: Whether to enable GSM audio codec or not. Possible values: yes or no<br /> 
+ * *G729*: Whether to enable G.729 audio codec or not. Possible values: _yes_ or _no_<br /> 
+ * *VPX*: Whether to enable VPX video codecs (VP8) or not. Possible values: _yes_ or _no_<br /> 
+ * *NEON*: Whether to enable ARMv7 Neon optimizations or not. Possible values: _yes_ or _no_<br /> 
+
 === Building LGPL version ===
 If you are license owner then, you can build a non-GPL version of Doubango and iDoubs like this:
 {{{
