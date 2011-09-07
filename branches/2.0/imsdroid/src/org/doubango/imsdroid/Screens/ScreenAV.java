@@ -31,7 +31,6 @@ import org.doubango.imsdroid.Main;
 import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
-import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnMediaPluginEventArgs;
 import org.doubango.ngn.media.NgnMediaType;
@@ -39,8 +38,8 @@ import org.doubango.ngn.model.NgnContact;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
-import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.sip.NgnSipStack;
+import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnGraphicsUtils;
 import org.doubango.ngn.utils.NgnStringUtils;
@@ -203,19 +202,29 @@ public class ScreenAV extends BaseScreen{
 	    mListener = new OrientationEventListener(IMSDroid.getContext(), SensorManager.SENSOR_DELAY_NORMAL) {
 			@Override
 			public void onOrientationChanged(int orient) {
-				try {
-					final boolean bFipVideo = NgnEngine.getInstance().getConfigurationService().getBoolean(
-									NgnConfigurationEntry.GENERAL_VIDEO_FLIP, NgnConfigurationEntry.DEFAULT_GENERAL_FLIP_VIDEO);					
-					if (bFipVideo){
-						if ((orient > 345 || orient <15)  ||
-								(orient > 75 && orient <105)   ||
-								(orient > 165 && orient < 195) ||
-								(orient > 255 && orient < 285)){
-							int rotation = mAVSession.compensCamRotation(true);
-							if (rotation != sLastRotation){
-								Log.d(ScreenAV.TAG,"Received Screen Orientation Change setRotation["+String.valueOf(rotation)+"]");
-								sLastRotation = rotation ; 
+				try {				
+					if ((orient > 345 || orient <15)  ||
+							(orient > 75 && orient <105)   ||
+							(orient > 165 && orient < 195) ||
+							(orient > 255 && orient < 285)){
+						int rotation = mAVSession.compensCamRotation(true);
+						if (rotation != sLastRotation) {
+							Log.d(ScreenAV.TAG,"Received Screen Orientation Change setRotation["+ String.valueOf(rotation)+ "]");
+							sLastRotation = rotation;
+							switch (rotation) {
+							case 0:
+							case 90:
 								mAVSession.setRotation(rotation);
+								mAVSession.setProducerFlipped(false);
+								break;
+							case 180:
+								mAVSession.setRotation(0);
+								mAVSession.setProducerFlipped(true);
+								break;
+							case 270:
+								mAVSession.setRotation(90);
+								mAVSession.setProducerFlipped(true);
+								break;
 							}
 						}
 					}

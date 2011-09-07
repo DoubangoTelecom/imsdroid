@@ -242,6 +242,22 @@ public class NgnCameraProducer {
 			}
 		}
 	}
+	
+	public static int getNumberOfCameras() {
+		// 1. Android 2.3 or later
+		if (NgnApplication.getSDKVersion() >= 9) {
+			try {
+				Method getNumberOfCamerasMethod = Camera.class.getDeclaredMethod("getNumberOfCameras");
+				if (getNumberOfCamerasMethod != null) {
+					return (Integer) getNumberOfCamerasMethod.invoke(null);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return 1;
+	}
+
 	private static Camera openFrontFacingCamera() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException{
 		Camera camera = null;
 		

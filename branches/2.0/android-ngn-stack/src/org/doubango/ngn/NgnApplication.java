@@ -371,7 +371,7 @@ public class NgnApplication extends Application{
      */
     public static boolean useSetModeToHackSpeaker(){
     	final String model = Build.MODEL;
-        return  (isSamsung() && getSDKVersion() <= 7) ||
+        return  (isSamsung() && !isSamsungGalaxyMini() && getSDKVersion()<= 7) ||
                 
                 model.equalsIgnoreCase("blade")    ||		// ZTE Blade
                 
@@ -387,6 +387,12 @@ public class NgnApplication extends Application{
      * Whether the stack is running on a Samsung device
      * @return true if the stack is running on a Samsung device and false otherwise
      */
+    
+    public static boolean isSamsungGalaxyMini(){
+    	final String model = Build.MODEL.toLowerCase();
+    	return model.equalsIgnoreCase("gt-i5800");
+    }
+        
     public static boolean isSamsung(){
     	final String model = Build.MODEL.toLowerCase();
     	return model.startsWith("gt-") 

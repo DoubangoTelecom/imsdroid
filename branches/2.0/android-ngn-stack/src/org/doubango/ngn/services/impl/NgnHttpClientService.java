@@ -116,6 +116,22 @@ public class NgnHttpClientService extends NgnBaseService implements INgnHttpClie
 		return result;
 	}
 	
+	@Override
+	public InputStream getBinary(String uri) {
+		try{
+			HttpGet getRequest = new HttpGet(uri);
+			final HttpResponse resp = mClient.execute(getRequest);
+			if(resp != null){
+				return  resp.getEntity().getContent();
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+
 	public static String getResponseAsString(HttpResponse resp){
         String result = "";
         try{

@@ -39,7 +39,6 @@ public class NgnConfigurationEntry {
 	public static final String GENERAL_FULL_SCREEN_VIDEO = "GENERAL_FULL_SCREEN_VIDEO." + TAG;
 	public static final String GENERAL_USE_FFC = "GENERAL_USE_FFC." + TAG;
 	public static final String GENERAL_INTERCEPT_OUTGOING_CALLS = "GENERAL_INTERCEPT_OUTGOING_CALLS." + TAG;
-	public static final String GENERAL_VIDEO_FLIP = "GENERAL_VIDEO_FLIP." + TAG;
 	public static final String GENERAL_AUDIO_PLAY_LEVEL = "GENERAL_AUDIO_PLAY_LEVEL." + TAG;
 	public static final String GENERAL_ENUM_DOMAIN = "GENERAL_ENUM_DOMAIN." + TAG;
 	public static final String GENERAL_AEC = "GENERAL_AEC."+ TAG ;
@@ -128,7 +127,6 @@ public class NgnConfigurationEntry {
 	public static final boolean DEFAULT_GENERAL_FULL_SCREEN_VIDEO = true;
 	public static final boolean DEFAULT_GENERAL_INTERCEPT_OUTGOING_CALLS = true;
 	public static final boolean DEFAULT_GENERAL_USE_FFC = true;
-	public static final boolean DEFAULT_GENERAL_FLIP_VIDEO = false;
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
 	public static final float DEFAULT_GENERAL_AUDIO_PLAY_LEVEL = 0.25f;
 	public static final String DEFAULT_GENERAL_ENUM_DOMAIN = "e164.org";
