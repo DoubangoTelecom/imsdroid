@@ -1,7 +1,7 @@
 #summary Building IMSDroid v2.x
 #labels Featured,Phase-Support
 
-<wiki:toc max_depth="3" />
+<wiki:toc max_depth="4" />
 
 == Building Java Code ==
 To build the java code you only need Eclipse and Android SDK. 
