@@ -118,7 +118,7 @@ If you are license owner then, you can build a GPL version of Doubango and iDoub
 }}}
 
 === More options ===
-The options listed below are used with *buildAll.sh* build script. If you don't know which one to use then, used the pre-configured scripts: *commercial.sh*, *lgpl.sh* or *gpl.sh*<br /> 
+The options listed below are used with *buildAll.sh* script. If you don't know which one to use then, we recommend using on of these pre-configured scripts: *commercial.sh*, *lgpl.sh* or *gpl.sh*<br /> 
  * *LICENSE*: License type. Possible values: _gpl_ or _lgpl_<br /> 
  * *NO_FREE*: Whether to include non free 3rd parties libraries (such as AMR or G.729). Possible values: yes or no<br /> 
  * *FFMPEG*: Whether to enable FFmpeg (most of video features) or not. Possible values: _yes_ or _no_<br /> 
