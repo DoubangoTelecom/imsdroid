@@ -45,9 +45,9 @@ public class NgnProxyPluginMgr {
 	private static final Hashtable<BigInteger, NgnProxyPlugin>sPlugins = new Hashtable<BigInteger, NgnProxyPlugin>(); // HashTable is synchronized
 	
 	public static void Initialize() {
-        ProxyVideoConsumer.setDefaultChroma(tmedia_chroma_t.tmedia_rgb565le);
+        ProxyVideoConsumer.setDefaultChroma(tmedia_chroma_t.tmedia_chroma_rgb565le);
         ProxyVideoConsumer.setDefaultAutoResizeDisplay(true);
-        ProxyVideoProducer.setDefaultChroma(tmedia_chroma_t.tmedia_nv21);
+        ProxyVideoProducer.setDefaultChroma(tmedia_chroma_t.tmedia_chroma_nv21);
         
         // these values will be updated by the engine using ones stored using the
         // configuration service

@@ -1,6 +1,7 @@
 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
 *  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
+*  Copyright (C) 2011, Tiscali
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
@@ -22,6 +23,8 @@
 */
 package org.doubango.ngn.media;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -33,6 +36,7 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.util.Log;
+import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -131,47 +135,122 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	}
 
 	public int getNativeCameraHardRotation(boolean preview){
-		int     terminalRotation   = getTerminalRotation();
-		boolean isFront            = NgnCameraProducer.isFrontFacingCameraEnabled();
-		if (NgnApplication.isSamsung()){
-			if (preview){
-				if (isFront){
-					if (terminalRotation == 0) return 0;
-					else return 90;
+		// only for 2.3 and above
+		if(NgnApplication.getSDKVersion() >= 9){			
+			try {
+				
+				int orientation = 0;
+				int cameraId = 0;
+				int numOfCameras = NgnCameraProducer.getNumberOfCameras();
+				if (numOfCameras > 1) {
+					if (NgnCameraProducer.isFrontFacingCameraEnabled()) {
+						cameraId = numOfCameras-1;
+					}
 				}
-				else return 0 ;
-			}
-			else{
-				if (isFront){
-					if (terminalRotation == 0) return -270;
-					else return 90;
+				
+				Class<?> clsCameraInfo = null;
+
+				final Class<?>[] classes = android.hardware.Camera.class.getDeclaredClasses();
+				for (Class<?> c : classes) {
+					if (c.getSimpleName().equals("CameraInfo")) {
+						clsCameraInfo = c;
+						break;
+					}
+				}
+				
+				final Object info = clsCameraInfo.getConstructor((Class[]) null).newInstance((Object[]) null);
+				Method getCamInfoMthd = android.hardware.Camera.class.getDeclaredMethod("getCameraInfo", int.class, clsCameraInfo);
+				getCamInfoMthd.invoke(null, cameraId, info);
+				
+				Display display = NgnApplication.getDefaultDisplay();
+				if (display != null) {
+					orientation = display.getOrientation();
+				}
+				orientation = (orientation + 45) / 90 * 90;     
+				int rotation = 0;
+
+				final Field fieldFacing = clsCameraInfo.getField("facing");
+				final Field fieldOrient = clsCameraInfo.getField("orientation");
+				final Field fieldFrontFacingConst = clsCameraInfo.getField("CAMERA_FACING_FRONT");
+								
+				if (fieldFacing.getInt(info) == fieldFrontFacingConst.getInt(info)) {
+					rotation = (fieldOrient.getInt(info) - orientation + 360) % 360;     					
+				}
+				else {
+					// back-facing camera         
+					rotation = (fieldOrient.getInt(info) + orientation) % 360;
+				}
+				
+				return rotation;
+			} 
+			catch (Exception e) {
+				e.printStackTrace();
+				return 0;
+			} 
+		}
+		else {
+			int     terminalRotation   = getTerminalRotation();
+			boolean isFront            = NgnCameraProducer.isFrontFacingCameraEnabled();
+			if (NgnApplication.isSamsung() && !NgnApplication.isSamsungGalaxyMini()){
+				if (preview){
+					if (isFront){
+						if (terminalRotation == 0) return 0;
+						else return 90;
+					}
+					else return 0 ;
 				}
 				else{
-					if (terminalRotation == 0) return 0;
-					else return 0;
+					if (isFront){
+						if (terminalRotation == 0) return -270;
+						else return 90;
+					}
+					else{
+						if (terminalRotation == 0) return 0;
+						else return 0;
+					}
 				}
 			}
-		}
-		else if (NgnApplication.isToshiba()){
-			if (preview){
-				if (terminalRotation == 0) return 0;
-				else return 270;
+			else if (NgnApplication.isToshiba()){
+				if (preview){
+					if (terminalRotation == 0) return 0;
+					else return 270;
+				}
+				else{
+					return 0;
+				}
 			}
 			else{
-				return 0;
+				return 0 ;
 			}
-		}
-		else{
-			return 0 ;
 		}
 	}
 
 	public int compensCamRotation(boolean preview){
-		int     cameraHardRotation = getNativeCameraHardRotation(preview) ;
-		int     rotation           = 0;
-		int     terminalRotation   = getTerminalRotation();
-		rotation = (terminalRotation-cameraHardRotation) % 360;
-		return rotation;  
+
+		int cameraHardRotation = getNativeCameraHardRotation(preview) ;
+
+		if (NgnApplication.getSDKVersion() >= 9) {
+			
+			if (preview) {
+				return cameraHardRotation;
+			}
+			
+			switch (cameraHardRotation) {
+			case 0:
+			case 180:
+			default:
+				return 0;
+			case 90:
+			case 270:
+				return 90;
+			}
+		}
+		else {
+			int     terminalRotation   = getTerminalRotation();
+			int rotation = 0;
+			rotation = (terminalRotation-cameraHardRotation) % 360;
+			return rotation;
+		}
 	}
 
 	public boolean isFrontFacingCameraEnabled() {
@@ -261,12 +340,21 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 								
 			try {
 				int terminalRotation = getTerminalRotation();
+								
 				Camera.Parameters parameters = camera.getParameters();
+				
 				if (terminalRotation == 0) {
 					parameters.set("orientation", "landscape");
 				} else {
 					parameters.set("orientation", "portrait");
 				}
+				
+				// looks like it can be removed
+				if (NgnApplication.getSDKVersion() >= 9) {
+					int rotation = compensCamRotation(false);
+					parameters.setRotation(rotation);
+				}
+
 				camera.setParameters(parameters);
 			} catch (Exception e) {
 				Log.e(TAG, e.toString());

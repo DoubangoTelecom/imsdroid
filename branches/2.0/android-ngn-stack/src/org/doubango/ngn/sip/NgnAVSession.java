@@ -133,6 +133,19 @@ public class NgnAVSession extends NgnInviteSession{
 		return sSessions;
 	}
 	
+	public boolean isMicrophoneMute() {
+		if(mAudioProducer != null){
+			return mAudioProducer.isOnMute();
+		}
+		return false;
+	}
+	
+	public void setMicrophoneMute(boolean mute) {
+	    if(mAudioProducer != null){
+	        mAudioProducer.setOnMute(mute);
+	    } 
+	}
+
 	/**
 	 * Retrieves an audio/video session by id.
 	 * @param id the id of the audio/video session to retrieve
@@ -498,6 +511,13 @@ public class NgnAVSession extends NgnInviteSession{
 		return 0;
 	}
 	
+	public int camRotation(boolean preview){
+		if(mVideoProducer != null){
+			return mVideoProducer.getNativeCameraHardRotation(preview);
+		}
+		return 0;
+	}
+	
 	/**
 	 * Sets the local video rotation angle
 	 * @param rot rotation angle in degree
@@ -508,18 +528,18 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 	}
 	
-	public boolean setProducerFliped(boolean flipped){
+	public boolean setProducerFlipped(boolean flipped){
 		final MediaSessionMgr mediaMgr;
 		if((mediaMgr = super.getMediaSessionMgr()) != null){
-			return mediaMgr.producerSetInt32(twrap_media_type_t.twrap_media_video, "flip", 1);
+			return mediaMgr.producerSetInt32(twrap_media_type_t.twrap_media_video, "flip", flipped?1:0);
 		}
 		return false;
 	}
 	
-	public boolean setConsumerFliped(boolean flipped){
+	public boolean setConsumerFlipped(boolean flipped){
 		final MediaSessionMgr mediaMgr;
 		if((mediaMgr = super.getMediaSessionMgr()) != null){
-			return mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_video, "flip", 1);
+			return mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_video, "flip", flipped?1:0);
 		}
 		return false;
 	}

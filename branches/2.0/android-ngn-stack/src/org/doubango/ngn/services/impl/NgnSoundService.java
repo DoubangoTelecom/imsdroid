@@ -54,7 +54,7 @@ public class NgnSoundService extends NgnBaseService implements INgnSoundService{
 	
 	private ToneGenerator mRingbackPlayer;
 	private ToneGenerator mDTMFPlayer;
-	private Ringtone mRingtonePlayer;
+	protected Ringtone mRingtonePlayer;
 	
 	@Override
 	public boolean start() {

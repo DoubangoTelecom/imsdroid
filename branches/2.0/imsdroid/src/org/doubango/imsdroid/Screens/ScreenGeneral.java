@@ -38,7 +38,6 @@ public class ScreenGeneral  extends BaseScreen {
 	private Spinner mSpAudioPlaybackLevel;
 	private CheckBox mCbFullScreenVideo;
 	private CheckBox mCbFFC;
-	private CheckBox mCbVflip;
 	private CheckBox mCbAutoStart;
 	private CheckBox mCbInterceptOutgoingCalls;
 	private EditText mEtEnumDomain;
@@ -68,7 +67,6 @@ public class ScreenGeneral  extends BaseScreen {
         mCbFullScreenVideo = (CheckBox)findViewById(R.id.screen_general_checkBox_fullscreen);
         mCbInterceptOutgoingCalls = (CheckBox)findViewById(R.id.screen_general_checkBox_interceptCall);
         mCbFFC = (CheckBox)findViewById(R.id.screen_general_checkBox_ffc);
-        mCbVflip = (CheckBox)findViewById(R.id.screen_general_checkBox_videoflip);
         mCbAutoStart = (CheckBox)findViewById(R.id.screen_general_checkBox_autoStart);
         mSpAudioPlaybackLevel = (Spinner)findViewById(R.id.screen_general_spinner_playback_level);
         mEtEnumDomain = (EditText)findViewById(R.id.screen_general_editText_enum_domain);
@@ -84,7 +82,6 @@ public class ScreenGeneral  extends BaseScreen {
         mCbFullScreenVideo.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_FULL_SCREEN_VIDEO, NgnConfigurationEntry.DEFAULT_GENERAL_FULL_SCREEN_VIDEO));
         mCbInterceptOutgoingCalls.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_INTERCEPT_OUTGOING_CALLS, NgnConfigurationEntry.DEFAULT_GENERAL_INTERCEPT_OUTGOING_CALLS));
         mCbFFC.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_USE_FFC, NgnConfigurationEntry.DEFAULT_GENERAL_USE_FFC));
-        mCbVflip.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_VIDEO_FLIP, NgnConfigurationEntry.DEFAULT_GENERAL_FLIP_VIDEO));
         mCbAutoStart.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_AUTOSTART, NgnConfigurationEntry.DEFAULT_GENERAL_AUTOSTART));
         mCbAEC.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC,NgnConfigurationEntry.DEFAULT_GENERAL_AEC));
         mCbVAD.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_VAD,NgnConfigurationEntry.DEFAULT_GENERAL_VAD));
@@ -99,7 +96,6 @@ public class ScreenGeneral  extends BaseScreen {
         super.addConfigurationListener(mCbFullScreenVideo);
         super.addConfigurationListener(mCbInterceptOutgoingCalls);
         super.addConfigurationListener(mCbFFC);
-        super.addConfigurationListener(mCbVflip);
         super.addConfigurationListener(mCbAutoStart);
         super.addConfigurationListener(mEtEnumDomain);
         super.addConfigurationListener(mSpAudioPlaybackLevel);
@@ -115,7 +111,6 @@ public class ScreenGeneral  extends BaseScreen {
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_FULL_SCREEN_VIDEO, mCbFullScreenVideo.isChecked());
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_INTERCEPT_OUTGOING_CALLS, mCbInterceptOutgoingCalls.isChecked());
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_USE_FFC, mCbFFC.isChecked());
-			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_VIDEO_FLIP, mCbVflip.isChecked());
 			mConfigurationService.putFloat(NgnConfigurationEntry.GENERAL_AUDIO_PLAY_LEVEL, ((AudioPlayBackLevel)mSpAudioPlaybackLevel.getSelectedItem()).mValue);
 			mConfigurationService.putString(NgnConfigurationEntry.GENERAL_ENUM_DOMAIN, mEtEnumDomain.getText().toString());
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_AEC, mCbAEC.isChecked());
