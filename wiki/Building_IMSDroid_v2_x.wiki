@@ -130,19 +130,19 @@ The options listed below are used with *buildAll.sh* script. If you don't know w
  * *VPX*: Whether to enable VPX video codecs (VP8) or not. Possible values: _yes_ or _no_<br /> 
  * *NEON*: Whether to enable ARMv7 Neon optimizations or not. Possible values: _yes_ or _no_<br /> 
 
-=== Building GPL version ===
+==== Building GPL version ====
 If you are license owner then, you can build a GPL version of Doubango and iDoubs like this:
 {{{
 ../bindings/java/android/gpl.sh
 }}}
 
-=== Building LGPL version ===
+==== Building LGPL version ====
 If you are license owner then, you can build a non-GPL version of Doubango and iDoubs like this:
 {{{
 ../bindings/java/android/lgpl.sh
 }}}
 
-=== Building Commercial version ===
+==== Building Commercial version ====
 If you are license owner then, you can build a non-GPL version of Doubango and iDoubs like this:
 {{{
 ../bindings/java/android/commercial.sh
