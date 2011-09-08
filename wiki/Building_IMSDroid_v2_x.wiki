@@ -68,7 +68,7 @@ cd $(DOUBANGO_HOME)/android-projects
 }}}
 You can add *NEON=yes* to enable neon optimization for armv7-a processors. You MUST use at least [http://developer.android.com/sdk/ndk/index.html NDK r4b].<br />
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
-The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *imsdroid\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
+The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *android-ngn-stack\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
 
 === Building libtinyWRAP.so with G729AB ===
 Starting IMSDroid revision 311 and [http://www.doubango.org/ doubango] revision 498 we fully support G.729 annex A and B (CNG and VAD).<br />
@@ -109,7 +109,7 @@ make PROJECT=g729b BT=static install
 
 You can add *NEON=yes* to enable neon optimization for armv7-a processors. You MUST use at least [http://developer.android.com/sdk/ndk/index.html NDK r4b].<br />
 The binaries will be generated under *$(DOUBANGO_HOME)/android-projects/output*.
-The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *imsdroid\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
+The shared libraries will be named *libtinyWRAP_armv7-a.so* if built with *neon* optimizations. Otherwise it will be named *libtinyWRAP_armv5te.so*. Rename the library as *libtinyWRAP.so* and copy it to *android-ngn-stack\libs\$(ABI)* where *ABI* is equal to *armeabi* for the ARMv5te version or *armeabi-v7a* for ARMv7-a.
 
 === More options ===
 The options listed below are used with *buildAll.sh* script. If you don't know which one to use then, we recommend using on of these pre-configured scripts: *commercial.sh*, *lgpl.sh* or *gpl.sh*<br /> 
