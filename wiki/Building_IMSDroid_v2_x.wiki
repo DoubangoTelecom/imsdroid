@@ -131,19 +131,19 @@ The options listed below are used with *buildAll.sh* script. If you don't know w
  * *NEON*: Whether to enable ARMv7 Neon optimizations or not. Possible values: _yes_ or _no_<br /> 
 
 ==== Building GPL version ====
-If you are license owner then, you can build a GPL version of Doubango and iDoubs like this:
+You can build a GPL version of Doubango like this:
 {{{
 ../bindings/java/android/gpl.sh
 }}}
 
 ==== Building LGPL version ====
-If you are license owner then, you can build a non-GPL version of Doubango and iDoubs like this:
+You can build an LGPL version of Doubango like this:
 {{{
 ../bindings/java/android/lgpl.sh
 }}}
 
 ==== Building Commercial version ====
-If you are license owner then, you can build a non-GPL version of Doubango and iDoubs like this:
+You can build a commercial version of Doubango like this:
 {{{
 ../bindings/java/android/commercial.sh
 }}}
