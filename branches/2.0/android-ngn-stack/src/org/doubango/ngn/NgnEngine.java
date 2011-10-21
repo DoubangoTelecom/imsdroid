@@ -43,7 +43,10 @@ import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
+import org.doubango.tinyWRAP.SipStack;
+import org.doubango.tinyWRAP.tdav_codec_id_t;
 import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
+import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -83,6 +86,8 @@ public class NgnEngine {
 		ProxyAudioProducer.registerPlugin();
 		ProxyAudioConsumer.registerPlugin();
 		
+		SipStack.initialize();
+		
 		NgnProxyPluginMgr.Initialize();
 	}
 	
@@ -112,6 +117,34 @@ public class NgnEngine {
 			mNotifManager = null;
 		}
 		mVibrator = null;
+		
+		// Initialize SIP stack
+		SipStack.initialize();
+		// Set codec priorities
+		int prio = 0;
+		SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_g722, prio++);
+		SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_speex_wb, prio++);
+		SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_speex_uwb, prio++);
+		SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_speex_nb, prio++);
+		SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_pcma, prio++);
+		SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_pcmu, prio++);
+		SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_ilbc, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_gsm, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_g729ab, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_amr_nb_oa, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_amr_nb_be, prio++);
+        
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_bp30, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_bp20, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_bp10, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_vp8, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_mp4ves_es, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_theora, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h263, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h261, prio++);
+        
+        // Set default mediaType to use when receiving bodiless INVITE
+        MediaSessionMgr.defaultsSetMediaType(twrap_media_type_t.twrap_media_audiovideo);
 		
 		// Apply defaults using the values stored in the configuration service
 		MediaSessionMgr.defaultsSetBandwidthLevel(
