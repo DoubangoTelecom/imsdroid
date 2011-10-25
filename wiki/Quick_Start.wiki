@@ -20,7 +20,7 @@ If you don't have enough time and:
 At the home screen, go to Options ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png]) -> Identity ([http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/identity_48.png]) to open the *Identity screen*.<br />
 
 <table>
-<tr><td>[http://imsdroid.googlecode.com/svn/trunk/screenshots/screen_identity.png]</td></tr>
+<tr><td>[http://imsdroid.googlecode.com/svn/branches/1.0/screenshots/screen_identity.png]</td></tr>
 <tr align="center"><td>*Identity Screen*</td></tr>
 </table>
 
