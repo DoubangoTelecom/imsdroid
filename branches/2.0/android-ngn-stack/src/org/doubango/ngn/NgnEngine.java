@@ -173,6 +173,7 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetAgcEnabled(false);
 		MediaSessionMgr.defaultsSetVadEnabled(vad);
 		MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
+		MediaSessionMgr.defaultsSetJbMargin(0);
 	}
 	
 	/**
