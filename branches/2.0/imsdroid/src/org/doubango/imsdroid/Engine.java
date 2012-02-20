@@ -19,15 +19,8 @@
 */
 package org.doubango.imsdroid;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.Impl.ScreenService;
-import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.NgnNativeService;
 import org.doubango.ngn.media.NgnMediaType;
@@ -35,7 +28,6 @@ import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.sip.NgnMsrpSession;
 import org.doubango.ngn.utils.NgnPredicate;
 
-import android.R.raw;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -61,7 +53,7 @@ public class Engine extends NgnEngine{
 	// In the normal case, we should just put the native libraries under "libs/armeabi" and "libs/armeabi-v7a" for ARMv5TE and ARMv7-a (with NEON) CPUs respectively and it's up to
 	// Android system to detect and load the right libraries. Unfortunately there are problems with some devices reporting ARMv7-a without neon support (e.g Motorolla XOOM) which is correct but not expected.
 	// For more information about the issue: http://code.google.com/p/imsdroid/issues/detail?id=197
-	// To fix the issue, we need to use the ARMv5TE version on the buggy ARMv7-a devices (only). Please note that is doesn't make sense to rebuilt the libs for ARMv7-a without neon because there will
+	// To fix the issue, we need to use the ARMv5TE version on the buggy ARMv7-a devices (only). Please note that it doesn't make sense to rebuilt the libs for ARMv7-a without neon because there will
 	// be no performance gain as the video codecs accelerate the coding based on the ability to vectorize the code.
 	// To enable the fix:
 	//	1. Move "libs/armeabi/libtinyWRAP.so" to "res/raw" and rename it to "libtinywrap_armv5te.jet". Please note that the file extension
@@ -105,7 +97,7 @@ public class Engine extends NgnEngine{
 			}
 		}*/
 
-		// Load the library as usual: based on Android detection
+		// Load the library
 		System.load(libPath);
 		// Initialize the engine
 		NgnEngine.initialize();
