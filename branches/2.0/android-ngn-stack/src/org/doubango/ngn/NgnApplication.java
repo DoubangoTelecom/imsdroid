@@ -383,6 +383,16 @@ public class NgnApplication extends Application{
                 ;
     }
     
+    public static boolean isARMv7WithoutNeon(){
+    	final String abi = NgnApplication.getABI();
+    	final String model = Build.MODEL;
+    	return abi.equals("armeabi-v7a") && 
+    	(
+    			model.equalsIgnoreCase("<your first model>") ||
+    			model.equalsIgnoreCase("<your second model>")
+    	);
+    }
+    
     /**
      * Whether the stack is running on a Samsung device
      * @return true if the stack is running on a Samsung device and false otherwise
