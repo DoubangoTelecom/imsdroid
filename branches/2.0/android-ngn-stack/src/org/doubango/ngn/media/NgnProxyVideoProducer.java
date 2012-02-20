@@ -350,10 +350,10 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				}
 				
 				// looks like it can be removed
-				if (NgnApplication.getSDKVersion() >= 9) {
-					int rotation = compensCamRotation(false);
-					parameters.setRotation(rotation);
-				}
+				//if (NgnApplication.getSDKVersion() >= 9) {
+				//	int rotation = compensCamRotation(false);
+				//	parameters.setRotation(rotation);
+				//}
 
 				camera.setParameters(parameters);
 			} catch (Exception e) {

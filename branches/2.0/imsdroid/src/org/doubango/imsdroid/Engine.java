@@ -19,8 +19,15 @@
 */
 package org.doubango.imsdroid;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.Impl.ScreenService;
+import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.NgnNativeService;
 import org.doubango.ngn.media.NgnMediaType;
@@ -28,6 +35,7 @@ import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.sip.NgnMsrpSession;
 import org.doubango.ngn.utils.NgnPredicate;
 
+import android.R.raw;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -43,11 +51,63 @@ public class Engine extends NgnEngine{
 	private static final int NOTIF_APP_ID = 19833894;
 	private static final int NOTIF_CONTSHARE_ID = 19833895;
 	private static final int NOTIF_CHAT_ID = 19833896;
+	private static final String DATA_FOLDER = String.format("/data/data/%s", Main.class.getPackage().getName());
+	private static final String LIBS_FOLDER = String.format("%s/lib", Engine.DATA_FOLDER);
+	private static final String LIB_NAME = "libtinyWRAP.so";
 	
 	private IScreenService mScreenService;
 	
+	// This block of code is used to load the Doubango native libraries.
+	// In the normal case, we should just put the native libraries under "libs/armeabi" and "libs/armeabi-v7a" for ARMv5TE and ARMv7-a (with NEON) CPUs respectively and it's up to
+	// Android system to detect and load the right libraries. Unfortunately there are problems with some devices reporting ARMv7-a without neon support (e.g Motorolla XOOM) which is correct but not expected.
+	// For more information about the issue: http://code.google.com/p/imsdroid/issues/detail?id=197
+	// To fix the issue, we need to use the ARMv5TE version on the buggy ARMv7-a devices (only). Please note that is doesn't make sense to rebuilt the libs for ARMv7-a without neon because there will
+	// be no performance gain as the video codecs accelerate the coding based on the ability to vectorize the code.
+	// To enable the fix:
+	//	1. Move "libs/armeabi/libtinyWRAP.so" to "res/raw" and rename it to "libtinywrap_armv5te.jet". Please note that the file extension
+	//		is changed to avoid compression issues on Android versions prior to 2.3. For more information: http://ponystyle.com/blog/2010/03/26/dealing-with-asset-compression-in-android-apps/
+	// 2. Uncomment code from line 73 (if(NgnApplication.isARMv7WithoutNeon())....) to line 106
+	// 3. Change "NgnApplication.isARMv7WithoutNeon()" to add a device model which is known to have this issue.
 	static {
-		System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class.getPackage().getName()));
+		String libPath = String.format("%s/%s", Engine.LIBS_FOLDER, Engine.LIB_NAME);
+		/*if(NgnApplication.isARMv7WithoutNeon()){
+			final String armv5LibPath = String.format("%s/%s", Engine.DATA_FOLDER, Engine.LIB_ARMV5TE_NAME);
+			InputStream is = null;
+			OutputStream fos = null;
+			try {
+				final byte[] buffer = new byte[1024];
+				int redBytes;
+				// do nothing if the library is already copied
+				// IMPORTANT: If you are a developer and providing your own libs then, you must inhibit this line to load the lib each time it's changed.
+				if(!new File(armv5LibPath).exists()){
+					is  = NgnApplication.getInstance().getResources().openRawResource(R.raw.libtinywrap_armv5te);			
+					fos = new FileOutputStream(armv5LibPath);
+					while((redBytes = is.read(buffer)) != -1){
+						fos.write(buffer, 0, redBytes);
+					}
+				}
+				libPath = armv5LibPath;
+			} 
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			finally{
+				try {
+					if(is != null){
+						is.close();
+					}
+					if(fos != null){
+						fos.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}*/
+
+		// Load the library as usual: based on Android detection
+		System.load(libPath);
+		// Initialize the engine
 		NgnEngine.initialize();
 	}
 	
