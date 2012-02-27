@@ -34,11 +34,21 @@ public class NgnProxyPlugin implements Comparable<NgnProxyPlugin>{
 	protected boolean mPrepared;
 	protected final BigInteger mId;
 	protected final ProxyPlugin mPlugin;
+	protected long mSipSessionId;
 	
 	public NgnProxyPlugin(BigInteger id, ProxyPlugin plugin){
 		mId = id;
 		mPlugin = plugin;
 		mValid = true;
+		mSipSessionId = -1;
+	}
+	
+	public long getSipSessionId(){
+		return mSipSessionId;
+	}
+	
+	public void setSipSessionId(long id){
+		mSipSessionId = id;
 	}
 	
 	public boolean isValid(){

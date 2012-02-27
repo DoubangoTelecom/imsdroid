@@ -387,12 +387,14 @@ public class NgnAVSession extends NgnInviteSession{
 					if((myProxyPlugin = NgnProxyPluginMgr.findPlugin(plugin.getId())) != null){
 						mVideoConsumer = (NgnProxyVideoConsumer)myProxyPlugin;
 						mVideoConsumer.setContext(mContext);
+						mVideoConsumer.setSipSessionId(super.getId());
 					}
 				}
 				if((plugin = mediaMgr.findProxyPluginProducer(twrap_media_type_t.twrap_media_video)) != null){
 					if((myProxyPlugin = NgnProxyPluginMgr.findPlugin(plugin.getId())) != null){
 						mVideoProducer = (NgnProxyVideoProducer)myProxyPlugin;
 						mVideoProducer.setContext(mContext);
+						mVideoProducer.setSipSessionId(super.getId());
 					}
 				}
 			}
@@ -401,15 +403,16 @@ public class NgnAVSession extends NgnInviteSession{
 				if((plugin = mediaMgr.findProxyPluginConsumer(twrap_media_type_t.twrap_media_audio)) != null){
 					if((myProxyPlugin = NgnProxyPluginMgr.findPlugin(plugin.getId())) != null){
 						mAudioConsumer = (NgnProxyAudioConsumer)myProxyPlugin;
+						mAudioConsumer.setSipSessionId(super.getId());
 					}
 				}
 				if((plugin = mediaMgr.findProxyPluginProducer(twrap_media_type_t.twrap_media_audio)) != null){
 					if((myProxyPlugin = NgnProxyPluginMgr.findPlugin(plugin.getId())) != null){
 						mAudioProducer = (NgnProxyAudioProducer)myProxyPlugin;
+						mAudioProducer.setSipSessionId(super.getId());
 					}
 				}
 			}
-			
 			
 			mConsumersAndProducersInitialzed = true;
 			return true;
@@ -540,6 +543,15 @@ public class NgnAVSession extends NgnInviteSession{
 		final MediaSessionMgr mediaMgr;
 		if((mediaMgr = super.getMediaSessionMgr()) != null){
 			return mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_video, "flip", flipped?1:0);
+		}
+		return false;
+	}
+	
+	// Doubango AEC for THIS session. Default value (for all sessions) is the one in "NgnConfigurationEntry.GENERAL_AEC" configuration entry.
+	public boolean setAECEnabled(boolean enabled){
+		final MediaSessionMgr mediaMgr;
+		if((mediaMgr = super.getMediaSessionMgr()) != null){
+			return mediaMgr.sessionSetInt32(twrap_media_type_t.twrap_media_audio, "echo-supp", enabled ? 1 : 0);
 		}
 		return false;
 	}

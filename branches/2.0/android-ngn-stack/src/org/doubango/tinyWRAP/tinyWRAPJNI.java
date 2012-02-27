@@ -70,6 +70,7 @@ class tinyWRAPJNI {
   public final static native boolean MediaSessionMgr_defaultsSetMediaType(int jarg1);
   public final static native boolean MediaSessionMgr_defaultsSetVolume(int jarg1);
   public final static native int MediaSessionMgr_defaultsGetVolume();
+  public final static native boolean MediaSessionMgr_defaultsSetInviteSessionTimers(int jarg1, String jarg2);
   public final static native void delete_MediaContent(long jarg1);
   public final static native String MediaContent_getType(long jarg1, MediaContent jarg1_);
   public final static native long MediaContent_getDataLength(long jarg1, MediaContent jarg1_);
@@ -196,7 +197,14 @@ class tinyWRAPJNI {
   public final static native boolean CallSession_hold__SWIG_1(long jarg1, CallSession jarg1_);
   public final static native boolean CallSession_resume__SWIG_0(long jarg1, CallSession jarg1_, long jarg2, ActionConfig jarg2_);
   public final static native boolean CallSession_resume__SWIG_1(long jarg1, CallSession jarg1_);
+  public final static native boolean CallSession_transfer__SWIG_0(long jarg1, CallSession jarg1_, String jarg2, long jarg3, ActionConfig jarg3_);
+  public final static native boolean CallSession_transfer__SWIG_1(long jarg1, CallSession jarg1_, String jarg2);
+  public final static native boolean CallSession_acceptTransfer__SWIG_0(long jarg1, CallSession jarg1_, long jarg2, ActionConfig jarg2_);
+  public final static native boolean CallSession_acceptTransfer__SWIG_1(long jarg1, CallSession jarg1_);
+  public final static native boolean CallSession_rejectTransfer__SWIG_0(long jarg1, CallSession jarg1_, long jarg2, ActionConfig jarg2_);
+  public final static native boolean CallSession_rejectTransfer__SWIG_1(long jarg1, CallSession jarg1_);
   public final static native boolean CallSession_sendDTMF(long jarg1, CallSession jarg1_, int jarg2);
+  public final static native long CallSession_getSessionTransferId(long jarg1, CallSession jarg1_);
   public final static native long new_MsrpSession(long jarg1, SipStack jarg1_, long jarg2, MsrpCallback jarg2_);
   public final static native void delete_MsrpSession(long jarg1);
   public final static native boolean MsrpSession_setCallback(long jarg1, MsrpSession jarg1_, long jarg2, MsrpCallback jarg2_);
@@ -240,8 +248,10 @@ class tinyWRAPJNI {
   public final static native boolean PublicationSession_unPublish__SWIG_1(long jarg1, PublicationSession jarg1_);
   public final static native long new_RegistrationSession(long jarg1, SipStack jarg1_);
   public final static native void delete_RegistrationSession(long jarg1);
-  public final static native boolean RegistrationSession_register_(long jarg1, RegistrationSession jarg1_);
-  public final static native boolean RegistrationSession_unRegister(long jarg1, RegistrationSession jarg1_);
+  public final static native boolean RegistrationSession_register___SWIG_0(long jarg1, RegistrationSession jarg1_, long jarg2, ActionConfig jarg2_);
+  public final static native boolean RegistrationSession_register___SWIG_1(long jarg1, RegistrationSession jarg1_);
+  public final static native boolean RegistrationSession_unRegister__SWIG_0(long jarg1, RegistrationSession jarg1_, long jarg2, ActionConfig jarg2_);
+  public final static native boolean RegistrationSession_unRegister__SWIG_1(long jarg1, RegistrationSession jarg1_);
   public final static native boolean RegistrationSession_accept__SWIG_0(long jarg1, RegistrationSession jarg1_, long jarg2, ActionConfig jarg2_);
   public final static native boolean RegistrationSession_accept__SWIG_1(long jarg1, RegistrationSession jarg1_);
   public final static native boolean RegistrationSession_reject__SWIG_0(long jarg1, RegistrationSession jarg1_, long jarg2, ActionConfig jarg2_);

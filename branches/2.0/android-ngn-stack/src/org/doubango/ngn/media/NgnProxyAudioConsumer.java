@@ -232,7 +232,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 		public void run() {
 			Log.d(TAG, "===== Audio Player Thread (Start) =====");
 			
-			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
 			
 			int nFrameLength = mOutputBuffer.capacity();
 			final int nFramesCount = 1; // Number of 20ms' to copy
