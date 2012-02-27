@@ -80,7 +80,7 @@ public class ScreenAV extends BaseScreen{
 	private static final String TAG = ScreenAV.class.getCanonicalName();
 	private static final SimpleDateFormat sDurationTimerFormat = new SimpleDateFormat("mm:ss");
 	private static int sCountBlankPacket = 0;
-	private static int sLastRotation = 1;
+	private static int sLastRotation = -1;
 	
 	private String mRemotePartyDisplayName;
 	private Bitmap mRemotePartyPhoto;
@@ -209,23 +209,8 @@ public class ScreenAV extends BaseScreen{
 							(orient > 255 && orient < 285)){
 						int rotation = mAVSession.compensCamRotation(true);
 						if (rotation != sLastRotation) {
-							Log.d(ScreenAV.TAG,"Received Screen Orientation Change setRotation["+ String.valueOf(rotation)+ "]");
-							sLastRotation = rotation;
-							switch (rotation) {
-							case 0:
-							case 90:
-								mAVSession.setRotation(rotation);
-								mAVSession.setProducerFlipped(false);
-								break;
-							case 180:
-								mAVSession.setRotation(0);
-								mAVSession.setProducerFlipped(true);
-								break;
-							case 270:
-								mAVSession.setRotation(90);
-								mAVSession.setProducerFlipped(true);
-								break;
-							}
+							Log.d(ScreenAV.TAG,"Received Screen Orientation Change setRotation["+ String.valueOf(rotation)+ "]");						
+							applyCamRotation(rotation);
 						}
 					}
 				} catch (Exception e) {
@@ -578,6 +563,27 @@ public class ScreenAV extends BaseScreen{
 		return avSession.makeCall(remoteUri);
 	}
 	
+	private void applyCamRotation(int rotation){
+		if(mAVSession != null){
+			sLastRotation = rotation;
+			switch (rotation) {
+				case 0:
+				case 90:
+					mAVSession.setRotation(rotation);
+					mAVSession.setProducerFlipped(false);
+					break;
+				case 180:
+					mAVSession.setRotation(0);
+					mAVSession.setProducerFlipped(true);
+					break;
+				case 270:								
+					mAVSession.setRotation(90);
+					mAVSession.setProducerFlipped(true);
+					break;
+				}
+		}
+	}
+	
 	private boolean hangUpCall(){
 		if(mAVSession != null){
 			return mAVSession.hangUpCall();
@@ -664,6 +670,7 @@ public class ScreenAV extends BaseScreen{
 					}
 					// Send blank packets to open NAT pinhole
 					if(mAVSession != null && mIsVideoCall){
+						applyCamRotation(mAVSession.compensCamRotation(true));
 						mTimerBlankPacket.schedule(mTimerTaskBlankPacket, 0, 250);
 					}
 					mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
@@ -932,7 +939,8 @@ public class ScreenAV extends BaseScreen{
 			ScreenAV.this.runOnUiThread(new Runnable() {
 				public void run() {
 					IBaseScreen currentScreen = mScreenService.getCurrentScreen();
-					if(currentScreen != null && currentScreen.getId() == getId()){
+					boolean gotoHome = (currentScreen != null && currentScreen.getId() == getId());
+					if(gotoHome){
 						mScreenService.show(ScreenHome.class);
 					}
 					mScreenService.destroy(getId());

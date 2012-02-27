@@ -56,7 +56,7 @@ public class Engine extends NgnEngine{
 	// To fix the issue, we need to use the ARMv5TE version on the buggy ARMv7-a devices (only). Please note that it doesn't make sense to rebuilt the libs for ARMv7-a without neon because there will
 	// be no performance gain as the video codecs accelerate the coding based on the ability to vectorize the code.
 	// To enable the fix:
-	//	1. Move "libs/armeabi/libtinyWRAP.so" to "res/raw" and rename it to "libtinywrap_armv5te.jet". Please note that the file extension
+	//	1. Copy "libs/armeabi/libtinyWRAP.so" to "res/raw" and rename it to "libtinywrap_armv5te.jet". Please note that the file extension
 	//		is changed to avoid compression issues on Android versions prior to 2.3. For more information: http://ponystyle.com/blog/2010/03/26/dealing-with-asset-compression-in-android-apps/
 	// 2. Uncomment code from line 73 (if(NgnApplication.isARMv7WithoutNeon())....) to line 106
 	// 3. Change "NgnApplication.isARMv7WithoutNeon()" to add a device model which is known to have this issue.

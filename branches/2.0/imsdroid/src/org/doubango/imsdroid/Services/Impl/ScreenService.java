@@ -127,6 +127,7 @@ public class ScreenService extends NgnBaseService implements IScreenService {
 		String screen_id = (id == null) ? cls.getCanonicalName() : id;
 		Intent intent = new Intent(mainActivity, cls);
 		intent.putExtra("id", screen_id);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		final Window window = mainActivity.getLocalActivityManager().startActivity(screen_id, intent);
 		if(window != null){
 			View view = mainActivity.getLocalActivityManager().startActivity(screen_id, intent).getDecorView();
@@ -174,7 +175,8 @@ public class ScreenService extends NgnBaseService implements IScreenService {
 	public boolean destroy(String id) {
 		final LocalActivityManager activityManager = (((Main)Engine.getInstance().getMainActivity())).getLocalActivityManager();
 		if(activityManager != null){
-			activityManager.destroyActivity(id, false);
+			activityManager.destroyActivity(id, true);
+			
 			// http://code.google.com/p/android/issues/detail?id=12359
 			// http://www.netmite.com/android/mydroid/frameworks/base/core/java/android/app/LocalActivityManager.java
 			try {

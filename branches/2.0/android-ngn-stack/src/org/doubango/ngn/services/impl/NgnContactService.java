@@ -147,12 +147,6 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 	
 	@Override
 	public boolean load(){
-		/*new Thread(new Runnable() {
-			@Override
-			public void run() {
-				load2();
-			}
-		}).start();*/
 		return load2();
 	}
 	
@@ -160,6 +154,7 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 		mLoading = true;
 		boolean bOK = false;
 		Cursor managedCursor = null;
+		final Activity activity = NgnEngine.getInstance().getMainActivity();
 		final List<NgnContact> contactsCopy = new ArrayList<NgnContact>();
 		
 		if(mOnBeginLoadCallback != null){
@@ -170,7 +165,6 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 			String phoneNumber, displayName, label;
 			NgnContact contact = null;
 			int id, type, photoId;
-			final Activity activity = NgnEngine.getInstance().getMainActivity();
 			final Resources res = NgnApplication.getContext().getResources();
 			
 			if(NgnApplication.getSDKVersion() >=5 && activity != null){
@@ -244,6 +238,8 @@ public class NgnContactService  extends NgnBaseService implements INgnContactSer
 		}
 		finally{
 			if(managedCursor != null){
+				activity.stopManagingCursor(managedCursor);
+				
 				managedCursor.close();
 			}
 		}

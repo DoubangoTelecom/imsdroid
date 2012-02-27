@@ -124,12 +124,12 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		android.content.res.Configuration conf = NgnApplication.getContext().getResources().getConfiguration();
 		int     terminalRotation  = 0 ;
 		switch(conf.orientation){
-		case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
-			terminalRotation = 0;//The starting position is 0 (landscape).
-			break;
-		case android.content.res.Configuration.ORIENTATION_PORTRAIT:
-			terminalRotation = 90 ;
-			break;
+			case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
+				terminalRotation = 0;//The starting position is 0 (landscape).
+				break;
+			case android.content.res.Configuration.ORIENTATION_PORTRAIT:
+				terminalRotation = 90 ;
+				break;
 		}
 		return terminalRotation;
 	}
@@ -227,23 +227,27 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 
 	public int compensCamRotation(boolean preview){
 
-		int cameraHardRotation = getNativeCameraHardRotation(preview) ;
+		final int cameraHardRotation = getNativeCameraHardRotation(preview);
+		final android.content.res.Configuration conf = NgnApplication.getContext().getResources().getConfiguration();
+		if(conf.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE){
+			return 0;
+		}
 
 		if (NgnApplication.getSDKVersion() >= 9) {
-			
 			if (preview) {
 				return cameraHardRotation;
 			}
-			
-			switch (cameraHardRotation) {
-			case 0:
-			case 180:
-			default:
-				return 0;
-			case 90:
-			case 270:
-				return 90;
-			}
+			else{
+				switch (cameraHardRotation) {
+					case 0:
+					case 180:
+					default:
+						return 0;
+					case 90:
+					case 270:
+						return 90;
+				}
+			}			
 		}
 		else {
 			int     terminalRotation   = getTerminalRotation();

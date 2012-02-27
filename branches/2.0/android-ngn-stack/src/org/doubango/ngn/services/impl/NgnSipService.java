@@ -758,9 +758,6 @@ implements INgnSipService, tinyWRAPConstants {
                     break;
 
                 case tsip_i_request:
-                case tsip_o_ect_ok:
-                case tsip_o_ect_nok:
-                case tsip_i_ect:
                     {
                         break;
                     }

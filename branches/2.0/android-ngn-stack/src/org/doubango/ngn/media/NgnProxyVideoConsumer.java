@@ -228,7 +228,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     	return 0;
     }
     
-    private int stopCallback(){
+    private synchronized int stopCallback(){
     	Log.d(TAG, "stopCallback");
     	super.mStarted = false;
     	if(mLooper != null){
@@ -239,11 +239,23 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     	return 0;
     }
 	
-    private void drawFrame(){
-    	final Canvas canvas = mPreview.mHolder.lockCanvas();
-		if (canvas != null && mPreview != null){
+    private synchronized void drawFrame(){
+		if (mPreview != null && mPreview.mHolder != null){
+			final Canvas canvas = mPreview.mHolder.lockCanvas();
+			if(canvas == null){
+				return;
+			}
 			mRGB565Bitmap.copyPixelsFromBuffer(mVideoFrame);
 			if(mFullScreenRequired){
+				// destroy cropped bitmap if surface has changed
+				if(mPreview.isSurfaceChanged()){
+					mPreview.setSurfaceChanged(false);
+					if(mRGBCroppedBitmap != null){
+						mRGBCroppedBitmap.recycle();
+						mRGBCroppedBitmap = null;
+					}
+				}
+				
 				// create new cropped image if doesn't exist yet
 				if(mRGBCroppedBitmap == null){
 					float ratio = Math.max(
@@ -347,6 +359,8 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 		@SuppressWarnings("unused")
 		private Rect mSurfDisplay;
 		private final float mRatio;
+		private boolean mSurfaceChanged;
+		
 		MyProxyVideoConsumerPreview(Context context, int width, int height, int fps) {
 			super(context);
 			
@@ -363,6 +377,14 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 				mSurfFrame = null;
 			}
 			mSurfDisplay = mSurfFrame;
+		}
+		
+		public synchronized void setSurfaceChanged(boolean surfaceChanged){
+			mSurfaceChanged = surfaceChanged;
+		}
+		
+		public synchronized boolean isSurfaceChanged(){
+			return mSurfaceChanged;
 		}
 	
 		public void surfaceCreated(SurfaceHolder holder) {
@@ -383,6 +405,7 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
 				int newH = (int)(newW/mRatio) > h ? h : (int)(newW/mRatio);
 				
 				mSurfDisplay = new Rect(0, 0, newW, newH);
+				setSurfaceChanged(true);
 			}
 		}
 	}

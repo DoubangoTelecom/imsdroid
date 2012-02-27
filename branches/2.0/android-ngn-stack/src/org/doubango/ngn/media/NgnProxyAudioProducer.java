@@ -20,11 +20,13 @@
 */
 package org.doubango.ngn.media;
 
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
+import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
 import org.doubango.tinyWRAP.ProxyAudioProducerCallback;
@@ -50,6 +52,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 	private final ProxyAudioProducer mProducer;
 	private boolean mRoutingChanged;
 	private boolean mOnMute;
+	private boolean mHasBuiltInAEC;
 	
 	private Thread mProducerThread;
 	private AudioRecord mAudioRecord;
@@ -62,6 +65,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
         mCallback = new MyProxyAudioProducerCallback(this);
         mProducer.setCallback(mCallback);
         mOnMute = false;
+        mHasBuiltInAEC = false;
 	}
 	
 	public void setOnPause(boolean pause){
@@ -158,12 +162,25 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 		mAudioFrame = ByteBuffer.allocateDirect(shortsPerNotif * 2);
 		mPtime = ptime; mRate = rate; mChannels = channels;
 		Log.d(TAG, "Configure aecEnabled:" +aecEnabled);
-		mAudioRecord = new AudioRecord(
-				aecEnabled ? MediaRecorder.AudioSource.VOICE_RECOGNITION : MediaRecorder.AudioSource.MIC,
-				rate,
-				AudioFormat.CHANNEL_IN_MONO,
-				AudioFormat.ENCODING_PCM_16BIT,
-				bufferSize);
+        int audioSrc = MediaRecorder.AudioSource.MIC ;
+        if(aecEnabled){
+        	audioSrc = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+            if(NgnApplication.getSDKVersion() >= 11){
+				try {
+					final Field f = MediaRecorder.AudioSource.class.getDeclaredField("VOICE_COMMUNICATION");
+					audioSrc = f.getInt(null);
+					mHasBuiltInAEC = true;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+            }
+        }
+        mAudioRecord = new AudioRecord(
+                audioSrc,
+                rate,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                bufferSize);
 		
 		if(mAudioRecord.getState() == AudioRecord.STATE_INITIALIZED){
 			super.mPrepared = true;
@@ -206,6 +223,13 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin{
 								.getInstance()
 								.getConfigurationService()
 								.getInt(NgnConfigurationEntry.MEDIA_AUDIO_PRODUCER_GAIN, NgnConfigurationEntry.DEFAULT_MEDIA_AUDIO_PRODUCER_GAIN));
+			}
+			// disable Doubango AEC
+			if(mHasBuiltInAEC){
+				final NgnAVSession ngnAVSession = NgnAVSession.getSession(getSipSessionId());
+				if(ngnAVSession != null){
+					ngnAVSession.setAECEnabled(false);
+				}
 			}
 
 			while (NgnProxyAudioProducer.super.mValid && mStarted) {
