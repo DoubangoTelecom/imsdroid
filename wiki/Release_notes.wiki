@@ -3,6 +3,11 @@
 
 <wiki:toc max_depth="2" />
 
+==2.0.481==
+ * Add support for Android ICS (4.0)
+ * Align with latest Doubango binaries (r685)
+ * Fix issue 278, issue 280, issue 298, issue 290, issue 206, issue 262, issue 312, issue 322 and issue 325.
+
 ==2.0.453-vp8==
  * First beta version with support for VP8 video codec (AMRv7-a only)
 
