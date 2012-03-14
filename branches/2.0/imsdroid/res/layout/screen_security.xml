@@ -5,16 +5,20 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/screen_security_linearLayout_srtp" android:layout_width="fill_parent" android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_security_textView_srtp_mode" android:text="SRTP Mode" android:textSize="16dp"></TextView>
+        <Spinner android:layout_height="wrap_content" android:id="@+id/screen_security_spinner_srtp_modes" android:layout_width="fill_parent"></Spinner>
+    </LinearLayout>
   
+
   
-  
-<LinearLayout android:id="@+id/screen_security_linearLayout_imsaka" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="5px">
-<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_amf" android:text="AMF" android:textSize="16px"></TextView>
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_amf" android:text="0x0000"></EditText><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Operator Id" android:textSize="16px" android:id="@+id/screen_security_textView_opid"></TextView>
+<LinearLayout android:id="@+id/screen_security_linearLayout_imsaka" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="5px" android:layout_below="@+id/screen_security_linearLayout_srtp">
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_amf" android:text="AMF" android:textSize="16dp"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_amf" android:text="0x0000"></EditText><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Operator Id" android:id="@+id/screen_security_textView_opid" android:textSize="16dp"></TextView>
 <EditText android:layout_height="wrap_content" android:text="0x00000000000000000000000000000000" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_opid"></EditText>
 </LinearLayout>
 
-<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_security_checkBox_tlsfiles" android:layout_width="fill_parent" android:text="TLS Certificates" android:layout_below="@+id/screen_security_linearLayout_imsaka"></CheckBox>
+<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_security_checkBox_tlsfiles" android:layout_width="fill_parent" android:text="TLS Certificates" android:layout_below="@+id/screen_security_linearLayout_imsaka" android:visibility="invisible"></CheckBox>
 
 <LinearLayout android:id="@+id/screen_security_linearLayout_tlsfiles" android:layout_height="wrap_content" android:orientation="vertical" android:layout_below="@+id/screen_security_checkBox_tlsfiles" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:visibility="invisible">
 <TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_privatekey" android:text="Private Key File" android:layout_marginTop="5px" android:layout_marginLeft="5px" android:layout_below="@+id/screen_security_checkBox_tlsfiles"></TextView>

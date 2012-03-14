@@ -18,4 +18,5 @@
         <include android:id="@+id/view_call_incall_audio_keyboard" layout="@layout/view_dialer_buttons" android:layout_weight="2" android:layout_margin="2px" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
         </LinearLayout>
     </SlidingDrawer>
+    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true" android:src="@drawable/secure_16" android:id="@+id/view_call_incall_audio_imageView_secure"></ImageView>
 </RelativeLayout>

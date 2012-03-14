@@ -25,6 +25,7 @@ import org.doubango.tinyWRAP.tdav_codec_id_t;
 import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
+import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
 
 
 public class NgnConfigurationEntry {
@@ -92,6 +93,7 @@ public class NgnConfigurationEntry {
 	public static final String MEDIA_AUDIO_PRODUCER_ATTENUATION = "MEDIA_AUDIO_PRODUCER_ATTENUATION." + TAG;
 	
 	// Security
+	public static final String SECURITY_SRTP_MODE = "SECURITY_SRTP_MODE." + TAG;
 	public static final String SECURITY_IMSAKA_AMF = "SECURITY_IMSAKA_AMF." + TAG;
 	public static final String SECURITY_IMSAKA_OPID = "SECURITY_IMSAKA_OPID." + TAG;
 	
@@ -165,7 +167,7 @@ public class NgnConfigurationEntry {
 	public static final int DEFAULT_NATT_STUN_PORT = 3478;
 	
 	// QoS
-    public static final int DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL = tmedia_bandwidth_level_t.tmedia_bl_unrestricted.swigValue();
+    public static final int DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL = tmedia_bandwidth_level_t.tmedia_bl_unrestricted.swigValue(); // should be String but do not change for backward compatibility
     public static final String DEFAULT_QOS_PRECOND_STRENGTH = tmedia_qos_strength_t.tmedia_qos_strength_none.toString();
     public static final String DEFAULT_QOS_PRECOND_TYPE = tmedia_qos_stype_t.tmedia_qos_stype_none.toString();
     public static final String DEFAULT_QOS_REFRESHER = "none";
@@ -190,6 +192,7 @@ public class NgnConfigurationEntry {
 	// Security
 	public static final String DEFAULT_SECURITY_IMSAKA_AMF = "0x0000";
 	public static final String DEFAULT_SECURITY_IMSAKA_OPID = "0x00000000000000000000000000000000";
+	public static final String DEFAULT_SECURITY_SRTP_MODE = tmedia_srtp_mode_t.tmedia_srtp_mode_none.toString();
 	
 	// XCAP
 	public static final boolean DEFAULT_XCAP_ENABLED = false;
