@@ -46,6 +46,7 @@ import org.doubango.tinyWRAP.ProxyVideoProducer;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
 import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
+import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.app.Activity;
@@ -150,6 +151,10 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetBandwidthLevel(
 							tmedia_bandwidth_level_t.swigToEnum(getConfigurationService().getInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL, NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL)
 				));
+		MediaSessionMgr.defaultsSetSRtpMode(tmedia_srtp_mode_t.valueOf(getConfigurationService().getString(
+				NgnConfigurationEntry.SECURITY_SRTP_MODE,
+				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_MODE)));
+		
 		// codecs, AEC, NoiseSuppression, Echo cancellation, ....
 		boolean aec         = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
 		boolean vad        = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_VAD, NgnConfigurationEntry.DEFAULT_GENERAL_VAD) ;

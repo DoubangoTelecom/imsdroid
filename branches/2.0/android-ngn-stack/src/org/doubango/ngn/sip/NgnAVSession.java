@@ -547,6 +547,14 @@ public class NgnAVSession extends NgnInviteSession{
 		return false;
 	}
 	
+	public boolean isSecure(){
+		final MediaSessionMgr mediaMgr;
+		if((mediaMgr = super.getMediaSessionMgr()) != null){
+			return (mediaMgr.sessionGetInt32(twrap_media_type_t.twrap_media_audiovideo, "srtp-enabled") != 0);
+		}
+		return false;
+	}
+	
 	// Doubango AEC for THIS session. Default value (for all sessions) is the one in "NgnConfigurationEntry.GENERAL_AEC" configuration entry.
 	public boolean setAECEnabled(boolean enabled){
 		final MediaSessionMgr mediaMgr;

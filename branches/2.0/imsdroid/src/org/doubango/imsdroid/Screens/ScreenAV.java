@@ -797,6 +797,9 @@ public class ScreenAV extends BaseScreen{
 		}
 		mTvInfo.setText(getString(R.string.string_incall));
 		
+		mViewInAudioCall.findViewById(R.id.view_call_incall_audio_imageView_secure)
+			.setVisibility(mAVSession.isSecure() ? View.VISIBLE : View.INVISIBLE);
+		
 		mMainLayout.removeAllViews();
 		mMainLayout.addView(mViewInAudioCall);
 		mCurrentView = ViewType.ViewInCall;
@@ -814,6 +817,9 @@ public class ScreenAV extends BaseScreen{
 		mTvInfo = null;
 		mMainLayout.removeAllViews();
 		mMainLayout.addView(mViewInCallVideo);
+		
+		mViewInCallVideo.findViewById(R.id.view_call_incall_video_imageView_secure)
+				.setVisibility(mAVSession.isSecure() ? View.VISIBLE : View.INVISIBLE);
 		
 		// Video Consumer
 		loadVideoPreview();

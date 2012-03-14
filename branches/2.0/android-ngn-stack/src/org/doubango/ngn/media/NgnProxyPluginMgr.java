@@ -25,6 +25,7 @@ import java.util.Hashtable;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
+import org.doubango.tinyWRAP.ProxyPlugin;
 import org.doubango.tinyWRAP.ProxyPluginMgr;
 import org.doubango.tinyWRAP.ProxyPluginMgrCallback;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
@@ -62,6 +63,10 @@ public class NgnProxyPluginMgr {
 	
 	private NgnProxyPluginMgr(){
 		
+	}
+	
+	public static ProxyPlugin findNativePlugin(BigInteger id){
+		return sPluginMgr.findPlugin(id);
 	}
 	
 	public static NgnProxyPlugin findPlugin(BigInteger id){
