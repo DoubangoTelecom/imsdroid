@@ -3,6 +3,13 @@
 
 <wiki:toc max_depth="2" />
 
+==2.0.484==
+ * Adds support for SRTP
+ * Enable TLS
+ * Fix crashes when ending video calls on some devices
+ * Adds support for more front facing cameras
+ * Fix issue 331
+
 ==2.0.481==
  * Add support for Android ICS (4.0)
  * Align with latest Doubango binaries (r685)
