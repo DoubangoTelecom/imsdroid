@@ -139,6 +139,17 @@ public class NgnCameraProducer {
 		return NgnCameraProducer.instance;
 	}
 	
+	public static void releaseCamera(Camera camera){
+		if(camera != null){
+			camera.stopPreview();
+			NgnCameraProducer.deInitializeCallbacks(camera);
+			camera.release();
+			if(camera == NgnCameraProducer.instance){
+				NgnCameraProducer.instance = null;
+			}
+		}
+	}
+	
 	public static void releaseCamera(){
 		if(NgnCameraProducer.instance != null){
 			NgnCameraProducer.instance.stopPreview();
@@ -214,31 +225,39 @@ public class NgnCameraProducer {
 	}
 	
 	private static void initializeCallbacks(PreviewCallback callback){
-		if(NgnCameraProducer.instance != null){
+		initializeCallbacks(callback, NgnCameraProducer.instance);
+	}
+	
+	private static void initializeCallbacks(PreviewCallback callback, Camera camera){
+		if(camera != null){
 			if(NgnCameraProducer.setPreviewCallbackWithBufferMethod != null){
 				try {
-					NgnCameraProducer.setPreviewCallbackWithBufferMethod.invoke(NgnCameraProducer.instance, callback);
+					NgnCameraProducer.setPreviewCallbackWithBufferMethod.invoke(camera, callback);
 				} catch (Exception e) {
 					Log.e(NgnCameraProducer.TAG, e.toString());
 				}
 			}
 			else{
-				NgnCameraProducer.instance.setPreviewCallback(callback);
+				camera.setPreviewCallback(callback);
 			}
 		}
 	}
 	
 	private static void deInitializeCallbacks(){
-		if(NgnCameraProducer.instance != null){
+		deInitializeCallbacks(NgnCameraProducer.instance);
+	}
+	
+	private static void deInitializeCallbacks(Camera camera){
+		if(camera!= null){
 			if(NgnCameraProducer.setPreviewCallbackWithBufferMethod != null){
 				try {
-					NgnCameraProducer.setPreviewCallbackWithBufferMethod.invoke(NgnCameraProducer.instance, new Object[]{ null });
+					NgnCameraProducer.setPreviewCallbackWithBufferMethod.invoke(camera, new Object[]{ null });
 				} catch (Exception e) {
 					Log.e(NgnCameraProducer.TAG, e.toString());
 				}
 			}
 			else{
-				NgnCameraProducer.instance.setPreviewCallback(null);
+				camera.setPreviewCallback(null);
 			}
 		}
 	}

@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
@@ -35,6 +36,7 @@ import org.doubango.tinyWRAP.ProxyVideoProducerCallback;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceHolder;
@@ -57,9 +59,12 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	private final MyProxyVideoProducerCallback mCallback;
 	private Context mContext;
 	private MyProxyVideoProducerPreview mPreview;
-	private int mWidth;
-	private int mHeight;
+	private int mWidth; // negotiated width
+	private int mHeight; // negotiated height
 	private int mFps;
+	private int mFrameWidth; // camera picture output width
+	private int mFrameHeight; // camera picture output height
+	
 	private ByteBuffer mVideoFrame;
 	
 	public NgnProxyVideoProducer(BigInteger id, ProxyVideoProducer producer){
@@ -100,10 +105,9 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	public void pushBlankPacket(){
 		if(super.mValid && mProducer != null){
 			if(mVideoFrame == null){
-				final float capacity = (float)(mWidth * mHeight) * 1.5f/* (3/2) */;
-				mVideoFrame = ByteBuffer.allocateDirect((int)capacity);
+				mVideoFrame = ByteBuffer.allocateDirect((mWidth * mHeight * 3) >> 1);
 			}
-			final ByteBuffer buffer = ByteBuffer.allocateDirect(mVideoFrame .capacity());
+			final ByteBuffer buffer = ByteBuffer.allocateDirect(mVideoFrame.capacity());
 			mProducer.push(buffer, buffer.capacity());
 		}
 	}
@@ -121,7 +125,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	}
 	
 	public int getTerminalRotation(){
-		android.content.res.Configuration conf = NgnApplication.getContext().getResources().getConfiguration();
+		final android.content.res.Configuration conf = NgnApplication.getContext().getResources().getConfiguration();
 		int     terminalRotation  = 0 ;
 		switch(conf.orientation){
 			case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
@@ -288,11 +292,11 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		super.mPaused = pause;
 	}
 	
-	private int prepareCallback(int width, int height, int fps){
+	private synchronized int prepareCallback(int width, int height, int fps){
 		Log.d(NgnProxyVideoProducer.TAG, "prepareCallback("+width+","+height+","+fps+")");
 		
-		mWidth = width;
-		mHeight = height;
+		mFrameWidth = mWidth = width;
+		mFrameHeight = mHeight = height;
 		mFps = fps;
 		
 		super.mPrepared = true;
@@ -300,44 +304,68 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		return 0;
     }
 
-    private int startCallback(){
+    private synchronized int startCallback(){
     	Log.d(TAG, "startCallback");
 		this.mStarted = true;
+		
+		if(mPreview != null){
+			startCameraPreview(mPreview.getCamera());
+    	}
 		return 0;
     }
 
-    private int pauseCallback(){
+    private synchronized int pauseCallback(){
     	Log.d(TAG, "pauseCallback");
     	setOnPause(true);
     	return 0;
     }
 
-    private int stopCallback(){
+    private synchronized int stopCallback(){
     	Log.d(TAG, "stopCallback");
     	
-		mPreview = null;
-		mContext = null;
+    	if(mPreview != null){
+    		stopCameraPreview(mPreview.getCamera());
+    	}
+    	
 		super.mStarted = false;
 		
 		return 0;
     }
-	
-    private void startCameraPreview(Camera camera){
+	    
+    private Size getCameraBestPreviewSize(Camera camera){
+    	final List<Size> prevSizes = camera.getParameters().getSupportedPreviewSizes();
+    	
+    	Size minSize = null;
+    	int minScore = Integer.MAX_VALUE;
+    	for(Size size : prevSizes){
+    		final int score = Math.abs(size.width - mWidth) + Math.abs(size.height - mHeight);
+    		if(minScore > score){
+    			minScore = score;
+    			minSize = size;
+    		}
+    	}
+    	return minSize;
+    }
+    
+    private synchronized void startCameraPreview(Camera camera){
 		if(camera != null && mProducer != null){
-			try{
-				// allocate buffer
-				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", mWidth, mHeight));
-				final float capacity = (float)(mWidth * mHeight)*1.5f/* (3/2) */;
-				mVideoFrame = ByteBuffer.allocateDirect((int)capacity);
-				
+			try{				
 				Camera.Parameters parameters = camera.getParameters();
-				parameters.setPreviewSize(mWidth, mHeight);
+				final Size prevSize = getCameraBestPreviewSize(camera);
+				parameters.setPreviewSize(prevSize.width, prevSize.height);
 				camera.setParameters(parameters);
 				
 				// alert the framework that we cannot respect the negotiated size
-				//if(mProducer != null && super.isValid() && (mWidth != previewWidth || mHeight != previewHeight)){
-					//mProducer.setActualCameraOutputSize(previewWidth, previewHeight);
-				//}
+				if(mProducer != null && prevSize != null && super.isValid() && (mWidth != prevSize.width || mHeight != prevSize.height)){
+					mFrameWidth = prevSize.width;
+					mFrameHeight = prevSize.height;
+					mProducer.setActualCameraOutputSize(mFrameWidth, mFrameHeight);
+				}
+				
+				// allocate buffer
+				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", mFrameWidth, mFrameHeight));
+				mVideoFrame = ByteBuffer.allocateDirect((mFrameWidth * mFrameHeight * 3) >> 1);
+				
 			} catch(Exception e){
 				Log.e(TAG, e.toString());
 			}
@@ -352,12 +380,6 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				} else {
 					parameters.set("orientation", "portrait");
 				}
-				
-				// looks like it can be removed
-				//if (NgnApplication.getSDKVersion() >= 9) {
-				//	int rotation = compensCamRotation(false);
-				//	parameters.setRotation(rotation);
-				//}
 
 				camera.setParameters(parameters);
 			} catch (Exception e) {
@@ -380,18 +402,29 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	    }
     }
     
+    private synchronized void stopCameraPreview(Camera camera){
+    	if(camera != null){
+    		try{
+    			camera.stopPreview();
+    		}catch (Exception e) {
+				Log.e(TAG, e.toString());
+			}
+    	}
+    }
+    
 	private PreviewCallback previewCallback = new PreviewCallback() {
 	  public void onPreviewFrame(byte[] _data, Camera _camera) {
-		  if(NgnProxyVideoProducer.super.mValid && mVideoFrame != null){
-			  mVideoFrame.put(_data);
-			  mProducer.push(mVideoFrame, mVideoFrame.capacity());
-			  mVideoFrame.rewind();
-			
-				if(NgnProxyVideoProducer.sAddCallbackBufferSupported){
-					NgnCameraProducer.addCallbackBuffer(_camera, _data);
+		  if(mStarted){
+			  if(NgnProxyVideoProducer.super.mValid && mVideoFrame != null && _data != null){
+				  mVideoFrame.put(_data);
+				  mProducer.push(mVideoFrame, mVideoFrame.capacity());
+				  mVideoFrame.rewind();
 				}
-			}
-	  	}
+			  if(NgnProxyVideoProducer.sAddCallbackBufferSupported){
+				  NgnCameraProducer.addCallbackBuffer(_camera, _data);
+			  }
+		 }
+	 }
 	};
     
     /***
@@ -400,6 +433,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	class MyProxyVideoProducerPreview extends SurfaceView implements SurfaceHolder.Callback {
 		private SurfaceHolder mHolder;
 		private final NgnProxyVideoProducer myProducer;
+		private Camera mCamera;
 	
 		MyProxyVideoProducerPreview(NgnProxyVideoProducer _producer) {
 			super(_producer.mContext);
@@ -409,11 +443,15 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 			mHolder.addCallback(this);
 			mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		}
+		
+		public Camera getCamera(){
+			return mCamera;
+		}
 	
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
 			try {
-				/*final Camera camera =*/ NgnCameraProducer.openCamera(myProducer.mFps, 
+				mCamera = NgnCameraProducer.openCamera(myProducer.mFps, 
 						myProducer.mWidth, 
 						myProducer.mHeight, 
 						mHolder,
@@ -429,7 +467,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			Log.d(TAG,"Destroy Preview");
 			try{
-				NgnCameraProducer.releaseCamera();
+				NgnCameraProducer.releaseCamera(mCamera);
 			}
 			catch (Exception exception) {
 				Log.e(TAG, exception.toString());
@@ -439,9 +477,10 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			Log.d(TAG,"Surface Changed Callback");
-			final Camera camera = NgnCameraProducer.getCamera();
 			try{
-				myProducer.startCameraPreview(camera);
+				if(mCamera != null){
+					myProducer.startCameraPreview(mCamera);
+				}
 			}
 			catch (Exception exception) {
 				Log.e(TAG, exception.toString());

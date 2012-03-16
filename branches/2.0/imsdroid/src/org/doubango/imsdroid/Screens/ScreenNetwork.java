@@ -47,7 +47,7 @@ public class ScreenNetwork extends BaseScreen {
 	private RadioButton mRbIPv4;
 	private RadioButton mRbIPv6;
 	
-	private final static String[] sSpinnerTransportItems = new String[] {NgnConfigurationEntry.DEFAULT_NETWORK_TRANSPORT.toUpperCase(), "TCP", /*"TLS", "SCTP"*/};
+	private final static String[] sSpinnerTransportItems = new String[] {NgnConfigurationEntry.DEFAULT_NETWORK_TRANSPORT.toUpperCase(), "TCP", "TLS"/*, "SCTP"*/};
 	private final static String[] sSpinnerProxydiscoveryItems = new String[] {NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_DISCOVERY, NgnConfigurationEntry.PCSCF_DISCOVERY_DNS_SRV/*, "DHCPv4/v6", "Both"*/};
 	
 	public ScreenNetwork() {
