@@ -37,4 +37,5 @@ public enum NgnInviteEventTypes {
     REMOTE_HOLD,
     REMOTE_RESUME,
     SIP_RESPONSE,
+    REMOTE_DEVICE_INFO_CHANGED,
 }

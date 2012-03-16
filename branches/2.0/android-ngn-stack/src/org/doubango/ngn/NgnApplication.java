@@ -383,14 +383,25 @@ public class NgnApplication extends Application{
                 ;
     }
     
+    
+    // Requires 'System.load("libutils.so");' to be called first
+    //public static boolean isARMv7WithoutNeon(){
+    //	final CpuFamily_t family = AndroidUtils.getCpuFamily();
+    //	if(family == CpuFamily_t.ARM){
+    //		final CpuFeatures_t features =  AndroidUtils.getCpuFeatures();
+    //		return ((features.swigValue() & CpuFeatures_t.ARMv7.swigValue()) != 0) && ((features.swigValue() & CpuFeatures_t.NEON.swigValue()) == 0);
+    //	}
+    //	return false;
+    //}
+    
     public static boolean isARMv7WithoutNeon(){
-    	final String abi = NgnApplication.getABI();
-    	final String model = Build.MODEL;
-    	return abi.equals("armeabi-v7a") && 
-    	(
-    			model.equalsIgnoreCase("<your first model>") ||
-    			model.equalsIgnoreCase("<your second model>")
-    	);
+        final String abi = NgnApplication.getABI();
+        final String model = Build.MODEL;
+        return abi.equals("armeabi-v7a") && 
+        (
+                        model.equalsIgnoreCase("<your first model>") ||
+                        model.equalsIgnoreCase("<your second model>")
+        );
     }
     
     /**

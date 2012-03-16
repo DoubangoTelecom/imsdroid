@@ -39,4 +39,6 @@ public class NgnContentType {
 	public final static String SMS_3GPP = "application/vnd.3gpp.sms";
 	
 	public final static String JSON = "application/json";
+	
+	public final static String DOUBANGO_DEVICE_INFO = "doubango/device-info";
 }

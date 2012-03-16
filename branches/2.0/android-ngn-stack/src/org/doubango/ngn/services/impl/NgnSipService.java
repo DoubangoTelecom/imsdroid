@@ -34,6 +34,7 @@ import org.doubango.ngn.events.NgnRegistrationEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventTypes;
 import org.doubango.ngn.events.NgnSubscriptionEventArgs;
 import org.doubango.ngn.events.NgnSubscriptionEventTypes;
+import org.doubango.ngn.model.NgnDeviceInfo.Orientation;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnNetworkService;
 import org.doubango.ngn.services.INgnSipService;
@@ -81,6 +82,7 @@ import org.doubango.tinyWRAP.tinyWRAPConstants;
 import org.doubango.tinyWRAP.tsip_invite_event_type_t;
 import org.doubango.tinyWRAP.tsip_message_event_type_t;
 import org.doubango.tinyWRAP.tsip_options_event_type_t;
+import org.doubango.tinyWRAP.tsip_request_type_t;
 import org.doubango.tinyWRAP.tsip_subscribe_event_type_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 import org.doubango.tinyWRAP.twrap_sms_type_t;
@@ -759,6 +761,36 @@ implements INgnSipService, tinyWRAPConstants {
 
                 case tsip_i_request:
                     {
+                    	final SipMessage sipMessage = e.getSipMessage();
+                    	if(sipMessage != null && ((mySession = NgnAVSession.getSession(session.getId())) != null)){
+                    		if(sipMessage.getRequestType() == tsip_request_type_t.tsip_INFO){
+                    			final String contentType = sipMessage.getSipHeaderValue("c");
+                    			if(NgnStringUtils.equals(contentType, NgnContentType.DOUBANGO_DEVICE_INFO, true)){
+                    				final byte content[] = sipMessage.getSipContent();
+                    				if(content != null){
+                    					final String values[] = new String(content).split("\r\n");
+                    					for(String value : values){
+                    						if(value == null) continue;
+                    						final String kvp[] = value.split(":");
+                    						if(kvp.length == 2){
+                    							if(NgnStringUtils.equals(kvp[0], "orientation", true)){
+                    								if(NgnStringUtils.equals(kvp[1], "landscape", true)){
+                    									((NgnInviteSession)mySession).getRemoteDeviceInfo().setOrientation(Orientation.LANDSCAPE);
+                    								}
+                    								else if(NgnStringUtils.equals(kvp[1], "portrait", true)){
+                    									((NgnInviteSession)mySession).getRemoteDeviceInfo().setOrientation(Orientation.PORTRAIT);
+                    								}
+                    							}
+                    							else if(NgnStringUtils.equals(kvp[0], "lang", true)){
+                    								((NgnInviteSession)mySession).getRemoteDeviceInfo().setLang(kvp[1]);
+                    							}
+                    						}
+                    					}
+                    					mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.REMOTE_DEVICE_INFO_CHANGED, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                    				}
+                    			}
+                    		}
+                    	}
                         break;
                     }
                 case tsip_m_early_media:

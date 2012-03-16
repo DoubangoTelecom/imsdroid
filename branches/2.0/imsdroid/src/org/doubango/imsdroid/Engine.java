@@ -60,7 +60,7 @@ public class Engine extends NgnEngine{
 	//		is changed to avoid compression issues on Android versions prior to 2.3. For more information: http://ponystyle.com/blog/2010/03/26/dealing-with-asset-compression-in-android-apps/
 	// 2. Uncomment code from line 73 (if(NgnApplication.isARMv7WithoutNeon())....) to line 106
 	// 3. Change "NgnApplication.isARMv7WithoutNeon()" to add a device model which is known to have this issue.
-	static {
+	static {		
 		String libPath = String.format("%s/%s", Engine.LIBS_FOLDER, Engine.LIB_NAME);
 		/*if(NgnApplication.isARMv7WithoutNeon()){
 			final String armv5LibPath = String.format("%s/%s", Engine.DATA_FOLDER, Engine.LIB_ARMV5TE_NAME);

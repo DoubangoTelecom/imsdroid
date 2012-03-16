@@ -45,7 +45,9 @@ public class NgnConfigurationEntry {
 	public static final String GENERAL_AEC = "GENERAL_AEC."+ TAG ;
 	public static final String GENERAL_VAD = "GENERAL_VAD."+ TAG ;	
 	public static final String GENERAL_NR = "GENERAL_NR."+ TAG ;	
-	public static final String GENERAL_ECHO_TAIL = "GENERAL_ECHO_TAIL."+ TAG ;
+	public static final String GENERAL_ECHO_TAIL = "GENERAL_ECHO_TAIL." + TAG ;
+	public static final String GENERAL_SEND_DEVICE_INFO = "GENERAL_SEND_DEVICE_INFO" + TAG;
+	
 	// Identity
 	public static final String IDENTITY_DISPLAY_NAME = "IDENTITY_DISPLAY_NAME." + TAG;
 	public static final String IDENTITY_IMPU = "IDENTITY_IMPU." + TAG;
@@ -136,6 +138,7 @@ public class NgnConfigurationEntry {
 	public static final boolean DEFAULT_GENERAL_VAD = false; // speex-dsp don't support VAD for fixed-point implementation
 	public static final boolean DEFAULT_GENERAL_NR = true;
 	public static final int DEFAULT_GENERAL_ECHO_TAIL = 500;
+	public static final boolean DEFAULT_GENERAL_SEND_DEVICE_INFO = false;
 	
 	//	Identity
 	public static final String DEFAULT_IDENTITY_DISPLAY_NAME = "John Doe";

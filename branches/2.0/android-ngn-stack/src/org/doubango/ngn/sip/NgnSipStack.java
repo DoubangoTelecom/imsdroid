@@ -27,6 +27,8 @@ import org.doubango.ngn.services.impl.NgnNetworkService.DNS_TYPE;
 import org.doubango.tinyWRAP.SipCallback;
 import org.doubango.tinyWRAP.SipStack;
 
+import android.os.Build;
+
 /**
  * SIP/IMS Stack
  */
@@ -70,9 +72,10 @@ public class NgnSipStack extends SipStack{
         super.addHeader("Allow", "INVITE, ACK, CANCEL, BYE, MESSAGE, OPTIONS, NOTIFY, PRACK, UPDATE, REFER");
         super.addHeader("Privacy", "none");
         super.addHeader("P-Access-Network-Info", "ADSL;utran-cell-id-3gpp=00000000");
-        super.addHeader("User-Agent", String.format("IM-client/OMA1.0 android-ngn-stack/v%s (doubango r%s)", 
+        super.addHeader("User-Agent", String.format("IM-client/OMA1.0 android-ngn-stack/v%s (doubango r%s, %s)", 
 				NgnApplication.getVersionName(), 
-				NgnApplication.getContext().getString(R.string.doubango_revision)));
+				NgnApplication.getContext().getString(R.string.doubango_revision),
+				Build.MODEL));
 	}
 
 	@Override

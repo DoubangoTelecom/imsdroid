@@ -32,6 +32,7 @@ import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
 import org.doubango.ngn.events.NgnInviteEventArgs;
+import org.doubango.ngn.events.NgnInviteEventTypes;
 import org.doubango.ngn.events.NgnMediaPluginEventArgs;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnContact;
@@ -41,6 +42,7 @@ import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.sip.NgnSipStack;
 import org.doubango.ngn.sip.NgnInviteSession.InviteState;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.ngn.utils.NgnContentType;
 import org.doubango.ngn.utils.NgnGraphicsUtils;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnTimer;
@@ -79,8 +81,11 @@ import android.widget.TextView;
 public class ScreenAV extends BaseScreen{
 	private static final String TAG = ScreenAV.class.getCanonicalName();
 	private static final SimpleDateFormat sDurationTimerFormat = new SimpleDateFormat("mm:ss");
-	private static int sCountBlankPacket = 0;
-	private static int sLastRotation = -1;
+	
+	private static int mCountBlankPacket;
+	private static int mLastRotation; // values: degrees
+	private boolean mSendDeviceInfo;
+	private int mLastOrientation; // values: portrait, landscape...
 	
 	private String mRemotePartyDisplayName;
 	private Bitmap mRemotePartyPhoto;
@@ -181,6 +186,11 @@ public class ScreenAV extends BaseScreen{
 		
 		mIsVideoCall = mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video;
 		
+		mSendDeviceInfo = getEngine().getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_SEND_DEVICE_INFO, NgnConfigurationEntry.DEFAULT_GENERAL_SEND_DEVICE_INFO);
+		mCountBlankPacket = 0;
+		mLastRotation = -1;
+		mLastOrientation = -1;
+		
 		mInflater = LayoutInflater.from(this);
 		
 		mBroadCastRecv = new BroadcastReceiver() {
@@ -199,29 +209,45 @@ public class ScreenAV extends BaseScreen{
 		intentFilter.addAction(NgnMediaPluginEventArgs.ACTION_MEDIA_PLUGIN_EVENT);
 	    registerReceiver(mBroadCastRecv, intentFilter);
 	    
-	    mListener = new OrientationEventListener(IMSDroid.getContext(), SensorManager.SENSOR_DELAY_NORMAL) {
-			@Override
-			public void onOrientationChanged(int orient) {
-				try {				
-					if ((orient > 345 || orient <15)  ||
-							(orient > 75 && orient <105)   ||
-							(orient > 165 && orient < 195) ||
-							(orient > 255 && orient < 285)){
-						int rotation = mAVSession.compensCamRotation(true);
-						if (rotation != sLastRotation) {
-							Log.d(ScreenAV.TAG,"Received Screen Orientation Change setRotation["+ String.valueOf(rotation)+ "]");						
-							applyCamRotation(rotation);
+	    if(mIsVideoCall){
+		    mListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+				@Override
+				public void onOrientationChanged(int orient) {
+					try {				
+						if ((orient > 345 || orient <15)  ||
+								(orient > 75 && orient <105)   ||
+								(orient > 165 && orient < 195) ||
+								(orient > 255 && orient < 285)){
+							int rotation = mAVSession.compensCamRotation(true);
+							if (rotation != mLastRotation) {
+								Log.d(ScreenAV.TAG,"Received Screen Orientation Change setRotation["+ String.valueOf(rotation)+ "]");						
+								applyCamRotation(rotation);
+								if(mSendDeviceInfo && mAVSession != null){
+									final android.content.res.Configuration conf = getResources().getConfiguration();
+									if(conf.orientation != mLastOrientation){
+										mLastOrientation = conf.orientation;
+										switch(mLastOrientation){
+											case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
+												mAVSession.sendInfo("orientation:landscape\r\nlang:fr-FR\r\n", NgnContentType.DOUBANGO_DEVICE_INFO);
+												break;
+											case android.content.res.Configuration.ORIENTATION_PORTRAIT:
+												mAVSession.sendInfo("orientation:portrait\r\nlang:fr-FR\r\n", NgnContentType.DOUBANGO_DEVICE_INFO);
+												break;
+										}
+									}
+								}
+							}
 						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
+			};
+			if(!mListener.canDetectOrientation()){
+				Log.w(TAG, "canDetectOrientation() is equal to false");
 			}
-		};
-		if(!mListener.canDetectOrientation()){
-			Log.w(TAG, "canDetectOrientation() is equal to false");
-		}
-		
+	    }
+			
 		mMainLayout = (RelativeLayout)findViewById(R.id.screen_av_relativeLayout);
         loadView();
         
@@ -269,7 +295,7 @@ public class ScreenAV extends BaseScreen{
 			mWakeLock.release();
 		}
 		
-		if (mListener.canDetectOrientation()) {
+		if (mListener != null && mListener.canDetectOrientation()) {
 			mListener.disable();
 		}
 	}
@@ -287,7 +313,7 @@ public class ScreenAV extends BaseScreen{
 			mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
 		}
 
-		if (mListener.canDetectOrientation()) {
+		if (mListener != null && mListener.canDetectOrientation()) {
 			mListener.enable();
 		}
 	}
@@ -565,7 +591,7 @@ public class ScreenAV extends BaseScreen{
 	
 	private void applyCamRotation(int rotation){
 		if(mAVSession != null){
-			sLastRotation = rotation;
+			mLastRotation = rotation;
 			switch (rotation) {
 				case 0:
 				case 90:
@@ -679,6 +705,11 @@ public class ScreenAV extends BaseScreen{
 					if(!mIsVideoCall && mWakeLock != null && mWakeLock.isHeld()){
 						mWakeLock.release();
 			        }
+					
+					if(args.getEventType() == NgnInviteEventTypes.REMOTE_DEVICE_INFO_CHANGED){
+						Log.d(TAG, String.format("Remote device info changed: orientation: %s", mAVSession.getRemoteDeviceInfo().getOrientation()));
+					}
+					
 					break;
 					
 				case TERMINATING:
@@ -858,9 +889,6 @@ public class ScreenAV extends BaseScreen{
 	}
 	
 	private void loadTermView(String phrase){
-		if(mCurrentView == ViewType.ViewTermwait){
-			return;
-		}
 		Log.d(TAG, "loadTermView()");
 		
 		if(mViewTermwait == null){
@@ -868,6 +896,13 @@ public class ScreenAV extends BaseScreen{
 			loadKeyboard(mViewTermwait);
 		}
 		mTvInfo = (TextView)mViewTermwait.findViewById(R.id.view_call_trying_textView_info);
+		mTvInfo.setText(NgnStringUtils.isNullOrEmpty(phrase) ? getString(R.string.string_call_terminated) : phrase);
+		
+		// loadTermView() could be called twice (onTermwait() and OnTerminated) and this is why we need to
+		// update the info text for both
+		if(mCurrentView == ViewType.ViewTermwait){
+			return;
+		}
 		
 		final TextView tvRemote = (TextView)mViewTermwait.findViewById(R.id.view_call_trying_textView_remote);
 		final ImageView ivAvatar = (ImageView)mViewTermwait.findViewById(R.id.view_call_trying_imageView_avatar);
@@ -879,7 +914,6 @@ public class ScreenAV extends BaseScreen{
 		if(mRemotePartyPhoto != null){
 			ivAvatar.setImageBitmap(mRemotePartyPhoto);
 		}
-		mTvInfo.setText(NgnStringUtils.isNullOrEmpty(phrase) ? getString(R.string.string_call_terminated) : phrase);
 		
 		mMainLayout.removeAllViews();
 		mMainLayout.addView(mViewTermwait);
@@ -918,16 +952,16 @@ public class ScreenAV extends BaseScreen{
 	private final TimerTask mTimerTaskBlankPacket = new TimerTask(){
 		@Override
 		public void run() {	
-			Log.d(TAG,"Resending Blank Packet " +String.valueOf(sCountBlankPacket));
-			if (sCountBlankPacket < 3) {
+			Log.d(TAG,"Resending Blank Packet " +String.valueOf(mCountBlankPacket));
+			if (mCountBlankPacket < 3) {
 				if (mAVSession != null) {
 					mAVSession.pushBlankPacket();
 				}
-				sCountBlankPacket++;
+				mCountBlankPacket++;
 			}
 			else {
 				cancel();
-				sCountBlankPacket=0;
+				mCountBlankPacket=0;
 			}
 		}
 	};
@@ -935,7 +969,7 @@ public class ScreenAV extends BaseScreen{
 	private void cancelBlankPacket(){
 		if(mTimerBlankPacket != null){
 			mTimerBlankPacket.cancel();
-			sCountBlankPacket=0;
+			mCountBlankPacket=0;
 		}
 	}
 	

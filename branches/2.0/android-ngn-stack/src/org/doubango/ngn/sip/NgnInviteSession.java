@@ -21,12 +21,15 @@
 */
 package org.doubango.ngn.sip;
 
+import java.nio.ByteBuffer;
 import java.util.Date;
 
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.media.NgnMediaType;
+import org.doubango.ngn.model.NgnDeviceInfo;
 import org.doubango.ngn.model.NgnHistoryEvent;
 import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
+import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.InviteSession;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 
@@ -44,6 +47,7 @@ public abstract class NgnInviteSession extends NgnSipSession{
     protected boolean mLocalHold;
     private boolean mEventAdded;
     private boolean mEventIncoming;
+    private final NgnDeviceInfo mRemoteDeviceInfo;
 
     public enum InviteState{
         NONE,
@@ -63,6 +67,7 @@ public abstract class NgnInviteSession extends NgnSipSession{
 	public NgnInviteSession(NgnSipStack sipStack) {
 		super(sipStack);
 		
+		mRemoteDeviceInfo = new NgnDeviceInfo();
 		mState = InviteState.NONE;
 	}
 	
@@ -146,6 +151,35 @@ public abstract class NgnInviteSession extends NgnSipSession{
 	
 	public void setRemoteHold(boolean remoteHold){
 		mRemoteHold = remoteHold;
+	}
+	
+	public NgnDeviceInfo getRemoteDeviceInfo(){
+		return mRemoteDeviceInfo;
+	}
+	
+	public boolean sendInfo(ByteBuffer content, String contentType){
+		if(content != null){
+			ActionConfig config = new ActionConfig();
+			config.addHeader("Content-Type", contentType);
+			boolean ret = ((InviteSession)this.getSession()).sendInfo(content, content.capacity(), config);
+			config.delete();
+			return ret;
+		}
+		return false;
+	}
+	
+	public boolean sendInfo(String content, String contentType){
+		if(content != null){
+			ActionConfig config = new ActionConfig();
+			config.addHeader("Content-Type", contentType);
+			final byte[] bytes = content.getBytes();
+	        ByteBuffer payload = ByteBuffer.allocateDirect(bytes.length);
+	        payload.put(bytes);
+			boolean ret = ((InviteSession)this.getSession()).sendInfo(payload, payload.capacity(), config);
+			config.delete();
+			return ret;
+		}
+		return false;
 	}
      
      /**
