@@ -72,7 +72,7 @@ public class NgnSipStack extends SipStack{
         super.addHeader("Allow", "INVITE, ACK, CANCEL, BYE, MESSAGE, OPTIONS, NOTIFY, PRACK, UPDATE, REFER");
         super.addHeader("Privacy", "none");
         super.addHeader("P-Access-Network-Info", "ADSL;utran-cell-id-3gpp=00000000");
-        super.addHeader("User-Agent", String.format("IM-client/OMA1.0 android-ngn-stack/v%s (doubango r%s, %s)", 
+        super.addHeader("User-Agent", String.format("IM-client/OMA1.0 android-ngn-stack/v%s (doubango r%s - %s)", 
 				NgnApplication.getVersionName(), 
 				NgnApplication.getContext().getString(R.string.doubango_revision),
 				Build.MODEL));
