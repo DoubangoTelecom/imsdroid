@@ -4,15 +4,15 @@
 <wiki:toc max_depth="2" />
 
 ==2.0.487==
-- ICE (Interactive Connectivity Establishment): Full implementation of RFC 5245 for NAT Traversal
-- 1080p (Full HD): all platforms supports full HD video negotiation. Off course it depends on your CPU and network bandwidth. The preferred video size could be changed from the QoS/QoS screen.
-- Adaptive video jitter buffer: A video jitter buffer with advanced features like error correction, packet loss retransmission, delay recovery...
-- RTP/AVPF profile as per RFC 4585
-- RTCP: Full support for RTCP (3550) and many extensions such as: PLI (RFC 4585), SLI (RFC 4585), RPSI (RFC 4585), FIR (RFC 5104), NACK (4585), TMMBN (RFC 5104)...
-- rtcp-mux as per 5761
-- Negotiation of Generic Image Attributes in the SDP as per RFC 6236
-- Source-Specific Media Attributes in SDP as per draft-lennox-mmusic-sdp-source-attributes-01
-- Explicit Call Transfer as per 3GPP TS 24.629
+ * ICE (Interactive Connectivity Establishment): Full implementation of RFC 5245 for NAT Traversal
+ * 1080p (Full HD): all platforms supports full HD video negotiation. Off course it depends on your CPU and network bandwidth. The preferred video size could be changed from the QoS/QoS screen.
+ * Adaptive video jitter buffer: A video jitter buffer with advanced features like error correction, packet loss retransmission, delay recovery...
+ * RTP/AVPF profile as per RFC 4585
+ * RTCP: Full support for RTCP (3550) and many extensions such as: PLI (RFC 4585), SLI (RFC 4585), RPSI (RFC 4585), FIR (RFC 5104), NACK (4585), TMMBN (RFC 5104)...
+ * rtcp-mux as per 5761
+ * Negotiation of Generic Image Attributes in the SDP as per RFC 6236
+ * Source-Specific Media Attributes in SDP as per draft-lennox-mmusic-sdp-source-attributes-01
+ * Explicit Call Transfer as per 3GPP TS 24.629
 
 ==2.0.484==
  * Adds support for SRTP
