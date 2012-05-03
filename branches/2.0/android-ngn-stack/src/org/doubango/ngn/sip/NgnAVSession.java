@@ -103,6 +103,22 @@ public class NgnAVSession extends NgnInviteSession{
             return avSession;
         }
     }
+    
+    public static boolean handleMediaUpdate(long id, twrap_media_type_t newMediaType){
+    	NgnAVSession avSession = NgnAVSession.getSession(id);
+        if (avSession != null){
+        	avSession.mConsumersAndProducersInitialzed = false;
+        	avSession.initializeConsumersAndProducers();
+            switch (newMediaType){
+                case twrap_media_audio: avSession.mMediaType = NgnMediaType.Audio; return true;
+                case twrap_media_video: avSession.mMediaType = NgnMediaType.Video; return true;
+                case twrap_media_audiovideo: avSession.mMediaType = NgnMediaType.AudioVideo; return true;
+                default: return false; // For now MSRP update is not suportted
+            }
+        }
+        
+        return false;
+    }
 
     /**
      * Creates an outgoing audio/video call session.

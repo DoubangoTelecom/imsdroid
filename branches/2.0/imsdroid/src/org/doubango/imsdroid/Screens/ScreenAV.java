@@ -32,7 +32,6 @@ import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
 import org.doubango.ngn.events.NgnInviteEventArgs;
-import org.doubango.ngn.events.NgnInviteEventTypes;
 import org.doubango.ngn.events.NgnMediaPluginEventArgs;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnContact;
@@ -637,9 +636,9 @@ public class ScreenAV extends BaseScreen{
 			switch(args.getEventType()){
 				case STARTED_OK: //started or restarted (e.g. reINVITE)
 				{
-					if(args.getMediaType() == NgnMediaType.Video && mCurrentView == ViewType.ViewInCall){
-						loadVideoPreview();
-					}
+					mIsVideoCall = (mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video);
+					loadView();
+					
 					break;
 				}
 				case PREPARED_OK:
@@ -695,21 +694,36 @@ public class ScreenAV extends BaseScreen{
 						loadInCallView();
 					}
 					// Send blank packets to open NAT pinhole
-					if(mAVSession != null && mIsVideoCall){
+					if(mAVSession != null){
 						applyCamRotation(mAVSession.compensCamRotation(true));
 						mTimerBlankPacket.schedule(mTimerTaskBlankPacket, 0, 250);
+						if(!mIsVideoCall){
+							mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
+						}
 					}
-					mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
 					
 					// release power lock if not video call
 					if(!mIsVideoCall && mWakeLock != null && mWakeLock.isHeld()){
 						mWakeLock.release();
 			        }
 					
-					if(args.getEventType() == NgnInviteEventTypes.REMOTE_DEVICE_INFO_CHANGED){
-						Log.d(TAG, String.format("Remote device info changed: orientation: %s", mAVSession.getRemoteDeviceInfo().getOrientation()));
-					}
-					
+					switch(args.getEventType()){
+						case REMOTE_DEVICE_INFO_CHANGED:
+							{
+								Log.d(TAG, String.format("Remote device info changed: orientation: %s", mAVSession.getRemoteDeviceInfo().getOrientation()));
+								break;
+							}
+						case MEDIA_UPDATED:
+							{
+								//if((mIsVideoCall = (mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video))){
+								//	loadInCallVideoView();
+								//}
+								//else{
+								//	loadInCallAudioView();
+								//}
+								break;
+							}
+					}					
 					break;
 					
 				case TERMINATING:
@@ -843,8 +857,11 @@ public class ScreenAV extends BaseScreen{
 			mViewLocalVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_local_video);
 			mViewRemoteVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_remote_video);
 		}
-		
-        mTvDuration = null;
+		if(mTvDuration != null){
+			synchronized(mTvDuration){
+		        mTvDuration = null;
+			}
+		}
 		mTvInfo = null;
 		mMainLayout.removeAllViews();
 		mMainLayout.addView(mViewInCallVideo);
@@ -940,11 +957,13 @@ public class ScreenAV extends BaseScreen{
 		@Override
 		public void run() {
 			if(mAVSession != null && mTvDuration != null){
-				final Date date = new Date(new Date().getTime() - mAVSession.getStartTime());
-				ScreenAV.this.runOnUiThread(new Runnable() {
-					public void run() {
-						mTvDuration.setText(sDurationTimerFormat.format(date));
-					}});
+				synchronized(mTvDuration){
+					final Date date = new Date(new Date().getTime() - mAVSession.getStartTime());
+					ScreenAV.this.runOnUiThread(new Runnable() {
+						public void run() {
+							mTvDuration.setText(sDurationTimerFormat.format(date));
+						}});
+				}
 			}
 		}
 	};

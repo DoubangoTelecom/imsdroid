@@ -24,6 +24,7 @@ import org.doubango.imsdroid.R;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.MediaSessionMgr;
+import org.doubango.tinyWRAP.tmedia_profile_t;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -35,6 +36,7 @@ import android.widget.Spinner;
 public class ScreenGeneral  extends BaseScreen {
 	private final static String TAG = ScreenGeneral.class.getCanonicalName();
 	
+	private Spinner mSpProfile;
 	private Spinner mSpAudioPlaybackLevel;
 	private CheckBox mCbFullScreenVideo;
 	private CheckBox mCbFFC;
@@ -53,6 +55,10 @@ public class ScreenGeneral  extends BaseScreen {
 					new AudioPlayBackLevel(0.75f, "High"),
 					new AudioPlayBackLevel(1.0f, "Maximum"),
 			};
+	private final static Profile[] sProfiles =  new Profile[]{
+		new Profile(tmedia_profile_t.tmedia_profile_default, "Default (User Defined)"),
+        new Profile(tmedia_profile_t.tmedia_profile_rtcweb, "RTCWeb (Override)")
+	};
 	
 	public ScreenGeneral() {
 		super(SCREEN_TYPE.GENERAL_T, TAG);
@@ -69,6 +75,7 @@ public class ScreenGeneral  extends BaseScreen {
         mCbFFC = (CheckBox)findViewById(R.id.screen_general_checkBox_ffc);
         mCbAutoStart = (CheckBox)findViewById(R.id.screen_general_checkBox_autoStart);
         mSpAudioPlaybackLevel = (Spinner)findViewById(R.id.screen_general_spinner_playback_level);
+        mSpProfile = (Spinner)findViewById(R.id.screen_general_spinner_media_profile);
         mEtEnumDomain = (EditText)findViewById(R.id.screen_general_editText_enum_domain);
         mCbAEC = (CheckBox)this.findViewById(R.id.screen_general_checkBox_AEC);
         mCbVAD = (CheckBox)this.findViewById(R.id.screen_general_checkBox_VAD);
@@ -78,6 +85,10 @@ public class ScreenGeneral  extends BaseScreen {
         ArrayAdapter<AudioPlayBackLevel> adapter = new ArrayAdapter<AudioPlayBackLevel>(this, android.R.layout.simple_spinner_item, ScreenGeneral.sAudioPlaybackLevels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpAudioPlaybackLevel.setAdapter(adapter);
+        // Media Profile
+        ArrayAdapter<Profile> adapterProfile = new ArrayAdapter<Profile>(this, android.R.layout.simple_spinner_item, ScreenGeneral.sProfiles);
+        adapterProfile.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpProfile.setAdapter(adapterProfile);
         
         mCbFullScreenVideo.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_FULL_SCREEN_VIDEO, NgnConfigurationEntry.DEFAULT_GENERAL_FULL_SCREEN_VIDEO));
         mCbInterceptOutgoingCalls.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_INTERCEPT_OUTGOING_CALLS, NgnConfigurationEntry.DEFAULT_GENERAL_INTERCEPT_OUTGOING_CALLS));
@@ -87,7 +98,10 @@ public class ScreenGeneral  extends BaseScreen {
         mCbVAD.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_VAD,NgnConfigurationEntry.DEFAULT_GENERAL_VAD));
         mCbNR.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_NR,NgnConfigurationEntry.DEFAULT_GENERAL_NR));
         
-        mSpAudioPlaybackLevel.setSelection(getSpinnerIndex(
+        mSpProfile.setSelection(Profile.getSpinnerIndex(tmedia_profile_t.valueOf(mConfigurationService.getString(
+				NgnConfigurationEntry.MEDIA_PROFILE,
+				NgnConfigurationEntry.DEFAULT_MEDIA_PROFILE))));
+        mSpAudioPlaybackLevel.setSelection(AudioPlayBackLevel.getSpinnerIndex(
 				mConfigurationService.getFloat(
 						NgnConfigurationEntry.GENERAL_AUDIO_PLAY_LEVEL,
 						NgnConfigurationEntry.DEFAULT_GENERAL_AUDIO_PLAY_LEVEL)));
@@ -99,6 +113,7 @@ public class ScreenGeneral  extends BaseScreen {
         super.addConfigurationListener(mCbAutoStart);
         super.addConfigurationListener(mEtEnumDomain);
         super.addConfigurationListener(mSpAudioPlaybackLevel);
+        super.addConfigurationListener(mSpProfile);
         super.addConfigurationListener(mCbAEC);
         super.addConfigurationListener(mCbVAD);
         super.addConfigurationListener(mCbNR);
@@ -116,6 +131,8 @@ public class ScreenGeneral  extends BaseScreen {
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_AEC, mCbAEC.isChecked());
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_VAD, mCbVAD.isChecked());
 			mConfigurationService.putBoolean(NgnConfigurationEntry.GENERAL_NR, mCbNR.isChecked());
+			// profile should be moved to another screen (e.g. Media)
+			mConfigurationService.putString(NgnConfigurationEntry.MEDIA_PROFILE, sProfiles[mSpProfile.getSelectedItemPosition()].mValue.toString());
 			
 			// Compute
 			if(!mConfigurationService.commit()){
@@ -141,6 +158,7 @@ public class ScreenGeneral  extends BaseScreen {
 				}
 				MediaSessionMgr.defaultsSetVadEnabled(vad);
 				MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
+				MediaSessionMgr.defaultsSetProfile(sProfiles[mSpProfile.getSelectedItemPosition()].mValue);
 			}
 			
 			super.mComputeConfiguration = false;
@@ -148,14 +166,28 @@ public class ScreenGeneral  extends BaseScreen {
 		super.onPause();
 	}
 	
-	
-	private int getSpinnerIndex(float value){
-		for(int i = 0; i< sAudioPlaybackLevels.length; i++){
-			if(sAudioPlaybackLevels[i].mValue == value){
-				return i;
-			}
+	static class Profile{
+		tmedia_profile_t mValue;
+		String mDescription;
+		
+		Profile(tmedia_profile_t value, String description){
+			mValue = value;
+			mDescription = description;
 		}
-		return 0;
+
+		@Override
+		public String toString() {
+			return mDescription;
+		}
+		
+		static int getSpinnerIndex(tmedia_profile_t value){
+			for(int i = 0; i< sProfiles.length; i++){
+				if(sProfiles[i].mValue == value){
+					return i;
+				}
+			}
+			return 0;
+		}
 	}
 	
 	static class AudioPlayBackLevel{
@@ -170,6 +202,15 @@ public class ScreenGeneral  extends BaseScreen {
 		@Override
 		public String toString() {
 			return mDescription;
+		}
+		
+		static int getSpinnerIndex(float value){
+			for(int i = 0; i< sAudioPlaybackLevels.length; i++){
+				if(sAudioPlaybackLevels[i].mValue == value){
+					return i;
+				}
+			}
+			return 0;
 		}
 	}
 }

@@ -150,12 +150,10 @@ public class ScreenCodecs  extends BaseScreen{
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_mp4ves_es.swigValue(), "MP4V-ES", "MPEG-4 Part 2"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_theora))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_theora.swigValue(), "Theora", "Theora"));
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_bp10))
-	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp10.swigValue(), "H264-BP10", "H.264 Base Profile 1.0"));
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_bp20))
-	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp20.swigValue(), "H264-BP20", "H.264 Base Profile 2.0"));
-	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_bp30))
-	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp30.swigValue(), "H264-BP30", "H.264 Base Profile 3.0"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_bp))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_bp.swigValue(), "H264-BP", "H.264 Base Profile"));
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h264_mp))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h264_mp.swigValue(), "H264-MP", "H.264 Main Profile"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h263))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_h263.swigValue(),"H.263", "H.263"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_h263p))

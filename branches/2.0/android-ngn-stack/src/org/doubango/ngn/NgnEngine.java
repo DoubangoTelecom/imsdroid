@@ -45,9 +45,10 @@ import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
-import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
+import org.doubango.tinyWRAP.tmedia_pref_video_size_t;
 import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
+import org.doubango.tinyWRAP.tmedia_profile_t;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -111,6 +112,7 @@ public class NgnEngine {
 	 */
 	protected NgnEngine(){
 		final Context applicationContext = NgnApplication.getContext();
+		final INgnConfigurationService configurationService = getConfigurationService();
 		if(applicationContext != null){
 			mNotifManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		}
@@ -144,22 +146,29 @@ public class NgnEngine {
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h263, prio++);
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h261, prio++);
         
+        // Profile
+        MediaSessionMgr.defaultsSetProfile(tmedia_profile_t.valueOf(configurationService.getString(
+				NgnConfigurationEntry.MEDIA_PROFILE,
+				NgnConfigurationEntry.DEFAULT_MEDIA_PROFILE)));
         // Set default mediaType to use when receiving bodiless INVITE
         MediaSessionMgr.defaultsSetMediaType(twrap_media_type_t.twrap_media_audiovideo);
-		
-		// Apply defaults using the values stored in the configuration service
-		MediaSessionMgr.defaultsSetBandwidthLevel(
-							tmedia_bandwidth_level_t.swigToEnum(getConfigurationService().getInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL, NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL)
-				));
-		MediaSessionMgr.defaultsSetSRtpMode(tmedia_srtp_mode_t.valueOf(getConfigurationService().getString(
+		// Preferred video size
+		MediaSessionMgr.defaultsSetPrefVideoSize(tmedia_pref_video_size_t.valueOf(configurationService.getString(
+				NgnConfigurationEntry.QOS_PREF_VIDEO_SIZE,
+				NgnConfigurationEntry.DEFAULT_QOS_PREF_VIDEO_SIZE)));
+		// SRTP mode
+		MediaSessionMgr.defaultsSetSRtpMode(tmedia_srtp_mode_t.valueOf(configurationService.getString(
 				NgnConfigurationEntry.SECURITY_SRTP_MODE,
 				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_MODE)));
+		// ICE
+		MediaSessionMgr.defaultsSetIceEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_ICE, NgnConfigurationEntry.DEFAULT_NATT_USE_ICE));
+		
 		
 		// codecs, AEC, NoiseSuppression, Echo cancellation, ....
-		boolean aec         = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
-		boolean vad        = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_VAD, NgnConfigurationEntry.DEFAULT_GENERAL_VAD) ;
-		boolean nr          = getConfigurationService().getBoolean(NgnConfigurationEntry.GENERAL_NR, NgnConfigurationEntry.DEFAULT_GENERAL_NR) ;
-		int         echo_tail = mConfigurationService.getInt(NgnConfigurationEntry.GENERAL_ECHO_TAIL,NgnConfigurationEntry.DEFAULT_GENERAL_ECHO_TAIL);
+		boolean aec         = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
+		boolean vad        = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_VAD, NgnConfigurationEntry.DEFAULT_GENERAL_VAD) ;
+		boolean nr          = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_NR, NgnConfigurationEntry.DEFAULT_GENERAL_NR) ;
+		int         echo_tail = configurationService.getInt(NgnConfigurationEntry.GENERAL_ECHO_TAIL,NgnConfigurationEntry.DEFAULT_GENERAL_ECHO_TAIL);
 		
 		Log.d(TAG,"Configure AEC["+aec+"/"+echo_tail+"] NoiseSuppression["+nr+"], Voice activity detection["+vad+"]");
 		

@@ -79,6 +79,20 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		mFps = NgnProxyVideoProducer.DEFAULT_VIDEO_FPS;
     }
 	
+	@Override
+	public void finalize(){
+		int kaka = 0;
+		++kaka;
+	}
+	
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		
+		mVideoFrame = null;
+		System.gc();
+	}
+	
 	public void setContext(Context context){
     	mContext = context;
     }
@@ -107,8 +121,9 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 			if(mVideoFrame == null){
 				mVideoFrame = ByteBuffer.allocateDirect((mWidth * mHeight * 3) >> 1);
 			}
-			final ByteBuffer buffer = ByteBuffer.allocateDirect(mVideoFrame.capacity());
-			mProducer.push(buffer, buffer.capacity());
+			//final ByteBuffer buffer = ByteBuffer.allocateDirect(mVideoFrame.capacity());
+			//mProducer.push(buffer, buffer.capacity());
+			mProducer.push(mVideoFrame, mVideoFrame.capacity());
 		}
 	}
 	
@@ -364,8 +379,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				
 				// allocate buffer
 				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", mFrameWidth, mFrameHeight));
-				mVideoFrame = ByteBuffer.allocateDirect((mFrameWidth * mFrameHeight * 3) >> 1);
-				
+				mVideoFrame = ByteBuffer.allocateDirect((mFrameWidth * mFrameHeight * 3) >> 1);				
 			} catch(Exception e){
 				Log.e(TAG, e.toString());
 			}
