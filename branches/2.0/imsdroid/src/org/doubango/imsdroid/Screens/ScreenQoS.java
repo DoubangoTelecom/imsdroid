@@ -23,7 +23,7 @@ import org.doubango.imsdroid.R;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.MediaSessionMgr;
-import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
+import org.doubango.tinyWRAP.tmedia_pref_video_size_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 
@@ -47,7 +47,7 @@ public class ScreenQoS  extends BaseScreen {
 	private Spinner mSpRefresher;
 	private Spinner mSpPrecondStrength;
 	private Spinner mSpPrecondType;
-	private Spinner mSpPrecondBandwidth;
+	private Spinner mSpVsize;
 	
 	private final static String[] sSpinnerRefresherItems = new String[] {NgnConfigurationEntry.DEFAULT_QOS_REFRESHER, "uas", "uac"};
 	private final static ScreenQoSStrength[] sSpinnerPrecondStrengthItems = new ScreenQoSStrength[] {
@@ -60,17 +60,19 @@ public class ScreenQoS  extends BaseScreen {
 		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_segmented, "Segmented"),
 		   new ScreenQoSType(tmedia_qos_stype_t.tmedia_qos_stype_e2e, "End2End")
 		};
-	private final static int[] sSpinnerPrecondBandwidthItems = new int[] {
-		tmedia_bandwidth_level_t.tmedia_bl_low.swigValue(), 
-		tmedia_bandwidth_level_t.tmedia_bl_medium.swigValue(), 
-		tmedia_bandwidth_level_t.tmedia_bl_hight.swigValue(), 
-		NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL
-		};
-	private final static String[] sSpinnerPrecondBandwidthItemsStrings = new String[] {
-		"Low", 
-		"Medium", 
-		"High", 
-		"Unrestricted"
+	private final static ScreenQoSVsize[] sSpinnerVsizeItems = new ScreenQoSVsize[] {
+			new ScreenQoSVsize("SQCIF (128 x 98)", tmedia_pref_video_size_t.tmedia_pref_video_size_sqcif),
+	        new ScreenQoSVsize("QCIF (176 x 144)", tmedia_pref_video_size_t.tmedia_pref_video_size_qcif),
+	        new ScreenQoSVsize("QVGA (320 x 240)", tmedia_pref_video_size_t.tmedia_pref_video_size_qvga),
+	        new ScreenQoSVsize("CIF (352 x 288)", tmedia_pref_video_size_t.tmedia_pref_video_size_cif),
+	        new ScreenQoSVsize("HVGA (480 x 320)", tmedia_pref_video_size_t.tmedia_pref_video_size_hvga),
+	        new ScreenQoSVsize("VGA (640 x 480)", tmedia_pref_video_size_t.tmedia_pref_video_size_vga),
+	        new ScreenQoSVsize("4CIF (704 x 576)", tmedia_pref_video_size_t.tmedia_pref_video_size_4cif),
+	        new ScreenQoSVsize("SVGA (800 x 600)", tmedia_pref_video_size_t.tmedia_pref_video_size_svga),
+	        new ScreenQoSVsize("480P (852 x 480)", tmedia_pref_video_size_t.tmedia_pref_video_size_480p),
+	        new ScreenQoSVsize("720P (1280 x 720)", tmedia_pref_video_size_t.tmedia_pref_video_size_720p),
+	        new ScreenQoSVsize("16CIF (1408 x 1152)", tmedia_pref_video_size_t.tmedia_pref_video_size_16cif),
+	        new ScreenQoSVsize("1080P (1920 x 1080)", tmedia_pref_video_size_t.tmedia_pref_video_size_1080p)
 		};
 	
 	private final INgnConfigurationService mConfigurationService;
@@ -93,7 +95,7 @@ public class ScreenQoS  extends BaseScreen {
         mSpRefresher = (Spinner)findViewById(R.id.screen_qos_spinner_refresher);
         mSpPrecondStrength = (Spinner)findViewById(R.id.screen_qos_spinner_precond_strength);
         mSpPrecondType = (Spinner)findViewById(R.id.screen_qos_Spinner_precond_type);
-        mSpPrecondBandwidth = (Spinner)findViewById(R.id.screen_qos_spinner_precond_bandwidth);
+        mSpVsize = (Spinner)findViewById(R.id.screen_qos_Spinner_vsize);
         
         // spinners
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.sSpinnerRefresherItems);
@@ -108,9 +110,9 @@ public class ScreenQoS  extends BaseScreen {
         adapterType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpPrecondType.setAdapter(adapterType);
         
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, ScreenQoS.sSpinnerPrecondBandwidthItemsStrings);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSpPrecondBandwidth.setAdapter(adapter);
+        ArrayAdapter<ScreenQoSVsize> adapterVsize = new ArrayAdapter<ScreenQoSVsize>(this, android.R.layout.simple_spinner_item, ScreenQoS.sSpinnerVsizeItems);
+        adapterVsize.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpVsize.setAdapter(adapterVsize);
         
         // load values from configuration file (Do it before adding UI listeners)
         mCbEnableSessionTimers.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.QOS_USE_SESSION_TIMERS, NgnConfigurationEntry.DEFAULT_QOS_USE_SESSION_TIMERS));
@@ -129,10 +131,10 @@ public class ScreenQoS  extends BaseScreen {
 				NgnConfigurationEntry.QOS_PRECOND_TYPE,
 				NgnConfigurationEntry.DEFAULT_QOS_PRECOND_TYPE))));
 		
-		mSpPrecondBandwidth.setSelection(getSpinnerIndex(
-				mConfigurationService.getInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL,
-						NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL),
-						sSpinnerPrecondBandwidthItems));
+		mSpVsize.setSelection(ScreenQoSVsize.getSpinnerIndex(tmedia_pref_video_size_t.valueOf(mConfigurationService.getString(
+				NgnConfigurationEntry.QOS_PREF_VIDEO_SIZE,
+				NgnConfigurationEntry.DEFAULT_QOS_PREF_VIDEO_SIZE))));
+		
 		
 		mRlSessionTimers.setVisibility(mCbEnableSessionTimers.isChecked() ? View.VISIBLE : View.INVISIBLE);
 		
@@ -142,7 +144,7 @@ public class ScreenQoS  extends BaseScreen {
 		addConfigurationListener(mSpRefresher);
 		addConfigurationListener(mSpPrecondStrength);
 		addConfigurationListener(mSpPrecondType);
-		addConfigurationListener(mSpPrecondBandwidth);
+		addConfigurationListener(mSpVsize);
 		
 		// add local listeners
         mCbEnableSessionTimers.setOnCheckedChangeListener(mCbEnableSessionTimers_OnCheckedChangeListener);
@@ -161,16 +163,15 @@ public class ScreenQoS  extends BaseScreen {
 					sSpinnerPrecondStrengthItems[mSpPrecondStrength.getSelectedItemPosition()].mStrength.toString());
 			mConfigurationService.putString(NgnConfigurationEntry.QOS_PRECOND_TYPE, 
 					sSpinnerPrecondTypeItems[mSpPrecondType.getSelectedItemPosition()].mType.toString());
-			mConfigurationService.putInt(NgnConfigurationEntry.QOS_PRECOND_BANDWIDTH_LEVEL, 
-					sSpinnerPrecondBandwidthItems[mSpPrecondBandwidth.getSelectedItemPosition()]);
+			mConfigurationService.putString(NgnConfigurationEntry.QOS_PREF_VIDEO_SIZE, 
+					sSpinnerVsizeItems[mSpVsize.getSelectedItemPosition()].mValue.toString());
 			
 			// Compute
 			if(!mConfigurationService.commit()){
 				Log.e(TAG, "Failed to commit() configuration");
 			}
 			else{
-				tmedia_bandwidth_level_t newBandwidthLevel = tmedia_bandwidth_level_t.swigToEnum(sSpinnerPrecondBandwidthItems[mSpPrecondBandwidth.getSelectedItemPosition()]);
-				MediaSessionMgr.defaultsSetBandwidthLevel(newBandwidthLevel);
+				MediaSessionMgr.defaultsSetPrefVideoSize(sSpinnerVsizeItems[mSpVsize.getSelectedItemPosition()].mValue);
 			}
 			
 			super.mComputeConfiguration = false;
@@ -237,6 +238,35 @@ public class ScreenQoS  extends BaseScreen {
 		static int getSpinnerIndex(tmedia_qos_stype_t type){
 			for(int i = 0; i< sSpinnerPrecondTypeItems.length; i++){
 				if(type == sSpinnerPrecondTypeItems[i].mType){
+					return i;
+				}
+			}
+			return 0;
+		}
+	}
+	
+	private static class ScreenQoSVsize{
+		private final String mDescription;
+		private final tmedia_pref_video_size_t mValue;
+		
+		private ScreenQoSVsize(String description, tmedia_pref_video_size_t value) {
+			mValue = value;
+			mDescription = description;
+		}
+		
+		@Override
+		public String toString() {
+			return mDescription;
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			return mValue.equals(((ScreenQoSVsize)o).mValue);
+		}
+		
+		static int getSpinnerIndex(tmedia_pref_video_size_t value){
+			for(int i = 0; i< sSpinnerVsizeItems.length; i++){
+				if(value == sSpinnerVsizeItems[i].mValue){
 					return i;
 				}
 			}

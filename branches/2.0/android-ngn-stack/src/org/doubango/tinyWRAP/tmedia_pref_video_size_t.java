@@ -8,39 +8,47 @@
 
 package org.doubango.tinyWRAP;
 
-public enum tmedia_bandwidth_level_t {
-  tmedia_bl_low,
-  tmedia_bl_medium,
-  tmedia_bl_hight,
-  tmedia_bl_unrestricted;
+public enum tmedia_pref_video_size_t {
+  tmedia_pref_video_size_sqcif,
+  tmedia_pref_video_size_qcif,
+  tmedia_pref_video_size_qvga,
+  tmedia_pref_video_size_cif,
+  tmedia_pref_video_size_hvga,
+  tmedia_pref_video_size_vga,
+  tmedia_pref_video_size_4cif,
+  tmedia_pref_video_size_svga,
+  tmedia_pref_video_size_480p,
+  tmedia_pref_video_size_720p,
+  tmedia_pref_video_size_16cif,
+  tmedia_pref_video_size_1080p;
 
   public final int swigValue() {
     return swigValue;
   }
 
-  public static tmedia_bandwidth_level_t swigToEnum(int swigValue) {
-    tmedia_bandwidth_level_t[] swigValues = tmedia_bandwidth_level_t.class.getEnumConstants();
+  public static tmedia_pref_video_size_t swigToEnum(int swigValue) {
+    tmedia_pref_video_size_t[] swigValues = tmedia_pref_video_size_t.class.getEnumConstants();
     if (swigValue < swigValues.length && swigValue >= 0 && swigValues[swigValue].swigValue == swigValue)
       return swigValues[swigValue];
-    for (tmedia_bandwidth_level_t swigEnum : swigValues)
+    for (tmedia_pref_video_size_t swigEnum : swigValues)
       if (swigEnum.swigValue == swigValue)
         return swigEnum;
-    throw new IllegalArgumentException("No enum " + tmedia_bandwidth_level_t.class + " with value " + swigValue);
+    throw new IllegalArgumentException("No enum " + tmedia_pref_video_size_t.class + " with value " + swigValue);
   }
 
   @SuppressWarnings("unused")
-  private tmedia_bandwidth_level_t() {
+  private tmedia_pref_video_size_t() {
     this.swigValue = SwigNext.next++;
   }
 
   @SuppressWarnings("unused")
-  private tmedia_bandwidth_level_t(int swigValue) {
+  private tmedia_pref_video_size_t(int swigValue) {
     this.swigValue = swigValue;
     SwigNext.next = swigValue+1;
   }
 
   @SuppressWarnings("unused")
-  private tmedia_bandwidth_level_t(tmedia_bandwidth_level_t swigEnum) {
+  private tmedia_pref_video_size_t(tmedia_pref_video_size_t swigEnum) {
     this.swigValue = swigEnum.swigValue;
     SwigNext.next = this.swigValue+1;
   }

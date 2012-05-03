@@ -75,6 +75,21 @@ public class NgnProxyVideoConsumer extends NgnProxyPlugin{
     	mFps = NgnProxyVideoConsumer.DEFAULT_VIDEO_FPS;
     }
     
+    @Override
+    public void invalidate(){
+    	super.invalidate();
+    	if(mRGBCroppedBitmap != null){
+    		mRGBCroppedBitmap.recycle();
+    	}
+    	if(mRGB565Bitmap != null){
+    		mRGB565Bitmap.recycle();
+    	}
+    	mRGBCroppedBitmap = null;
+    	mRGB565Bitmap = null;
+    	mVideoFrame = null;
+    	System.gc();
+    }
+    
     public void setContext(Context context){
     	mContext = context;
     }

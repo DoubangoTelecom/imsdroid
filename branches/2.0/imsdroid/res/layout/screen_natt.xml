@@ -4,17 +4,15 @@
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
-<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_natt_checkBox_hack_aor" android:layout_width="fill_parent" android:text="Hack the AoR"></CheckBox>
+  android:layout_height="wrap_content" android:layout_marginTop="5px">
+    <CheckBox android:id="@+id/screen_natt_checkBox_ice" android:text="Enable ICE" android:layout_width="fill_parent" android:layout_height="wrap_content"></CheckBox>
+<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_natt_checkBox_hack_aor" android:layout_width="fill_parent" android:text="Hack the AoR" android:layout_below="@+id/screen_natt_checkBox_ice"></CheckBox>
 
 <CheckBox android:layout_below="@+id/screen_natt_checkBox_hack_aor" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_natt_checkBox_stun" android:text="Enable STUN/TURN"></CheckBox>
 
 <RelativeLayout android:layout_below="@+id/screen_natt_checkBox_stun" android:layout_height="wrap_content" android:id="@+id/screen_natt_relativeLayout_stun" android:layout_width="fill_parent">
 
 <RadioGroup android:layout_below="@+id/screen_natt_checkBox_stun" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginLeft="15px" android:id="@+id/screen_natt_radioGroup_stun">
-
-
-<CheckBox android:layout_height="wrap_content" android:text="Enable ICE" android:layout_width="fill_parent" android:id="@+id/screen_natt_checkBox_ice"></CheckBox>
 <RadioButton android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Discover STUN/TURN Server" android:id="@+id/screen_natt_radioButton_stun_disco"></RadioButton>
 <RadioButton android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_natt_radioButton_stun_set" android:text="Use this STUN/TURN Server" android:checked="true"></RadioButton>
 <RelativeLayout android:id="@+id/screen_natt_relativeLayout_stun_server" android:layout_width="fill_parent" android:layout_height="fill_parent">

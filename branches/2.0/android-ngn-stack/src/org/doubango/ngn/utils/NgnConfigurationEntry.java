@@ -23,6 +23,8 @@ package org.doubango.ngn.utils;
 import org.doubango.ngn.sip.NgnPresenceStatus;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
 import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
+import org.doubango.tinyWRAP.tmedia_pref_video_size_t;
+import org.doubango.tinyWRAP.tmedia_profile_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
@@ -84,6 +86,7 @@ public class NgnConfigurationEntry {
     public static final String QOS_SIP_CALLS_TIMEOUT = "QOS_SIP_CALLS_TIMEOUT." + TAG;
     public static final String QOS_SIP_SESSIONS_TIMEOUT = "QOS_SIP_SESSIONS_TIMEOUT" + TAG;
     public static final String QOS_USE_SESSION_TIMERS = "QOS_USE_SESSION_TIMERS." + TAG;
+    public static final String QOS_PREF_VIDEO_SIZE = "QOS_PREF_VIDEO_SIZE." + TAG;
 
 	
 	// Media
@@ -93,6 +96,7 @@ public class NgnConfigurationEntry {
 	public static final String MEDIA_AUDIO_PRODUCER_GAIN = "MEDIA_AUDIO_PRODUCER_GAIN." + TAG;
 	public static final String MEDIA_AUDIO_CONSUMER_ATTENUATION = "MEDIA_AUDIO_CONSUMER_ATTENUATION." + TAG;
 	public static final String MEDIA_AUDIO_PRODUCER_ATTENUATION = "MEDIA_AUDIO_PRODUCER_ATTENUATION." + TAG;
+	public static final String MEDIA_PROFILE = "MEDIA_PROFILE." + TAG;
 	
 	// Security
 	public static final String SECURITY_SRTP_MODE = "SECURITY_SRTP_MODE." + TAG;
@@ -177,13 +181,16 @@ public class NgnConfigurationEntry {
     public static final int DEFAULT_QOS_SIP_SESSIONS_TIMEOUT = 600000;
     public static final int DEFAULT_QOS_SIP_CALLS_TIMEOUT = 3600;
     public static final boolean DEFAULT_QOS_USE_SESSION_TIMERS = false;
+    public static final String DEFAULT_QOS_PREF_VIDEO_SIZE = tmedia_pref_video_size_t.tmedia_pref_video_size_cif.toString();
 	
 	// Media
+    public static final String DEFAULT_MEDIA_PROFILE = tmedia_profile_t.tmedia_profile_default.toString();
 	public static final int DEFAULT_MEDIA_CODECS = 
 		tdav_codec_id_t.tdav_codec_id_pcma.swigValue() |
 		tdav_codec_id_t.tdav_codec_id_pcmu.swigValue() |
 		
-		tdav_codec_id_t.tdav_codec_id_mp4ves_es.swigValue() |
+		tdav_codec_id_t.tdav_codec_id_h264_bp.swigValue() |
+		tdav_codec_id_t.tdav_codec_id_vp8.swigValue() |
 		tdav_codec_id_t.tdav_codec_id_h263p.swigValue() |
 		tdav_codec_id_t.tdav_codec_id_h263.swigValue();
 	public static final int DEFAULT_MEDIA_AUDIO_RESAMPLER_QUALITY = 0;

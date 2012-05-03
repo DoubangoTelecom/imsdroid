@@ -22,6 +22,7 @@ package org.doubango.imsdroid.Screens;
 import org.doubango.imsdroid.R;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.tinyWRAP.MediaSessionMgr;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -107,6 +108,9 @@ public class ScreenNatt extends BaseScreen {
 			// Compute
 			if(!mConfigurationService.commit()){
 				Log.e(TAG, "Failed to commit() configuration");
+			}
+			else{
+				MediaSessionMgr.defaultsSetIceEnabled(mCbEnableIce.isChecked());
 			}
 			
 			super.mComputeConfiguration = false;

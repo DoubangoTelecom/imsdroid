@@ -809,6 +809,23 @@ implements INgnSipService, tinyWRAPConstants {
                     	}
                         break;
                     }
+                case tsip_m_updating:
+	                {
+	                	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+                    		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.MEDIA_UPDATING, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                    	}
+	                	break;
+	                }
+                case tsip_m_updated:
+	                {
+	                	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
+	                		if(mySession instanceof NgnAVSession){
+	                			NgnAVSession.handleMediaUpdate(mySession.getId(), e.getMediaType());
+	                		}
+	                		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.MEDIA_UPDATED, ((NgnInviteSession)mySession).getMediaType(), phrase));
+	                	}
+	                	break;
+	                }
                 case tsip_m_local_hold_nok:
                     {
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
