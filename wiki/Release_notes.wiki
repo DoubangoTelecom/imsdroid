@@ -3,6 +3,11 @@
 
 <wiki:toc max_depth="2" />
 
+==2.0.491==
+First version fully implementing RTCWeb standards (ICE, SRTP/SRTCP, RTCP-MUX...).
+This version can be used to call [http://code.google.com/p/sipml5/ sipML5]
+To enable the features: Options -> General -> Media Profile -> RTCWeb
+
 ==2.0.487==
  * ICE (Interactive Connectivity Establishment): Full implementation of RFC 5245 for NAT Traversal
  * 1080p (Full HD): all platforms supports full HD video negotiation. Off course it depends on your CPU and network bandwidth. The preferred video size could be changed from the QoS/QoS screen.
