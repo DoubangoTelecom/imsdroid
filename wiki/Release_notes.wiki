@@ -5,7 +5,7 @@
 
 ==2.0.491==
 First version fully implementing RTCWeb standards (ICE, SRTP/SRTCP, RTCP-MUX...).<br />
-This version can be used to call [http://code.google.com/p/sipml5/ sipML5]<br />
+This version can be used to call [http://code.google.com/p/sipml5/ sipML5] webApp<br />
 To enable the features: Options -> General -> Media Profile -> RTCWeb
 
 ==2.0.487==
