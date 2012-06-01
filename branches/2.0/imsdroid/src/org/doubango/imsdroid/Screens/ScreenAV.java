@@ -715,12 +715,12 @@ public class ScreenAV extends BaseScreen{
 							}
 						case MEDIA_UPDATED:
 							{
-								//if((mIsVideoCall = (mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video))){
-								//	loadInCallVideoView();
-								//}
-								//else{
-								//	loadInCallAudioView();
-								//}
+								if((mIsVideoCall = (mAVSession.getMediaType() == NgnMediaType.AudioVideo || mAVSession.getMediaType() == NgnMediaType.Video))){
+									loadInCallVideoView();
+								}
+								else{
+									loadInCallAudioView();
+								}
 								break;
 							}
 					}					
@@ -866,8 +866,10 @@ public class ScreenAV extends BaseScreen{
 		mMainLayout.removeAllViews();
 		mMainLayout.addView(mViewInCallVideo);
 		
-		mViewInCallVideo.findViewById(R.id.view_call_incall_video_imageView_secure)
-				.setVisibility(mAVSession.isSecure() ? View.VISIBLE : View.INVISIBLE);
+		final View viewSecure = mViewInCallVideo.findViewById(R.id.view_call_incall_video_imageView_secure);
+		if(viewSecure != null){
+			viewSecure.setVisibility(mAVSession.isSecure() ? View.VISIBLE : View.INVISIBLE);
+		}
 		
 		// Video Consumer
 		loadVideoPreview();
@@ -961,7 +963,10 @@ public class ScreenAV extends BaseScreen{
 					final Date date = new Date(new Date().getTime() - mAVSession.getStartTime());
 					ScreenAV.this.runOnUiThread(new Runnable() {
 						public void run() {
-							mTvDuration.setText(sDurationTimerFormat.format(date));
+							try{
+								mTvDuration.setText(sDurationTimerFormat.format(date));
+							}
+							catch(Exception e){}
 						}});
 				}
 			}
