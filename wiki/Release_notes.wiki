@@ -4,7 +4,7 @@
 <wiki:toc max_depth="2" />
 
 ==2.0.499==
- * Fix issue 197 and issue 188
+ * Fix issue 197, issue 188 and issue 82
  * Align with Doubango 715
  * Improve AEC
 
