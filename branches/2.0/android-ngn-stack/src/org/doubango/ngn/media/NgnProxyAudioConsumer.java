@@ -193,8 +193,8 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 		
 		final int minBufferSize = AudioTrack.getMinBufferSize(mOutputRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		final int shortsPerNotif = (mOutputRate * mPtime)/1000;
-		mBufferSize = Math.max(minBufferSize, shortsPerNotif*2);
-		mOutputBuffer = ByteBuffer.allocateDirect(shortsPerNotif*2);
+		mBufferSize = Math.max(minBufferSize, shortsPerNotif<<1);
+		mOutputBuffer = ByteBuffer.allocateDirect(shortsPerNotif<<1);
 		mAec = mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
 		
 		// setSpeakerphoneOn(false);

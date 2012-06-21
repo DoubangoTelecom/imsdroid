@@ -22,6 +22,8 @@ package org.doubango.ngn;
 import java.lang.reflect.Field;
 
 import org.doubango.ngn.utils.NgnStringUtils;
+import org.doubango.utils.AndroidUtils;
+import org.doubango.utils.CpuFeatures_t;
 
 import android.app.Application;
 import android.app.KeyguardManager;
@@ -395,13 +397,15 @@ public class NgnApplication extends Application{
     //}
     
     public static boolean isARMv7WithoutNeon(){
-        final String abi = NgnApplication.getABI();
-        final String model = Build.MODEL;
-        return abi.equals("armeabi-v7a") && 
-        (
-                        model.equalsIgnoreCase("<your first model>") ||
-                        model.equalsIgnoreCase("<your second model>")
-        );
+        return (isCpuARMv7() && !isCpuNeon());
+    }
+    
+    public static boolean isCpuARMv7(){
+    	return ((AndroidUtils.getCpuFeatures().intValue() & CpuFeatures_t.ARMv7.swigValue()) != 0);
+    }
+    
+    public static boolean isCpuNeon(){
+    	return ((AndroidUtils.getCpuFeatures().intValue() & CpuFeatures_t.NEON.swigValue()) != 0);
     }
     
     /**
