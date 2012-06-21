@@ -3,6 +3,11 @@
 
 <wiki:toc max_depth="2" />
 
+==2.0.499==
+ * Fix issue 197 and issue 188
+ * Align with Doubango 715
+ * Improve AEC
+
 ==2.0.491==
 First version fully implementing RTCWeb standards (ICE, SRTP/SRTCP, RTCP-MUX...).<br />
 This version can be used to call [http://code.google.com/p/sipml5/ sipML5] webApp<br />
