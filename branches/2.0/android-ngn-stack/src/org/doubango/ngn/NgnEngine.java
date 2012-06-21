@@ -184,10 +184,11 @@ public class NgnEngine {
 			MediaSessionMgr.defaultsSetEchoSuppEnabled(false);
 			MediaSessionMgr.defaultsSetEchoTail(0); 
 		}
-		MediaSessionMgr.defaultsSetAgcEnabled(false);
+		MediaSessionMgr.defaultsSetAgcEnabled(true);
 		MediaSessionMgr.defaultsSetVadEnabled(vad);
 		MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
 		MediaSessionMgr.defaultsSetJbMargin(0);
+		MediaSessionMgr.defaultsSetJbMaxLateRate(0);
 	}
 	
 	/**
