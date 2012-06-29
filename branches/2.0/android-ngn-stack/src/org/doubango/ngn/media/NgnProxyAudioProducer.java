@@ -20,7 +20,6 @@
  */
 package org.doubango.ngn.media;
 
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 

@@ -137,9 +137,8 @@ public class NgnEngine {
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_amr_nb_oa, prio++);
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_amr_nb_be, prio++);
         
-        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_bp30, prio++);
-        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_bp20, prio++);
-        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_bp10, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_bp, prio++);
+        SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h264_mp, prio++);
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_vp8, prio++);
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_mp4ves_es, prio++);
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_theora, prio++);
@@ -189,6 +188,8 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
 		MediaSessionMgr.defaultsSetJbMargin(0);
 		MediaSessionMgr.defaultsSetJbMaxLateRate(0);
+		MediaSessionMgr.defaultsSetRtcpEnabled(true);
+		MediaSessionMgr.defaultsSetRtcpMuxEnabled(true);
 	}
 	
 	/**
