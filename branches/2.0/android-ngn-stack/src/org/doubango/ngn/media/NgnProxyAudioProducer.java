@@ -125,6 +125,24 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 		}
 		return -1;
 	}
+	
+	/**
+	 * Function called when the native producer (C++) is ready to send data (every @b ptime milliseconds). It's up to you to fill the data.
+	 * This function is only called if you register a buffer using @ref setPushBuffer(pPushBufferPtr, nPushBufferSize, bUsePushCallback) with @b bUsePushCallback equal to @b true
+	 */
+	private int fillPushBuffer(){
+		// sample code
+		// for performance reasons, 'is' and 'buff'  must be created once
+		// up to you to manage the offset index (circle buffer)
+		// InputStream is = getContext().getAssets().open("audio.wav"); 
+		// byte buff[] = new byte[(int)nPushBufferSize]; // for performance reasons, create once
+		// is.read(buff, offset, buff.length);
+		// mAudioFrame.put(buff);
+		// pmAudioFrame.rewind();
+		// is.close();
+		Log.d(TAG, "fillPushBuffer");
+		return 0;
+	}
 
 	private int pauseCallback() {
 		Log.d(NgnProxyAudioProducer.TAG, "pauseCallback");
@@ -226,7 +244,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 			int nRead;
 
 			if (NgnProxyAudioProducer.super.mValid) {
-				mProducer.setPushBuffer(mAudioFrame, mAudioFrame.capacity());
+				mProducer.setPushBuffer(mAudioFrame, mAudioFrame.capacity(), false);
 				mProducer
 						.setGain(NgnEngine
 								.getInstance()
@@ -305,7 +323,12 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 		public int start() {
 			return myProducer.startCallback();
 		}
-
+		
+		@Override
+		public int fillPushBuffer() {
+		    return myProducer.fillPushBuffer();
+		}
+		
 		@Override
 		public int pause() {
 			return myProducer.pauseCallback();
