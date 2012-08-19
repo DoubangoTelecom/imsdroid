@@ -81,8 +81,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	
 	@Override
 	public void finalize(){
-		int kaka = 0;
-		++kaka;
+		
 	}
 	
 	@Override
@@ -239,7 +238,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				}
 			}
 			else{
-				return 0 ;
+				return 0;
 			}
 		}
 	}

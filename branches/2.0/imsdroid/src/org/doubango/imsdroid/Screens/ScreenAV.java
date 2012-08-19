@@ -591,7 +591,11 @@ public class ScreenAV extends BaseScreen{
 	private void applyCamRotation(int rotation){
 		if(mAVSession != null){
 			mLastRotation = rotation;
-			switch (rotation) {
+			// libYUV
+			mAVSession.setRotation(rotation);
+			
+			// FFmpeg
+			/*switch (rotation) {
 				case 0:
 				case 90:
 					mAVSession.setRotation(rotation);
@@ -605,7 +609,7 @@ public class ScreenAV extends BaseScreen{
 					mAVSession.setRotation(90);
 					mAVSession.setProducerFlipped(true);
 					break;
-				}
+				}*/
 		}
 	}
 	
