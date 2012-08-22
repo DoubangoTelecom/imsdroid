@@ -4,6 +4,13 @@
 <wiki:toc max_depth="2" />
 
 ==2.0.499==
+ * Align with Doubango 738
+ * Direct redering of YUV420P frame to opengl-es surface using shaders for GPU chroma conversion (yuv420p -> rgba)
+ * Use libyuv (http://code.google.com/p/libyuv/) NEON optimized functions for choma conversion and image scaling, rotation, cropping...
+ * Video jitter buffer enhancements
+ * Fix issue 228
+
+==2.0.499==
  * Fix on-way video when calling Chrome 21.0.1180.60-m
 
 ==2.0.499==
