@@ -25,6 +25,7 @@ import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.utils.AndroidUtils;
 import org.doubango.utils.CpuFeatures_t;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -326,6 +327,7 @@ public class NgnApplication extends Application{
     private static ConnectivityManager sConnectivityManager;
     private static PowerManager sPowerManager;
     private static PowerManager.WakeLock sPowerManagerLock;
+    private static int sGlEsVersion;
     
     
     public NgnApplication() {
@@ -568,6 +570,18 @@ public class NgnApplication extends Application{
 			e.printStackTrace();
 			return "unknown";
 		}
+    }
+    
+    public static int getGlEsVersion(){
+    	if(sGlEsVersion == 0){
+		    sGlEsVersion = ((ActivityManager) NgnApplication.getContext().getSystemService(Context.ACTIVITY_SERVICE)).getDeviceConfigurationInfo().reqGlEsVersion;
+		    Log.d(TAG, "sGlEsVersion=" + sGlEsVersion);
+    	}
+    	return sGlEsVersion;
+    }
+    
+    public static boolean isGlEs2Supported(){
+    	return getGlEsVersion() >= 0x20000;
     }
     
     public static boolean acquirePowerLock(){

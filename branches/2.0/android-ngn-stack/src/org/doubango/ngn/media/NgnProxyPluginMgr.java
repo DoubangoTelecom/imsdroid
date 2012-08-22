@@ -22,6 +22,7 @@ package org.doubango.ngn.media;
 import java.math.BigInteger;
 import java.util.Hashtable;
 
+import org.doubango.ngn.NgnApplication;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
@@ -46,7 +47,8 @@ public class NgnProxyPluginMgr {
 	private static final Hashtable<BigInteger, NgnProxyPlugin>sPlugins = new Hashtable<BigInteger, NgnProxyPlugin>(); // HashTable is synchronized
 	
 	public static void Initialize() {
-        ProxyVideoConsumer.setDefaultChroma(tmedia_chroma_t.tmedia_chroma_rgb565le);
+		// use openGL-ES 2.0 shaders for chroma conversion (YUV420P -> RGBA)
+        ProxyVideoConsumer.setDefaultChroma(NgnApplication.isGlEs2Supported() ? tmedia_chroma_t.tmedia_chroma_yuv420p : tmedia_chroma_t.tmedia_chroma_rgb565le);
         ProxyVideoConsumer.setDefaultAutoResizeDisplay(true);
         ProxyVideoProducer.setDefaultChroma(tmedia_chroma_t.tmedia_chroma_nv21);
         
@@ -124,7 +126,7 @@ public class NgnProxyPluginMgr {
 					synchronized(this){
 						ProxyVideoConsumer consumer = sPluginMgr.findVideoConsumer(id);
 						if(consumer != null){
-							NgnProxyVideoConsumer myConsumer = new NgnProxyVideoConsumer(id, consumer);
+							NgnProxyVideoConsumer myConsumer = NgnProxyVideoConsumer.createInstance(id, consumer);
 							sPlugins.put(id, myConsumer);
 						}
 					}
