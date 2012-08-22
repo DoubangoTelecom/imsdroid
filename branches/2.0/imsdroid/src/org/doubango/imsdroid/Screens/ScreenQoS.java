@@ -69,7 +69,8 @@ public class ScreenQoS  extends BaseScreen {
 	        new ScreenQoSVsize("VGA (640 x 480)", tmedia_pref_video_size_t.tmedia_pref_video_size_vga),
 	        new ScreenQoSVsize("4CIF (704 x 576)", tmedia_pref_video_size_t.tmedia_pref_video_size_4cif),
 	        new ScreenQoSVsize("SVGA (800 x 600)", tmedia_pref_video_size_t.tmedia_pref_video_size_svga),
-	        new ScreenQoSVsize("480P (852 x 480)", tmedia_pref_video_size_t.tmedia_pref_video_size_480p),
+	        // FIXME: OpenGL rendering issue for 480P
+	        // new ScreenQoSVsize("480P (852 x 480)", tmedia_pref_video_size_t.tmedia_pref_video_size_480p),
 	        new ScreenQoSVsize("720P (1280 x 720)", tmedia_pref_video_size_t.tmedia_pref_video_size_720p),
 	        new ScreenQoSVsize("16CIF (1408 x 1152)", tmedia_pref_video_size_t.tmedia_pref_video_size_16cif),
 	        new ScreenQoSVsize("1080P (1920 x 1080)", tmedia_pref_video_size_t.tmedia_pref_video_size_1080p)

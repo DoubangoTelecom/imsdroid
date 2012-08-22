@@ -1,5 +1,6 @@
 package org.doubango.test.call;
 
+import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
@@ -9,6 +10,7 @@ import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnUriUtils;
+import org.doubango.utils.AndroidUtils;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -16,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +31,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 public class Main extends Activity {
-    	
+	private static String TAG = Main.class.getCanonicalName();
 	private ListView mListView;
 	private TextView mTvLog;
 	private MainAdapter mAdapter;
@@ -261,10 +264,23 @@ public class Main extends Activity {
 		}
     }
     
-    
+    private static final String DATA_FOLDER = String.format("/data/data/%s", Main.class.getPackage().getName());
+	private static final String LIBS_FOLDER = String.format("%s/lib", Main.DATA_FOLDER);
     // Load native libraries (the shared libraries are from 'android-ngn-stack' project)
 	static {
-		System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class.getPackage().getName()));
+		// See 'http://code.google.com/p/imsdroid/issues/detail?id=197' for more information
+		// Load Android utils library (required to detect CPU features)
+		System.load(String.format("%s/%s", Main.LIBS_FOLDER, "libutils_armv5te.so"));
+		Log.d(TAG,"CPU_Feature=" + AndroidUtils.getCpuFeatures());
+		if(NgnApplication.isCpuNeon()){
+			Log.d(TAG,"isCpuNeon()=YES");
+			System.load(String.format("%s/%s", Main.LIBS_FOLDER, "libtinyWRAP_armv7-a.so"));
+		}
+		else{
+			Log.d(TAG,"isCpuNeon()=NO");
+			System.load(String.format("%s/%s", Main.LIBS_FOLDER, "libtinyWRAP_armv5te.so"));
+		}
+		// Initialize the engine
 		NgnEngine.initialize();
 	}
 }
