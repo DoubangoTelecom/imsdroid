@@ -88,7 +88,7 @@ public class NgnUriUtils {
 				}
 				// FIXME: Should be done by doubango
 				return String.format("sip:%s@%s", 
-						uri.replace("(", "").replace(")", "").replace("-", "").replace("#", "%23"), 
+						uri.replace(" ", "").replace("(", "").replace(")", "").replace("-", "").replace("#", "%23"), 
 						realm);
 			}
 		}
