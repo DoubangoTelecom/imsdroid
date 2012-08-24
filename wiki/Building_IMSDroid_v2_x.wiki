@@ -148,4 +148,7 @@ You can build a commercial version of Doubango like this:
 ../bindings/java/android/commercial.sh
 }}}
 
+==Technical help==
+Please check our [http://code.google.com/p/webrtc2sip/issues/list issue tracker] or [https://groups.google.com/group/doubango developer group] if you have any problem.
+
 Et voilà
