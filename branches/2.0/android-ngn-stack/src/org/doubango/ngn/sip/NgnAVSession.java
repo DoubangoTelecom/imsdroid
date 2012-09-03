@@ -43,6 +43,7 @@ import org.doubango.ngn.utils.NgnPredicate;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.CallSession;
+import org.doubango.tinyWRAP.Codec;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyPlugin;
 import org.doubango.tinyWRAP.SipMessage;
@@ -53,7 +54,9 @@ import org.doubango.tinyWRAP.tmedia_qos_stype_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.content.Context;
+import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.util.Log;
 import android.view.View;
 
@@ -75,6 +78,8 @@ public class NgnAVSession extends NgnInviteSession{
 	private final INgnConfigurationService mConfigurationService;
 	
 	private boolean mSendingVideo;
+	private boolean mMuteOn;
+	private boolean mSpeakerOn;
 	
     private final static NgnObservableHashMap<Long, NgnAVSession> sSessions = new NgnObservableHashMap<Long, NgnAVSession>(true);
     
@@ -147,19 +152,6 @@ public class NgnAVSession extends NgnInviteSession{
 
 	public static NgnObservableHashMap<Long, NgnAVSession> getSessions(){
 		return sSessions;
-	}
-	
-	public boolean isMicrophoneMute() {
-		if(mAudioProducer != null){
-			return mAudioProducer.isOnMute();
-		}
-		return false;
-	}
-	
-	public void setMicrophoneMute(boolean mute) {
-	    if(mAudioProducer != null){
-	        mAudioProducer.setOnMute(mute);
-	    } 
 	}
 
 	/**
@@ -337,6 +329,10 @@ public class NgnAVSession extends NgnInviteSession{
 	    
 	    mConfigurationService = NgnEngine.getInstance().getConfigurationService();
 	    
+	    mSendingVideo = mConfigurationService.getBoolean(
+	    		NgnConfigurationEntry.GENERAL_AUTOSTART_VIDEO,
+				NgnConfigurationEntry.DEFAULT_GENERAL_AUTOSTART_VIDEO);
+	    
 	    // commons
 	    super.init();
 	    // SigComp
@@ -441,6 +437,37 @@ public class NgnAVSession extends NgnInviteSession{
 		if(super.mMediaSessionMgr != null){
 			super.mMediaSessionMgr.delete();
 			super.mMediaSessionMgr = null;
+		}
+	}
+	
+	private void updateEchoTail(){
+		if(mConfigurationService.getBoolean(NgnConfigurationEntry.GENERAL_USE_ECHO_TAIL_ADAPTIVE,
+				NgnConfigurationEntry.DEFAULT_GENERAL_USE_ECHO_TAIL_ADAPTIVE)){
+			Log.d(TAG, "Setting new echo tail");
+			final MediaSessionMgr mediaMgr;
+			if((mediaMgr = super.getMediaSessionMgr()) != null){
+				final Codec codec = mediaMgr.producerGetCodec(twrap_media_type_t.twrap_media_audio);
+				if(codec == null){
+					Log.e(TAG, "Failed to get producer codec");
+					return;
+				}
+				final int samplingRate = codec.getAudioSamplingRate();
+				final int channels = codec.getAudioChannels();
+				if(samplingRate <= 0){
+					Log.e(TAG, samplingRate + " not valid as audio sampling rate");
+					return;
+				}
+				if(channels != 1 && channels != 2){
+					Log.e(TAG, channels + " not valid as audio channels value");
+					return;
+				}
+				final int minBufferSize = AudioRecord.getMinBufferSize(samplingRate, channels == 1 ? AudioFormat.CHANNEL_IN_MONO : AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
+				Log.d(TAG, "getMinBufferSize("+samplingRate+ ","+channels+")="+minBufferSize);
+				final int echoTail1 = (((1000 * minBufferSize) / samplingRate) << 1);
+				final int echoTail2 = echoTail1 < 200 ? 200 : echoTail1; // make it more reasonable
+				Log.d(TAG, "Echo tail ("+echoTail1+"->"+echoTail2+")");
+				mediaMgr.sessionSetInt32(twrap_media_type_t.twrap_media_audio, "echo-tail", echoTail2);
+			}
 		}
 	}
 	
@@ -585,11 +612,22 @@ public class NgnAVSession extends NgnInviteSession{
 	 * @param speakerOn true to enable the speakerphone and false to disable it
 	 */
 	public void setSpeakerphoneOn(boolean speakerOn){
-		if(mAudioProducer != null){
-			mAudioProducer.setSpeakerphoneOn(speakerOn);
+		if(NgnApplication.isSLEs2Supported()){
+			final MediaSessionMgr mediaMgr;
+			if((mediaMgr = super.getMediaSessionMgr()) != null){
+				if(mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_audio, "speaker-on", speakerOn ? 1 : 0)){
+					mSpeakerOn = speakerOn;
+				}
+			}
 		}
-		if(mAudioConsumer != null){
-			mAudioConsumer.setSpeakerphoneOn(speakerOn);
+		else{
+			if(mAudioProducer != null){
+				mAudioProducer.setSpeakerphoneOn(speakerOn);
+			}
+			if(mAudioConsumer != null){
+				mAudioConsumer.setSpeakerphoneOn(speakerOn);
+			}
+			mSpeakerOn = speakerOn;
 		}
 	}
 	
@@ -597,22 +635,57 @@ public class NgnAVSession extends NgnInviteSession{
 	 * Toggles the speakerphone. Enable it if disabled and vice-versa
 	 */
 	public void toggleSpeakerphone(){
-		if(mAudioProducer != null){
-			mAudioProducer.toggleSpeakerphone();
+		setSpeakerphoneOn(!mSpeakerOn);
+	}
+	
+	public boolean isSpeakerOn(){
+		if(!NgnApplication.isSLEs2Supported()){
+			if(mAudioProducer != null){
+				return mAudioProducer.isSpeakerOn();
+			}
 		}
-		if(mAudioConsumer != null){
-			mAudioConsumer.toggleSpeakerphone();
+		return mSpeakerOn;
+	}
+	
+	public boolean isMicrophoneMute() {
+		if(NgnApplication.isSLEs2Supported()){
+			return mMuteOn;
+		}
+		else{
+			if(mAudioProducer != null){
+				return mAudioProducer.isOnMute();
+			}
+			return mMuteOn;
+		}
+	}
+	
+	public void setMicrophoneMute(boolean mute) {
+		if(NgnApplication.isSLEs2Supported()){
+			final MediaSessionMgr mediaMgr;
+			if((mediaMgr = super.getMediaSessionMgr()) != null){
+				if(mediaMgr.producerSetInt32(twrap_media_type_t.twrap_media_audio, "mute", mute ? 1 : 0)){
+					mMuteOn =  mute;
+				}
+			}
+		}
+		else{
+		    if(mAudioProducer != null){
+		        mAudioProducer.setOnMute(mute);
+		        mMuteOn = mAudioProducer.isOnMute();
+		    } 
 		}
 	}
 	
 	public boolean onVolumeChanged(boolean bDown){
-		if(mAudioProducer == null || !mAudioProducer.onVolumeChanged(bDown)){
-			return false;
+		if(!NgnApplication.isSLEs2Supported()){
+			if(mAudioProducer == null || !mAudioProducer.onVolumeChanged(bDown)){
+				return false;
+			}
+			if(mAudioConsumer == null || !mAudioConsumer.onVolumeChanged(bDown)){
+				return false;
+			}
 		}
-		if(mAudioConsumer == null || !mAudioConsumer.onVolumeChanged(bDown)){
-			return false;
-		}
-		return true;
+		return false;
 	}
 	
 	public void setModeInCall(boolean bInCall){
@@ -642,6 +715,7 @@ public class NgnAVSession extends NgnInviteSession{
 			case INCALL:
 				setModeInCall(true);
 				initializeConsumersAndProducers();
+				updateEchoTail();
 				break;
 			
 			case TERMINATED:

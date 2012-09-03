@@ -1,6 +1,5 @@
 package org.doubango.test;
 
-import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
@@ -8,7 +7,6 @@ import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnStringUtils;
-import org.doubango.utils.AndroidUtils;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -39,26 +37,6 @@ public class Main extends Activity {
 	private final NgnEngine mEngine;
 	private final INgnConfigurationService mConfigurationService;
 	private final INgnSipService mSipService;
-	private static final String DATA_FOLDER = String.format("/data/data/%s", Main.class.getPackage().getName());
-	private static final String LIBS_FOLDER = String.format("%s/lib", Main.DATA_FOLDER);
-	
-	// Load native libraries (the shared libraries are from 'android-ngn-stack' project)
-	static {
-		// See 'http://code.google.com/p/imsdroid/issues/detail?id=197' for more information
-		// Load Android utils library (required to detect CPU features)
-		System.load(String.format("%s/%s", Main.LIBS_FOLDER, "libutils_armv5te.so"));
-		Log.d(TAG,"CPU_Feature=" + AndroidUtils.getCpuFeatures());
-		if(NgnApplication.isCpuNeon()){
-			Log.d(TAG,"isCpuNeon()=YES");
-			System.load(String.format("%s/%s", Main.LIBS_FOLDER, "libtinyWRAP_armv7-a.so"));
-		}
-		else{
-			Log.d(TAG,"isCpuNeon()=NO");
-			System.load(String.format("%s/%s", Main.LIBS_FOLDER, "libtinyWRAP_armv5te.so"));
-		}
-		// Initialize the engine
-		NgnEngine.initialize();
-	}
 	
 	public Main(){
 		mEngine = NgnEngine.getInstance();

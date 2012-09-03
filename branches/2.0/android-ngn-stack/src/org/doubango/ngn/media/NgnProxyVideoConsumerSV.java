@@ -23,10 +23,8 @@ package org.doubango.ngn.media;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnMediaPluginEventArgs;
 import org.doubango.ngn.events.NgnMediaPluginEventTypes;
-import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoConsumerCallback;
 import org.doubango.tinyWRAP.ProxyVideoFrame;
@@ -62,7 +60,6 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 	private ByteBuffer mVideoFrame;
 	private Bitmap mRGB565Bitmap;
 	private Bitmap mRGBCroppedBitmap;
-	private boolean mFullScreenRequired;
 	private Looper mLooper;
     private Handler mHandler;
 
@@ -186,9 +183,6 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 		mHeight = height;
 		mFps = fps;
 		
-		mFullScreenRequired = NgnEngine.getInstance().getConfigurationService().getBoolean(
-				NgnConfigurationEntry.GENERAL_FULL_SCREEN_VIDEO, 
-				NgnConfigurationEntry.DEFAULT_GENERAL_FULL_SCREEN_VIDEO);
 		mRGB565Bitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
 		mVideoFrame = ByteBuffer.allocateDirect((mWidth * mHeight) << 1);
 		mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
@@ -266,7 +260,7 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 				return;
 			}
 			mRGB565Bitmap.copyPixelsFromBuffer(mVideoFrame);
-			if(mFullScreenRequired){
+			if(super.mFullScreenRequired){
 				// destroy cropped bitmap if surface has changed
 				if(mPreview.isSurfaceChanged()){
 					mPreview.setSurfaceChanged(false);

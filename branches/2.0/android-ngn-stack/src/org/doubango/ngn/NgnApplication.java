@@ -179,17 +179,6 @@ import android.view.WindowManager;
  *  @endcode
  *  ... just before @code </manifest> @endcode
  * 
- * <h2>Loading native libraries</h2>
- * The NGN library contain native (C/C++) libraries from Doubango Framework. These libraries contain the signaling protocols (sip, sdp, rtp, xcap, msrp,...),
- * codecs (h264,theora,speex,gsm,g729,...), ...<br />
- * You must load these libraries before calling any function from the NGN library. We recommend using a static block in your main activity like this:<br>
- * @code
- * // Load native libraries (the shared libraries are from 'android-ngn-stack' project)
- * static {
- * 	System.load(String.format("/data/data/%s/lib/libtinyWRAP.so", Main.class.getPackage().getName()));
- * 	NgnEngine.initialize();
- * }
- * @endcode
  * 
  * <h2>Declaring your app as NGN</h2>
  * Decalaring your app as NGN is recommended if your are programming at <b>high</b> level. <br />
@@ -328,6 +317,7 @@ public class NgnApplication extends Application{
     private static PowerManager sPowerManager;
     private static PowerManager.WakeLock sPowerManagerLock;
     private static int sGlEsVersion;
+    static final String sBuildModel = Build.MODEL.toLowerCase();
     
     
     public NgnApplication() {
@@ -353,7 +343,7 @@ public class NgnApplication extends Application{
 		sPackageManager = sInstance.getPackageManager();    		
 		sPackageName = sInstance.getPackageName();
 		
-		Log.d(TAG,"Build.MODEL="+Build.MODEL);
+		Log.d(TAG,"Build.MODEL="+sBuildModel);
 		Log.d(TAG,"Build.VERSION.SDK="+Build.VERSION.SDK);
 	}
     
@@ -374,29 +364,17 @@ public class NgnApplication extends Application{
      * @return true if we need to apply the hack and false otherwise
      */
     public static boolean useSetModeToHackSpeaker(){
-    	final String model = Build.MODEL;
         return  (isSamsung() && !isSamsungGalaxyMini() && getSDKVersion()<= 7) ||
                 
-                model.equalsIgnoreCase("blade")    ||		// ZTE Blade
+        sBuildModel.equalsIgnoreCase("blade")    ||		// ZTE Blade
                 
-                model.equalsIgnoreCase("htc_supersonic") || //HTC EVO
+        sBuildModel.equalsIgnoreCase("htc_supersonic") || //HTC EVO
                 
-                model.equalsIgnoreCase("U8110") || // Huawei U8110
-                model.equalsIgnoreCase("U8150")  // Huawei U8110
+        sBuildModel.equalsIgnoreCase("U8110") || // Huawei U8110
+        sBuildModel.equalsIgnoreCase("U8150")  // Huawei U8110
                 
                 ;
-    }
-    
-    
-    // Requires 'System.load("libutils.so");' to be called first
-    //public static boolean isARMv7WithoutNeon(){
-    //	final CpuFamily_t family = AndroidUtils.getCpuFamily();
-    //	if(family == CpuFamily_t.ARM){
-    //		final CpuFeatures_t features =  AndroidUtils.getCpuFeatures();
-    //		return ((features.swigValue() & CpuFeatures_t.ARMv7.swigValue()) != 0) && ((features.swigValue() & CpuFeatures_t.NEON.swigValue()) == 0);
-    //	}
-    //	return false;
-    //}
+    }   
     
     public static boolean isARMv7WithoutNeon(){
         return (isCpuARMv7() && !isCpuNeon());
@@ -416,17 +394,15 @@ public class NgnApplication extends Application{
      */
     
     public static boolean isSamsungGalaxyMini(){
-    	final String model = Build.MODEL.toLowerCase();
-    	return model.equalsIgnoreCase("gt-i5800");
+    	return sBuildModel.equalsIgnoreCase("gt-i5800");
     }
         
     public static boolean isSamsung(){
-    	final String model = Build.MODEL.toLowerCase();
-    	return model.startsWith("gt-") 
-		|| model.contains("samsung") 
-		|| model.startsWith("sgh-") 
-		|| model.startsWith("sph-") 
-		|| model.startsWith("sch-");
+    	return sBuildModel.startsWith("gt-") 
+		|| sBuildModel.contains("samsung") 
+		|| sBuildModel.startsWith("sgh-") 
+		|| sBuildModel.startsWith("sph-") 
+		|| sBuildModel.startsWith("sch-");
     }
     
     /**
@@ -434,23 +410,19 @@ public class NgnApplication extends Application{
      * @return true if the stack is running on a HTC device and false otherwise
      */
     public static boolean isHTC(){
-    	final String model = Build.MODEL.toLowerCase();
-    	return model.startsWith("htc");
+    	return sBuildModel.startsWith("htc");
     }
     
     public static boolean isZTE(){
-    	final String model = Build.MODEL.toLowerCase();
-    	return model.startsWith("zte");
+    	return sBuildModel.startsWith("zte");
     }
     
     public static boolean isLG(){
-    	final String model = Build.MODEL.toLowerCase();
-    	return model.startsWith("lg-");
+    	return sBuildModel.startsWith("lg-");
     }
     
     public static boolean isToshiba(){
-    	final String model = Build.MODEL.toLowerCase();
-    	return model.startsWith("toshiba");
+    	return sBuildModel.startsWith("toshiba");
     }
     
     public static boolean isAudioRecreateRequired(){
@@ -582,6 +554,10 @@ public class NgnApplication extends Application{
     
     public static boolean isGlEs2Supported(){
     	return getGlEsVersion() >= 0x20000;
+    }
+    
+    public static boolean isSLEs2Supported(){
+    	return (NgnApplication.getSDKVersion() >= 9);
     }
     
     public static boolean acquirePowerLock(){

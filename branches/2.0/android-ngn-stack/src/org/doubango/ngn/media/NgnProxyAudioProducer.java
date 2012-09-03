@@ -102,6 +102,10 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 	public void toggleSpeakerphone() {
 		setSpeakerphoneOn(!NgnApplication.getAudioManager().isSpeakerphoneOn());
 	}
+	
+	public boolean isSpeakerOn(){
+		return NgnApplication.getAudioManager().isSpeakerphoneOn();
+	}
 
 	public boolean onVolumeChanged(boolean bDown) {
 		return true;

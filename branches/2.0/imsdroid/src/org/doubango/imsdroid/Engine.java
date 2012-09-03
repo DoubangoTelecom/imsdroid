@@ -21,14 +21,12 @@ package org.doubango.imsdroid;
 
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Services.Impl.ScreenService;
-import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.NgnNativeService;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.sip.NgnMsrpSession;
 import org.doubango.ngn.utils.NgnPredicate;
-import org.doubango.utils.AndroidUtils;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -45,27 +43,8 @@ public class Engine extends NgnEngine{
 	private static final int NOTIF_APP_ID = 19833894;
 	private static final int NOTIF_CONTSHARE_ID = 19833895;
 	private static final int NOTIF_CHAT_ID = 19833896;
-	private static final String DATA_FOLDER = String.format("/data/data/%s", Main.class.getPackage().getName());
-	private static final String LIBS_FOLDER = String.format("%s/lib", Engine.DATA_FOLDER);
 	
 	private IScreenService mScreenService;
-
-	static {
-		// See 'http://code.google.com/p/imsdroid/issues/detail?id=197' for more information
-		// Load Android utils library (required to detect CPU features)
-		System.load(String.format("%s/%s", Engine.LIBS_FOLDER, "libutils_armv5te.so"));
-		Log.d(TAG,"CPU_Feature="+AndroidUtils.getCpuFeatures());
-		if(NgnApplication.isCpuNeon()){
-			Log.d(TAG,"isCpuNeon()=YES");
-			System.load(String.format("%s/%s", Engine.LIBS_FOLDER, "libtinyWRAP_armv7-a.so"));
-		}
-		else{
-			Log.d(TAG,"isCpuNeon()=NO");
-			System.load(String.format("%s/%s", Engine.LIBS_FOLDER, "libtinyWRAP_armv5te.so"));
-		}
-		// Initialize the engine
-		NgnEngine.initialize();
-	}
 	
 	public static NgnEngine getInstance(){
 		if(sInstance == null){

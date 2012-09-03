@@ -38,6 +38,7 @@ public class NgnConfigurationEntry {
 	
 	// General
 	public static final String GENERAL_AUTOSTART = "GENERAL_AUTOSTART." + TAG;
+	public static final String GENERAL_AUTOSTART_VIDEO = "GENERAL_AUTOSTART_VIDEO." + TAG;
 	public static final String GENERAL_SHOW_WELCOME_SCREEN = "GENERAL_SHOW_WELCOME_SCREEN." + TAG;
 	public static final String GENERAL_FULL_SCREEN_VIDEO = "GENERAL_FULL_SCREEN_VIDEO." + TAG;
 	public static final String GENERAL_USE_FFC = "GENERAL_USE_FFC." + TAG;
@@ -48,6 +49,7 @@ public class NgnConfigurationEntry {
 	public static final String GENERAL_VAD = "GENERAL_VAD."+ TAG ;	
 	public static final String GENERAL_NR = "GENERAL_NR."+ TAG ;	
 	public static final String GENERAL_ECHO_TAIL = "GENERAL_ECHO_TAIL." + TAG ;
+	public static final String GENERAL_USE_ECHO_TAIL_ADAPTIVE = "GENERAL_USE_ECHO_TAIL_ADAPTIVE." + TAG ;
 	public static final String GENERAL_SEND_DEVICE_INFO = "GENERAL_SEND_DEVICE_INFO" + TAG;
 	
 	// Identity
@@ -136,12 +138,14 @@ public class NgnConfigurationEntry {
 	public static final boolean DEFAULT_GENERAL_INTERCEPT_OUTGOING_CALLS = true;
 	public static final boolean DEFAULT_GENERAL_USE_FFC = true;
 	public static final boolean DEFAULT_GENERAL_AUTOSTART = true;
+	public static final boolean DEFAULT_GENERAL_AUTOSTART_VIDEO = true;
 	public static final float DEFAULT_GENERAL_AUDIO_PLAY_LEVEL = 0.25f;
 	public static final String DEFAULT_GENERAL_ENUM_DOMAIN = "e164.org";
 	public static final boolean DEFAULT_GENERAL_AEC = true;
+	public static final boolean DEFAULT_GENERAL_USE_ECHO_TAIL_ADAPTIVE = true;
 	public static final boolean DEFAULT_GENERAL_VAD = false; // speex-dsp don't support VAD for fixed-point implementation
 	public static final boolean DEFAULT_GENERAL_NR = true;
-	public static final int DEFAULT_GENERAL_ECHO_TAIL = 500;
+	public static final int DEFAULT_GENERAL_ECHO_TAIL = 200;
 	public static final boolean DEFAULT_GENERAL_SEND_DEVICE_INFO = false;
 	
 	//	Identity
