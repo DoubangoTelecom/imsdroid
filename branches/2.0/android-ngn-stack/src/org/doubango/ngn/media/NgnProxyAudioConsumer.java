@@ -108,8 +108,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 				Log.d(TAG, "Consumer changeVolume HP on AEC");
 				return mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*0.5f, AudioTrack.getMaxVolume()*0.5f) == AudioTrack.SUCCESS;
 			}
-			else 
-				if(bVolumeChanged){
+			else if(bVolumeChanged){
 				Log.d(TAG, "Consumer changeVolume VolumeChanged   bDown:"+bDown);
 				audioManager.adjustStreamVolume(AUDIO_STREAM_TYPE, bDown ? AudioManager.ADJUST_LOWER : AudioManager.ADJUST_RAISE, 
 					AudioManager.FLAG_SHOW_UI);

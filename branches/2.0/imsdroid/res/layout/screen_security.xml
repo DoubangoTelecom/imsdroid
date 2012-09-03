@@ -6,15 +6,15 @@
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/screen_security_linearLayout_srtp" android:layout_width="fill_parent" android:orientation="vertical">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_security_textView_srtp_mode" android:text="SRTP Mode" android:textSize="16dp"></TextView>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_security_textView_srtp_mode" android:text="SRTP Mode" android:textSize="20dp"></TextView>
         <Spinner android:layout_height="wrap_content" android:id="@+id/screen_security_spinner_srtp_modes" android:layout_width="fill_parent"></Spinner>
     </LinearLayout>
   
 
   
 <LinearLayout android:id="@+id/screen_security_linearLayout_imsaka" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="5px" android:layout_below="@+id/screen_security_linearLayout_srtp">
-<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_amf" android:text="AMF" android:textSize="16dp"></TextView>
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_amf" android:text="0x0000"></EditText><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Operator Id" android:id="@+id/screen_security_textView_opid" android:textSize="16dp"></TextView>
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_amf" android:text="AMF" android:textSize="20dp" android:layout_marginTop="2dp"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_amf" android:text="0x0000"></EditText><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Operator Id" android:id="@+id/screen_security_textView_opid" android:textSize="20dp" android:layout_marginTop="2dp"></TextView>
 <EditText android:layout_height="wrap_content" android:text="0x00000000000000000000000000000000" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_opid"></EditText>
 </LinearLayout>
 

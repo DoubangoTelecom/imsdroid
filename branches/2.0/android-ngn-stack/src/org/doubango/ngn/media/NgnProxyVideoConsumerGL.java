@@ -86,7 +86,7 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
     	mContext = context == null ? mContext : context;
     	if(mContext != null){
 	    	if(mPreview == null || mPreview.isDestroyed()){
-	    		mPreview = new NgnProxyVideoConsumerGLPreview(mContext, mVideoFrame, mWidth, mHeight, mFps);
+	    		mPreview = new NgnProxyVideoConsumerGLPreview(mContext, super.mFullScreenRequired,  mVideoFrame, mWidth, mHeight, mFps);
 	    	}
     	}
 		return mPreview;
@@ -300,8 +300,11 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 	    private boolean mSurfaceDestroyed;
 	    @SuppressWarnings("unused")
 		private Context mContext;
+	    
+	    private int mViewWidth, mViewHeight, mViewX, mViewY;
+	    private boolean mFullScreenRequired;
 		
-		public NgnProxyVideoConsumerGLPreview(Context context, ByteBuffer buffer, int bufferWidth, int bufferHeight, int fps) {
+		public NgnProxyVideoConsumerGLPreview(Context context, boolean fullScreenRequired, ByteBuffer buffer, int bufferWidth, int bufferHeight, int fps) {
 			super(context);
 	        setEGLContextClientVersion(2);
 			setEGLConfigChooser(8, 8, 8, 8, 16, 0);	
@@ -320,6 +323,8 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 	        mIndices = ByteBuffer.allocateDirect(INDICES_DATA.length
 	                * SHORT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asShortBuffer();
 	        mIndices.put(INDICES_DATA).position(0);
+	        
+	        mFullScreenRequired = fullScreenRequired;
 		}
 		
 		public void setBuffer(ByteBuffer buffer, int bufferWidth, int bufferHeight){
@@ -352,6 +357,7 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 
 	    @Override
 		public void onDrawFrame(GL10 glUnused) {
+	    	GLES20.glViewport(mViewX, mViewY, mViewWidth, mViewHeight);
 	    	GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 	        GLES20.glUseProgram(mProgram);
 	        checkGlError("glUseProgram");
@@ -380,7 +386,7 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 
 	    public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 	    	GLES20.glViewport(0, 0, width, height);
-	    	
+	    	setViewport(width, height);
 	        // GLU.gluPerspective(glUnused, 45.0f, (float)width/(float)height, 0.1f, 100.0f);
 	    }
 
@@ -458,6 +464,8 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 	        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 	        
 	        mSurfaceCreated = true;
+	        
+	        setViewport(getWidth(), getHeight());
 	    }
 
 	    private int loadShader(int shaderType, String source) {
@@ -505,6 +513,21 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 	            }
 	        }
 	        return program;
+	    }
+	    
+	    private void setViewport(int width, int height){
+	    	if(mFullScreenRequired){
+	    		mViewWidth = width;
+	    		mViewHeight = height;
+	    		mViewX = mViewY = 0;
+	    	}
+	    	else{
+	    		float fRatio = ((float) mBufferWidthY / (float) mBufferHeightY);
+				mViewWidth = (int) ((float) width / fRatio) > height ? (int) ((float) height * fRatio) : width;
+				mViewHeight = (int) (mViewWidth / fRatio) > height ? height : (int) (mViewWidth / fRatio);
+				mViewX = ((width - mViewWidth) >> 1);
+				mViewY = ((height - mViewHeight) >> 1);
+	    	}
 	    }
 
 	    private void checkGlError(String op) {

@@ -1,11 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1' standalone='yes' ?>
 <tagfile>
   <compound kind="page">
-    <name>index</name>
-    <title>Foreword</title>
-    <filename>index</filename>
-  </compound>
-  <compound kind="page">
     <name>Introduction</name>
     <title></title>
     <filename>_introduction</filename>
@@ -68,159 +63,8 @@
     <docanchor file="_ngn_sip_service_page">anchor_Listening_for_audio_video_call_state</docanchor>
   </compound>
   <compound kind="class">
-    <name>org::doubango::ngn::NgnApplication</name>
-    <filename>classorg_1_1doubango_1_1ngn_1_1_ngn_application.html</filename>
-    <member kind="function" static="yes">
-      <type>static Context</type>
-      <name>getContext</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_application.html</anchorfile>
-      <anchor>a09e86a7f24b136873a02f73614b31fc5</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function" static="yes">
-      <type>static int</type>
-      <name>getSDKVersion</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_application.html</anchorfile>
-      <anchor>a6019a9b1600b1979bda5d41babcb1d6b</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function" static="yes">
-      <type>static boolean</type>
-      <name>useSetModeToHackSpeaker</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_application.html</anchorfile>
-      <anchor>ae6071d946afb072b9a820419ee729bab</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function" static="yes">
-      <type>static boolean</type>
-      <name>isSamsung</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_application.html</anchorfile>
-      <anchor>abf3148388fef3be8a33875de8f369753</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function" static="yes">
-      <type>static boolean</type>
-      <name>isHTC</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_application.html</anchorfile>
-      <anchor>ae24fbbbe2ea3b71951012bb34e236a6b</anchor>
-      <arglist>()</arglist>
-    </member>
-  </compound>
-  <compound kind="class">
     <name>org::doubango::ngn::NgnEngine</name>
     <filename>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</filename>
-    <member kind="function">
-      <type>synchronized boolean</type>
-      <name>start</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>aeffba43e02b7ed5176f4c94d64c9be1c</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>synchronized boolean</type>
-      <name>stop</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a1cfd5ad6fa6290f25a243349c9dfb16b</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>synchronized boolean</type>
-      <name>isStarted</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a36fe1062c5169305358fb7e86ae7463f</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>void</type>
-      <name>setMainActivity</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a4f79b2f5a3c863d7ae86c3039354a952</anchor>
-      <arglist>(Activity mainActivity)</arglist>
-    </member>
-    <member kind="function">
-      <type>Activity</type>
-      <name>getMainActivity</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a2b74d2ea285ccbd4b4bf61bed65381eb</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnConfigurationService</type>
-      <name>getConfigurationService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>ae7852f0cea9f8453f0de0eda9472e8de</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnStorageService</type>
-      <name>getStorageService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>aa514a0ff965c81cc2c28ae10de03124f</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnNetworkService</type>
-      <name>getNetworkService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>ad583127962e81c35b258614dc7c6b3bc</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnHttpClientService</type>
-      <name>getHttpClientService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a03059fb870cfff0c4191b0754081746a</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnContactService</type>
-      <name>getContactService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a9208e8d48f638dc31073f133ac782d9e</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnHistoryService</type>
-      <name>getHistoryService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a2a2cddc84ad30c5048585484f7b1ec0c</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnSipService</type>
-      <name>getSipService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a35fe3391b613e63147bd8688c2df4c26</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>INgnSoundService</type>
-      <name>getSoundService</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>afab10caf3158171731e3144eee2eda97</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function">
-      <type>Class&lt;?extends NgnNativeService &gt;</type>
-      <name>getNativeServiceClass</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>ae016a84bd969a618d4a8784c0a8cf99e</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function" static="yes">
-      <type>static NgnEngine</type>
-      <name>getInstance</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>aecd6dde60106e3cc2d80f4a8c94bdeac</anchor>
-      <arglist>()</arglist>
-    </member>
-    <member kind="function" protection="protected">
-      <type></type>
-      <name>NgnEngine</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1_ngn_engine.html</anchorfile>
-      <anchor>a05a0e598efe88666dff053ff5240cab1</anchor>
-      <arglist>()</arglist>
-    </member>
   </compound>
   <compound kind="class">
     <name>org::doubango::ngn::NgnNativeService</name>
@@ -235,10 +79,18 @@
     <filename>classorg_1_1doubango_1_1ngn_1_1events_1_1_ngn_invite_event_args.html</filename>
     <base>org::doubango::ngn::events::NgnEventArgs</base>
   </compound>
+  <compound kind="enum">
+    <name>org::doubango::ngn::events::NgnInviteEventTypes</name>
+    <filename>enumorg_1_1doubango_1_1ngn_1_1events_1_1_ngn_invite_event_types.html</filename>
+  </compound>
   <compound kind="class">
     <name>org::doubango::ngn::events::NgnStackEventArgs</name>
     <filename>classorg_1_1doubango_1_1ngn_1_1events_1_1_ngn_stack_event_args.html</filename>
     <base>org::doubango::ngn::events::NgnEventArgs</base>
+  </compound>
+  <compound kind="enum">
+    <name>org::doubango::ngn::events::NgnStackEventTypes</name>
+    <filename>enumorg_1_1doubango_1_1ngn_1_1events_1_1_ngn_stack_event_types.html</filename>
   </compound>
   <compound kind="class">
     <name>org::doubango::ngn::events::NgnStringEventArgs</name>
@@ -258,6 +110,14 @@
   <compound kind="class">
     <name>org::doubango::ngn::media::NgnProxyPlugin</name>
     <filename>classorg_1_1doubango_1_1ngn_1_1media_1_1_ngn_proxy_plugin.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>org::doubango::ngn::media::NgnProxyVideoConsumerGL</name>
+    <filename>classorg_1_1doubango_1_1ngn_1_1media_1_1_ngn_proxy_video_consumer_g_l.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>org::doubango::ngn::media::NgnProxyVideoConsumerSV</name>
+    <filename>classorg_1_1doubango_1_1ngn_1_1media_1_1_ngn_proxy_video_consumer_s_v.html</filename>
   </compound>
   <compound kind="class">
     <name>org::doubango::ngn::media::NgnProxyVideoProducer</name>
@@ -289,6 +149,13 @@
       <arglist>()</arglist>
     </member>
     <member kind="function">
+      <type>List&lt; NgnEmail &gt;</type>
+      <name>getEmails</name>
+      <anchorfile>classorg_1_1doubango_1_1ngn_1_1model_1_1_ngn_contact.html</anchorfile>
+      <anchor>a9acd8641912bbe5e8e129b1478ac0f29</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
       <type>String</type>
       <name>getPrimaryNumber</name>
       <anchorfile>classorg_1_1doubango_1_1ngn_1_1model_1_1_ngn_contact.html</anchorfile>
@@ -301,6 +168,13 @@
       <anchorfile>classorg_1_1doubango_1_1ngn_1_1model_1_1_ngn_contact.html</anchorfile>
       <anchor>a19af42e492f421e19238c6e77af86750</anchor>
       <arglist>(PhoneType type, String number, String description)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>addEmail</name>
+      <anchorfile>classorg_1_1doubango_1_1ngn_1_1model_1_1_ngn_contact.html</anchorfile>
+      <anchor>ad160d329d9310b03131cc17f420f449d</anchor>
+      <arglist>(NgnEmail.EmailType type, String value, String description)</arglist>
     </member>
     <member kind="function">
       <type>void</type>
@@ -609,8 +483,8 @@
       <type>boolean</type>
       <name>sendTextMessage</name>
       <anchorfile>classorg_1_1doubango_1_1ngn_1_1sip_1_1_ngn_messaging_session.html</anchorfile>
-      <anchor>ae906198963a3bfd30dda4e8c84e4a3b9</anchor>
-      <arglist>(String text)</arglist>
+      <anchor>a00bddbefe79e774f9ea3d67f3e178cc3</anchor>
+      <arglist>(String text, String contentType)</arglist>
     </member>
     <member kind="function">
       <type>boolean</type>
@@ -626,6 +500,15 @@
       <anchor>a733172b5de1c90845f919750c6a0c765</anchor>
       <arglist>()</arglist>
     </member>
+  </compound>
+  <compound kind="class">
+    <name>org::doubango::ngn::sip::NgnMsrpSession</name>
+    <filename>classorg_1_1doubango_1_1ngn_1_1sip_1_1_ngn_msrp_session.html</filename>
+    <base>org::doubango::ngn::sip::NgnInviteSession</base>
+  </compound>
+  <compound kind="enum">
+    <name>org::doubango::ngn::sip::NgnPresenceStatus</name>
+    <filename>enumorg_1_1doubango_1_1ngn_1_1sip_1_1_ngn_presence_status.html</filename>
   </compound>
   <compound kind="class">
     <name>org::doubango::ngn::sip::NgnRegistrationSession</name>
@@ -656,12 +539,7 @@
   <compound kind="class">
     <name>org::doubango::ngn::sip::NgnSipSession</name>
     <filename>classorg_1_1doubango_1_1ngn_1_1sip_1_1_ngn_sip_session.html</filename>
-    <member kind="enumeration">
-      <name>ConnectionState</name>
-      <anchorfile>classorg_1_1doubango_1_1ngn_1_1sip_1_1_ngn_sip_session.html</anchorfile>
-      <anchor>a544e0cc851be4cf264f763a2e42bed29</anchor>
-      <arglist></arglist>
-    </member>
+    <class kind="enum">org::doubango::ngn::sip::NgnSipSession::ConnectionState</class>
     <member kind="function">
       <type>int</type>
       <name>incRef</name>
@@ -768,6 +646,10 @@
       <arglist>(NgnSipStack sipStack)</arglist>
     </member>
   </compound>
+  <compound kind="enum">
+    <name>org::doubango::ngn::sip::NgnSipSession::ConnectionState</name>
+    <filename>enumorg_1_1doubango_1_1ngn_1_1sip_1_1_ngn_sip_session_1_1_connection_state.html</filename>
+  </compound>
   <compound kind="class">
     <name>org::doubango::ngn::sip::NgnSipStack</name>
     <filename>classorg_1_1doubango_1_1ngn_1_1sip_1_1_ngn_sip_stack.html</filename>
@@ -778,5 +660,10 @@
       <anchor>ac75d9eeb6f53cd03ad3df8028270d5c7</anchor>
       <arglist>(SipCallback callback, String realmUri, String impiUri, String impuUri)</arglist>
     </member>
+  </compound>
+  <compound kind="page">
+    <name>index</name>
+    <title>Foreword</title>
+    <filename>index</filename>
   </compound>
 </tagfile>

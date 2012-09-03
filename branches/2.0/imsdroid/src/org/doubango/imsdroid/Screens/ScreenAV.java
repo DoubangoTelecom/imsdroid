@@ -308,8 +308,10 @@ public class ScreenAV extends BaseScreen{
 			mProxSensor.start();
 		}
 		
-		if (mAVSession.getState() == InviteState.INCALL) {
-			mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
+		if(mAVSession != null){
+			if (mAVSession.getState() == InviteState.INCALL) {
+				mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
+			}
 		}
 
 		if (mListener != null && mListener.canDetectOrientation()) {
@@ -372,7 +374,7 @@ public class ScreenAV extends BaseScreen{
 			itemSendStopVideo = menu.add(1, ScreenAV.MENU_SEND_STOP_VIDEO, 0, getString(R.string.string_send_video));
 		}
 		MenuItem itemShareContent = menu.add(1, ScreenAV.MENU_SHARE_CONTENT, 0, "Share Content").setIcon(R.drawable.image_gallery_48);
-		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, IMSDroid.getAudioManager().isSpeakerphoneOn() ? getString(R.string.string_speaker_off) : getString(R.string.string_speaker_on))
+		MenuItem itemSpeaker = menu.add(1, ScreenAV.MENU_SPEAKER, 0, mAVSession.isSpeakerOn() ? getString(R.string.string_speaker_off) : getString(R.string.string_speaker_on))
 			.setIcon(R.drawable.phone_speaker_48);
 		
 		switch(mAVSession.getState()){
@@ -660,6 +662,7 @@ public class ScreenAV extends BaseScreen{
 	}
 	
 	private void handleSipEvent(Intent intent){
+		@SuppressWarnings("unused")
 		InviteState state;
 		if(mAVSession == null){
 			Log.e(TAG, "Invalid session object");
@@ -694,9 +697,9 @@ public class ScreenAV extends BaseScreen{
 						getEngine().getSoundService().stopRingTone();
 						mAVSession.setSpeakerphoneOn(false);
 					//}
-					if(state == InviteState.INCALL){
+					//if(state == InviteState.INCALL){
 						loadInCallView();
-					}
+					//}
 					// Send blank packets to open NAT pinhole
 					if(mAVSession != null){
 						applyCamRotation(mAVSession.compensCamRotation(true));
@@ -751,11 +754,11 @@ public class ScreenAV extends BaseScreen{
 	        case INCOMING:
 	        case INPROGRESS:
 	        case REMOTE_RINGING:
-	        case EARLY_MEDIA:
 	        	loadTryingView();
 	        	break;
 	        	
 	        case INCALL:
+	        case EARLY_MEDIA:
 	        	loadInCallView();
 	        	break;
 	        	

@@ -19,6 +19,8 @@ package org.doubango.ngn.media;
 import java.math.BigInteger;
 
 import org.doubango.ngn.NgnApplication;
+import org.doubango.ngn.NgnEngine;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.ProxyPlugin;
 import org.doubango.tinyWRAP.ProxyVideoConsumer;
 
@@ -26,8 +28,14 @@ import android.content.Context;
 import android.view.View;
 
 public abstract class NgnProxyVideoConsumer extends NgnProxyPlugin{
+	protected boolean mFullScreenRequired;
+	
 	public NgnProxyVideoConsumer(BigInteger id, ProxyPlugin plugin) {
 		super(id, plugin);
+		
+		mFullScreenRequired = NgnEngine.getInstance().getConfigurationService().getBoolean(
+				NgnConfigurationEntry.GENERAL_FULL_SCREEN_VIDEO, 
+				NgnConfigurationEntry.DEFAULT_GENERAL_FULL_SCREEN_VIDEO);
 	}
 	
 	public static NgnProxyVideoConsumer createInstance(BigInteger id, ProxyVideoConsumer consumer){

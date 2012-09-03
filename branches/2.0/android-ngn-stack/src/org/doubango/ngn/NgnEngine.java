@@ -46,9 +46,10 @@ import org.doubango.tinyWRAP.ProxyVideoProducer;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
 import org.doubango.tinyWRAP.tmedia_pref_video_size_t;
+import org.doubango.tinyWRAP.tmedia_profile_t;
 import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
-import org.doubango.tinyWRAP.tmedia_profile_t;
+import org.doubango.utils.AndroidUtils;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -66,6 +67,9 @@ public class NgnEngine {
 	private final static String TAG = NgnEngine.class.getCanonicalName();
 	
 	protected static NgnEngine sInstance;
+	private static boolean sInitialized;
+	private static final String DATA_FOLDER = String.format("/data/data/%s", NgnApplication.getContext().getPackageName());
+	private static final String LIBS_FOLDER = String.format("%s/lib", NgnEngine.DATA_FOLDER);
 	
 	protected boolean mStarted;
 	protected Activity mMainActivity;
@@ -82,15 +86,60 @@ public class NgnEngine {
 	protected INgnSipService mSipService;
 	protected INgnSoundService mSoundService;
 	
+	static{
+		NgnEngine.initialize2();
+	}
+	
+	// This function will be renamed as "initialize()" when "initialize()" get removed
+	private static void initialize2(){
+		// do not add try/catch to let the app die if libraries are missing or incompatible
+		if(!sInitialized){
+			// See 'http://code.google.com/p/imsdroid/issues/detail?id=197' for more information
+			// Load Android utils library (required to detect CPU features)
+			System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libutils_armv5te.so"));
+			Log.d(TAG,"CPU_Feature="+AndroidUtils.getCpuFeatures());
+			if(NgnApplication.isCpuNeon()){
+				Log.d(TAG,"isCpuNeon()=YES");
+				System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libtinyWRAP_armv7-a.so"));
+			}
+			else{
+				Log.d(TAG,"isCpuNeon()=NO");
+				System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libtinyWRAP_armv5te.so"));
+			}
+			
+			// If OpenSL ES is supported then used it
+			if(NgnApplication.isSLEs2Supported()){
+				final String pluginPath = String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libplugin_audio_opensles_armv5te.so");
+				
+				// returned value is the number of registered add-ons (2 = 1 consumer + 1 producer)
+				if(MediaSessionMgr.registerAudioPluginFromFile(pluginPath) < 2){
+					// die if cannot load add-ons
+					throw new RuntimeException("Failed to register audio plugin with path=" + pluginPath);
+				}
+				
+				Log.d(TAG, "Using OpenSL ES audio driver");
+			}
+			// otherwise, use AudioTrack/Record
+			else{
+				ProxyAudioProducer.registerPlugin();
+				ProxyAudioConsumer.registerPlugin();
+			}
+			ProxyVideoProducer.registerPlugin();
+			ProxyVideoConsumer.registerPlugin();
+			
+			SipStack.initialize();
+			
+			NgnProxyPluginMgr.Initialize();
+			
+			sInitialized = true;
+		}
+	}
+	
+	// This function is deprecated and you no longer need to call it. Also, do not load the native libs in your app
+	// Will be removed in the next releases
+	@Deprecated
 	public static void initialize(){
-		ProxyVideoProducer.registerPlugin();
-		ProxyVideoConsumer.registerPlugin();
-		ProxyAudioProducer.registerPlugin();
-		ProxyAudioConsumer.registerPlugin();
-		
-		SipStack.initialize();
-		
-		NgnProxyPluginMgr.Initialize();
+		initialize2();
 	}
 	
 	/**
@@ -164,18 +213,20 @@ public class NgnEngine {
 		
 		
 		// codecs, AEC, NoiseSuppression, Echo cancellation, ....
-		boolean aec         = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
-		boolean vad        = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_VAD, NgnConfigurationEntry.DEFAULT_GENERAL_VAD) ;
-		boolean nr          = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_NR, NgnConfigurationEntry.DEFAULT_GENERAL_NR) ;
-		int         echo_tail = configurationService.getInt(NgnConfigurationEntry.GENERAL_ECHO_TAIL,NgnConfigurationEntry.DEFAULT_GENERAL_ECHO_TAIL);
+		final boolean aec = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
+		final boolean echo_tail_adaptive = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_USE_ECHO_TAIL_ADAPTIVE, NgnConfigurationEntry.DEFAULT_GENERAL_USE_ECHO_TAIL_ADAPTIVE);
+		final boolean vad = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_VAD, NgnConfigurationEntry.DEFAULT_GENERAL_VAD) ;
+		final boolean nr = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_NR, NgnConfigurationEntry.DEFAULT_GENERAL_NR) ;
+		final int echo_tail = configurationService.getInt(NgnConfigurationEntry.GENERAL_ECHO_TAIL, NgnConfigurationEntry.DEFAULT_GENERAL_ECHO_TAIL);
 		
-		Log.d(TAG,"Configure AEC["+aec+"/"+echo_tail+"] NoiseSuppression["+nr+"], Voice activity detection["+vad+"]");
+		Log.d(TAG, "Configure AEC["+aec+"/"+echo_tail+"] AEC_TAIL_ADAPT["+echo_tail_adaptive+"] NoiseSuppression["+nr+"], Voice activity detection["+vad+"]");
 		
 		if (aec){
 			MediaSessionMgr.defaultsSetEchoSuppEnabled(true);
 			// Very Important: EchoTail is in milliseconds
 			// When using WebRTC AEC, the maximum value is 500ms
-			// When using Speex-DSP, any number is valid but you should choose a multiple of 20ms.
+			// When using Speex-DSP, any number is valid but you should choose a multiple of 20ms
+			// In all cases this value will be updated per session if adaptive echo tail option is enabled
 			MediaSessionMgr.defaultsSetEchoTail(echo_tail);
 			MediaSessionMgr.defaultsSetEchoSkew(0);
 		}
@@ -186,8 +237,10 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetAgcEnabled(true);
 		MediaSessionMgr.defaultsSetVadEnabled(vad);
 		MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
-		MediaSessionMgr.defaultsSetJbMargin(0);
-		MediaSessionMgr.defaultsSetJbMaxLateRate(0);
+		MediaSessionMgr.defaultsSetJbMargin(100);
+		// IMPORTANT: setting the Jitter buffer max late to (0) cause "SIGFPE" error in SpeexDSP function "jitter_buffer_ctl(JITTER_BUFFER_SET_MAX_LATE_RATE)"
+		// This only happen when the audio engine is dynamically loaded from shared library (at least on Galaxy Nexus)
+		MediaSessionMgr.defaultsSetJbMaxLateRate(1);
 		MediaSessionMgr.defaultsSetRtcpEnabled(true);
 		MediaSessionMgr.defaultsSetRtcpMuxEnabled(true);
 	}

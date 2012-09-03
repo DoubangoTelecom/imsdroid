@@ -28,7 +28,9 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
@@ -155,26 +157,37 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 
 	@Override
 	public String getLocalIP(boolean ipv6) {
-		final HashMap<String, String> addressMap = new HashMap<String, String>();
+		final HashMap<String, InetAddress> addressMap = new HashMap<String, InetAddress>();
 		try {
 			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
 				NetworkInterface intf = en.nextElement();
 				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 					InetAddress inetAddress = enumIpAddr.nextElement();
 					Log.d(NgnNetworkService.TAG, inetAddress.getHostAddress().toString());
-					if (!inetAddress.isLoopbackAddress()) {
-						if (((inetAddress instanceof Inet4Address) && !ipv6) || ((inetAddress instanceof Inet6Address) && ipv6)) {
-							addressMap.put(intf.getName(), inetAddress.getHostAddress().toString());
-						}
+					if (((inetAddress instanceof Inet4Address) && !ipv6) || ((inetAddress instanceof Inet6Address) && ipv6)) {
+						addressMap.put(intf.getName(), inetAddress);
 					}
 				}
 			}
 			if(addressMap.size() > 0){
-				final String openvpn = addressMap.get(OPENVPN_INTERFACE_NAME);
-				if(!NgnStringUtils.isNullOrEmpty(openvpn)){
-					return openvpn;
+				// openvpn address
+				final InetAddress openvpn = addressMap.get(OPENVPN_INTERFACE_NAME);
+				if(openvpn != null){
+					final String openvpnAddr = openvpn.getHostAddress().toString();
+					if(!NgnStringUtils.isNullOrEmpty(openvpnAddr)){
+						return openvpnAddr;
+					}
 				}
-				return addressMap.values().iterator().next();
+				
+				final Iterator<Map.Entry<String, InetAddress>> it = addressMap.entrySet().iterator();
+			    while (it.hasNext()) {
+			    	final InetAddress address = it.next().getValue();
+			    	if(address.isLoopbackAddress() || (ipv6 && ((Inet6Address)address).isLinkLocalAddress())){
+			    		continue;
+			    	}
+				    return address.getHostAddress();
+			    }
+				return addressMap.values().iterator().next().getHostAddress();
 			}
 		} catch (SocketException ex) {
 			Log.e(NgnNetworkService.TAG, ex.toString());
