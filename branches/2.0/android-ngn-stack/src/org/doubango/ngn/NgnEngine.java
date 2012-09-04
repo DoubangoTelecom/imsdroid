@@ -41,8 +41,6 @@ import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyAudioConsumer;
 import org.doubango.tinyWRAP.ProxyAudioProducer;
-import org.doubango.tinyWRAP.ProxyVideoConsumer;
-import org.doubango.tinyWRAP.ProxyVideoProducer;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
 import org.doubango.tinyWRAP.tmedia_pref_video_size_t;
@@ -124,8 +122,6 @@ public class NgnEngine {
 				ProxyAudioProducer.registerPlugin();
 				ProxyAudioConsumer.registerPlugin();
 			}
-			ProxyVideoProducer.registerPlugin();
-			ProxyVideoConsumer.registerPlugin();
 			
 			SipStack.initialize();
 			
