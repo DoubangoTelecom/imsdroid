@@ -79,6 +79,28 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 	private final NgnObservableList<NgnAccessPoint> mAccessPoints;
 	private BroadcastReceiver mNetworkWatcher;
 	
+	private static int WifiManager_WIFI_MODE = WifiManager.WIFI_MODE_FULL;
+	private static int ConnectivityManager_TYPE_WIMAX = -1;
+	
+	static{
+		int sdkVersion = NgnApplication.getSDKVersion();
+		if(sdkVersion >= 9){
+			try {
+				WifiManager_WIFI_MODE = WifiManager.class.getDeclaredField("WIFI_MODE_FULL_HIGH_PERF").getInt(null);
+			} catch (Exception e) {
+				Log.e(TAG, e.toString());
+			}
+		}
+		
+		if(sdkVersion >= 8){
+			try {
+				ConnectivityManager_TYPE_WIMAX = ConnectivityManager.class.getDeclaredField("TYPE_WIMAX").getInt(null);
+			} catch (Exception e) {
+				Log.e(TAG, e.toString());
+			}
+		}
+	}
+	
 	public static final int[] sWifiSignalValues = new int[] {
         0,
         1,
@@ -86,9 +108,6 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
         3,
         4
     };
-	
-	// Will be added in froyo SDK
-	private static int ConnectivityManager_TYPE_WIMAX = 6;
 	
 	public static enum DNS_TYPE {
 		DNS_1, DNS_2, DNS_3, DNS_4
@@ -385,14 +404,12 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 		boolean use3G = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.NETWORK_USE_3G,
 				NgnConfigurationEntry.DEFAULT_NETWORK_USE_3G);
 
-		if (useWifi && (netType == ConnectivityManager.TYPE_WIFI)) {
+		if (useWifi && (netType == ConnectivityManager.TYPE_WIFI) && mWifiLock == null) {
 			if (mWifiManager != null && mWifiManager.isWifiEnabled()) {
-				mWifiLock = mWifiManager.createWifiLock(
-						WifiManager.WIFI_MODE_FULL, NgnNetworkService.TAG);
+				mWifiLock = mWifiManager.createWifiLock(NgnNetworkService.WifiManager_WIFI_MODE, NgnNetworkService.TAG);
 				final WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
 				if (wifiInfo != null && mWifiLock != null) {
-					final DetailedState detailedState = WifiInfo
-							.getDetailedStateOf(wifiInfo.getSupplicantState());
+					final DetailedState detailedState = WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState());
 					if (detailedState == DetailedState.CONNECTED
 							|| detailedState == DetailedState.CONNECTING
 							|| detailedState == DetailedState.OBTAINING_IPADDR) {
@@ -404,8 +421,7 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 			} else {
 				Log.d(NgnNetworkService.TAG, "WiFi not enabled");
 			}
-		} else if (use3G
-				&& (netType == ConnectivityManager.TYPE_MOBILE || netType == ConnectivityManager_TYPE_WIMAX)) {
+		} else if (use3G && (netType == ConnectivityManager.TYPE_MOBILE || netType == ConnectivityManager_TYPE_WIMAX)) {
 			if ((netSubType >= TelephonyManager.NETWORK_TYPE_UMTS)
 					|| // HACK
 					(netSubType == TelephonyManager.NETWORK_TYPE_GPRS)
