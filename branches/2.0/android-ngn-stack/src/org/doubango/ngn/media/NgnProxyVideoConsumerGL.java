@@ -126,17 +126,16 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 			// Not on the top
 			return 0;
 		}
-		
-		if(mVideoFrame == null || mVideoFrame.capacity() != nAvailableSize){
+		// the frame size is equal to the display size (thanks to the converter)
+		long frameWidth = mConsumer.getDisplayWidth();
+		long frameHeight = mConsumer.getDisplayHeight();
+		if(mVideoFrame == null || mWidth != frameWidth || frameHeight != mHeight || mVideoFrame.capacity() != nAvailableSize){
 			synchronized(mPreview){
-				long newWidth = mConsumer.getDisplayWidth();
-				long newHeight = mConsumer.getDisplayHeight();
-				
 				mVideoFrame = ByteBuffer.allocateDirect((int)nAvailableSize);
 				mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
 				
-				mWidth = (int)newWidth;
-				mHeight = (int)newHeight;
+				mWidth = (int)frameWidth;
+				mHeight = (int)frameHeight;
 				mPreview.setBuffer(mVideoFrame, mWidth, mHeight);
 			}
 			return 0;

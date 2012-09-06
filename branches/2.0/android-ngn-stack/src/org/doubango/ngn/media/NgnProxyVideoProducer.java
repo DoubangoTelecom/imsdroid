@@ -369,12 +369,12 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				parameters.setPreviewSize(prevSize.width, prevSize.height);
 				camera.setParameters(parameters);
 				
-				// alert the framework that we cannot respect the negotiated size
-				if(mProducer != null && prevSize != null && super.isValid() && (mWidth != prevSize.width || mHeight != prevSize.height)){
+				if(prevSize != null && super.isValid() && (mWidth != prevSize.width || mHeight != prevSize.height)){
 					mFrameWidth = prevSize.width;
 					mFrameHeight = prevSize.height;
-					mProducer.setActualCameraOutputSize(mFrameWidth, mFrameHeight);
 				}
+				// alert the framework that we cannot respect the negotiated size
+				mProducer.setActualCameraOutputSize(mFrameWidth, mFrameHeight);
 				
 				// allocate buffer
 				Log.d(TAG, String.format("setPreviewSize [%d x %d ]", mFrameWidth, mFrameHeight));

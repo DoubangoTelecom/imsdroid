@@ -7,7 +7,7 @@
         <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/view_call_incall_video_imageView_secure" android:src="@drawable/secure_16" android:layout_margin="3px"></ImageView>
     </FrameLayout>
 
-        <FrameLayout android:layout_alignParentRight="true" android:layout_alignParentBottom="true" android:minHeight="90dp" android:background="@drawable/grad_whiterounded" android:layout_height="90dp" android:layout_width="76dp" android:minWidth="76dp" android:padding="1dp">
+        <FrameLayout android:layout_alignParentRight="true" android:layout_alignParentBottom="true" android:minHeight="90dp" android:minWidth="90dp" android:background="@drawable/grad_whiterounded" android:layout_margin="4dp" android:padding="4dp" android:layout_height="94dp" android:layout_width="94dp">
         <FrameLayout android:layout_gravity="center" android:id="@+id/view_call_incall_video_FrameLayout_local_video" android:layout_height="fill_parent" android:layout_width="fill_parent"></FrameLayout>
     </FrameLayout>
 

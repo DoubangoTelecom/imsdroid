@@ -120,14 +120,14 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 						public void handleMessage(Message message) {
 							final int nCopiedSize = message.arg1;
 							final int nAvailableSize = message.arg2;
-							if(mVideoFrame == null || mVideoFrame.capacity() != nAvailableSize){
-								long newWidth = mConsumer.getDisplayWidth();
-								long newHeight = mConsumer.getDisplayHeight();
-								if(newWidth<=0 || newHeight<=0){
-									Log.e(TAG,"nCopiedSize="+nCopiedSize+" and newWidth="+newWidth+" and newHeight="+newHeight);
+							long frameWidth = mConsumer.getDisplayWidth();
+							long frameHeight = mConsumer.getDisplayHeight();
+							if(mVideoFrame == null || mWidth != frameWidth || frameHeight != mHeight || mVideoFrame.capacity() != nAvailableSize){
+								if(frameWidth <=0 || frameHeight <= 0){
+									Log.e(TAG,"nCopiedSize="+nCopiedSize+" and newWidth="+frameWidth+" and newHeight="+frameHeight);
 									return;
 								}
-								Log.d(TAG,"resizing the buffer nAvailableSize="+nAvailableSize+" and newWidth="+newWidth+" and newHeight="+newHeight);
+								Log.d(TAG,"resizing the buffer nAvailableSize="+nAvailableSize+" and newWidth="+frameWidth+" and newHeight="+frameHeight);
 								if(mRGB565Bitmap != null){
 									mRGB565Bitmap.recycle();
 								}
@@ -136,11 +136,11 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 									mRGBCroppedBitmap = null;
 									// do not create the cropped bitmap, wait for drawFrame()
 								}
-								mRGB565Bitmap = Bitmap.createBitmap((int)newWidth, (int)newHeight, Bitmap.Config.RGB_565);
+								mRGB565Bitmap = Bitmap.createBitmap((int)frameWidth, (int)frameHeight, Bitmap.Config.RGB_565);
 								mVideoFrame = ByteBuffer.allocateDirect((int)nAvailableSize);
 								mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
-								mWidth = (int)newWidth;
-								mHeight = (int)newHeight;
+								mWidth = (int)frameWidth;
+								mHeight = (int)frameHeight;
 								return; // Draw the picture next time
 							}
 							
