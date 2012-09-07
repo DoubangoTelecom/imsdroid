@@ -83,8 +83,8 @@ public class NgnUriUtils {
 			else{
 				String realm = NgnEngine.getInstance().getConfigurationService().getString(NgnConfigurationEntry.NETWORK_REALM, 
 						NgnConfigurationEntry.DEFAULT_NETWORK_REALM);
-				if(realm.contains(":")){
-					realm = realm.substring(realm.indexOf(":")+1);
+				if(realm.startsWith("sip:") || realm.startsWith("sips:")){ // do not forget that IPv6 address could contain ":"
+					realm = realm.substring(realm.indexOf(":") + 1);
 				}
 				// FIXME: Should be done by doubango
 				return String.format("sip:%s@%s", 
