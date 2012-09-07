@@ -183,6 +183,9 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 					InetAddress inetAddress = enumIpAddr.nextElement();
 					Log.d(NgnNetworkService.TAG, inetAddress.getHostAddress().toString());
+					if(inetAddress.isLoopbackAddress() || ((inetAddress instanceof Inet6Address) && ((Inet6Address)inetAddress).isLinkLocalAddress())){
+			    		continue;
+			    	}
 					if (((inetAddress instanceof Inet4Address) && !ipv6) || ((inetAddress instanceof Inet6Address) && ipv6)) {
 						addressMap.put(intf.getName(), inetAddress);
 					}
@@ -201,9 +204,7 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 				final Iterator<Map.Entry<String, InetAddress>> it = addressMap.entrySet().iterator();
 			    while (it.hasNext()) {
 			    	final InetAddress address = it.next().getValue();
-			    	if(address.isLoopbackAddress() || (ipv6 && ((Inet6Address)address).isLinkLocalAddress())){
-			    		continue;
-			    	}
+			    	// put here code to select the preferred address
 				    return address.getHostAddress();
 			    }
 				return addressMap.values().iterator().next().getHostAddress();
