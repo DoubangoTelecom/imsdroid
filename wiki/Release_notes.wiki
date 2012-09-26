@@ -33,7 +33,7 @@ To enable the features: Options -> General -> Media Profile -> RTCWeb
  * Negotiation of Generic Image Attributes in the SDP as per RFC 6236
  * Source-Specific Media Attributes in SDP as per draft-lennox-mmusic-sdp-source-attributes-01
  * Explicit Call Transfer as per 3GPP TS 24.629
- * Fix issue 339
+ * Fix issue 339 and issue 167
 
 ==2.0.484==
  * Adds support for SRTP
