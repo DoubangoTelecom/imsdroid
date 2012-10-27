@@ -557,7 +557,7 @@ public class NgnApplication extends Application{
     }
     
     public static boolean isSLEs2Supported(){
-    	return (NgnApplication.getSDKVersion() >= 9);
+    	return /* (NgnApplication.getSDKVersion() >= 9) */ false;
     }
     
     public static boolean acquirePowerLock(){
