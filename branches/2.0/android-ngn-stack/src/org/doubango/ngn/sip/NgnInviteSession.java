@@ -124,6 +124,10 @@ public abstract class NgnInviteSession extends NgnSipSession{
 				NgnEngine.getInstance().getHistoryService().addEvent(historyEvent);
 			}
 			break;
+		default:
+			{
+				break;
+			}
 		}
      }
 

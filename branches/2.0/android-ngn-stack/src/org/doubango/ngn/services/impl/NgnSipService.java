@@ -726,8 +726,11 @@ implements INgnSipService, tinyWRAPConstants {
                             }
 
                         case twrap_media_audio:
-                        case twrap_media_audiovideo:
+                        case twrap_media_audio_video:
                         case twrap_media_video:
+                        case twrap_media_audio_t140:
+                        case twrap_media_audio_video_t140:
+                        case twrap_media_video_t140:
                             {
                                 if ((session = e.takeCallSessionOwnership()) == null){
                                     Log.e(TAG,"Failed to take audio/video session ownership");
@@ -863,6 +866,10 @@ implements INgnSipService, tinyWRAPConstants {
                     		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(session.getId(), NgnInviteEventTypes.REMOTE_RESUME, ((NgnInviteSession)mySession).getMediaType(), phrase));
                     	}
                         break;
+                    }
+                default:
+                    {
+                    	break;
                     }
             }
 			

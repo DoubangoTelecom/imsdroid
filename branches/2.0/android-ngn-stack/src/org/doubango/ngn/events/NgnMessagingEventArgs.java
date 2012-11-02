@@ -33,11 +33,12 @@ public class NgnMessagingEventArgs extends NgnEventArgs{
     
     public static final String ACTION_MESSAGING_EVENT = TAG + ".ACTION_MESSAGING_EVENT";
     
-    public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
-    public static final String EXTRA_SESSION = TAG + "session";
-    public static final String EXTRA_CODE = TAG + "code";
-    public static final String EXTRA_REMOTE_PARTY = TAG + "from";
-    public static final String EXTRA_DATE = TAG + "date";
+    public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED; // NgnEventArgs
+    public static final String EXTRA_SESSION = TAG + "session"; // NgnSession
+    public static final String EXTRA_CODE = TAG + "code"; // Short
+    public static final String EXTRA_REMOTE_PARTY = TAG + "from"; // String
+    public static final String EXTRA_DATE = TAG + "date"; // Date
+    public static final String EXTRA_T140_DATA_TYPE = TAG + "t140_data_type"; // tmedia_t140_data_type_t
 
     public NgnMessagingEventArgs(long sessionId, NgnMessagingEventTypes type, String phrase, byte[] payload, String contentType){
     	super();

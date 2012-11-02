@@ -31,7 +31,6 @@ import org.simpleframework.xml.Root;
 public class NgnHistoryList {
     private final NgnObservableList<NgnHistoryEvent> mEvents;
     
-    @SuppressWarnings("unused")
 	@ElementList(name="event", required=false, inline=true)
 	private List<NgnHistoryEvent> mSerializableEvents;
 	

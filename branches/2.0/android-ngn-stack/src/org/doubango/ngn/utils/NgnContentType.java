@@ -41,4 +41,6 @@ public class NgnContentType {
 	public final static String JSON = "application/json";
 	
 	public final static String DOUBANGO_DEVICE_INFO = "doubango/device-info";
+	
+	public final static String T140COMMAND = "doubango/t140-command";
 }

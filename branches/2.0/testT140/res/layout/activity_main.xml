@@ -1,0 +1,34 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/button_Call"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Call" />
+    
+    <TextView
+        android:id="@+id/textView_Status"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        />
+    
+    <EditText
+        android:id="@+id/editText_Typing"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textMultiLine" />
+
+    <TextView
+        android:id="@+id/textView_History"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="17dp"
+        android:editable="true"
+        android:inputType="text" />
+
+</LinearLayout>

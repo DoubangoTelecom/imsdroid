@@ -165,6 +165,8 @@ public class CallScreen extends Activity {
 					mEngine.getSoundService().stopRingBackTone();
 					finish();
 					break;
+				default:
+						break;
 			}
 		}
 	}
