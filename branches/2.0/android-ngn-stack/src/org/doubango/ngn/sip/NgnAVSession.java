@@ -21,11 +21,15 @@
 */
 package org.doubango.ngn.sip;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
+import org.doubango.ngn.events.NgnMessagingEventArgs;
+import org.doubango.ngn.events.NgnMessagingEventTypes;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.media.NgnProxyAudioConsumer;
 import org.doubango.ngn.media.NgnProxyAudioProducer;
@@ -37,9 +41,12 @@ import org.doubango.ngn.model.NgnHistoryAVCallEvent;
 import org.doubango.ngn.model.NgnHistoryEvent;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
+import org.doubango.ngn.utils.NgnContentType;
+import org.doubango.ngn.utils.NgnDateTimeUtils;
 import org.doubango.ngn.utils.NgnListUtils;
 import org.doubango.ngn.utils.NgnObservableHashMap;
 import org.doubango.ngn.utils.NgnPredicate;
+import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.ActionConfig;
 import org.doubango.tinyWRAP.CallSession;
@@ -48,12 +55,16 @@ import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyPlugin;
 import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
+import org.doubango.tinyWRAP.T140Callback;
+import org.doubango.tinyWRAP.T140CallbackData;
 import org.doubango.tinyWRAP.tmedia_bandwidth_level_t;
 import org.doubango.tinyWRAP.tmedia_qos_strength_t;
 import org.doubango.tinyWRAP.tmedia_qos_stype_t;
+import org.doubango.tinyWRAP.tmedia_t140_data_type_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -66,6 +77,7 @@ import android.view.View;
 public class NgnAVSession extends NgnInviteSession{
 	private static final String TAG = NgnAVSession.class.getCanonicalName();
 	
+	private NgnT140Callback mT140Callback;
 	private CallSession mSession;
 	private boolean mConsumersAndProducersInitialzed;
 	private NgnProxyVideoConsumer mVideoConsumer;
@@ -84,22 +96,12 @@ public class NgnAVSession extends NgnInviteSession{
     private final static NgnObservableHashMap<Long, NgnAVSession> sSessions = new NgnObservableHashMap<Long, NgnAVSession>(true);
     
     public static NgnAVSession takeIncomingSession(NgnSipStack sipStack, CallSession session, twrap_media_type_t mediaType, SipMessage sipMessage){
-        NgnMediaType media;
-
+        NgnMediaType media = NgnMediaType.ConvertFromNative(mediaType);
+        if(media == NgnMediaType.None){
+        	Log.e(TAG, "Invalid media type");
+        	return null;
+        }
         synchronized (sSessions){
-            switch (mediaType){
-                case twrap_media_audio:
-                    media = NgnMediaType.Audio;
-                    break;
-                case twrap_media_video:
-                    media = NgnMediaType.Video;
-                    break;
-                case twrap_media_audiovideo:
-                    media = NgnMediaType.AudioVideo;
-                    break;
-                default:
-                    return null;
-            }
             NgnAVSession avSession = new NgnAVSession(sipStack, session, media, InviteState.INCOMING);
             if (sipMessage != null){
                 avSession.setRemotePartyUri(sipMessage.getSipHeaderValue("f"));
@@ -114,12 +116,11 @@ public class NgnAVSession extends NgnInviteSession{
         if (avSession != null){
         	avSession.mConsumersAndProducersInitialzed = false;
         	avSession.initializeConsumersAndProducers();
-            switch (newMediaType){
-                case twrap_media_audio: avSession.mMediaType = NgnMediaType.Audio; return true;
-                case twrap_media_video: avSession.mMediaType = NgnMediaType.Video; return true;
-                case twrap_media_audiovideo: avSession.mMediaType = NgnMediaType.AudioVideo; return true;
-                default: return false; // For now MSRP update is not suportted
-            }
+        	NgnMediaType _newMediaType = NgnMediaType.ConvertFromNative(newMediaType);
+        	if(_newMediaType != NgnMediaType.None){
+        		avSession.mMediaType = _newMediaType;
+        		return true;
+        	}
         }
         
         return false;
@@ -287,18 +288,7 @@ public class NgnAVSession extends NgnInviteSession{
         		NgnConfigurationEntry.DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL);
         tmedia_bandwidth_level_t bl = tmedia_bandwidth_level_t.swigToEnum(level);
         config.setMediaInt(twrap_media_type_t.twrap_media_audiovideo, "bandwidth-level", bl.swigValue());
-        
-        switch (super.getMediaType())
-        {
-            case AudioVideo:
-            case Video:
-                ret = mSession.callAudioVideo(remoteUri, config);
-                break;
-            case Audio:
-            default:
-                ret = mSession.callAudio(remoteUri, config);
-                break;
-        }
+        ret = mSession.call(remoteUri, NgnMediaType.ConvertToNative(super.getMediaType()), config);
         config.delete();
 
         return ret;
@@ -354,6 +344,11 @@ public class NgnAVSession extends NgnInviteSession{
 				tmedia_qos_strength_t.valueOf(mConfigurationService.getString(NgnConfigurationEntry.QOS_PRECOND_STRENGTH,
 						NgnConfigurationEntry.DEFAULT_QOS_PRECOND_STRENGTH)));
 
+		// T.140 callback
+		if(NgnMediaType.isT140Type(getMediaType())){
+			mT140Callback = new NgnT140Callback(this);
+		}
+		
 	    /* 3GPP TS 24.173
 	        *
 	        * 5.1 IMS communication service identifier
@@ -394,7 +389,7 @@ public class NgnAVSession extends NgnInviteSession{
 			ProxyPlugin plugin;
 			NgnProxyPlugin myProxyPlugin;
 			// Video
-			if(super.mMediaType == NgnMediaType.Video || super.mMediaType == NgnMediaType.AudioVideo){
+			if(NgnMediaType.isVideoType(super.mMediaType)){
 				if((plugin = mediaMgr.findProxyPluginConsumer(twrap_media_type_t.twrap_media_video)) != null){
 					if((myProxyPlugin = NgnProxyPluginMgr.findPlugin(plugin.getId())) != null){
 						mVideoConsumer = (NgnProxyVideoConsumer)myProxyPlugin;
@@ -411,7 +406,7 @@ public class NgnAVSession extends NgnInviteSession{
 				}
 			}
 			// Audio
-			if(super.mMediaType == NgnMediaType.Audio || super.mMediaType == NgnMediaType.AudioVideo){
+			if(NgnMediaType.isAudioType(super.mMediaType)){
 				if((plugin = mediaMgr.findProxyPluginConsumer(twrap_media_type_t.twrap_media_audio)) != null){
 					if((myProxyPlugin = NgnProxyPluginMgr.findPlugin(plugin.getId())) != null){
 						mAudioConsumer = (NgnProxyAudioConsumer)myProxyPlugin;
@@ -713,14 +708,20 @@ public class NgnAVSession extends NgnInviteSession{
 				break;
 				
 			case INCALL:
+			case EARLY_MEDIA:
 				setModeInCall(true);
 				initializeConsumersAndProducers();
 				updateEchoTail();
+				mSession.setT140Callback(mT140Callback);
 				break;
 			
 			case TERMINATED:
+			case TERMINATING:
 				setModeInCall(false);
 				deInitializeMediaSession();
+				mSession.setT140Callback(null);
+				break;
+			default:
 				break;
 		}
 		
@@ -847,5 +848,82 @@ public class NgnAVSession extends NgnInviteSession{
      */
     public boolean sendDTMF(int digit){
         return mSession.sendDTMF(digit);
+    }
+    
+    private boolean sendT140Data(tmedia_t140_data_type_t dataType, String dataStr) {
+    	if(!isConnected()){
+    		Log.e(TAG, "Cannot send T.140 data. The session must be connected first.");
+    		return false;
+    	}
+    	if(!NgnMediaType.isT140Type(getMediaType())){
+    		Log.e(TAG, "Cannot send T.140 data. Not supported by this session.");
+    		return false;
+    	}
+        if (!NgnStringUtils.isNullOrEmpty(dataStr)){
+			try {
+				byte[] bytes = dataStr.getBytes("UTF-8");
+				ByteBuffer dataPtr = ByteBuffer.allocateDirect(bytes.length);
+	            dataPtr.put(bytes);      
+	            return mSession.sendT140Data(dataType, dataPtr, dataPtr.capacity());
+			} catch (UnsupportedEncodingException e) {
+				Log.e(TAG, e.toString());
+				return false;
+			}
+        }
+        else{
+            return mSession.sendT140Data(dataType);
+        }
+    }
+
+    public boolean sendT140Data(String dataStr){
+        return sendT140Data(tmedia_t140_data_type_t.tmedia_t140_data_type_utf8, dataStr);
+    }
+
+    public boolean sendT140Data(tmedia_t140_data_type_t dataType){
+        return sendT140Data(dataType, null);
+    }
+    
+    
+    /**
+     * NgnT140Callback
+     */
+    static class NgnT140Callback extends T140Callback {
+    	final NgnAVSession mAVSession;
+    	
+    	NgnT140Callback(NgnAVSession avSession){
+    		mAVSession = avSession;
+    	}
+
+		@Override
+		public int ondata(T140CallbackData pData) {
+			tmedia_t140_data_type_t dataType = pData.getType();
+			final Intent intent = new Intent(NgnMessagingEventArgs.ACTION_MESSAGING_EVENT);
+			final byte[] bytes;
+			final String contentType;
+			switch(dataType){
+				case tmedia_t140_data_type_utf8:
+					{
+						bytes = pData.getData();
+						contentType = NgnContentType.TEXT_PLAIN;
+						break;
+					}
+				default:
+					{
+						bytes = null;
+						contentType = NgnContentType.T140COMMAND;
+						break;
+					}
+			}
+			
+			final NgnMessagingEventArgs args = new NgnMessagingEventArgs(mAVSession.getId(), NgnMessagingEventTypes.INCOMING, 
+					"T.140", bytes, contentType);
+			intent.putExtra(NgnMessagingEventArgs.EXTRA_REMOTE_PARTY, mAVSession.getRemotePartyUri());
+			intent.putExtra(NgnMessagingEventArgs.EXTRA_DATE, NgnDateTimeUtils.now());
+			intent.putExtra(NgnMessagingEventArgs.EXTRA_EMBEDDED, args);
+			intent.putExtra(NgnMessagingEventArgs.EXTRA_T140_DATA_TYPE, dataType);
+			NgnApplication.getContext().sendBroadcast(intent);
+			
+			return 0;
+		}
     }
 }

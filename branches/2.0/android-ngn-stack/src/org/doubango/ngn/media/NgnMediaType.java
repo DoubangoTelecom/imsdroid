@@ -19,6 +19,8 @@
 */
 package org.doubango.ngn.media;
 
+import org.doubango.tinyWRAP.twrap_media_type_t;
+
 public enum NgnMediaType {
 	None,
 	Audio,
@@ -26,10 +28,36 @@ public enum NgnMediaType {
 	AudioVideo,
 	SMS,
 	Chat,
-	FileTransfer;
+	FileTransfer,
+	Msrp /* Chat | FileTransfer */,
+	T140,
+	AudioT140,
+	AudioVideoT140,
+	VideoT140;
 	
+	public static boolean isVideoType(NgnMediaType type){
+		switch(type){
+			case AudioVideo: case Video: case AudioVideoT140: case VideoT140: return true;
+			default: return false;
+		}
+	}
+	public static boolean isAudioType(NgnMediaType type){
+		switch(type){
+			case Audio: case AudioVideo: case AudioT140: case AudioVideoT140: return true;
+			default: return false;
+		}
+	}
 	public static boolean isAudioVideoType(NgnMediaType type){
-		return type == Audio || type == AudioVideo || type == Video;
+		return isAudioType(type) || isVideoType(type);
+	}
+	public static boolean isT140Type(NgnMediaType type){
+		switch(type){
+			case T140: case AudioT140: case AudioVideoT140: case VideoT140: return true;
+			default: return false;
+		}
+	}
+	public static boolean isAudioVideoT140Type(NgnMediaType type){
+		return isAudioVideoType(type) || isT140Type(type);
 	}
 	public static boolean isFileTransfer(NgnMediaType type){
 		return type == FileTransfer;
@@ -38,6 +66,54 @@ public enum NgnMediaType {
 		return type == Chat;
 	}
 	public static boolean isMsrpType(NgnMediaType type){
-		return isFileTransfer(type) || isChat(type);
+		return type == Msrp || isFileTransfer(type) || isChat(type);
 	}
+	
+
+    public static NgnMediaType ConvertFromNative(twrap_media_type_t mediaType){
+        switch (mediaType){
+            case twrap_media_audio:
+                return Audio;
+            case twrap_media_video:
+                return Video;
+            case twrap_media_audio_video:
+                return AudioVideo;
+            case twrap_media_audio_t140:
+                return AudioT140;
+            case twrap_media_audio_video_t140:
+                return AudioVideoT140;
+            case twrap_media_t140:
+                return T140;
+            case twrap_media_video_t140:
+                return VideoT140;
+            case twrap_media_msrp:
+                return Msrp;
+            default:
+                return None;
+        }
+    }
+
+    public static twrap_media_type_t ConvertToNative(NgnMediaType mediaType){
+        switch (mediaType){
+            case Audio:
+                return twrap_media_type_t.twrap_media_audio;
+            case Video:
+                return twrap_media_type_t.twrap_media_video;
+            case AudioVideo:
+                return twrap_media_type_t.twrap_media_audio_video;
+            case AudioT140:
+                return twrap_media_type_t.twrap_media_audio_t140;
+            case VideoT140:
+                return twrap_media_type_t.twrap_media_video_t140;
+            case AudioVideoT140:
+                return twrap_media_type_t.twrap_media_audio_video_t140;
+            case T140:
+                return twrap_media_type_t.twrap_media_t140;
+            case Chat: 
+            case FileTransfer:
+                return twrap_media_type_t.twrap_media_msrp;
+            default:
+                return twrap_media_type_t.twrap_media_none;
+        }
+    }
 }

@@ -319,7 +319,8 @@ public class NgnApplication extends Application{
     private static int sGlEsVersion;
     static final String sBuildModel = Build.MODEL.toLowerCase();
     
-    
+    // This function is called by the package manager, you must never explicitly invoke it.
+    // Do not forget to add/change the <application /> section in your manifest as done in IMSDroid or all other test apps
     public NgnApplication() {
     	sInstance = this;
     }

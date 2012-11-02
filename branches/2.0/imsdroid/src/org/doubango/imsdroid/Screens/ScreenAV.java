@@ -38,8 +38,8 @@ import org.doubango.ngn.model.NgnContact;
 import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
-import org.doubango.ngn.sip.NgnSipStack;
 import org.doubango.ngn.sip.NgnInviteSession.InviteState;
+import org.doubango.ngn.sip.NgnSipStack;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnContentType;
 import org.doubango.ngn.utils.NgnGraphicsUtils;
@@ -438,6 +438,10 @@ public class ScreenAV extends BaseScreen{
 				itemShareContent.setEnabled(false);
 				break;
 			}
+			default:
+			{
+				break;
+			}
 		}
 		
 		return true;
@@ -728,6 +732,10 @@ public class ScreenAV extends BaseScreen{
 								else{
 									loadInCallAudioView();
 								}
+								break;
+							}
+						default:
+							{
 								break;
 							}
 					}					

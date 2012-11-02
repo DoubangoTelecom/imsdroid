@@ -358,6 +358,8 @@ public class ScreenTabHistory extends BaseScreen {
 								break;
 						}
 						break;
+					default:
+						break;
 				}
 			}
 			
