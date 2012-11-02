@@ -1,7 +1,4 @@
-/* Copyright (C) 2010-2011, Mamadou Diop.
-*  Copyright (C) 2011, Doubango Telecom.
-*
-* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
+/* Copyright (C) 2012, Doubango Telecom.
 *	
 * This file is part of imsdroid Project (http://code.google.com/p/imsdroid)
 *
