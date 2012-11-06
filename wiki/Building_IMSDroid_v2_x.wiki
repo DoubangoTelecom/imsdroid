@@ -35,7 +35,7 @@ svn checkout http://doubango.googlecode.com/svn/branches/2.0/doubango doubango-r
  # goto *$(DOUBANGO_HOME)/android-projects* and open *root.mk* with your preferred text editor
  # Change *$ANDROID_NDK_ROOT* variable to point to the NDK root directory (e.g. */cygdrive/c/android-ndk*)
  # Change *$ANDROID_SDK_ROOT* variable to point to the SDK root directory (e.g. */cygdrive/c/android-sdk*). This step is not required if you don't wish to use *adb* utility.
- # Change *$ANDROID_PLATFORM* variable to point to your preferred platform root directory (e.g. *$(ANDROID_NDK_ROOT)/build/platforms/android-1.5*)
+ # Change *$ANDROID_PLATFORM* variable to point to your preferred platform root directory (e.g. *android-3*)
  # Set *$ANDROID_GCC_VER* variable with your GCC version (e.g. *4.2.1*)
  # Open new Console window
  # Add the toolchain root binary directory to the system *$PATH* if not already done:
