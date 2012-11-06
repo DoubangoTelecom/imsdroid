@@ -86,6 +86,7 @@ public class MainActivity extends Activity {
 				tdav_codec_id_t.tdav_codec_id_red.swigValue() |
 				tdav_codec_id_t.tdav_codec_id_t140.swigValue()
 				);
+		mConfigurationService.commit();
 	}
 	
     @Override
