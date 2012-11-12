@@ -77,6 +77,7 @@ public enum NgnMediaType {
             case twrap_media_video:
                 return Video;
             case twrap_media_audio_video:
+            case twrap_media_audiovideo:
                 return AudioVideo;
             case twrap_media_audio_t140:
                 return AudioT140;
