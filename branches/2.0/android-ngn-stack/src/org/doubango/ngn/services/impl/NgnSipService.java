@@ -101,6 +101,7 @@ implements INgnSipService, tinyWRAPConstants {
 	
 	private NgnRegistrationSession mRegSession;
 	private NgnSipStack mSipStack;
+	private final DDebugCallback mDebugCallback;
 	private final MySipCallback mSipCallback;
 	private final NgnSipPrefrences mPreferences;
 	
@@ -112,6 +113,7 @@ implements INgnSipService, tinyWRAPConstants {
 	public NgnSipService() {
 		super();
 		
+		mDebugCallback = new DDebugCallback();
 		mSipCallback = new MySipCallback(this);
 		mPreferences = new NgnSipPrefrences();
 		
@@ -250,7 +252,7 @@ implements INgnSipService, tinyWRAPConstants {
 		
 		if (mSipStack == null) {
 			mSipStack = new NgnSipStack(mSipCallback, mPreferences.getRealm(), mPreferences.getIMPI(), mPreferences.getIMPU());	
-			mSipStack.setDebugCallback(new DDebugCallback());
+			mSipStack.setDebugCallback(mDebugCallback);
 			SipStack.setCodecs_2(mConfigurationService.getInt(NgnConfigurationEntry.MEDIA_CODECS, 
 					NgnConfigurationEntry.DEFAULT_MEDIA_CODECS));
 		} else {
@@ -727,6 +729,7 @@ implements INgnSipService, tinyWRAPConstants {
 
                         case twrap_media_audio:
                         case twrap_media_audio_video:
+                        case twrap_media_audiovideo:
                         case twrap_media_video:
                         case twrap_media_audio_t140:
                         case twrap_media_audio_video_t140:
@@ -765,7 +768,7 @@ implements INgnSipService, tinyWRAPConstants {
                 case tsip_i_request:
                     {
                     	final SipMessage sipMessage = e.getSipMessage();
-                    	if(sipMessage != null && ((mySession = NgnAVSession.getSession(session.getId())) != null)){
+                    	if(sipMessage != null && session != null && ((mySession = NgnAVSession.getSession(session.getId())) != null)){
                     		if(sipMessage.getRequestType() == tsip_request_type_t.tsip_INFO){
                     			final String contentType = sipMessage.getSipHeaderValue("c");
                     			if(NgnStringUtils.equals(contentType, NgnContentType.DOUBANGO_DEVICE_INFO, true)){
