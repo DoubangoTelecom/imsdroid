@@ -3,6 +3,12 @@
 
 <wiki:toc max_depth="2" />
 
+==2.532.758==
+- Align with Doubango 758
+- Update media engine to allow interop with Chrome stable "23.0.1271.64 m" using sipml5
+- Adds support for realtime text (T.140)
+- Fix issue 391, issue 277, issue 296, issue 313, issue 383, issue 381 and issue 375
+
 ==2.0.509==
  * Align with Doubango 738
  * Direct redering of YUV420P frame to opengl-es surface using shaders for GPU chroma conversion (yuv420p -> rgba)
