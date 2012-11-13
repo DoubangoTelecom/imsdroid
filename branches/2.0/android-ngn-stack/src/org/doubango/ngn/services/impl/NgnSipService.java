@@ -543,7 +543,7 @@ implements INgnSipService, tinyWRAPConstants {
                     else if (((mySession = NgnAVSession.getSession(sessionId)) != null) || ((mySession = NgnMsrpSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.CONNECTING);
                         ((NgnInviteSession)mySession).setState(InviteState.INPROGRESS);
-                        mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.INPROGRESS, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                        mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.INPROGRESS, ((NgnInviteSession)mySession).getMediaType(), phrase), sipCode);
                     } 
                     // Publication
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
@@ -579,7 +579,7 @@ implements INgnSipService, tinyWRAPConstants {
                     else if (((mySession = NgnAVSession.getSession(sessionId)) != null) || ((mySession = NgnMsrpSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.CONNECTED);
                     	((NgnInviteSession)mySession).setState(InviteState.INCALL);
-                        mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.CONNECTED, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                        mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.CONNECTED, ((NgnInviteSession)mySession).getMediaType(), phrase), sipCode);
                     }
                     // Publication
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
@@ -610,7 +610,7 @@ implements INgnSipService, tinyWRAPConstants {
                     else if (((mySession = NgnAVSession.getSession(sessionId)) != null) || ((mySession = NgnMsrpSession.getSession(sessionId)) != null)){
                     	mySession.setConnectionState(ConnectionState.TERMINATING);
                     	((NgnInviteSession)mySession).setState(InviteState.TERMINATING);
-                    	mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.TERMWAIT, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                    	mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.TERMWAIT, ((NgnInviteSession)mySession).getMediaType(), phrase), sipCode);
                     }
 					// Publication
                     else if(((mySession = NgnPublicationSession.getSession(sessionId)) != null)){
@@ -652,7 +652,7 @@ implements INgnSipService, tinyWRAPConstants {
                     else if (((mySession = NgnAVSession.getSession(sessionId)) != null) || ((mySession = NgnMsrpSession.getSession(sessionId)) != null)){
                         mySession.setConnectionState(ConnectionState.TERMINATED);
                         ((NgnInviteSession)mySession).setState(InviteState.TERMINATED);
-                        mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.TERMINATED, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                        mSipService.broadcastInviteEvent(new NgnInviteEventArgs(sessionId, NgnInviteEventTypes.TERMINATED, ((NgnInviteSession)mySession).getMediaType(), phrase), sipCode);
                         if(mySession instanceof NgnAVSession){
                         	NgnAVSession.releaseSession((NgnAVSession)mySession);
                         }
@@ -755,7 +755,7 @@ implements INgnSipService, tinyWRAPConstants {
                 	// For backward compatibility keep both "RINGING" and "SIP_RESPONSE"
                     if (code == 180 && session != null){
                     	if (((mySession = NgnAVSession.getSession(session.getId())) != null) || ((mySession = NgnMsrpSession.getSession(session.getId())) != null)){
-                    		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(mySession.getId(), NgnInviteEventTypes.RINGING, ((NgnInviteSession)mySession).getMediaType(), phrase));
+                    		mSipService.broadcastInviteEvent(new NgnInviteEventArgs(mySession.getId(), NgnInviteEventTypes.RINGING, ((NgnInviteSession)mySession).getMediaType(), phrase), code);
                     	}
                     }
                     if(session != null){
