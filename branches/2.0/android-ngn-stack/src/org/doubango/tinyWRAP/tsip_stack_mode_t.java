@@ -8,41 +8,39 @@
 
 package org.doubango.tinyWRAP;
 
-public enum thttp_event_type_t {
-  thttp_event_dialog_started,
-  thttp_event_message,
-  thttp_event_auth_failed,
-  thttp_event_closed,
-  thttp_event_transport_error,
-  thttp_event_dialog_terminated;
+public enum tsip_stack_mode_t {
+  tsip_stack_mode_ua,
+  tsip_stack_mode_p2p,
+  tsip_stack_mode_mediaproxy,
+  tsip_stack_mode_mcu;
 
   public final int swigValue() {
     return swigValue;
   }
 
-  public static thttp_event_type_t swigToEnum(int swigValue) {
-    thttp_event_type_t[] swigValues = thttp_event_type_t.class.getEnumConstants();
+  public static tsip_stack_mode_t swigToEnum(int swigValue) {
+    tsip_stack_mode_t[] swigValues = tsip_stack_mode_t.class.getEnumConstants();
     if (swigValue < swigValues.length && swigValue >= 0 && swigValues[swigValue].swigValue == swigValue)
       return swigValues[swigValue];
-    for (thttp_event_type_t swigEnum : swigValues)
+    for (tsip_stack_mode_t swigEnum : swigValues)
       if (swigEnum.swigValue == swigValue)
         return swigEnum;
-    throw new IllegalArgumentException("No enum " + thttp_event_type_t.class + " with value " + swigValue);
+    throw new IllegalArgumentException("No enum " + tsip_stack_mode_t.class + " with value " + swigValue);
   }
 
   @SuppressWarnings("unused")
-  private thttp_event_type_t() {
+  private tsip_stack_mode_t() {
     this.swigValue = SwigNext.next++;
   }
 
   @SuppressWarnings("unused")
-  private thttp_event_type_t(int swigValue) {
+  private tsip_stack_mode_t(int swigValue) {
     this.swigValue = swigValue;
     SwigNext.next = swigValue+1;
   }
 
   @SuppressWarnings("unused")
-  private thttp_event_type_t(thttp_event_type_t swigEnum) {
+  private tsip_stack_mode_t(tsip_stack_mode_t swigEnum) {
     this.swigValue = swigEnum.swigValue;
     SwigNext.next = this.swigValue+1;
   }
