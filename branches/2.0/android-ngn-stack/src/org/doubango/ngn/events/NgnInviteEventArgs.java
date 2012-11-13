@@ -37,9 +37,9 @@ public class NgnInviteEventArgs extends NgnEventArgs{
     
     public static final String ACTION_INVITE_EVENT = TAG + ".ACTION_INVITE_EVENT";
     
-    public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED;
-    public static final String EXTRA_SESSION = "session";
-    public static final String EXTRA_SIPCODE = "sipCode";
+    public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED; // @NgnInviteEventArgs
+    public static final String EXTRA_SESSION = "session"; // @object
+    public static final String EXTRA_SIPCODE = "sipCode"; // @short
 
     public NgnInviteEventArgs(long sessionId, NgnInviteEventTypes eventType, NgnMediaType mediaType, String phrase){
     	super();
