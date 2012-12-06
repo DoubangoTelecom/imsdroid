@@ -20,6 +20,7 @@
 package org.doubango.ngn.services.impl;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -49,11 +50,11 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
 import android.net.wifi.WifiConfiguration.GroupCipher;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -81,9 +82,10 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 	
 	private static int WifiManager_WIFI_MODE = WifiManager.WIFI_MODE_FULL;
 	private static int ConnectivityManager_TYPE_WIMAX = -1;
+	private static Method NetworkInterface_isUp;
 	
 	static{
-		int sdkVersion = NgnApplication.getSDKVersion();
+		final int sdkVersion = NgnApplication.getSDKVersion();
 		if(sdkVersion >= 9){
 			try {
 				WifiManager_WIFI_MODE = WifiManager.class.getDeclaredField("WIFI_MODE_FULL_HIGH_PERF").getInt(null);
@@ -99,6 +101,13 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 				Log.e(TAG, e.toString());
 			}
 		}
+		
+		// according to the documentation, NetworkInterface::isUp() is only defined starting API Level 9 but it's available on my GS1 (API Level 8)
+		// this is why we don't test sdk version
+		try{
+			NetworkInterface_isUp = NetworkInterface.class.getDeclaredMethod("isUp");
+		}
+		catch (Exception e) { }
 	}
 	
 	public static final int[] sWifiSignalValues = new int[] {
@@ -177,9 +186,20 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 	@Override
 	public String getLocalIP(boolean ipv6) {
 		final HashMap<String, InetAddress> addressMap = new HashMap<String, InetAddress>();
+		
 		try {
 			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
-				NetworkInterface intf = en.nextElement();
+				final NetworkInterface intf = en.nextElement();
+				
+				// http://code.google.com/p/imsdroid/issues/detail?id=398#c3
+				try{
+					if(NetworkInterface_isUp != null && !(Boolean)NetworkInterface_isUp.invoke(intf)){
+						Log.i(TAG, "interface=" + intf.getName() + " is not up");
+						continue;
+					}
+				}
+				catch(Exception e){}
+				
 				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 					InetAddress inetAddress = enumIpAddr.nextElement();
 					Log.d(NgnNetworkService.TAG, inetAddress.getHostAddress().toString());
