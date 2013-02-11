@@ -83,13 +83,15 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
     
     @Override
     public final View startPreview(Context context){
-    	mContext = context == null ? mContext : context;
-    	if(mContext != null){
-	    	if(mPreview == null || mPreview.isDestroyed()){
-	    		mPreview = new NgnProxyVideoConsumerGLPreview(mContext, super.mFullScreenRequired,  mVideoFrame, mWidth, mHeight, mFps);
+    	synchronized(this){
+	    	mContext = context == null ? mContext : context;
+	    	if(mContext != null){
+		    	if(mPreview == null || mPreview.isDestroyed()){
+		    		mPreview = new NgnProxyVideoConsumerGLPreview(mContext, super.mFullScreenRequired,  mVideoFrame, mWidth, mHeight, mFps);
+		    	}
 	    	}
+			return mPreview;
     	}
-		return mPreview;
     }
     
     @Override
@@ -98,23 +100,30 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 	}
     
     private int prepareCallback(int width, int height, int fps){
-    	Log.d(TAG, "prepareCallback("+width+","+height+","+fps+")");
-    	
-    	// Update video stream parameters with real values (negotiated)
-		mWidth = width;
-		mHeight = height;
-		mFps = fps;
-		mVideoFrame = ByteBuffer.allocateDirect((mWidth * mHeight * 3) >> 1);
-		mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
-		
-		super.mPrepared = true;
-		return 0;
+    	synchronized(this){
+	    	Log.d(TAG, "prepareCallback("+width+","+height+","+fps+")");
+	    	
+	    	// Update video stream parameters with real values (negotiated)
+			mWidth = width;
+			mHeight = height;
+			mFps = fps;
+			mVideoFrame = ByteBuffer.allocateDirect((mWidth * mHeight * 3) >> 1);
+			mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
+			if(mPreview != null){
+				mPreview.setBuffer(mVideoFrame, mWidth, mHeight);
+			}
+			
+			super.mPrepared = true;
+			return 0;
+    	}
     }
     
     private int startCallback(){
-    	Log.d(NgnProxyVideoConsumerGL.TAG, "startCallback");
-    	super.mStarted = true;
-    	return 0;
+    	synchronized(this){
+	    	Log.d(NgnProxyVideoConsumerGL.TAG, "startCallback");
+	    	super.mStarted = true;
+	    	return 0;
+    	}
     }
 
     private int bufferCopiedCallback(long nCopiedSize, long nAvailableSize) {
@@ -146,7 +155,7 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 		return 0;
     }
     
-    private int consumeCallback(ProxyVideoFrame _frame){    	
+    private int consumeCallback(ProxyVideoFrame _frame){
 		if(!super.mValid){
 			Log.e(TAG, "Invalid state");
 			return -1;
@@ -165,17 +174,21 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
     }
 
     private int pauseCallback(){
-    	Log.d(TAG, "pauseCallback");
-    	super.mPaused = true;
-    	return 0;
+    	synchronized(this){
+	    	Log.d(TAG, "pauseCallback");
+	    	super.mPaused = true;
+	    	return 0;
+    	}
     }
     
     private synchronized int stopCallback(){
-    	Log.d(TAG, "stopCallback");
-    	super.mStarted = false;
-    	
-    	mPreview = null;
-    	return 0;
+    	synchronized(this){
+	    	Log.d(TAG, "stopCallback");
+	    	super.mStarted = false;
+	    	
+	    	mPreview = null;
+	    	return 0;
+    	}
     }
 	
 	/**
