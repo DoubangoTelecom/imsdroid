@@ -411,7 +411,11 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				}
 			}
 			
-			camera.startPreview();
+			try{
+    			camera.startPreview();
+    		}catch (Exception e) {
+				Log.e(TAG, e.toString());
+			}
 	    }
     }
     
