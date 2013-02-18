@@ -69,7 +69,11 @@ import android.widget.Toast;
  */
 public class NgnNetworkService  extends NgnBaseService implements INgnNetworkService {
 	private static final String TAG = NgnNetworkService.class.getCanonicalName();
+	
 	private static final String OPENVPN_INTERFACE_NAME = "tun0";
+	@SuppressWarnings("unused")
+	private static final String WLAN_INTERFACE_NAME = "wlan0";
+	private static final String USB_INTERFACE_NAME = "usb0";
 	
 	private WifiManager mWifiManager;
 	private WifiLock mWifiLock;
@@ -222,9 +226,13 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 				}
 				
 				final Iterator<Map.Entry<String, InetAddress>> it = addressMap.entrySet().iterator();
+				Map.Entry<String, InetAddress> kvp;
 			    while (it.hasNext()) {
-			    	final InetAddress address = it.next().getValue();
-			    	// put here code to select the preferred address
+			    	kvp = it.next();
+			    	final InetAddress address = kvp.getValue();
+			    	if(kvp.getKey().equals(USB_INTERFACE_NAME)){
+			    		continue;
+			    	}
 				    return address.getHostAddress();
 			    }
 				return addressMap.values().iterator().next().getHostAddress();
