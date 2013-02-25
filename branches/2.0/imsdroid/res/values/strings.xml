@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="app_name">IMSDroid</string>
-    <string name="doubango_revision">820</string>
+    <string name="doubango_revision">827</string>
     <string name="spinner_ipversion">Select IP version</string>
     <string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>
     <string name="spinner_transport">Select Network Transport</string>
