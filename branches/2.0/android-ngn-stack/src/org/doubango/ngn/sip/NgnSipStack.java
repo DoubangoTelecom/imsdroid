@@ -35,7 +35,7 @@ import android.os.Build;
 public class NgnSipStack extends SipStack{
 
 	public enum STACK_STATE {
-	     NONE, STARTING, STARTED, STOPPING, STOPPED
+	     NONE, STARTING, STARTED, STOPPING, STOPPED, DISCONNECTED
 	}
 	
 	private STACK_STATE mState = STACK_STATE.NONE;

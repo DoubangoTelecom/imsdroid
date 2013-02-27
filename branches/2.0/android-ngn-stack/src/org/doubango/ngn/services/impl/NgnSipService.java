@@ -1063,6 +1063,10 @@ implements INgnSipService, tinyWRAPConstants {
 					mSipService.mSipStack.setState(STACK_STATE.STOPPED);
 					Log.d(TAG, "Stack stopped");
 					break;
+				case tinyWRAPConstants.tsip_event_code_stack_disconnected:
+					mSipService.mSipStack.setState(STACK_STATE.DISCONNECTED);
+					Log.d(TAG, "Stack disconnected");
+					break;
 			}
 			return 0;
 		}
