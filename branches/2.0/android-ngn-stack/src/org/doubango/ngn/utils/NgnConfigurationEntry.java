@@ -104,6 +104,10 @@ public class NgnConfigurationEntry {
 	public static final String SECURITY_SRTP_MODE = "SECURITY_SRTP_MODE." + TAG;
 	public static final String SECURITY_IMSAKA_AMF = "SECURITY_IMSAKA_AMF." + TAG;
 	public static final String SECURITY_IMSAKA_OPID = "SECURITY_IMSAKA_OPID." + TAG;
+	public static final String SECURITY_TLS_PRIVKEY_FILE_PATH = "SECURITY_TLS_PRIVKEY_FILE_PATH." + TAG;
+	public static final String SECURITY_TLS_PUBKEY_FILE_PATH = "SECURITY_TLS_PUBKEY_FILE_PATH." + TAG;
+	public static final String SECURITY_TLS_CA_FILE_PATH = "SECURITY_TLS_CA_FILE_PATH." + TAG;
+	public static final String SECURITY_TLS_VERIFY_CERTS = "SECURITY_TLS_VERIFY_CERTS." + TAG;
 	
 	// XCAP
 	public static final String XCAP_PASSWORD = "XCAP_PASSWORD." + TAG;
@@ -207,6 +211,10 @@ public class NgnConfigurationEntry {
 	public static final String DEFAULT_SECURITY_IMSAKA_AMF = "0x0000";
 	public static final String DEFAULT_SECURITY_IMSAKA_OPID = "0x00000000000000000000000000000000";
 	public static final String DEFAULT_SECURITY_SRTP_MODE = tmedia_srtp_mode_t.tmedia_srtp_mode_none.toString();
+	public static final String DEFAULT_SECURITY_TLS_PRIVKEY_FILE_PATH = null;
+	public static final String DEFAULT_SECURITY_TLS_PUBKEY_FILE_PATH = null;
+	public static final String DEFAULT_SECURITY_TLS_CA_FILE_PATH = null;
+	public static final boolean DEFAULT_SECURITY_TLS_VERIFY_CERTS = false;
 	
 	// XCAP
 	public static final boolean DEFAULT_XCAP_ENABLED = false;

@@ -375,6 +375,17 @@ implements INgnSipService, tinyWRAPConstants {
 			mSipStack.setSigCompId(null);
 		}
 		
+		// TLS
+		final String pvFilePath = mConfigurationService.getString(NgnConfigurationEntry.SECURITY_TLS_PRIVKEY_FILE_PATH, NgnConfigurationEntry.DEFAULT_SECURITY_TLS_PRIVKEY_FILE_PATH);
+		final String pbFilePath = mConfigurationService.getString(NgnConfigurationEntry.SECURITY_TLS_PUBKEY_FILE_PATH, NgnConfigurationEntry.DEFAULT_SECURITY_TLS_PUBKEY_FILE_PATH);
+		final String caFilePath = mConfigurationService.getString(NgnConfigurationEntry.SECURITY_TLS_CA_FILE_PATH, NgnConfigurationEntry.DEFAULT_SECURITY_TLS_CA_FILE_PATH);
+		final boolean verifyCerts = mConfigurationService.getBoolean(NgnConfigurationEntry.SECURITY_TLS_VERIFY_CERTS, NgnConfigurationEntry.DEFAULT_SECURITY_TLS_VERIFY_CERTS);
+		Log.d(TAG, String.format("TLS - pvk='%s' pbk='%s' ca='%s' verify=%s", pvFilePath, pbFilePath, caFilePath, verifyCerts));
+		if(!mSipStack.setSSLCertificates(pvFilePath, pbFilePath, caFilePath, verifyCerts)){
+			Log.e(TAG, "Failed to set TLS certificates");
+			return false;
+		}
+		
 		// Start the Stack
 		if (!mSipStack.start()) {
 			if(context != null && Thread.currentThread() == Looper.getMainLooper().getThread()){
