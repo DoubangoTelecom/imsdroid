@@ -20,6 +20,7 @@
 
 package org.doubango.ngn;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.utils.AndroidUtils;
@@ -318,6 +319,18 @@ public class NgnApplication extends Application{
     private static PowerManager.WakeLock sPowerManagerLock;
     private static int sGlEsVersion;
     static final String sBuildModel = Build.MODEL.toLowerCase();
+    static final String[] sSLEs2FriendlyBuildModels = 
+    {
+    	"galaxy nexus", /* 4.1 */
+    	/*"gt-s5360",*//* 2.3.6 :robotic*/ 
+    	"gt-s5570i", /* 2.3.0 */
+    	"xt890", /* Motorola Razer i 4.0.4 */
+    	"lg-p970" /* 2.3.4 */
+    };
+    static final String[] sSetModeFriendlyBuildModels = 
+    {
+    	"gt-s5570i" /* 2.3.6 */
+    };
     
     // This function is called by the package manager, you must never explicitly invoke it.
     // Do not forget to add/change the <application /> section in your manifest as done in IMSDroid or all other test apps
@@ -390,14 +403,17 @@ public class NgnApplication extends Application{
     }
     
     /**
-     * Whether the stack is running on a Samsung device
-     * @return true if the stack is running on a Samsung device and false otherwise
+     * Whether the stack is running on a Samsung Galaxy Mini device
+     * @return true if the stack is running on a Samsung Galaxy Mini device and false otherwise
      */
-    
     public static boolean isSamsungGalaxyMini(){
     	return sBuildModel.equalsIgnoreCase("gt-i5800");
     }
         
+    /**
+     * Whether the stack is running on a Samsung Galaxy Mini device
+     * @return true if the stack is running on a Samsung Galaxy Mini device and false otherwise
+     */
     public static boolean isSamsung(){
     	return sBuildModel.startsWith("gt-") 
 		|| sBuildModel.contains("samsung") 
@@ -414,14 +430,26 @@ public class NgnApplication extends Application{
     	return sBuildModel.startsWith("htc");
     }
     
+    /**
+     * Whether the stack is running on a ZTE device
+     * @return true if the stack is running on a ZTE device and false otherwise
+     */
     public static boolean isZTE(){
     	return sBuildModel.startsWith("zte");
     }
     
+    /**
+     * Whether the stack is running on a LG device
+     * @return true if the stack is running on a LG device and false otherwise
+     */
     public static boolean isLG(){
     	return sBuildModel.startsWith("lg-");
     }
     
+    /**
+     * Whether the stack is running on a Toshiba device
+     * @return true if the stack is running on a Toshiba device and false otherwise
+     */
     public static boolean isToshiba(){
     	return sBuildModel.startsWith("toshiba");
     }
@@ -431,7 +459,7 @@ public class NgnApplication extends Application{
     }
     
     public static boolean isSetModeAllowed(){
-    	return isZTE() || isLG();
+    	return isZTE() || isLG() || Arrays.asList(sSetModeFriendlyBuildModels).contains(sBuildModel);
     }
     
     public static boolean isBuggyProximitySensor(){
@@ -558,7 +586,11 @@ public class NgnApplication extends Application{
     }
     
     public static boolean isSLEs2Supported(){
-    	return /* (NgnApplication.getSDKVersion() >= 9) */ false;
+    	return (NgnApplication.getSDKVersion() >= 9);
+    }
+    
+    public static boolean isSLEs2KnownToWork(){
+    	return isSLEs2Supported() && Arrays.asList(sSLEs2FriendlyBuildModels).contains(sBuildModel);
     }
     
     public static boolean acquirePowerLock(){

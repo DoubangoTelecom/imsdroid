@@ -365,7 +365,7 @@ public class NgnAVSession extends NgnInviteSession{
 	    super.addHeader("P-Preferred-Service", "urn:urn-7:3gpp-service.ims.icsi.mmtel");
 	    
 	    mHistoryEvent = new NgnHistoryAVCallEvent((mediaType == NgnMediaType.AudioVideo || mediaType == NgnMediaType.Video), null);
-	    super.setState(callState);
+	    this.setState(callState);
 	}
     
 	@Override
@@ -607,7 +607,7 @@ public class NgnAVSession extends NgnInviteSession{
 	 * @param speakerOn true to enable the speakerphone and false to disable it
 	 */
 	public void setSpeakerphoneOn(boolean speakerOn){
-		if(NgnApplication.isSLEs2Supported()){
+		if(NgnApplication.isSLEs2KnownToWork()){
 			final MediaSessionMgr mediaMgr;
 			if((mediaMgr = super.getMediaSessionMgr()) != null){
 				if(mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_audio, "speaker-on", speakerOn ? 1 : 0)){
@@ -634,7 +634,7 @@ public class NgnAVSession extends NgnInviteSession{
 	}
 	
 	public boolean isSpeakerOn(){
-		if(!NgnApplication.isSLEs2Supported()){
+		if(!NgnApplication.isSLEs2KnownToWork()){
 			if(mAudioProducer != null){
 				return mAudioProducer.isSpeakerOn();
 			}
@@ -643,7 +643,7 @@ public class NgnAVSession extends NgnInviteSession{
 	}
 	
 	public boolean isMicrophoneMute() {
-		if(NgnApplication.isSLEs2Supported()){
+		if(NgnApplication.isSLEs2KnownToWork()){
 			return mMuteOn;
 		}
 		else{
@@ -655,7 +655,7 @@ public class NgnAVSession extends NgnInviteSession{
 	}
 	
 	public void setMicrophoneMute(boolean mute) {
-		if(NgnApplication.isSLEs2Supported()){
+		if(NgnApplication.isSLEs2KnownToWork()){
 			final MediaSessionMgr mediaMgr;
 			if((mediaMgr = super.getMediaSessionMgr()) != null){
 				if(mediaMgr.producerSetInt32(twrap_media_type_t.twrap_media_audio, "mute", mute ? 1 : 0)){
@@ -672,7 +672,7 @@ public class NgnAVSession extends NgnInviteSession{
 	}
 	
 	public boolean onVolumeChanged(boolean bDown){
-		if(!NgnApplication.isSLEs2Supported()){
+		if(!NgnApplication.isSLEs2KnownToWork()){
 			if(mAudioProducer == null || !mAudioProducer.onVolumeChanged(bDown)){
 				return false;
 			}
@@ -683,10 +683,28 @@ public class NgnAVSession extends NgnInviteSession{
 		return false;
 	}
 	
-	public void setModeInCall(boolean bInCall){
-		final AudioManager audiomanager = NgnApplication.getAudioManager();
+	public void setMode(InviteState state){
 		if(NgnApplication.isSetModeAllowed()){
-			audiomanager.setMode(bInCall ? AudioManager.MODE_IN_CALL : AudioManager.MODE_NORMAL);
+			final AudioManager audiomanager = NgnApplication.getAudioManager();
+			if(audiomanager != null){
+				Log.d(TAG, "setMode("+state+")");
+				switch(state){
+					case INCOMING:
+					case INPROGRESS:
+					case REMOTE_RINGING:
+						audiomanager.setMode(AudioManager.MODE_RINGTONE);
+						break;
+					case INCALL:
+					case EARLY_MEDIA:
+						audiomanager.setMode(NgnApplication.getSDKVersion() >= 11 ? AudioManager.MODE_IN_COMMUNICATION : AudioManager.MODE_IN_CALL);
+						break;
+					case TERMINATED:
+					case TERMINATING:
+						audiomanager.setMode(AudioManager.MODE_NORMAL);
+						break;
+					default: break;
+				}
+			}
 		}
 	}
 	
@@ -695,7 +713,9 @@ public class NgnAVSession extends NgnInviteSession{
 		if(super.mState == state){
 			return;
 		}
+		Log.d(TAG, "setState("+state+")");
 		super.setState(state);
+		setMode(state);
 		
 		switch(state){
 			case INCOMING:
@@ -703,13 +723,11 @@ public class NgnAVSession extends NgnInviteSession{
 				break;
 				
 			case INPROGRESS:
-				setModeInCall(true);
 				initializeConsumersAndProducers();
 				break;
 				
 			case INCALL:
 			case EARLY_MEDIA:
-				setModeInCall(true);
 				initializeConsumersAndProducers();
 				updateEchoTail();
 				mSession.setT140Callback(mT140Callback);
@@ -717,7 +735,6 @@ public class NgnAVSession extends NgnInviteSession{
 			
 			case TERMINATED:
 			case TERMINATING:
-				setModeInCall(false);
 				deInitializeMediaSession();
 				mSession.setT140Callback(null);
 				break;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="app_name">IMSDroid</string>
-    <string name="doubango_revision">836</string>
+    <string name="doubango_revision">854</string>
     <string name="spinner_ipversion">Select IP version</string>
     <string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>
     <string name="spinner_transport">Select Network Transport</string>
@@ -9,7 +9,7 @@
     <string name="day_today">Today</string>
     <string name="day_yesterday">Yesterday</string>
     <string formatted="false" name="copyright">
-    IMSDroid/v%s (doubango r%s), Copyright © 2010-2012 Doubango Telecom. All rights reserved.\n\n
+    IMSDroid/v%s (doubango r%s), Copyright © 2010-2013 Doubango Telecom. All rights reserved.\n\n
     IMSDroid is free software: you can redistribute it and/or modify it under the terms of
     the GNU General Public License as published by the Free Software Foundation, either version 3
     of the License, or (at your option) any later version.\n
