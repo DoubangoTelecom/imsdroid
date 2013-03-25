@@ -107,8 +107,8 @@ public class NgnEngine {
 				System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libtinyWRAP_armv5te.so"));
 			}
 			
-			// If OpenSL ES is supported then used it
-			if(NgnApplication.isSLEs2Supported()){
+			// If OpenSL ES is supported and know to work on current device then used it
+			if(NgnApplication.isSLEs2KnownToWork()){
 				final String pluginPath = String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libplugin_audio_opensles_armv5te.so");
 				
 				// returned value is the number of registered add-ons (2 = 1 consumer + 1 producer)

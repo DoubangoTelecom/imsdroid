@@ -77,6 +77,7 @@ public class NativeService extends NgnNativeService {
 		
 		// register()
 		mBroadcastReceiver = new BroadcastReceiver() {
+			@SuppressWarnings("incomplete-switch")
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				final String action = intent.getAction();
