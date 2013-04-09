@@ -89,6 +89,7 @@ public class NgnConfigurationEntry {
     public static final String QOS_SIP_SESSIONS_TIMEOUT = "QOS_SIP_SESSIONS_TIMEOUT" + TAG;
     public static final String QOS_USE_SESSION_TIMERS = "QOS_USE_SESSION_TIMERS." + TAG;
     public static final String QOS_PREF_VIDEO_SIZE = "QOS_PREF_VIDEO_SIZE." + TAG;
+    public static final String QOS_USE_ZERO_VIDEO_ARTIFACTS = "QOS_USE_ZERO_VIDEO_ARTIFACTS." + TAG;
 
 	
 	// Media
@@ -189,6 +190,7 @@ public class NgnConfigurationEntry {
     public static final int DEFAULT_QOS_SIP_SESSIONS_TIMEOUT = 600000;
     public static final int DEFAULT_QOS_SIP_CALLS_TIMEOUT = 3600;
     public static final boolean DEFAULT_QOS_USE_SESSION_TIMERS = false;
+    public static final boolean DEFAULT_QOS_USE_ZERO_VIDEO_ARTIFACTS = false;
     public static final String DEFAULT_QOS_PREF_VIDEO_SIZE = tmedia_pref_video_size_t.tmedia_pref_video_size_cif.toString();
 	
 	// Media

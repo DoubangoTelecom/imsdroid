@@ -66,6 +66,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	private int mFrameHeight; // camera picture output height
 	
 	private ByteBuffer mVideoFrame;
+	private byte[] mVideoCallbackData;
 	
 	public NgnProxyVideoProducer(BigInteger id, ProxyVideoProducer producer){
 		super(id, producer);
@@ -74,9 +75,10 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
         mProducer.setCallback(mCallback);
         
      	// Initialize video stream parameters with default values
-        mWidth = NgnProxyVideoProducer.DEFAULT_VIDEO_WIDTH;
-		mHeight = NgnProxyVideoProducer.DEFAULT_VIDEO_HEIGHT;
+        mFrameWidth = mWidth = NgnProxyVideoProducer.DEFAULT_VIDEO_WIDTH;
+        mFrameHeight = mHeight = NgnProxyVideoProducer.DEFAULT_VIDEO_HEIGHT;
 		mFps = NgnProxyVideoProducer.DEFAULT_VIDEO_FPS;
+		
     }
 	
 	@Override
@@ -320,7 +322,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 
     private synchronized int startCallback(){
     	Log.d(TAG, "startCallback");
-		this.mStarted = true;
+		mStarted = true;
 		
 		if(mPreview != null){
 			startCameraPreview(mPreview.getCamera());
@@ -362,6 +364,10 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
     }
     
     private synchronized void startCameraPreview(Camera camera){
+    	if(!mStarted){
+    		Log.w(TAG, "Someone requested to start camera preview but producer not ready ...delaying");
+    		return;
+    	}
 		if(camera != null && mProducer != null){
 			try{				
 				Camera.Parameters parameters = camera.getParameters();
@@ -373,6 +379,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 					mFrameWidth = prevSize.width;
 					mFrameHeight = prevSize.height;
 				}
+				
 				// alert the framework that we cannot respect the negotiated size
 				mProducer.setActualCameraOutputSize(mFrameWidth, mFrameHeight);
 				
@@ -407,6 +414,9 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 			// Callback Buffers
 			if(NgnProxyVideoProducer.sAddCallbackBufferSupported){
 				for(int i=0; i<NgnProxyVideoProducer.CALLABACK_BUFFERS_COUNT; i++){
+					if(i == 0 || (mVideoCallbackData == null)){
+						mVideoCallbackData = new byte[mVideoFrame.capacity()];
+					}
 					NgnCameraProducer.addCallbackBuffer(camera, new byte[mVideoFrame.capacity()]);
 				}
 			}
@@ -438,7 +448,8 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				  mVideoFrame.rewind();
 				}
 			  if(NgnProxyVideoProducer.sAddCallbackBufferSupported){
-				  NgnCameraProducer.addCallbackBuffer(_camera, _data);
+				  // do not use "_data" which could be null (e.g. on GSII)
+				  NgnCameraProducer.addCallbackBuffer(_camera, mVideoCallbackData);
 			  }
 		 }
 	 }
@@ -467,6 +478,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
+			Log.d(TAG,"surfaceCreated()");
 			try {
 				mCamera = NgnCameraProducer.openCamera(myProducer.mFps, 
 						myProducer.mWidth, 
@@ -482,7 +494,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			Log.d(TAG,"Destroy Preview");
+			Log.d(TAG,"surfaceDestroyed()");
 			try{
 				NgnCameraProducer.releaseCamera(mCamera);
 			}

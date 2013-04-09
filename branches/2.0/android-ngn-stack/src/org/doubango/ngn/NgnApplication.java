@@ -322,6 +322,7 @@ public class NgnApplication extends Application{
     static final String[] sSLEs2FriendlyBuildModels = 
     {
     	"galaxy nexus", /* 4.1 */
+    	"gt-i9100", /* Galaxy SII, 4.0.4 */
     	/*"gt-s5360",*//* 2.3.6 :robotic*/ 
     	"gt-s5570i", /* 2.3.0 */
     	"xt890", /* Motorola Razer i 4.0.4 */
