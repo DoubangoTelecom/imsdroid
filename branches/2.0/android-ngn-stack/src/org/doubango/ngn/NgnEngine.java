@@ -205,6 +205,10 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetPrefVideoSize(tmedia_pref_video_size_t.valueOf(configurationService.getString(
 				NgnConfigurationEntry.QOS_PREF_VIDEO_SIZE,
 				NgnConfigurationEntry.DEFAULT_QOS_PREF_VIDEO_SIZE)));
+		// Zero Video Artifacts
+		MediaSessionMgr.defaultsSetVideoZeroArtifactsEnabled(configurationService.getBoolean(
+				NgnConfigurationEntry.QOS_USE_ZERO_VIDEO_ARTIFACTS,
+				NgnConfigurationEntry.DEFAULT_QOS_USE_ZERO_VIDEO_ARTIFACTS));
 		// SRTP mode
 		MediaSessionMgr.defaultsSetSRtpMode(tmedia_srtp_mode_t.valueOf(configurationService.getString(
 				NgnConfigurationEntry.SECURITY_SRTP_MODE,

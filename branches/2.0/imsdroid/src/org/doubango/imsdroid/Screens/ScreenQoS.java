@@ -41,6 +41,7 @@ import android.widget.Spinner;
 public class ScreenQoS  extends BaseScreen {
 	private final static String TAG = ScreenQoS.class.getCanonicalName();
 	
+	private CheckBox mCbEnableZeroArtifacts;
 	private CheckBox mCbEnableSessionTimers;
 	private RelativeLayout mRlSessionTimers;
 	private EditText mEtSessionTimeOut;
@@ -90,6 +91,7 @@ public class ScreenQoS  extends BaseScreen {
 		setContentView(R.layout.screen_qos);
 		
 		// get controls
+		mCbEnableZeroArtifacts = (CheckBox)findViewById(R.id.screen_qos_checkBox_zeroArtifacts);
 		mCbEnableSessionTimers = (CheckBox)findViewById(R.id.screen_qos_checkBox_sessiontimers);
 		mRlSessionTimers = (RelativeLayout)findViewById(R.id.screen_qos_relativeLayout_sessiontimers);
         mEtSessionTimeOut = (EditText)findViewById(R.id.screen_qos_editText_stimeout);
@@ -117,6 +119,7 @@ public class ScreenQoS  extends BaseScreen {
         
         // load values from configuration file (Do it before adding UI listeners)
         mCbEnableSessionTimers.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.QOS_USE_SESSION_TIMERS, NgnConfigurationEntry.DEFAULT_QOS_USE_SESSION_TIMERS));
+        mCbEnableZeroArtifacts.setChecked(mConfigurationService.getBoolean(NgnConfigurationEntry.QOS_USE_ZERO_VIDEO_ARTIFACTS, NgnConfigurationEntry.DEFAULT_QOS_USE_ZERO_VIDEO_ARTIFACTS));
         mEtSessionTimeOut.setText(mConfigurationService.getString(NgnConfigurationEntry.QOS_SIP_CALLS_TIMEOUT, Integer.toString(NgnConfigurationEntry.DEFAULT_QOS_SIP_CALLS_TIMEOUT)));
 		mSpRefresher.setSelection(getSpinnerIndex(
 				mConfigurationService.getString(NgnConfigurationEntry.QOS_REFRESHER,
@@ -156,6 +159,8 @@ public class ScreenQoS  extends BaseScreen {
 			
 			mConfigurationService.putBoolean(NgnConfigurationEntry.QOS_USE_SESSION_TIMERS,
 					mCbEnableSessionTimers.isChecked());
+			mConfigurationService.putBoolean(NgnConfigurationEntry.QOS_USE_ZERO_VIDEO_ARTIFACTS,
+					mCbEnableZeroArtifacts.isChecked());						
 			mConfigurationService.putString(NgnConfigurationEntry.QOS_SIP_CALLS_TIMEOUT,
 					mEtSessionTimeOut.getText().toString());
 			mConfigurationService.putString(NgnConfigurationEntry.QOS_REFRESHER, 
@@ -173,6 +178,7 @@ public class ScreenQoS  extends BaseScreen {
 			}
 			else{
 				MediaSessionMgr.defaultsSetPrefVideoSize(sSpinnerVsizeItems[mSpVsize.getSelectedItemPosition()].mValue);
+				MediaSessionMgr.defaultsSetVideoZeroArtifactsEnabled(mCbEnableZeroArtifacts.isChecked());
 			}
 			
 			super.mComputeConfiguration = false;
