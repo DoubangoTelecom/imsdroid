@@ -3,6 +3,17 @@
 
 <wiki:toc max_depth="2" />
 
+==2.548.870==
+ * Align with Doubango 870
+ * Adds support for ZeroVideoArtifacts (Options -> QoS/QoE)
+ * Improve interop with other WebRTC endpoints (mainly chrome and Firefox)
+ * Improve interop with other h264-rtp implementations (e.g. gstreamer, bria,
+cisco, polycom, lync...) 
+ * Improve video perfs
+ * Re-design the video jitter buffer
+ * List of devices with opensl-es enabled: "galaxy nexus", "gt-i9100", "gt-s5570i", "xt890", "lg-p970"
+ * Many other bug fixes
+
 ==2.544.836==
  * Align with Doubango 836 (DTLS-SRTP)
 
