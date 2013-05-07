@@ -134,6 +134,8 @@ public class ScreenCodecs  extends BaseScreen{
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_wb.swigValue(), "Speex-WB", "Speex Wide-Band (16 KHz)"));
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_speex_uwb.swigValue(), "Speex-UWB", "Speex Ultra Wide-Band (32 KHz)"));
 	        }
+	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_opus))
+	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_opus.swigValue(), "OPUS", "OPUS (8 - 48 KHz)"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g722))
 	        	sScreenCodecsItems.add(new ScreenCodecsItem(tdav_codec_id_t.tdav_codec_id_g722.swigValue(), "G.722", "G722 HD Voice (16 KHz)"));
 	        if(SipStack.isCodecSupported(tdav_codec_id_t.tdav_codec_id_g729ab))

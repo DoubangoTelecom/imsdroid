@@ -243,11 +243,16 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetVadEnabled(vad);
 		MediaSessionMgr.defaultsSetNoiseSuppEnabled(nr);
 		MediaSessionMgr.defaultsSetJbMargin(100);
-		// IMPORTANT: setting the Jitter buffer max late to (0) cause "SIGFPE" error in SpeexDSP function "jitter_buffer_ctl(JITTER_BUFFER_SET_MAX_LATE_RATE)"
+		// /!\IMPORTANT: setting the Jitter buffer max late to (0) cause "SIGFPE" error in SpeexDSP function "jitter_buffer_ctl(JITTER_BUFFER_SET_MAX_LATE_RATE)"
 		// This only happen when the audio engine is dynamically loaded from shared library (at least on Galaxy Nexus)
 		MediaSessionMgr.defaultsSetJbMaxLateRate(1);
 		MediaSessionMgr.defaultsSetRtcpEnabled(true);
 		MediaSessionMgr.defaultsSetRtcpMuxEnabled(true);
+		// supported opus mw_rates: 8000,12000,16000,24000,48000
+		// opensl-es playback_rates: 8000, 11025, 16000, 22050, 24000, 32000, 44100, 64000, 88200, 96000, 192000
+		// webrtc aec record_rates: 8000, 16000, 32000
+		MediaSessionMgr.defaultsSetOpusMaxCaptureRate(16000);// /!\IMPORTANT: only 8k and 16k will work with WebRTC AEC
+		MediaSessionMgr.defaultsSetOpusMaxPlaybackRate(16000);
 	}
 	
 	/**
