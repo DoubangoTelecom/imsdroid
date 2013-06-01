@@ -12,14 +12,14 @@
 
 <RelativeLayout android:layout_below="@+id/screen_natt_checkBox_stun" android:layout_height="wrap_content" android:id="@+id/screen_natt_relativeLayout_stun" android:layout_width="fill_parent">
 
-<RadioGroup android:layout_below="@+id/screen_natt_checkBox_stun" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginLeft="15px" android:id="@+id/screen_natt_radioGroup_stun">
+<RadioGroup android:layout_below="@+id/screen_natt_checkBox_stun" android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/screen_natt_radioGroup_stun">
 <RadioButton android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Discover STUN/TURN Server" android:id="@+id/screen_natt_radioButton_stun_disco"></RadioButton>
 <RadioButton android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_natt_radioButton_stun_set" android:text="Use this STUN/TURN Server" android:checked="true"></RadioButton>
 <RelativeLayout android:id="@+id/screen_natt_relativeLayout_stun_server" android:layout_width="fill_parent" android:layout_height="fill_parent">
 
-<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_natt_textView_stun_server" android:text="Server Address" android:textSize="16dp"></TextView>
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_natt_textView_stun_server" android:text="STUN/TURN Server Address" android:textSize="16dp"></TextView>
 <EditText android:layout_below="@+id/screen_natt_textView_stun_server" android:layout_height="wrap_content" android:text="numb.viagenie.ca" android:layout_width="fill_parent" android:id="@+id/screen_natt_editText_stun_server"></EditText>
-<TextView android:layout_width="wrap_content" android:layout_below="@+id/screen_natt_editText_stun_server" android:layout_height="wrap_content" android:id="@+id/screen_natt_textView_stun_port" android:text="Server Port" android:textSize="16dp"></TextView>
+<TextView android:layout_width="wrap_content" android:layout_below="@+id/screen_natt_editText_stun_server" android:layout_height="wrap_content" android:id="@+id/screen_natt_textView_stun_port" android:text="STUN/TURN Server Port" android:textSize="16dp"></TextView>
 <EditText android:layout_below="@+id/screen_natt_textView_stun_port" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="3478" android:inputType="number" android:id="@+id/screen_natt_editText_stun_port"></EditText>
 </RelativeLayout>
 

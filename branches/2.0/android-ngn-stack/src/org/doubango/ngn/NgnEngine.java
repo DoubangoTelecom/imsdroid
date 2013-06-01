@@ -213,9 +213,10 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetSRtpMode(tmedia_srtp_mode_t.valueOf(configurationService.getString(
 				NgnConfigurationEntry.SECURITY_SRTP_MODE,
 				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_MODE)));
-		// ICE
+		// NAT Traversal (ICE, STUN and TURN)
 		MediaSessionMgr.defaultsSetIceEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_ICE, NgnConfigurationEntry.DEFAULT_NATT_USE_ICE));
-		
+		MediaSessionMgr.defaultsSetIceStunEnabled(true); // we want ICE reflexive candidates
+		MediaSessionMgr.defaultsSetStunEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_STUN, NgnConfigurationEntry.DEFAULT_NATT_USE_STUN));
 		
 		// codecs, AEC, NoiseSuppression, Echo cancellation, ....
 		final boolean aec = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
