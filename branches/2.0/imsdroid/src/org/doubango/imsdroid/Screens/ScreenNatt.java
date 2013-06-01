@@ -78,7 +78,7 @@ public class ScreenNatt extends BaseScreen {
         mEtStunServer.setText(mConfigurationService.getString(NgnConfigurationEntry.NATT_STUN_SERVER, NgnConfigurationEntry.DEFAULT_NATT_STUN_SERVER));
         mEtStunPort.setText(mConfigurationService.getString(NgnConfigurationEntry.NATT_STUN_PORT, Integer.toString(NgnConfigurationEntry.DEFAULT_NATT_STUN_PORT)));
         
-        mRlEnableStun.setVisibility(mCbEnableStun.isChecked() ? View.VISIBLE : View.INVISIBLE);
+        // mRlEnableStun.setVisibility(mCbEnableStun.isChecked() ? View.VISIBLE : View.INVISIBLE);
         mRlStunServer.setVisibility(mRbSetStun.isChecked() ? View.VISIBLE : View.INVISIBLE);
         
         
@@ -111,6 +111,7 @@ public class ScreenNatt extends BaseScreen {
 			}
 			else{
 				MediaSessionMgr.defaultsSetIceEnabled(mCbEnableIce.isChecked());
+				MediaSessionMgr.defaultsSetStunEnabled(mCbEnableStun.isChecked());
 			}
 			
 			super.mComputeConfiguration = false;
@@ -121,7 +122,7 @@ public class ScreenNatt extends BaseScreen {
 	private OnCheckedChangeListener mCbEnableStun_OnCheckedChangeListener = new OnCheckedChangeListener(){
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			mRlEnableStun.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
+			// mRlEnableStun.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
 			mComputeConfiguration = true;
 		}
 	};

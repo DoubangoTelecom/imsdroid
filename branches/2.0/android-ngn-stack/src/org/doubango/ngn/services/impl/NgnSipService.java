@@ -289,6 +289,7 @@ implements INgnSipService, tinyWRAPConstants {
 		// Set STUN information
 		if(mConfigurationService.getBoolean(NgnConfigurationEntry.NATT_USE_STUN, NgnConfigurationEntry.DEFAULT_NATT_USE_STUN)){			
 			Log.d(TAG, "STUN=yes");
+			mSipStack.setSTUNEnabled(true);
 			if(mConfigurationService.getBoolean(NgnConfigurationEntry.NATT_STUN_DISCO, NgnConfigurationEntry.DEFAULT_NATT_STUN_DISCO)){
 				final String realm = mPreferences.getRealm();
 				String domain = realm.substring(realm.indexOf(':')+1);
@@ -311,7 +312,7 @@ implements INgnSipService, tinyWRAPConstants {
 		}
 		else{
 			Log.d(TAG, "STUN=no");
-			mSipStack.setSTUNServer(null, 0);
+			mSipStack.setSTUNEnabled(false);
 		}
 		
 		// Set Proxy-CSCF
