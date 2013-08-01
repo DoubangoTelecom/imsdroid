@@ -114,13 +114,12 @@ public class NgnAVSession extends NgnInviteSession{
     public static boolean handleMediaUpdate(long id, twrap_media_type_t newMediaType){
     	NgnAVSession avSession = NgnAVSession.getSession(id);
         if (avSession != null){
-        	avSession.mConsumersAndProducersInitialzed = false;
-        	avSession.initializeConsumersAndProducers();
         	NgnMediaType _newMediaType = NgnMediaType.ConvertFromNative(newMediaType);
         	if(_newMediaType != NgnMediaType.None){
-        		avSession.mMediaType = _newMediaType;
-        		return true;
+        		avSession.mMediaType = _newMediaType; // mediaType must be updated here because it's used by initializeConsumersAndProducers();
         	}
+        	avSession.mConsumersAndProducersInitialzed = false;
+        	return avSession.initializeConsumersAndProducers();
         }
         
         return false;
