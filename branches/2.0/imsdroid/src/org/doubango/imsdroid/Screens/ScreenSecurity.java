@@ -24,6 +24,7 @@ import org.doubango.ngn.services.INgnConfigurationService;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
+import org.doubango.tinyWRAP.tmedia_srtp_type_t;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -52,17 +53,15 @@ public class ScreenSecurity extends BaseScreen {
 	private final static int REQUEST_CODE_CA = 123456;
 	
 	private Spinner mSpSRtpMode;
+	private Spinner mSpSRtpType;
 	private LinearLayout mLlTlsFiles;
 	private ImageButton mIbPrivKey;
 	private ImageButton mIbPubKey;
 	private ImageButton mIbCA;
 	private EditText mEtAMF;
 	private EditText mEtOpId;
-	@SuppressWarnings("unused")
 	private EditText mEtPrivKey;
-	@SuppressWarnings("unused")
 	private EditText mEtPubKey;
-	@SuppressWarnings("unused")
 	private EditText mEtCA;
 	private CheckBox mCbTlsSecAgree;
 	private CheckBox mCbTlsFiles;
@@ -71,6 +70,11 @@ public class ScreenSecurity extends BaseScreen {
 		new ScreenSecuritySRtpMode(tmedia_srtp_mode_t.tmedia_srtp_mode_none, "None"),
 		new ScreenSecuritySRtpMode(tmedia_srtp_mode_t.tmedia_srtp_mode_optional, "Optional"),
 		new ScreenSecuritySRtpMode(tmedia_srtp_mode_t.tmedia_srtp_mode_mandatory, "Mandatory"),
+	};
+	private final static ScreenSecuritySRtpType sSpinnerSRtpTypeItems[] = new ScreenSecuritySRtpType[] {
+		new ScreenSecuritySRtpType(tmedia_srtp_type_t.tmedia_srtp_type_sdes, "SDES"),
+		new ScreenSecuritySRtpType(tmedia_srtp_type_t.tmedia_srtp_type_dtls, "DTLS"),
+		new ScreenSecuritySRtpType(tmedia_srtp_type_t.tmedia_srtp_type_sdes_dtls, "BOTH"),
 	};
 	
 	public  ScreenSecurity() {
@@ -85,6 +89,7 @@ public class ScreenSecurity extends BaseScreen {
         
       // get controls
         mSpSRtpMode = (Spinner)findViewById(R.id.screen_security_spinner_srtp_modes);
+        mSpSRtpType = (Spinner)findViewById(R.id.screen_security_spinner_srtp_types);
         mLlTlsFiles = (LinearLayout)findViewById(R.id.screen_security_linearLayout_tlsfiles);
         mCbTlsFiles = (CheckBox)findViewById(R.id.screen_security_checkBox_tlsfiles);
         mIbPrivKey = (ImageButton)findViewById(R.id.screen_security_imageButton_private_key);
@@ -100,22 +105,31 @@ public class ScreenSecurity extends BaseScreen {
         // load values from configuration file (do it before adding UI listeners)
         mEtAMF.setText(mConfigurationService.getString(NgnConfigurationEntry.SECURITY_IMSAKA_AMF, NgnConfigurationEntry.DEFAULT_SECURITY_IMSAKA_AMF));
         mEtOpId.setText(mConfigurationService.getString(NgnConfigurationEntry.SECURITY_IMSAKA_OPID, NgnConfigurationEntry.DEFAULT_SECURITY_IMSAKA_OPID));
-        //mEtPrivKey.setText(mConfigurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PRIV_KEY_FILE, Configuration.DEFAULT_TLS_PRIV_KEY_FILE));
-        //mEtPubKey.setText(mConfigurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PUB_KEY_FILE, Configuration.DEFAULT_TLS_PUB_KEY_FILE));
-        //mEtCA.setText(mConfigurationService.getString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_CA_FILE, Configuration.DEFAULT_TLS_CA_FILE));
+        mEtPrivKey.setText(mConfigurationService.getString(NgnConfigurationEntry.SECURITY_TLS_PRIVKEY_FILE_PATH, NgnConfigurationEntry.DEFAULT_SECURITY_TLS_PRIVKEY_FILE_PATH));
+        mEtPubKey.setText(mConfigurationService.getString(NgnConfigurationEntry.SECURITY_TLS_PUBKEY_FILE_PATH, NgnConfigurationEntry.DEFAULT_SECURITY_TLS_PUBKEY_FILE_PATH));
+        mEtCA.setText(mConfigurationService.getString(NgnConfigurationEntry.SECURITY_TLS_CA_FILE_PATH, NgnConfigurationEntry.DEFAULT_SECURITY_TLS_CA_FILE_PATH));
         //mCbTlsSecAgree.setChecked(mConfigurationService.getBoolean(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_SEC_AGREE, Configuration.DEFAULT_TLS_SEC_AGREE));
         
-        ArrayAdapter<ScreenSecuritySRtpMode> adapter = new ArrayAdapter<ScreenSecuritySRtpMode>(this, android.R.layout.simple_spinner_item, ScreenSecurity.sSpinnerSRtpModeItems);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSpSRtpMode.setAdapter(adapter);
-        
+        ArrayAdapter<ScreenSecuritySRtpMode> adapterSrtpMode = new ArrayAdapter<ScreenSecuritySRtpMode>(this, android.R.layout.simple_spinner_item, ScreenSecurity.sSpinnerSRtpModeItems);
+        adapterSrtpMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpSRtpMode.setAdapter(adapterSrtpMode);
         mSpSRtpMode.setSelection(ScreenSecuritySRtpMode.getSpinnerIndex(tmedia_srtp_mode_t.valueOf(mConfigurationService.getString(
 				NgnConfigurationEntry.SECURITY_SRTP_MODE,
 				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_MODE))));
         
+        ArrayAdapter<ScreenSecuritySRtpType> adapterType = new ArrayAdapter<ScreenSecuritySRtpType>(this, android.R.layout.simple_spinner_item, ScreenSecurity.sSpinnerSRtpTypeItems);
+        adapterType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpSRtpType.setAdapter(adapterType);
+        mSpSRtpType.setSelection(ScreenSecuritySRtpType.getSpinnerIndex(tmedia_srtp_type_t.valueOf(mConfigurationService.getString(
+				NgnConfigurationEntry.SECURITY_SRTP_TYPE,
+				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_TYPE))));
+        
         addConfigurationListener(mEtAMF);
         addConfigurationListener(mEtOpId);
         addConfigurationListener(mSpSRtpMode);
+        addConfigurationListener(mEtPrivKey);
+        addConfigurationListener(mEtPubKey);
+        addConfigurationListener(mEtCA);
         
         // local listeners
         mIbPrivKey.setOnClickListener(ibPrivKey_OnClickListener);
@@ -132,16 +146,19 @@ public class ScreenSecurity extends BaseScreen {
 			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_IMSAKA_OPID, mEtOpId.getText().toString());
 			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_SRTP_MODE, 
 					sSpinnerSRtpModeItems[mSpSRtpMode.getSelectedItemPosition()].mMode.toString());
+			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_SRTP_TYPE, 
+					sSpinnerSRtpTypeItems[mSpSRtpType.getSelectedItemPosition()].mType.toString());
 			
-			//configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PRIV_KEY_FILE, etPrivKey.getText().toString());
-			//configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_PUB_KEY_FILE, etPubKey.getText().toString());
-			//configurationService.setString(CONFIGURATION_SECTION.SECURITY, CONFIGURATION_ENTRY.TLS_CA_FILE, etCA.getText().toString());
+			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_TLS_PRIVKEY_FILE_PATH, mEtPrivKey.getText().toString());
+			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_TLS_PUBKEY_FILE_PATH, mEtPubKey.getText().toString());
+			mConfigurationService.putString(NgnConfigurationEntry.SECURITY_TLS_CA_FILE_PATH, mEtCA.getText().toString());
 			
 			if(!mConfigurationService.commit()){
 				Log.e(TAG, "Failed to Compute() configuration");
 			}
 			else{
 				MediaSessionMgr.defaultsSetSRtpMode(sSpinnerSRtpModeItems[mSpSRtpMode.getSelectedItemPosition()].mMode);
+				MediaSessionMgr.defaultsSetSRtpType(sSpinnerSRtpTypeItems[mSpSRtpType.getSelectedItemPosition()].mType);
 			}
 			
 			super.mComputeConfiguration = false;
@@ -233,8 +250,8 @@ public class ScreenSecurity extends BaseScreen {
 	
 	private OnCheckedChangeListener cbTlsFiles_OnCheckedChangeListener = new OnCheckedChangeListener(){
 		public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
-			mLlTlsFiles.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
-			Toast.makeText(ScreenSecurity.this, "Not implemented", Toast.LENGTH_SHORT).show();
+			// mLlTlsFiles.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
+			// Toast.makeText(ScreenSecurity.this, "Not implemented", Toast.LENGTH_SHORT).show();
 		}
 	};
 	
@@ -266,6 +283,35 @@ public class ScreenSecurity extends BaseScreen {
 		static int getSpinnerIndex(tmedia_srtp_mode_t mode){
 			for(int i = 0; i< sSpinnerSRtpModeItems.length; i++){
 				if(mode == sSpinnerSRtpModeItems[i].mMode){
+					return i;
+				}
+			}
+			return 0;
+		}
+	}
+	
+	private static class ScreenSecuritySRtpType {
+		private final String mDescription;
+		private final tmedia_srtp_type_t mType;
+
+		private ScreenSecuritySRtpType(tmedia_srtp_type_t type, String description) {
+			mType = type;
+			mDescription = description;
+		}
+
+		@Override
+		public String toString() {
+			return mDescription;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return mType.equals(((ScreenSecuritySRtpType)o).mType);
+		}
+		
+		static int getSpinnerIndex(tmedia_srtp_type_t type){
+			for(int i = 0; i< sSpinnerSRtpTypeItems.length; i++){
+				if(type == sSpinnerSRtpTypeItems[i].mType){
 					return i;
 				}
 			}

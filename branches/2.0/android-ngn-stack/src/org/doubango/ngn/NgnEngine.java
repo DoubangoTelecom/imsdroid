@@ -48,6 +48,7 @@ import org.doubango.tinyWRAP.tdav_codec_id_t;
 import org.doubango.tinyWRAP.tmedia_pref_video_size_t;
 import org.doubango.tinyWRAP.tmedia_profile_t;
 import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
+import org.doubango.tinyWRAP.tmedia_srtp_type_t;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 import org.doubango.utils.AndroidUtils;
 
@@ -213,6 +214,10 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetSRtpMode(tmedia_srtp_mode_t.valueOf(configurationService.getString(
 				NgnConfigurationEntry.SECURITY_SRTP_MODE,
 				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_MODE)));
+		// SRTP type
+		MediaSessionMgr.defaultsSetSRtpType(tmedia_srtp_type_t.valueOf(configurationService.getString(
+				NgnConfigurationEntry.SECURITY_SRTP_TYPE,
+				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_TYPE)));
 		// NAT Traversal (ICE, STUN and TURN)
 		MediaSessionMgr.defaultsSetIceEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_ICE, NgnConfigurationEntry.DEFAULT_NATT_USE_ICE));
 		MediaSessionMgr.defaultsSetIceStunEnabled(true); // we want ICE reflexive candidates

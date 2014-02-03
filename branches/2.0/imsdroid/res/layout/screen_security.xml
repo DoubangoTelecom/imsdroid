@@ -8,6 +8,8 @@
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/screen_security_linearLayout_srtp" android:layout_width="fill_parent" android:orientation="vertical">
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_security_textView_srtp_mode" android:text="SRTP Mode" android:textSize="20dp"></TextView>
         <Spinner android:layout_height="wrap_content" android:id="@+id/screen_security_spinner_srtp_modes" android:layout_width="fill_parent"></Spinner>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_security_textView_srtp_type" android:text="SRTP Type" android:textSize="20dp"></TextView>
+        <Spinner android:layout_height="wrap_content" android:id="@+id/screen_security_spinner_srtp_types" android:layout_width="fill_parent"></Spinner>
     </LinearLayout>
   
 
@@ -18,28 +20,38 @@
 <EditText android:layout_height="wrap_content" android:text="0x00000000000000000000000000000000" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_opid"></EditText>
 </LinearLayout>
 
-<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_security_checkBox_tlsfiles" android:layout_width="fill_parent" android:text="TLS Certificates" android:layout_below="@+id/screen_security_linearLayout_imsaka" android:visibility="invisible"></CheckBox>
+<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_security_checkBox_tlsfiles" android:layout_width="fill_parent" android:text="TLS Certificates" android:layout_below="@+id/screen_security_linearLayout_imsaka" android:visibility="visible"></CheckBox>
 
-<LinearLayout android:id="@+id/screen_security_linearLayout_tlsfiles" android:layout_height="wrap_content" android:orientation="vertical" android:layout_below="@+id/screen_security_checkBox_tlsfiles" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:visibility="invisible">
+<LinearLayout android:id="@+id/screen_security_linearLayout_tlsfiles" android:layout_height="wrap_content" android:orientation="vertical" android:layout_below="@+id/screen_security_checkBox_tlsfiles" android:layout_width="fill_parent" android:layout_marginLeft="10px" android:visibility="visible">
 <TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_privatekey" android:text="Private Key File" android:layout_marginTop="5px" android:layout_marginLeft="5px" android:layout_below="@+id/screen_security_checkBox_tlsfiles"></TextView>
 <LinearLayout android:id="@+id/screen_security_linearLayout_private_key" android:layout_below="@+id/screen_security_textView_privatekey" android:layout_height="wrap_content" android:layout_width="fill_parent">
-	<EditText android:layout_height="wrap_content" android:layout_below="@+id/screen_security_textView_privatekey" android:id="@+id/screen_security_editText_private_key" android:inputType="textUri" android:layout_width="wrap_content" android:layout_gravity="fill_horizontal" android:layout_weight="1" android:layout_marginLeft="5px" android:focusable="false" android:focusableInTouchMode="false" android:freezesText="true"></EditText>
-	<ImageButton android:id="@+id/screen_security_imageButton_private_key" android:layout_width="wrap_content" android:layout_toRightOf="@+id/screen_security_editText_private_key" android:layout_height="wrap_content" android:layout_below="@+id/screen_security_textView_privatekey" android:src="@drawable/folder_24" android:layout_marginRight="5px"></ImageButton>
+
+	<EditText
+	    android:id="@+id/screen_security_editText_private_key"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/screen_security_textView_privatekey"
+	    android:layout_gravity="fill_horizontal"
+	    android:layout_marginLeft="5px"
+	    android:layout_weight="1"
+	    android:inputType="textUri" >
+</EditText>
+	<ImageButton android:id="@+id/screen_security_imageButton_private_key" android:layout_width="wrap_content" android:layout_toRightOf="@+id/screen_security_editText_private_key" android:layout_height="wrap_content" android:layout_below="@+id/screen_security_textView_privatekey" android:src="@drawable/folder_24" android:layout_marginRight="5px" android:visibility="invisible"></ImageButton>
 </LinearLayout>
 
 <TextView android:layout_below="@+id/screen_security_linearLayout_private_key" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_public_key" android:text="Public Key File" android:layout_marginLeft="5px"></TextView>
 <LinearLayout android:id="@+id/screen_security_linearLayout_public_key" android:layout_below="@+id/screen_security_textView_public_key" android:layout_height="wrap_content" android:layout_width="fill_parent">
-	<EditText android:layout_below="@+id/screen_security_textView_public_key" android:layout_height="wrap_content" android:id="@+id/screen_security_editText_public_key" android:layout_width="fill_parent" android:layout_weight="1" android:layout_marginLeft="5px" android:focusable="false" android:focusableInTouchMode="false" android:freezesText="true"></EditText>
-	<ImageButton android:id="@+id/screen_security_imageButton_public_key" android:layout_width="wrap_content" android:layout_toRightOf="@+id/screen_security_editText_public_key" android:layout_height="wrap_content" android:layout_below="@+id/screen_security_textView_public_key" android:src="@drawable/folder_24" android:layout_marginRight="5px"></ImageButton>
+	<EditText android:layout_below="@+id/screen_security_textView_public_key" android:layout_height="wrap_content" android:id="@+id/screen_security_editText_public_key" android:layout_width="fill_parent" android:layout_weight="1" android:layout_marginLeft="5px" ></EditText>
+	<ImageButton android:id="@+id/screen_security_imageButton_public_key" android:layout_width="wrap_content" android:layout_toRightOf="@+id/screen_security_editText_public_key" android:layout_height="wrap_content" android:layout_below="@+id/screen_security_textView_public_key" android:src="@drawable/folder_24" android:layout_marginRight="5px" android:visibility="invisible"></ImageButton>
 </LinearLayout>
 
 <TextView android:layout_below="@+id/screen_security_linearLayout_public_key" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_textView_ca" android:text="Certificate File (CA)" android:layout_marginLeft="5px"></TextView>
 <LinearLayout android:id="@+id/screen_security_linearLayout_ca" android:layout_below="@+id/screen_security_textView_ca" android:layout_height="wrap_content" android:layout_width="fill_parent">
-	<EditText android:layout_below="@+id/screen_security_textView_ca" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_ca" android:layout_weight="1" android:layout_marginLeft="5px" android:focusable="false" android:focusableInTouchMode="false" android:freezesText="true"></EditText>
-	<ImageButton android:id="@+id/screen_security_imageButton_ca" android:layout_width="wrap_content" android:layout_toRightOf="@+id/screen_security_editText_ca" android:layout_height="wrap_content" android:layout_below="@+id/screen_security_textView_ca" android:src="@drawable/folder_24" android:layout_marginRight="5px"></ImageButton>
+	<EditText android:layout_below="@+id/screen_security_textView_ca" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/screen_security_editText_ca" android:layout_weight="1" android:layout_marginLeft="5px"></EditText>
+	<ImageButton android:id="@+id/screen_security_imageButton_ca" android:layout_width="wrap_content" android:layout_toRightOf="@+id/screen_security_editText_ca" android:layout_height="wrap_content" android:layout_below="@+id/screen_security_textView_ca" android:src="@drawable/folder_24" android:layout_marginRight="5px" android:visibility="invisible"></ImageButton>
 </LinearLayout>
 
-<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_security_checkBox_tls_secagree" android:text="Enable TLS security Agreement" android:layout_width="fill_parent" android:layout_below="@+id/screen_security_linearLayout_ca"></CheckBox>
+<CheckBox android:layout_height="wrap_content" android:id="@+id/screen_security_checkBox_tls_secagree" android:text="Enable TLS security Agreement" android:layout_width="fill_parent" android:layout_below="@+id/screen_security_linearLayout_ca" android:visibility="invisible"></CheckBox>
 </LinearLayout>
 <Button android:layout_height="wrap_content" android:id="@+id/screen_security_button_ipsec" android:layout_width="fill_parent" android:layout_marginTop="10px" android:layout_marginLeft="5px" android:text="Advanced (IPSec Sec-Agree)" android:layout_below="@+id/screen_security_linearLayout_tlsfiles" android:visibility="invisible"></Button>
 
