@@ -338,12 +338,20 @@ public class MediaSessionMgr {
     return tinyWRAPJNI.MediaSessionMgr_defaultsSetAvpfTail(tail_min, tail_max);
   }
 
+  public static boolean defaultsSetUseAvpfEnabled(boolean enabled) {
+    return tinyWRAPJNI.MediaSessionMgr_defaultsSetUseAvpfEnabled(enabled);
+  }
+
   public static boolean defaultsSetOpusMaxCaptureRate(long opus_maxcapturerate) {
     return tinyWRAPJNI.MediaSessionMgr_defaultsSetOpusMaxCaptureRate(opus_maxcapturerate);
   }
 
   public static boolean defaultsSetOpusMaxPlaybackRate(long opus_maxplaybackrate) {
     return tinyWRAPJNI.MediaSessionMgr_defaultsSetOpusMaxPlaybackRate(opus_maxplaybackrate);
+  }
+
+  public static boolean defaultsSetMaxFds(int max_fds) {
+    return tinyWRAPJNI.MediaSessionMgr_defaultsSetMaxFds(max_fds);
   }
 
 }
