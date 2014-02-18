@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimerTask;
 
+import org.doubango.imsdroid.CustomDialog;
 import org.doubango.imsdroid.Engine;
 import org.doubango.imsdroid.IMSDroid;
 import org.doubango.imsdroid.Main;
@@ -32,6 +33,7 @@ import org.doubango.imsdroid.R;
 import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.imsdroid.Utils.DialerUtils;
 import org.doubango.ngn.events.NgnInviteEventArgs;
+import org.doubango.ngn.events.NgnInviteEventTypes;
 import org.doubango.ngn.events.NgnMediaPluginEventArgs;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnContact;
@@ -47,10 +49,12 @@ import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnTimer;
 import org.doubango.ngn.utils.NgnUriUtils;
 
+import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -110,6 +114,9 @@ public class ScreenAV extends BaseScreen{
 	
 	private TextView mTvInfo;
 	private TextView mTvDuration;
+	
+	private AlertDialog mTransferDialog;
+	private NgnAVSession mAVTransfSession;
 	
 	private MyProxSensor mProxSensor;
 	private KeyguardLock mKeyguardLock;
@@ -680,6 +687,10 @@ public class ScreenAV extends BaseScreen{
 				return;
 			}
 			if(args.getSessionId() != mAVSession.getId()){
+				if(args.getEventType() == NgnInviteEventTypes.REMOTE_TRANSFER_INPROGESS){
+					// Native code created new session handle to be used to replace the current one (event = "tsip_i_ect_newcall").
+					mAVTransfSession = NgnAVSession.getSession(args.getSessionId());
+				}
 				return;
 			}
 			
@@ -734,6 +745,110 @@ public class ScreenAV extends BaseScreen{
 								}
 								break;
 							}
+						case LOCAL_TRANSFER_TRYING:
+		                    {
+		                    	if (mTvInfo != null) {
+		                    		mTvInfo.setText("Call Transfer: Initiated");
+		                    	}
+		                        break;
+		                    }
+		                case LOCAL_TRANSFER_FAILED:
+		                    {
+		                    	if (mTvInfo != null) {
+		                    		mTvInfo.setText("Call Transfer: Failed");
+		                    	}
+		                        break;
+		                    }
+		                case LOCAL_TRANSFER_ACCEPTED:
+		                    {
+		                    	if (mTvInfo != null) {
+		                    		mTvInfo.setText("Call Transfer: Accepted");
+		                    	}
+		                        break;
+		                    }
+		                case LOCAL_TRANSFER_COMPLETED:
+		                    {
+		                    	if (mTvInfo != null) {
+		                    		mTvInfo.setText("Call Transfer: Completed");
+		                    	}
+		                        break;
+		                    }
+		                case LOCAL_TRANSFER_NOTIFY:
+		                case REMOTE_TRANSFER_NOTIFY:
+		                    {
+		                    	if (mTvInfo != null && mAVSession != null) {
+		                    		short sipCode = intent.getShortExtra(NgnInviteEventArgs.EXTRA_SIPCODE, (short)0);
+		                    		
+		                    		mTvInfo.setText("Call Transfer: " + sipCode + " " + args.getPhrase());
+		                    		if (sipCode >= 300 && mAVSession.isLocalHeld()){
+		                    			mAVSession.resumeCall();
+		                            }
+		                    	}
+		                        break;
+		                    }
+	
+		                case REMOTE_TRANSFER_REQUESTED:
+		                    {
+		                    	String referToUri = intent.getStringExtra(NgnInviteEventArgs.EXTRA_REFERTO_URI);
+		                    	if (!NgnStringUtils.isNullOrEmpty(referToUri)) {
+		                    		String referToName = NgnUriUtils.getDisplayName(referToUri);
+		                    		if (!NgnStringUtils.isNullOrEmpty(referToName)) {
+		                    			mTransferDialog = CustomDialog.create(
+		        								ScreenAV.this,
+		        								R.drawable.exit_48,
+		        								null,
+		        								"Call Transfer to " + referToName + " requested. Do you accept?",
+		        								"Yes",
+		        								new DialogInterface.OnClickListener() {
+		        									@Override
+		        									public void onClick(DialogInterface dialog, int which) {
+		        										dialog.cancel();
+		        										mTransferDialog = null;
+		        										if (mAVSession != null) {
+		        											mAVSession.acceptCallTransfer();
+		        										}
+		        									}
+		        								}, "No",
+		        								new DialogInterface.OnClickListener() {
+		        									@Override
+		        									public void onClick(DialogInterface dialog, int which) {
+		        										dialog.cancel();
+		        										mTransferDialog = null;
+		        										if (mAVSession != null) {
+		        											mAVSession.rejectCallTransfer();
+		        										}
+		        									}
+		        								});
+		                    			mTransferDialog.show();
+		                    		}
+		                    	}
+		                        break;
+		                    }
+		               
+		                case REMOTE_TRANSFER_FAILED:
+		                    {
+		                    	if (mTransferDialog != null) {
+		                    		mTransferDialog.cancel();
+		                    		mTransferDialog = null;
+		                    	}
+		                    	mAVTransfSession = null;
+		                        break;
+		                    }
+		                case REMOTE_TRANSFER_COMPLETED:
+		                    {
+		                    	if (mTransferDialog != null) {
+		                    		mTransferDialog.cancel();
+		                    		mTransferDialog = null;
+		                    	}
+		                        if (mAVTransfSession != null)
+		                        {
+		                        	mAVTransfSession.setContext(mAVSession.getContext());
+		                            mAVSession = mAVTransfSession;
+		                            mAVTransfSession = null;
+		                            loadInCallView(true);
+		                        }
+		                        break;
+		                    }
 						default:
 							{
 								break;
@@ -743,6 +858,10 @@ public class ScreenAV extends BaseScreen{
 					
 				case TERMINATING:
 				case TERMINATED:
+					if (mTransferDialog != null) {
+                		mTransferDialog.cancel();
+                		mTransferDialog = null;
+                	}
 					mTimerSuicide.schedule(mTimerTaskSuicide, new Date(new Date().getTime() + 1500));
 					mTimerTaskInCall.cancel();
 					mTimerBlankPacket.cancel();
@@ -895,8 +1014,8 @@ public class ScreenAV extends BaseScreen{
 		mCurrentView = ViewType.ViewInCall;
 	}
 	
-	private void loadInCallView(){
-		if(mCurrentView == ViewType.ViewInCall){
+	private void loadInCallView(boolean force){
+		if(mCurrentView == ViewType.ViewInCall && !force){
 			return;
 		}
 		Log.d(TAG, "loadInCallView()");
@@ -907,6 +1026,10 @@ public class ScreenAV extends BaseScreen{
 		else{
 			loadInCallAudioView();
 		}
+	}
+	
+	private void loadInCallView(){
+		loadInCallView(false);
 	}
 	
 	private void loadProxSensorView(){

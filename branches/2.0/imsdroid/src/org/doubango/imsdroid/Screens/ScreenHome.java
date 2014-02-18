@@ -28,6 +28,7 @@ import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -89,7 +90,7 @@ public class ScreenHome extends BaseScreen {
 						}
 					}
 					else if(position == ScreenHomeItem.ITEM_EXIT_POS){
-						CustomDialog.show(
+						final AlertDialog dialog = CustomDialog.create(
 								ScreenHome.this,
 								R.drawable.exit_48,
 								null,
@@ -107,6 +108,7 @@ public class ScreenHome extends BaseScreen {
 										dialog.cancel();
 									}
 								});
+						dialog.show();
 					}
 					else{					
 						mScreenService.show(item.mClass, item.mClass.getCanonicalName());

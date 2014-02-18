@@ -26,6 +26,7 @@ import org.doubango.imsdroid.Services.IScreenService;
 import org.doubango.ngn.utils.NgnStringUtils;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -263,12 +264,13 @@ public abstract class BaseScreen extends Activity implements IBaseScreen {
 	}
 
 	protected void showMsgBox(String title, String message) {
-		CustomDialog.show(this, R.drawable.icon, title, message, "OK",
+		final AlertDialog dialog = CustomDialog.create(this, R.drawable.icon, title, message, "OK",
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 					}
 				}, null, null);
+		dialog.show();
 	}
 
 	protected void showMsgBoxOnUiThread(final String title, final String message) {

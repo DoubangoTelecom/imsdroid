@@ -301,6 +301,11 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 						}
 					}
 				}
+				
+				/*int state = mAudioRecord.getRecordingState();
+				if (state == AudioRecord.RECORDSTATE_STOPPED) {
+					Log.d(TAG, "===== RECORDSTATE_STOPPED ===== ");
+				}*/
 			}
 
 			unprepare();
