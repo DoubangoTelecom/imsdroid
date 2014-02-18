@@ -754,7 +754,7 @@ public class NgnAVSession extends NgnInviteSession{
 	 * @sa @ref hangUpCall()
 	 */
 	public boolean acceptCall(){
-        return mSession.accept();
+        return super.isActive() ? mSession.accept() : false;
     }
 
 	/**
@@ -762,12 +762,10 @@ public class NgnAVSession extends NgnInviteSession{
 	 * @return true if succeed and false otherwise
 	 */
     public boolean hangUpCall(){
-        if (super.isConnected()){
-            return mSession.hangup();
-        }
-        else{
-            return mSession.reject();
-        }
+    	if (super.isActive()) {
+    		return super.isConnected() ? mSession.hangup() : mSession.reject();
+    	}
+    	return false;
     }
 
     /**
@@ -776,7 +774,7 @@ public class NgnAVSession extends NgnInviteSession{
      * @sa @ref resumeCall() @ref isLocalHeld() @ref isRemoteHeld() @ref resumeCall()
      */
     public boolean holdCall(){
-		return mSession.hold();
+		return super.isActive() ? mSession.hold() : false;
 	}
     
     /**
@@ -785,8 +783,36 @@ public class NgnAVSession extends NgnInviteSession{
      * @sa @ref holdCall() @ref isLocalHeld() @ref isRemoteHeld()
      */
 	public boolean resumeCall(){		
-		return mSession.resume();
+		return super.isActive() ? mSession.resume() : false;
 	}
+	
+	/**
+	 * Transfers the current call.
+	 * @param transferUri The destination Uri.
+	 * @return true if succeed and false otherwise.
+	 */
+	public boolean transferCall(String transferUri){
+        if (NgnStringUtils.isNullOrEmpty(transferUri) || !NgnUriUtils.isValidSipUri(transferUri)){
+            return false;
+        }
+        return super.isActive() ? mSession.transfer(transferUri) : false;
+    }
+
+	/**
+	 * Accepts the incoming call transfer request.
+	 * @return true if succeed and false otherwise.
+	 */
+    public boolean acceptCallTransfer(){
+        return super.isActive() ? mSession.acceptTransfer() : false;
+    }
+
+    /**
+     * Rejects the incoming call transfer request.
+     * @return true if succeed and false otherwise.
+     */
+    public boolean rejectCallTransfer(){
+        return super.isActive() ? mSession.rejectTransfer() : false;
+    }
 	
 	/**
 	 * Checks whether the call is locally held held or not. You should use @ref resumeCall() to resume

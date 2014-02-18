@@ -328,6 +328,10 @@ public class NgnApplication extends Application{
     	"xt890", /* Motorola Razer i 4.0.4 */
     	"lg-p970" /* 2.3.4 */
     };
+    static final String[] sSLEs2UnFriendlyBuildModels = 
+	{
+    	"gt-s5360",/* 2.3.6 :robotic*/
+	};
     static final String[] sSetModeFriendlyBuildModels = 
     {
     	"gt-s5570i" /* 2.3.6 */
@@ -591,7 +595,8 @@ public class NgnApplication extends Application{
     }
     
     public static boolean isSLEs2KnownToWork(){
-    	return isSLEs2Supported() && Arrays.asList(sSLEs2FriendlyBuildModels).contains(sBuildModel);
+    	// return isSLEs2Supported() && Arrays.asList(sSLEs2FriendlyBuildModels).contains(sBuildModel); // AcceptOnlyIn(Array)
+    	return isSLEs2Supported() && !Arrays.asList(sSLEs2UnFriendlyBuildModels).contains(sBuildModel); // AcceptAllExceptIn(Array)
     }
     
     public static boolean acquirePowerLock(){

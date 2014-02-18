@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 public class CustomDialog {
 	
-	public static void show(Context context, int icon, String title, String msg, String positiveText, DialogInterface.OnClickListener positive, String negativeText, DialogInterface.OnClickListener negative){
+	public static AlertDialog create(Context context, int icon, String title, String msg, String positiveText, DialogInterface.OnClickListener positive, String negativeText, DialogInterface.OnClickListener negative){
 		AlertDialog.Builder builder;
 
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -51,6 +51,6 @@ public class CustomDialog {
 			builder.setNegativeButton(negativeText, negative);
 		}
 		
-		builder.create().show();
+		return builder.create();
 	}
 }

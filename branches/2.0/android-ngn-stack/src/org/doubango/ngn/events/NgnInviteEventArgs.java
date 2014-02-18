@@ -40,6 +40,7 @@ public class NgnInviteEventArgs extends NgnEventArgs{
     public static final String EXTRA_EMBEDDED = NgnEventArgs.EXTRA_EMBEDDED; // @NgnInviteEventArgs
     public static final String EXTRA_SESSION = "session"; // @object
     public static final String EXTRA_SIPCODE = "sipCode"; // @short
+    public static final String EXTRA_REFERTO_URI = "referto-uri"; //@String
 
     public NgnInviteEventArgs(long sessionId, NgnInviteEventTypes eventType, NgnMediaType mediaType, String phrase){
     	super();
