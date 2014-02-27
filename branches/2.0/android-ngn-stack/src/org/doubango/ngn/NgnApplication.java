@@ -595,8 +595,10 @@ public class NgnApplication extends Application{
     }
     
     public static boolean isSLEs2KnownToWork(){
+    	// FIXME: one-way audio on Galaxy SII and Nexus
     	// return isSLEs2Supported() && Arrays.asList(sSLEs2FriendlyBuildModels).contains(sBuildModel); // AcceptOnlyIn(Array)
-    	return isSLEs2Supported() && !Arrays.asList(sSLEs2UnFriendlyBuildModels).contains(sBuildModel); // AcceptAllExceptIn(Array)
+    	// return isSLEs2Supported() && !Arrays.asList(sSLEs2UnFriendlyBuildModels).contains(sBuildModel); // AcceptAllExceptIn(Array)
+    	return false;
     }
     
     public static boolean acquirePowerLock(){
