@@ -1,5 +1,5 @@
 #summary Building IMSDroid v2.x
-#labels Featured,Phase-Support
+#labels Featured,Phase-Support,Deprecated
 
 <wiki:toc max_depth="4" />
 
