@@ -1,6 +1,11 @@
 #summary Building IMSDroid v2.x
 #labels Featured,Phase-Support,Deprecated
 
+<font color="red" size="2">
+<strong>This page is now deprecated. New and easy way to build the libraries: [https://code.google.com/p/imsdroid/wiki/Building_Doubango]
+</strong><br />
+</font>
+
 <wiki:toc max_depth="4" />
 
 == Building Java Code ==
