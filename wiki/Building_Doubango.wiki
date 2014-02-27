@@ -50,6 +50,8 @@ If you have a commercial license:
 }}}
 The binaries will be generated into */tmp/doubango/android-projects/output/commercial/imsdroid/libs*.
 ===The hard way===
+Not really hard but boring :).
+
 To build the code for *ARMv5TE*:
 {{{
 ./configure --host=arm-linux-androideabi --with-android-cpu=armv5te --prefix=/tmp/doubango/output/android/armv5te
