@@ -303,6 +303,10 @@ public abstract class NgnSipSession extends NgnObservableObject implements Compa
 		}
 	}
     
+    public void setExpires(long expires) {
+    	getSession().setExpires(expires);
+    }
+    
     public void delete(){
 		getSession().delete();
 	}
