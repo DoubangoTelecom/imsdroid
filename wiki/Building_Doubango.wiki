@@ -8,7 +8,7 @@ For the Java code, you just need to import the code into Eclipse.
 <wiki:toc max_depth="4" />
 
 ==Installing Android NDK r9c==
-Download Android NDK r9c into */tmp*. This is only needed for the first time. <br />
+Download Android NDK r9c into */tmp*. This is needed only for the first time. <br />
 *IMPORTANT:* You must select the right version from [https://developer.android.com/tools/sdk/ndk/index.html] depending on your host system. Our host system is *CentOS 64*.
 {{{
 cd /tmp
