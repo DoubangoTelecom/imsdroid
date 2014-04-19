@@ -47,6 +47,7 @@ import org.doubango.tinyWRAP.ProxyVideoConsumer;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
 import org.doubango.tinyWRAP.SipStack;
 import org.doubango.tinyWRAP.tdav_codec_id_t;
+import org.doubango.tinyWRAP.tmedia_mode_t;
 import org.doubango.tinyWRAP.tmedia_pref_video_size_t;
 import org.doubango.tinyWRAP.tmedia_profile_t;
 import org.doubango.tinyWRAP.tmedia_srtp_mode_t;
@@ -276,6 +277,7 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetAudioChannels(1, 1); // (mono, mono)
 		MediaSessionMgr.defaultsSetAudioPtime(20);
 		
+		MediaSessionMgr.defaultsSetAvpfMode(tmedia_mode_t.tmedia_mode_optional);
 		MediaSessionMgr.defaultsSetAvpfTail(30, 160);
 		MediaSessionMgr.defaultsSetVideoFps(15);
 	}
