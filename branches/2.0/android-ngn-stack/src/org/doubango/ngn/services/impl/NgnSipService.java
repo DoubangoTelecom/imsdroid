@@ -297,47 +297,38 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 		}
 
 		// Set STUN information
+		mSipStack.setSTUNEnabled(mConfigurationService.getBoolean(
+				NgnConfigurationEntry.NATT_USE_STUN_FOR_SIP,
+				NgnConfigurationEntry.DEFAULT_NATT_USE_STUN_FOR_SIP));
 		if (mConfigurationService.getBoolean(
-				NgnConfigurationEntry.NATT_USE_STUN,
-				NgnConfigurationEntry.DEFAULT_NATT_USE_STUN)) {
-			Log.d(TAG, "STUN=yes");
-			mSipStack.setSTUNEnabled(true);
-			if (mConfigurationService.getBoolean(
-					NgnConfigurationEntry.NATT_STUN_DISCO,
-					NgnConfigurationEntry.DEFAULT_NATT_STUN_DISCO)) {
-				final String realm = mPreferences.getRealm();
-				String domain = realm.substring(realm.indexOf(':') + 1);
-				int[] port = new int[1];
-				String server = mSipStack.dnsSrv(
-						String.format("_stun._udp.%s", domain), port);
-				if (server == null) {
-					Log.e(TAG, "STUN discovery has failed");
-				}
-				Log.d(TAG, String.format("STUN1 - server=%s and port=%d",
-						server, port[0]));
-				mSipStack.setSTUNServer(server, port[0]);// Needed event if null
-			} else {
-				String server = mConfigurationService.getString(
-						NgnConfigurationEntry.NATT_STUN_SERVER,
-						NgnConfigurationEntry.DEFAULT_NATT_STUN_SERVER);
-				int port = mConfigurationService.getInt(
-						NgnConfigurationEntry.NATT_STUN_PORT,
-						NgnConfigurationEntry.DEFAULT_NATT_STUN_PORT);
-				Log.d(NgnSipService.TAG, String.format(
-						"STUN2 - server=%s and port=%d", server, port));
-				mSipStack.setSTUNServer(server, port);
+				NgnConfigurationEntry.NATT_STUN_DISCO,
+				NgnConfigurationEntry.DEFAULT_NATT_STUN_DISCO)) {
+			final String realm = mPreferences.getRealm();
+			String domain = realm.substring(realm.indexOf(':') + 1);
+			int[] port = new int[1];
+			String server = mSipStack.dnsSrv(
+					String.format("_stun._udp.%s", domain), port);
+			if (server == null) {
+				Log.e(TAG, "STUN discovery has failed");
 			}
+			Log.d(TAG, String.format("STUN1 - server=%s and port=%d",
+					server, port[0]));
+			mSipStack.setSTUNServer(server, port[0]);// Needed event if null
 		} else {
-			Log.d(TAG, "STUN=no");
-			mSipStack.setSTUNEnabled(false);
+			String server = mConfigurationService.getString(
+					NgnConfigurationEntry.NATT_STUN_SERVER,
+					NgnConfigurationEntry.DEFAULT_NATT_STUN_SERVER);
+			int port = mConfigurationService.getInt(
+					NgnConfigurationEntry.NATT_STUN_PORT,
+					NgnConfigurationEntry.DEFAULT_NATT_STUN_PORT);
+			Log.d(NgnSipService.TAG, String.format(
+					"STUN2 - server=%s and port=%d", server, port));
+			mSipStack.setSTUNServer(server, port);
 		}
 
 		// Set Proxy-CSCF
 		mPreferences.setPcscfHost(mConfigurationService.getString(
-				NgnConfigurationEntry.NETWORK_PCSCF_HOST, null)); // null will
-																	// trigger
-																	// DNS
-																	// NAPTR+SRV
+				NgnConfigurationEntry.NETWORK_PCSCF_HOST, null)); // null will trigger DNS NAPTR+SRV
 		mPreferences.setPcscfPort(mConfigurationService.getInt(
 				NgnConfigurationEntry.NETWORK_PCSCF_PORT,
 				NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_PORT));
@@ -869,51 +860,43 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
                         Log.e(TAG,"Invalid message");
                         return -1;
                     }
-                    twrap_media_type_t sessionType = e.getMediaType();
-
-                    switch (sessionType){
-                        case twrap_media_msrp:
-                            {
-                            	if ((session = e.takeMsrpSessionOwnership()) == null){
-                                    Log.e(TAG,"Failed to take MSRP session ownership");
-                                    return -1;
-                                }
-
-                                NgnMsrpSession msrpSession = NgnMsrpSession.takeIncomingSession(mSipService.getSipStack(), 
-                                		(MsrpSession)session, message);
-                                if (msrpSession == null){
-                                	Log.e(TAG,"Failed to create new session");
-                                    session.hangup();
-                                    session.delete();
-                                    return 0;
-                                }
-                                mSipService.broadcastInviteEvent(new NgnInviteEventArgs(msrpSession.getId(), NgnInviteEventTypes.INCOMING, msrpSession.getMediaType(), phrase));
-                                break;
-                            }
-
-                        case twrap_media_audio:
-                        case twrap_media_audio_video:
-                        case twrap_media_audiovideo:
-                        case twrap_media_video:
-                        case twrap_media_audio_t140:
-                        case twrap_media_audio_video_t140:
-                        case twrap_media_video_t140:
-                            {
-                                if ((session = e.takeCallSessionOwnership()) == null){
-                                    Log.e(TAG,"Failed to take audio/video session ownership");
-                                    return -1;
-                                }
-                                final NgnInviteEventTypes eType = type == tsip_invite_event_type_t.tsip_i_newcall ? NgnInviteEventTypes.INCOMING : NgnInviteEventTypes.REMOTE_TRANSFER_INPROGESS;
-                                final NgnAVSession avSession = NgnAVSession.takeIncomingSession(mSipService.getSipStack(), (CallSession)session, sessionType, message); 
-                                mSipService.broadcastInviteEvent(new NgnInviteEventArgs(avSession.getId(), eType, avSession.getMediaType(), phrase));
-                                break;
-                            }
-
-                        default:
-                            Log.e(TAG,"Invalid media type");
+                    final twrap_media_type_t sessionType = e.getMediaType();                    
+                    if (sessionType == twrap_media_type_t.twrap_media_msrp) {
+                    	if ((session = e.takeMsrpSessionOwnership()) == null){
+                            Log.e(TAG,"Failed to take MSRP session ownership");
+                            return -1;
+                        }
+                    	
+                        NgnMsrpSession msrpSession = NgnMsrpSession.takeIncomingSession(mSipService.getSipStack(), 
+                        		(MsrpSession)session, message);
+                        if (msrpSession == null){
+                        	Log.e(TAG,"Failed to create new session");
+                            session.hangup();
+                            session.delete();
                             return 0;
-                        
+                        }
+                        mSipService.broadcastInviteEvent(new NgnInviteEventArgs(msrpSession.getId(), NgnInviteEventTypes.INCOMING, msrpSession.getMediaType(), phrase));
                     }
+                    else if ((sessionType == twrap_media_type_t.twrap_media_audio) ||
+                    		(sessionType == twrap_media_type_t.twrap_media_audio_video) ||
+                    		(sessionType == twrap_media_type_t.twrap_media_audiovideo) ||
+                    		(sessionType == twrap_media_type_t.twrap_media_video) ||
+		                    (sessionType.swigValue() == (twrap_media_type_t.twrap_media_audio.swigValue() | twrap_media_type_t.twrap_media_t140.swigValue())) ||
+		                    (sessionType.swigValue() == (twrap_media_type_t.twrap_media_audio.swigValue() | twrap_media_type_t.twrap_media_video.swigValue() | twrap_media_type_t.twrap_media_t140.swigValue())) ||
+		                    (sessionType == twrap_media_type_t.twrap_media_t140)) {
+                            if ((session = e.takeCallSessionOwnership()) == null) {
+                                Log.e(TAG,"Failed to take audio/video session ownership");
+                                return -1;
+                            }
+                            final NgnInviteEventTypes eType = type == tsip_invite_event_type_t.tsip_i_newcall ? NgnInviteEventTypes.INCOMING : NgnInviteEventTypes.REMOTE_TRANSFER_INPROGESS;
+                            final NgnAVSession avSession = NgnAVSession.takeIncomingSession(mSipService.getSipStack(), (CallSession)session, sessionType, message); 
+                            mSipService.broadcastInviteEvent(new NgnInviteEventArgs(avSession.getId(), eType, avSession.getMediaType(), phrase));
+                        }
+
+                    else {
+                        Log.e(TAG,"Invalid media type");
+                        return 0;
+                    }  
                     break;
 
                 case tsip_ao_request:

@@ -22,39 +22,87 @@ package org.doubango.ngn.media;
 import org.doubango.tinyWRAP.twrap_media_type_t;
 
 public enum NgnMediaType {
-	None,
-	Audio,
-	Video,
-	AudioVideo,
-	SMS,
-	Chat,
-	FileTransfer,
-	Msrp /* Chat | FileTransfer */,
-	T140,
-	AudioT140,
-	AudioVideoT140,
-	VideoT140;
+	None(0x00000000),
+	Audio(0x00000001 << 0),
+    Video(0x00000001 << 1),
+    Msrp(0x00000001 << 2),
+    T140(0x00000001 << 3),
+    BFCP(0x00000001 << 4),
+    Audiobfcp((0x00000001 << 5) | BFCP.getValue()),
+    Videobfcp((0x00000001 << 6) | BFCP.getValue()),
+
+    // == Types without native mappings  == //
+    SMS(0x00000001 << 16),
+    ShortMessage(0x00000001 << 17),
+    Chat(0x00000001 << 18),
+    FileTransfer(0x00000001 << 19),
+    Messaging(SMS.getValue() | Chat.getValue() | ShortMessage.getValue()),
+    AudioT140(Audio.getValue() | T140.getValue()),
+    AudioVideo(Audio.getValue() | Video.getValue()),
+
+    All(~0)
+	;
+	
+	private final int mValue;
+	
+	private static class media_type_bind_s {
+		private NgnMediaType twrap;
+		private twrap_media_type_t tnative;
+		private media_type_bind_s(NgnMediaType _twrap, twrap_media_type_t _tnative) {
+            this.twrap = _twrap;
+            this.tnative = _tnative;
+        }
+        
+		private static media_type_bind_s[] __media_type_binds =  {
+            new media_type_bind_s(NgnMediaType.Msrp, twrap_media_type_t.twrap_media_msrp),
+            new media_type_bind_s(NgnMediaType.Audio, twrap_media_type_t.twrap_media_audio),
+            new media_type_bind_s(NgnMediaType.Video, twrap_media_type_t.twrap_media_video),
+            new media_type_bind_s(NgnMediaType.T140, twrap_media_type_t.twrap_media_t140),
+            new media_type_bind_s(NgnMediaType.BFCP, twrap_media_type_t.twrap_media_bfcp),
+            new media_type_bind_s(NgnMediaType.Audiobfcp, twrap_media_type_t.twrap_media_bfcp_audio),
+            new media_type_bind_s(NgnMediaType.Videobfcp, twrap_media_type_t.twrap_media_bfcp_video),
+        };
+		static int ConvertFromNative(twrap_media_type_t mediaType) {
+			int t = NgnMediaType.None.getValue();
+            for (int i = 0; i < __media_type_binds.length; ++i) {
+                if ((__media_type_binds[i].tnative.swigValue() & mediaType.swigValue()) == __media_type_binds[i].tnative.swigValue()) {
+                    t |= __media_type_binds[i].twrap.getValue();
+                }
+            }
+            return t;
+        }
+
+		static int ConvertToNative(NgnMediaType mediaType) {
+			int t = twrap_media_type_t.twrap_media_none.swigValue();
+            for (int i = 0; i < __media_type_binds.length; ++i)  {
+                if ((__media_type_binds[i].twrap.getValue() & mediaType.getValue()) == __media_type_binds[i].twrap.getValue()) {
+                    t |= __media_type_binds[i].tnative.swigValue();
+                }
+            }
+            return t;
+        }
+    };
+    
+	
+	private NgnMediaType(final int value) {
+		mValue = value;
+	}
+	
+	public int getValue() {
+		return mValue; 
+	}
 	
 	public static boolean isVideoType(NgnMediaType type){
-		switch(type){
-			case AudioVideo: case Video: case AudioVideoT140: case VideoT140: return true;
-			default: return false;
-		}
+		return ((type.getValue() & NgnMediaType.Video.getValue()) == NgnMediaType.Video.getValue()) || (type == NgnMediaType.Videobfcp);
 	}
 	public static boolean isAudioType(NgnMediaType type){
-		switch(type){
-			case Audio: case AudioVideo: case AudioT140: case AudioVideoT140: return true;
-			default: return false;
-		}
+		return ((type.getValue() & NgnMediaType.Audio.getValue()) == NgnMediaType.Audio.getValue()) || (type == NgnMediaType.Audiobfcp);
 	}
 	public static boolean isAudioVideoType(NgnMediaType type){
 		return isAudioType(type) || isVideoType(type);
 	}
 	public static boolean isT140Type(NgnMediaType type){
-		switch(type){
-			case T140: case AudioT140: case AudioVideoT140: case VideoT140: return true;
-			default: return false;
-		}
+		return ((type.getValue() & NgnMediaType.T140.getValue()) == NgnMediaType.T140.getValue());
 	}
 	public static boolean isAudioVideoT140Type(NgnMediaType type){
 		return isAudioVideoType(type) || isT140Type(type);
@@ -71,50 +119,22 @@ public enum NgnMediaType {
 	
 
     public static NgnMediaType ConvertFromNative(twrap_media_type_t mediaType){
-        switch (mediaType){
-            case twrap_media_audio:
-                return Audio;
-            case twrap_media_video:
-                return Video;
-            case twrap_media_audio_video:
-            case twrap_media_audiovideo:
-                return AudioVideo;
-            case twrap_media_audio_t140:
-                return AudioT140;
-            case twrap_media_audio_video_t140:
-                return AudioVideoT140;
-            case twrap_media_t140:
-                return T140;
-            case twrap_media_video_t140:
-                return VideoT140;
-            case twrap_media_msrp:
-                return Msrp;
-            default:
-                return None;
-        }
+        int t = media_type_bind_s.ConvertFromNative(mediaType);
+        for (NgnMediaType _t : NgnMediaType.values()) {
+    	   if(_t.getValue() == t) {
+    		   return _t;
+    	   }
+    	}
+        return NgnMediaType.None;
     }
 
     public static twrap_media_type_t ConvertToNative(NgnMediaType mediaType){
-        switch (mediaType){
-            case Audio:
-                return twrap_media_type_t.twrap_media_audio;
-            case Video:
-                return twrap_media_type_t.twrap_media_video;
-            case AudioVideo:
-                return twrap_media_type_t.twrap_media_audio_video;
-            case AudioT140:
-                return twrap_media_type_t.twrap_media_audio_t140;
-            case VideoT140:
-                return twrap_media_type_t.twrap_media_video_t140;
-            case AudioVideoT140:
-                return twrap_media_type_t.twrap_media_audio_video_t140;
-            case T140:
-                return twrap_media_type_t.twrap_media_t140;
-            case Chat: 
-            case FileTransfer:
-                return twrap_media_type_t.twrap_media_msrp;
-            default:
-                return twrap_media_type_t.twrap_media_none;
-        }
+    	int t = media_type_bind_s.ConvertToNative(mediaType);
+        for (twrap_media_type_t _t : twrap_media_type_t.values()) {
+    	   if(_t.swigValue() == t) {
+    		   return _t;
+    	   }
+    	}
+        return twrap_media_type_t.twrap_media_none;
     }
 }

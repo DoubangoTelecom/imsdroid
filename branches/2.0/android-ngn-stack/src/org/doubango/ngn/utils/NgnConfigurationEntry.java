@@ -75,11 +75,17 @@ public class NgnConfigurationEntry {
 	// NAT Traversal
 	public static final String NATT_HACK_AOR = "NATT_HACK_AOR." + TAG;
 	public static final String NATT_HACK_AOR_TIMEOUT = "NATT_HACK_AOR_TIMEOUT." + TAG;
+	/**@deprecated use {@link NATT_USE_STUN_FOR_SIP} instead.*/
 	public static final String NATT_USE_STUN = "NATT_USE_STUN." + TAG;
+	public static final String NATT_USE_STUN_FOR_SIP = "NATT_USE_STUN." + TAG; // same name as "NATT_USE_STUN" for backward compatibility
 	public static final String NATT_USE_ICE = "NATT_USE_ICE." + TAG;
+	public static final String NATT_USE_STUN_FOR_ICE =  "NATT_USE_STUN_FOR_ICE." + TAG;
+	public static final String NATT_USE_TURN_FOR_ICE =  "NATT_USE_TURN_FOR_ICE." + TAG;
 	public static final String NATT_STUN_DISCO = "NATT_STUN_DISCO." + TAG;
 	public static final String NATT_STUN_SERVER = "NATT_STUN_SERVER." + TAG;
 	public static final String NATT_STUN_PORT = "NATT_STUN_PORT." + TAG;
+	public static final String NATT_STUN_USERNAME = "NATT_STUN_USERNAME." + TAG;
+	public static final String NATT_STUN_PASSWORD = "NATT_STUN_PASSWORD." + TAG;
 	
 	// QoS
 	public static final String QOS_PRECOND_BANDWIDTH_LEVEL = "QOS_PRECOND_BANDWIDTH_LEVEL." + TAG;
@@ -178,11 +184,17 @@ public class NgnConfigurationEntry {
 	// NAT Traversal
 	public static final int DEFAULT_NATT_HACK_AOR_TIMEOUT = 2000;
 	public static final boolean DEFAULT_NATT_HACK_AOR = false;
+	/**@deprecated use {@link DEFAULT_NATT_USE_STUN_FOR_SIP} instead.*/
 	public static final boolean DEFAULT_NATT_USE_STUN = false;
+	public static final boolean DEFAULT_NATT_USE_STUN_FOR_SIP = false;
 	public static final boolean DEFAULT_NATT_USE_ICE = false;
+	public static final boolean DEFAULT_NATT_USE_STUN_FOR_ICE = true;
+	public static final boolean DEFAULT_NATT_USE_TURN_FOR_ICE = false;
 	public static final boolean DEFAULT_NATT_STUN_DISCO = false;
 	public static final String DEFAULT_NATT_STUN_SERVER = "numb.viagenie.ca";
 	public static final int DEFAULT_NATT_STUN_PORT = 3478;
+	public static final String DEFAULT_NATT_STUN_USERNAME = "";
+	public static final String DEFAULT_NATT_STUN_PASSWORD = "";
 	
 	// QoS
     public static final int DEFAULT_QOS_PRECOND_BANDWIDTH_LEVEL = tmedia_bandwidth_level_t.tmedia_bl_unrestricted.swigValue(); // should be String but do not change for backward compatibility

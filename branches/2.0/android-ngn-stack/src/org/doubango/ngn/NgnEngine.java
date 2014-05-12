@@ -230,8 +230,15 @@ public class NgnEngine {
 				NgnConfigurationEntry.DEFAULT_SECURITY_SRTP_TYPE)));
 		// NAT Traversal (ICE, STUN and TURN)
 		MediaSessionMgr.defaultsSetIceEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_ICE, NgnConfigurationEntry.DEFAULT_NATT_USE_ICE));
-		MediaSessionMgr.defaultsSetIceStunEnabled(true); // we want ICE reflexive candidates
-		MediaSessionMgr.defaultsSetStunEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_STUN, NgnConfigurationEntry.DEFAULT_NATT_USE_STUN));
+		MediaSessionMgr.defaultsSetStunEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_STUN_FOR_SIP, NgnConfigurationEntry.DEFAULT_NATT_USE_STUN_FOR_SIP)); // Public IP/port in SIP Contact/Via headers and SDP connection info.
+		MediaSessionMgr.defaultsSetIceStunEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_STUN_FOR_ICE, NgnConfigurationEntry.DEFAULT_NATT_USE_STUN_FOR_ICE)); // ICE reflexive candidates?
+		MediaSessionMgr.defaultsSetIceTurnEnabled(configurationService.getBoolean(NgnConfigurationEntry.NATT_USE_TURN_FOR_ICE, NgnConfigurationEntry.DEFAULT_NATT_USE_TURN_FOR_ICE)); // ICE reflexive candidates?
+		MediaSessionMgr.defaultsSetStunServer(
+				configurationService.getString(NgnConfigurationEntry.NATT_STUN_SERVER, NgnConfigurationEntry.DEFAULT_NATT_STUN_SERVER), 
+				configurationService.getInt(NgnConfigurationEntry.NATT_STUN_PORT, NgnConfigurationEntry.DEFAULT_NATT_STUN_PORT));
+		MediaSessionMgr.defaultsSetStunCred(
+				configurationService.getString(NgnConfigurationEntry.NATT_STUN_USERNAME, NgnConfigurationEntry.DEFAULT_NATT_STUN_USERNAME),
+				configurationService.getString(NgnConfigurationEntry.NATT_STUN_PASSWORD, NgnConfigurationEntry.DEFAULT_NATT_STUN_PASSWORD));
 		
 		// codecs, AEC, NoiseSuppression, Echo cancellation, ....
 		final boolean aec = configurationService.getBoolean(NgnConfigurationEntry.GENERAL_AEC, NgnConfigurationEntry.DEFAULT_GENERAL_AEC) ;
