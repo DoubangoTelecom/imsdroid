@@ -25,7 +25,7 @@ export NDK=/tmp/android-ndk-r9c
 Chekout Doubango v2.0 into */tmp*:
 {{{
 cd /tmp
-svn checkout http://doubango.googlecode.com/svn/branches/2.0/doubango doubango
+svn checkout https://doubango.googlecode.com/svn/branches/2.0/doubango doubango
 }}}
 
 ==Building the code==
