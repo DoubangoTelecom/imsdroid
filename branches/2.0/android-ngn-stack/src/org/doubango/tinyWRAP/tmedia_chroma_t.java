@@ -19,7 +19,9 @@ public enum tmedia_chroma_t {
   tmedia_chroma_nv21,
   tmedia_chroma_yuv422p,
   tmedia_chroma_uyvy422,
-  tmedia_chroma_yuv420p;
+  tmedia_chroma_yuv420p,
+  tmedia_chroma_mjpeg,
+  tmedia_chroma_yuyv422;
 
   public final int swigValue() {
     return swigValue;

@@ -173,6 +173,13 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 			Log.e(TAG, "already prepared");
 			return -1;
 		}
+		
+		// Use 44100hz for Hovis_Box_V1
+		if (NgnApplication.isHovis()) {
+			rate = 44100;
+			mProducer.setActualSndCardRecordParams(ptime, rate, channels);
+		}
+		
 		final boolean aecEnabled = NgnEngine.getInstance()
 				.getConfigurationService().getBoolean(
 						NgnConfigurationEntry.GENERAL_AEC,
@@ -196,8 +203,9 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 		mChannels = channels;
 		Log.d(TAG, "Configure aecEnabled:" + aecEnabled);
 		int audioSrc = MediaRecorder.AudioSource.MIC;
+		
 		if (aecEnabled) {
-			audioSrc = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+			//audioSrc = MediaRecorder.AudioSource.VOICE_RECOGNITION;
 			// Do not use built-in AEC
 			/*
 			 * if(NgnApplication.getSDKVersion() >= 11){ try { final Field f =
@@ -207,6 +215,12 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 			 * (Exception e) { e.printStackTrace(); } }
 			 */
 		}
+		
+		// Use CAMCORDER audio source for Hovis_Box_V1
+		if (NgnApplication.isHovis()) {
+			audioSrc = MediaRecorder.AudioSource.CAMCORDER;
+		}
+				
 		mAudioRecord = new AudioRecord(audioSrc, rate,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize);

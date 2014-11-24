@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, Mamadou Diop.
+                                                                 /* Copyright (C) 2010-2011, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
 *  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *
@@ -103,7 +103,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 		Log.d(TAG,"changeVolume("+bDown+","+bVolumeChanged+ ") aec:"+mAec);
 		final AudioManager audioManager = NgnApplication.getAudioManager();
 		if(audioManager != null){
-			if( !mIsInit && mAec && NgnApplication.getAudioManager().isSpeakerphoneOn() ){
+			/*if( !mIsInit && mAec && NgnApplication.getAudioManager().isSpeakerphoneOn() ){
 				mIsInit = true ;
 				Log.d(TAG, "Consumer changeVolume HP on AEC");
 				return mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*0.5f, AudioTrack.getMaxVolume()*0.5f) == AudioTrack.SUCCESS;
@@ -122,7 +122,7 @@ public class NgnProxyAudioConsumer extends NgnProxyPlugin{
 						NgnConfigurationEntry.DEFAULT_GENERAL_AUDIO_PLAY_LEVEL);
 				Log.d(TAG, "Consumer changeVolume audio attenuation "+attenuation);
 				return true ; //mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume()*attenuation, AudioTrack.getMaxVolume()*attenuation) == AudioTrack.SUCCESS;
-			}
+			}*/
 		}
 		return false;
 	}

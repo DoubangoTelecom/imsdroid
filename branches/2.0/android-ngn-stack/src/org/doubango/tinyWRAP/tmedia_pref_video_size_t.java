@@ -16,6 +16,7 @@ public enum tmedia_pref_video_size_t {
   tmedia_pref_video_size_hvga,
   tmedia_pref_video_size_vga,
   tmedia_pref_video_size_4cif,
+  tmedia_pref_video_size_wvga,
   tmedia_pref_video_size_svga,
   tmedia_pref_video_size_480p,
   tmedia_pref_video_size_720p,
