@@ -459,6 +459,14 @@ public class NgnApplication extends Application{
     	return sBuildModel.startsWith("toshiba");
     }
     
+    /**
+     * Whether the stack is running on a Hovis box
+     * @return true if the stack is running on a Hovis box and false otherwise
+     */
+    public static boolean isHovis(){
+    	return sBuildModel.startsWith("hovis_box_");
+    }
+    
     public static boolean isAudioRecreateRequired(){
     	return false;
     }

@@ -85,7 +85,8 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 	private BroadcastReceiver mNetworkWatcher;
 	
 	private static int WifiManager_WIFI_MODE = WifiManager.WIFI_MODE_FULL;
-	private static int ConnectivityManager_TYPE_WIMAX = -1;
+	private static int ConnectivityManager_TYPE_ETHERNET = 0x00000009;
+	private static int ConnectivityManager_TYPE_WIMAX = 0x00000006;
 	private static Method NetworkInterface_isUp;
 	
 	static{
@@ -93,6 +94,13 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 		if(sdkVersion >= 9){
 			try {
 				WifiManager_WIFI_MODE = WifiManager.class.getDeclaredField("WIFI_MODE_FULL_HIGH_PERF").getInt(null);
+			} catch (Exception e) {
+				Log.e(TAG, e.toString());
+			}
+		}
+		if(sdkVersion >= 13){
+			try {
+				ConnectivityManager_TYPE_ETHERNET = ConnectivityManager.class.getDeclaredField("TYPE_ETHERNET").getInt(null);
 			} catch (Exception e) {
 				Log.e(TAG, e.toString());
 			}
@@ -461,9 +469,13 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 				connected = true;
 			}
 		}
+		else if (netType == ConnectivityManager_TYPE_ETHERNET) {
+			// Ethernet always accepted
+			connected = true;
+		}
 
 		if (!connected) {
-			Log.d(NgnNetworkService.TAG, "No active network");
+			Log.e(NgnNetworkService.TAG, "No active network");
 			return false;
 		}
 

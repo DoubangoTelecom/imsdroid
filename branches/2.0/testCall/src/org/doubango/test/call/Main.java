@@ -38,19 +38,19 @@ public class Main extends Activity {
 	private final INgnConfigurationService mConfigurationService;
 	private final INgnSipService mSipService;
 	
-	private final static String SIP_DOMAIN = "doubango.org";
+	private final static String SIP_DOMAIN = "sip2sip.info";
 	private final static String SIP_USERNAME = "005";
 	private final static String SIP_PASSWORD = "mysecret";
-	private final static String SIP_SERVER_HOST = "192.168.0.12";
+	private final static String SIP_SERVER_HOST = "192.168.0.28";
 	private final static int SIP_SERVER_PORT = 5060;
 	
 	public final static String EXTRAT_SIP_SESSION_ID = "SipSession";
 	
 	static final MainListViewItem[] sMainListViewItems = new MainListViewItem[]{
-		new MainListViewItem("My First Item", "001"),
-		new MainListViewItem("My Second Item", "002"),
-		new MainListViewItem("My Third Item", "003"),
-		new MainListViewItem("My Fourth Item", "200006395544399062"),
+		new MainListViewItem("001", "001"),
+		new MainListViewItem("002", "002"),
+		new MainListViewItem("003", "003"),
+		new MainListViewItem("200006395544399062", "200006395544399062"),
 	};
 	
 	public Main(){
