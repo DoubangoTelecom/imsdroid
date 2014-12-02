@@ -1,9 +1,10 @@
 #summary Commercial License
 #labels Featured
 
-[http://code.google.com/p/imsdroid/ IMSDroid] is a free software licensed under the [http://www.gnu.org/licenses/gpl.html GNU GPLv3] license terms. As far as the commercial product using [http://code.google.com/p/imsdroid/ IMSDroid] or [http://doubango.org doubango] isn't a *closed-source* software and is compatible with [http://www.gnu.org/licenses/gpl.html GNU GPL] terms, there is no license violation. However, if your commercial product is a *closed-source* software and you want to keep it closed, then you should get a non-GPL license. <br /><br />
-We can provide a non-GPL version of all components used in both [http://code.google.com/p/imsdroid/ IMSDroid] and [http://doubango.org doubango] except for [http://www.videolan.org/developers/x264.html x264] library. <br /> An alternative to x264 could be PacketVideo's H.264 implementation which is released under Apache License.<br />
+[http://code.google.com/p/imsdroid/ IMSDroid] is a free software licensed under the [http://www.gnu.org/licenses/gpl.html GNU GPLv3] license terms. As far as the commercial product using [http://code.google.com/p/imsdroid/ IMSDroid] or [http://doubango.org doubango] isn't a *closed-source* software and is compatible with [http://www.gnu.org/licenses/gpl.html GNU GPL] terms, there is no license violation. However, if your commercial product is a *closed-source* software and you want to keep it closed, then you should get a non-GPL license. <br />
+We can provide a non-GPL version of all components used in both [http://code.google.com/p/imsdroid/ IMSDroid] and [http://doubango.org doubango] except for [http://www.videolan.org/developers/x264.html x264] library. <br />
+~~An alternative to x264 could be PacketVideo's H.264 implementation which is released under Apache License.~~Now we support [https://github.com/cisco/openh264 OpenH264] (BSD).<br />
 Owners of [http://doubango.org doubango] licenses can reuse part or whole 
 [http://code.google.com/p/imsdroid/ IMSDroid] source code without any restriction.<br/>
 
-For more information, please send me a mail at *diopmamadou(at)doubango.org* <br />
+For more information, please [http://doubango.org/contact.html contact us] <br />
