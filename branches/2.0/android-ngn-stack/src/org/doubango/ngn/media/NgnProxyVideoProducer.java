@@ -281,10 +281,18 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		return NgnCameraProducer.isFrontFacingCameraEnabled();
 	}
 
-	public void setRotation(int rot){
+	public boolean setRotation(int rot){
 		if(mProducer != null && super.mValid){
-			mProducer.setRotation(rot);
+			return mProducer.setRotation(rot);
 		}
+		return false;
+	}
+	
+	public boolean setMirror(boolean mirror){
+		if(mProducer != null && super.mValid){
+			return mProducer.setMirror(mirror);
+		}
+		return false;
 	}
 	
 	public void setOnPause(boolean pause){

@@ -7,7 +7,7 @@
 
 
     <application android:icon="@drawable/icon" android:name="NgnApplication" android:label="@string/app_name" android:hardwareAccelerated="true">
-	<string name="doubango_revision">1033</string>
+	<string name="doubango_revision">1231</string>
 	<service android:name="NgnNativeService"/>
 	
     </application>

@@ -563,8 +563,18 @@ public class NgnAVSession extends NgnInviteSession{
 	 * @param rot rotation angle in degree
 	 */
 	public void setRotation(int rot){
-		if(mVideoProducer != null){
+		if (mVideoProducer != null) {
 			mVideoProducer.setRotation(rot);
+		}
+	}
+	
+	/**
+	 * Sets whether to mirror the outgoing video
+	 * @param mirror
+	 */
+	public void setMirror(boolean mirror){
+		if(mVideoProducer != null){
+			mVideoProducer.setMirror(mirror);
 		}
 	}
 	
