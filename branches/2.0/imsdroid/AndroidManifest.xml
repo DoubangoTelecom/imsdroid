@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.doubango.imsdroid"
-      android:versionCode="579" android:versionName="2.579.1231">
+      android:versionCode="580" android:versionName="2.580.1243">
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="11" />
 
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:persistent="true" android:name="IMSDroid" android:hardwareAccelerated="true">
