@@ -1,9 +1,7 @@
-/* Copyright (C) 2010-2011, Mamadou Diop.
+/* Copyright (C) 2010-2015, Mamadou Diop.
 *  Copyright (C) 2011, Doubango Telecom.
 *  Copyright (C) 2011, Philippe Verney <verney(dot)philippe(AT)gmail(dot)com>
 *  Copyright (C) 2011, Tiscali
-*
-* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
 * This file is part of imsdroid Project (http://code.google.com/p/imsdroid)
 *
@@ -18,8 +16,6 @@
 * You should have received a copy of the GNU General Public License along 
 * with this program; if not, write to the Free Software Foundation, Inc., 
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-* 
-* @contributors: See $(DOUBANGO_HOME)\contributors.txt
 */
 package org.doubango.ngn.media;
 
@@ -28,6 +24,9 @@ import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.tinyWRAP.ProxyVideoProducer;
@@ -64,9 +63,17 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	private int mFps;
 	private int mFrameWidth; // camera picture output width
 	private int mFrameHeight; // camera picture output height
+	private final boolean mCheckFps; // make sure we're sending what we negotiated
+	private long mFrameDuration;
+	private long mNextFrameTime;
 	
 	private ByteBuffer mVideoFrame;
 	private byte[] mVideoCallbackData;
+	
+	private Thread mProducerPushThread;
+	private final Lock mLock;
+	private final Condition mConditionPushBuffer;
+	private final boolean mAsyncPush;
 	
 	public NgnProxyVideoProducer(BigInteger id, ProxyVideoProducer producer){
 		super(id, producer);
@@ -79,6 +86,13 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
         mFrameHeight = mHeight = NgnProxyVideoProducer.DEFAULT_VIDEO_HEIGHT;
 		mFps = NgnProxyVideoProducer.DEFAULT_VIDEO_FPS;
 		
+		mCheckFps = NgnApplication.isHovis();
+		mFrameDuration = 1000/mFps;
+		mNextFrameTime = 0;
+		
+		mAsyncPush = NgnApplication.isHovis();
+		mLock = mAsyncPush ? new ReentrantLock() : null;
+		mConditionPushBuffer = (mLock != null) ? mLock.newCondition() : null;
     }
 	
 	@Override
@@ -323,16 +337,54 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 		mFrameHeight = mHeight = height;
 		mFps = fps;
 		
+		mFrameDuration = 100/mFps;
+		mNextFrameTime = 0;
+		
 		super.mPrepared = true;
 		
 		return 0;
     }
+	
+	private Runnable mRunnablePush = new Runnable() {
+		@Override
+		public void run() {
+			Log.d(TAG, "===== Video Producer AsynThread (Start) ===== ");
+			
+			while (mValid && mStarted) {
+				try {
+					synchronized(mConditionPushBuffer) {
+						mConditionPushBuffer.wait();
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					break;
+				}
+				if (!mValid || !mStarted) {
+					break;
+				}
+				mLock.lock();
+				mProducer.push(mVideoFrame, mVideoFrame.capacity());
+				mLock.unlock();
+			}
+			
+			Log.d(TAG, "===== Video Producer AsyncThread (Stop) ===== ");
+		}
+	};
 
     private synchronized int startCallback(){
     	Log.d(TAG, "startCallback");
 		mStarted = true;
 		
-		if(mPreview != null){
+		if (mAsyncPush)
+		{
+			mProducerPushThread = new Thread(mRunnablePush,
+				"VideoProducerPushThread");
+			// FIXME
+			//mProducerPushThread.setPriority(Thread.MAX_PRIORITY);
+			mProducerPushThread.start();
+		}
+		
+		if (mPreview != null) {
 			startCameraPreview(mPreview.getCamera());
     	}
 		return 0;
@@ -347,11 +399,28 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
     private synchronized int stopCallback(){
     	Log.d(TAG, "stopCallback");
     	
-    	if(mPreview != null){
+    	if (mPreview != null) {
     		stopCameraPreview(mPreview.getCamera());
     	}
     	
-		super.mStarted = false;
+		mStarted = false;
+		
+		if (mConditionPushBuffer != null) {
+			synchronized(mConditionPushBuffer) {
+				mConditionPushBuffer.notifyAll(); // must be after "mStarted=false" to break endless loop
+			}
+		}
+		
+		if (mProducerPushThread != null) {
+			try {
+				synchronized(mProducerPushThread) {
+					mProducerPushThread.join();
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			mProducerPushThread = null;
+		}
 		
 		return 0;
     }
@@ -451,9 +520,32 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 	  public void onPreviewFrame(byte[] _data, Camera _camera) {
 		  if(mStarted){
 			  if(NgnProxyVideoProducer.super.mValid && mVideoFrame != null && _data != null){
-				  mVideoFrame.put(_data);
-				  mProducer.push(mVideoFrame, mVideoFrame.capacity());
-				  mVideoFrame.rewind();
+				  boolean pushFrame = true;
+				  if (mCheckFps)
+				  {
+					  long now = System.currentTimeMillis();
+					  pushFrame = (mNextFrameTime == 0 || (now - mNextFrameTime) >= mFrameDuration);
+					  mNextFrameTime = now + mFrameDuration;
+				  }
+				  if (pushFrame)
+				  {
+					  if (mAsyncPush)
+					  {
+						  	mLock.lock();
+							mVideoFrame.rewind();
+							mVideoFrame.put(_data);
+						  	mLock.unlock();
+						  	synchronized(mConditionPushBuffer){
+						  		mConditionPushBuffer.notify();
+						  	}
+					  }
+					  else
+					  {
+						  mVideoFrame.put(_data);
+						  mProducer.push(mVideoFrame, mVideoFrame.capacity());
+						  mVideoFrame.rewind();
+					  }
+				  }
 				}
 			  if(NgnProxyVideoProducer.sAddCallbackBufferSupported){
 				  // do not use "_data" which could be null (e.g. on GSII)
