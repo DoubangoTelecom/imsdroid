@@ -610,6 +610,27 @@ public class NgnAVSession extends NgnInviteSession{
 		}
 		return false;
 	}
+	
+	public boolean setVideoFps(int fps) {
+		if (mSession != null) {
+			return mSession.setVideoFps(fps);
+		}
+		return false;
+	}
+	
+	public boolean setVideoBandwidthUploadMax(int bw_max_kbps) {
+		if (mSession != null) {
+			return mSession.setVideoBandwidthUploadMax(bw_max_kbps);
+		}
+		return false;
+	}
+	
+	public boolean setVideoBandwidthDownloadMax(int bw_max_kbps) {
+		if (mSession != null) {
+			return mSession.setVideoBandwidthDownloadMax(bw_max_kbps);
+		}
+		return false;
+	}
 
 	/**
 	 * Enables or disables the speakerphone
