@@ -549,7 +549,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 				}
 			  if(NgnProxyVideoProducer.sAddCallbackBufferSupported){
 				  // do not use "_data" which could be null (e.g. on GSII)
-				  NgnCameraProducer.addCallbackBuffer(_camera, mVideoCallbackData);
+				  NgnCameraProducer.addCallbackBuffer(_camera, _data == null ? mVideoCallbackData : _data);
 			  }
 		 }
 	 }
