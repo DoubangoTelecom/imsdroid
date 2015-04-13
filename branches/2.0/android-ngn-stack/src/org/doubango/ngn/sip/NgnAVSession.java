@@ -862,10 +862,10 @@ public class NgnAVSession extends NgnInviteSession{
 		super.setLocalHold(localHold);
 		
 		if(mVideoProducer != null){
-			mVideoProducer.setOnPause(mLocalHold || mRemoteHold);
+			mVideoProducer.setOnPause(mLocalHold);
 		}
 		if(mAudioProducer != null){
-			mAudioProducer.setOnPause(mLocalHold || mRemoteHold);
+			mAudioProducer.setOnPause(mLocalHold);
 		}
 		
 		if(changed){
@@ -887,13 +887,6 @@ public class NgnAVSession extends NgnInviteSession{
 	public void setRemoteHold(boolean remoteHold){
 		final boolean changed = mRemoteHold != remoteHold;
 		super.setRemoteHold(remoteHold);
-		
-		if(mVideoProducer != null){
-			mVideoProducer.setOnPause(mLocalHold || mRemoteHold);
-		}
-		if(mAudioProducer != null){
-			mAudioProducer.setOnPause(mLocalHold || mRemoteHold);
-		}
 		
 		if(changed){
 			super.setChangedAndNotifyObservers(this);

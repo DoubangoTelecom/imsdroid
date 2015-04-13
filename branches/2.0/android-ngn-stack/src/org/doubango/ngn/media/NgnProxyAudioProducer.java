@@ -165,7 +165,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 			}
 			mProducerThread = null;
 		}
-		return -1;
+		return 0;
 	}
 
 	private synchronized int prepare(int ptime, int rate, int channels) {
