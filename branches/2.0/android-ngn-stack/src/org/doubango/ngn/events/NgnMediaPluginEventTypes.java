@@ -27,5 +27,6 @@ public enum NgnMediaPluginEventTypes {
 	STOPPED_OK,
 	STOPPED_NOK,
 	PAUSED_OK,
-	PAUSED_NOK
+	PAUSED_NOK,
+	VIDEO_INPUT_SIZE_CHANGED
 }

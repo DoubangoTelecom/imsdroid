@@ -779,6 +779,22 @@ public class NgnAVSession extends NgnInviteSession{
 		return mHistoryEvent.getStartTime();
 	}
 	
+	public int getVideoWidthNegotiated() {
+		return (mVideoConsumer != null) ? mVideoConsumer.getVideoWidthNegotiated() : 0;
+	}
+	
+	public int getVideoHeightNegotiated() {
+		return (mVideoConsumer != null) ? mVideoConsumer.getVideoHeightNegotiated() : 0;
+	}
+	
+	public int getVideoWidthReceived() {
+		return (mVideoConsumer != null) ? mVideoConsumer.getVideoWidthReceived() : 0;
+	}
+	
+	public int getVideoHeightReceived() {
+		return (mVideoConsumer != null) ? mVideoConsumer.getVideoHeightReceived() : 0;
+	}
+	
 	/**
 	 * Accepts an incoming audio/video call
 	 * @return true is succeed and false otherwise
