@@ -29,6 +29,10 @@ import android.view.View;
 
 public abstract class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	protected boolean mFullScreenRequired;
+	protected int mWidth;
+	protected int mHeight;
+	protected int mFps;
+	protected boolean mRenderedAtLeastOneFrame;
 	
 	public NgnProxyVideoConsumer(BigInteger id, ProxyPlugin plugin) {
 		super(id, plugin);
@@ -40,6 +44,19 @@ public abstract class NgnProxyVideoConsumer extends NgnProxyPlugin{
 	
 	public static NgnProxyVideoConsumer createInstance(BigInteger id, ProxyVideoConsumer consumer){
 		return NgnApplication.isGlEs2Supported() ? new NgnProxyVideoConsumerGL(id, consumer) : new NgnProxyVideoConsumerSV(id, consumer);
+	}
+	
+	public int getVideoWidthNegotiated() {
+		return mWidth;
+	}
+	public int getVideoHeightNegotiated() {
+		return mHeight;
+	}
+	public int getVideoWidthReceived() {
+		return mRenderedAtLeastOneFrame ? mWidth : 0; // zero means unknown
+	}
+	public int getVideoHeightReceived() {
+		return mRenderedAtLeastOneFrame ? mHeight : 0; // zero means unknown
 	}
 	
 	public abstract void setContext(Context context);

@@ -665,6 +665,7 @@ public class ScreenAV extends BaseScreen{
 				case STOPPED_NOK:
 				case PAUSED_OK:
 				case PAUSED_NOK:
+				case VIDEO_INPUT_SIZE_CHANGED: // Input video size change: resize your display if needed
 				{
 					break;
 				}

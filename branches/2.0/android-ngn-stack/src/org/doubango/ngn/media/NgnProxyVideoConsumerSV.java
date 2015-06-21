@@ -54,9 +54,6 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 	private final ProxyVideoConsumer mConsumer;
 	private Context mContext;
 	private MyProxyVideoConsumerPreview mPreview;
-	private int mWidth;
-	private int mHeight;
-	private int mFps;
 	private ByteBuffer mVideoFrame;
 	private Bitmap mRGB565Bitmap;
 	private Bitmap mRGBCroppedBitmap;
@@ -141,9 +138,12 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 								mConsumer.setConsumeBuffer(mVideoFrame, mVideoFrame.capacity());
 								mWidth = (int)frameWidth;
 								mHeight = (int)frameHeight;
+								mRenderedAtLeastOneFrame = true; // after "width=x, height=y" and before "broadcastEvent"
+								NgnMediaPluginEventArgs.broadcastEvent(new NgnMediaPluginEventArgs(mConsumer.getId(), NgnMediaType.Video, 
+					            		NgnMediaPluginEventTypes.VIDEO_INPUT_SIZE_CHANGED));
 								return; // Draw the picture next time
 							}
-							
+							mRenderedAtLeastOneFrame = true; // after "width=x, height=y"
 							drawFrame();
 						}
 					};
@@ -218,6 +218,7 @@ public class NgnProxyVideoConsumerSV extends NgnProxyVideoConsumer{
 		return 0;
     }
     
+   // @deprecated: never called
     private int consumeCallback(ProxyVideoFrame _frame){    	
 		if(!super.mValid || mRGB565Bitmap == null){
 			Log.e(TAG, "Invalid state");

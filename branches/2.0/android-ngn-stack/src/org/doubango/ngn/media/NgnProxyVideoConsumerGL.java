@@ -53,9 +53,6 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 	private ByteBuffer mVideoFrame;
 	private Context mContext;
 	private NgnProxyVideoConsumerGLPreview mPreview;
-	private int mWidth;
-	private int mHeight;
-	private int mFps;
 
 	protected NgnProxyVideoConsumerGL(BigInteger id, ProxyVideoConsumer consumer){
     	super(id, consumer);
@@ -147,14 +144,19 @@ public class NgnProxyVideoConsumerGL extends NgnProxyVideoConsumer{
 				mHeight = (int)frameHeight;
 				mPreview.setBuffer(mVideoFrame, mWidth, mHeight);
 			}
+			mRenderedAtLeastOneFrame = true; // after "width=x, height=y" and before "broadcastEvent"
+			NgnMediaPluginEventArgs.broadcastEvent(new NgnMediaPluginEventArgs(mConsumer.getId(), NgnMediaType.Video, 
+            		NgnMediaPluginEventTypes.VIDEO_INPUT_SIZE_CHANGED));
 			return 0;
 		}
+		mRenderedAtLeastOneFrame = true; // after "width=x, height=y"
 		
 		mPreview.requestRender();
 		
 		return 0;
     }
     
+    // @deprecated: never called
     private int consumeCallback(ProxyVideoFrame _frame){
 		if(!super.mValid){
 			Log.e(TAG, "Invalid state");
