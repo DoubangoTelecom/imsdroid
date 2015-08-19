@@ -1,0 +1,7 @@
+[IMSDroid](http://code.google.com/p/imsdroid/) is a free software licensed under the [GNU GPLv3](http://www.gnu.org/licenses/gpl.html) license terms. As far as the commercial product using [IMSDroid](http://code.google.com/p/imsdroid/) or [doubango](http://doubango.org) isn't a **closed-source** software and is compatible with [GNU GPL](http://www.gnu.org/licenses/gpl.html) terms, there is no license violation. However, if your commercial product is a **closed-source** software and you want to keep it closed, then you should get a non-GPL license. <br />
+We can provide a non-GPL version of all components used in both [IMSDroid](http://code.google.com/p/imsdroid/) and [doubango](http://doubango.org) except for [x264](http://www.videolan.org/developers/x264.html) library. <br />
+~~An alternative to x264 could be PacketVideo's H.264 implementation which is released under Apache License.~~Starting Doubango **1220** we support [OpenH264](https://github.com/cisco/openh264) (BSD).<br />
+Owners of [doubango](http://doubango.org) licenses can reuse part or whole
+[IMSDroid](http://code.google.com/p/imsdroid/) source code without any restriction.<br />
+
+For more information, please [contact us](http://doubango.org/contact.html) <br />

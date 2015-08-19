@@ -1,0 +1,10 @@
+## Video Producer ##
+The Video Producer plugin use [PreviewCallback](http://developer.android.com/reference/android/hardware/Camera.PreviewCallback.html) class and override onPreviewFrame(byte[.md](.md) _data, Camera_camera) function to have access to the current preview frame. The problem with this function is that it will copy each frame in a newly allocated memory which gives poor performance results. This is discussed here [http://code.google.com/p/android/issues/detail?id=2794](http://code.google.com/p/android/issues/detail?id=2794).<br />
+A workaround is to use [addCallbackBuffer](http://developer.android.com/reference/android/hardware/Camera.html) function. Unfortunately this function is only available starting API level 8 and we cannot use it as we target Android platform version 1.5 (API level 3) and later.
+
+## Full-Screen ##
+By default, for performance reasons, Surface view displaying the video sent by the remote party is displayed "AS IS" without being re-sized. <br />
+If you'd like to have the full-screen mode, then you should enable it by checking the appropriate checkbox in "Options -> General -> Enable Full-Screen Video" <br />
+
+## Video Size ##
+The application can decode any video size. By default, it will send QCIF (176x144) video for performance reasons. To allow high quality video (CIF and above), go to Options (![http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png](http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png)) -> QoS/QoE (![http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/qos_qoe_48.png](http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/qos_qoe_48.png)) and change **Bandwidth** value from **Low** and **Medium** or **High**. <br /> CIF video encoding requires at least a 600MHz processor.<br />

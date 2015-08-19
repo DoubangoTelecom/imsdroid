@@ -1,0 +1,1 @@
+The client will not work with **ekiga.net** until they have fixed [Bug 624751](https://code.google.com/p/imsdroid/issues/detail?id=24751) (https://bugzilla.gnome.org/show_bug.cgi?id=624751).

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <string name="app_name">IMSDroid</string>
+    <string name="doubango_revision">1328</string>
+    <string name="spinner_ipversion">Select IP version</string>
+    <string name="spinner_pcscf_discovery">Select PCSCF Discovery Mode</string>
+    <string name="spinner_transport">Select Network Transport</string>
+    <!-- Strings -->
+    <string name="day_today">Today</string>
+    <string name="day_yesterday">Yesterday</string>
+    <string formatted="false" name="copyright">
+    IMSDroid/v%s (doubango r%s), Copyright © 2010-2015 Doubango Telecom. All rights reserved.\n\n
+    IMSDroid is free software: you can redistribute it and/or modify it under the terms of
+    the GNU General Public License as published by the Free Software Foundation, either version 3
+    of the License, or (at your option) any later version.\n
+    \n
+    IMSDroid is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU General Public License for more details.\n
+    \n
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.\n
+    \n
+    For more information about the project: http://code.google.com/p/imsdroid/.\n
+    Addition copyright information: http://code.google.com/p/imsdroid/wiki/Copyrigths. \n
+  </string>
+    <string name="string_answer">Answer</string>
+    <string name="string_endcall">End Call</string>
+    <string name="string_speaker_on">Speaker ON</string>
+    <string name="string_speaker_off">Speaker OFF</string>
+    <string name="string_mute_on">Mute ON</string>
+    <string name="string_mute_off">Mute OFF</string>
+    <string name="string_hold">Hold</string>
+    <string name="string_resume">Resume</string>
+    <string name="string_send_video">Send Video</string>
+    <string name="string_stop_video">Stop Video</string>
+    <string name="string_switch_camera">Switch camera</string>
+    <string name="string_call_terminated">Call Terminated</string>
+    <string name="string_incall">In Call</string>
+    <string name="string_call_incoming">Incoming Call</string>
+    <string name="string_call_outgoing">Outgoing Call</string>
+    <string name="string_call_cancelled">Call cancelled</string>
+    <!-- Colors -->
+    <color name="color_black">#000000</color>
+    <color name="color_white">#FFFFFF</color>
+    <color name="color_violet">#9900FF</color>
+    <color name="color_gray">#736F6E</color>
+    <color name="color_dark">#161C27</color>
+    <color name="color_light">#4D6288</color>
+</resources>

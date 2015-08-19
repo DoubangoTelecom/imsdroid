@@ -1,0 +1,7 @@
+## Network Option ##
+If you try to run IMSDroid on the emulator it will alert that there is **"No active network"**. The problem comes from the emulator which always believes that you are using 3G/2.5 networks. Off course you are not (and cannot from the emulator). <br />
+This means that you should give your permission to use 3G/2.5 networks. From the home screen, click on the Options item(![http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png](http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png)) then Network (![http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/network_48.png](http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/network_48.png)) and check **"Enable 3G/2.G"**. <br />
+
+## Receiving Requests ##
+On the emulator, the IP address and port on which we bound to is not routable (**10.2.0.15**). This IP address and port is used in the “Contact” header to form our AoR. All incoming requests will be sent from the server to this IP address. <br /> To hack the AoR in order to use a routable IP address you should, from the home screen, click  on the Options item(![http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png](http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/options_48.png)) then NATT(![http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/natt_48.png](http://imsdroid.googlecode.com/svn/trunk/imsdroid/res/drawable/natt_48.png)) and check **"Hack the AoR"**. <br />
+Your server MUST support **rport**.<br />
