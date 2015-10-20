@@ -100,28 +100,29 @@ public class NgnEngine {
 		if(!sInitialized){
 			// See 'http://code.google.com/p/imsdroid/issues/detail?id=197' for more information
 			// Load Android utils library (required to detect CPU features)
+			// We've to use "System.loadLibrary" instead of "System.load" to fix https://github.com/DoubangoTelecom/imsdroid/issues/566
 			boolean haveLibUtils = new File(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libutils_armv5te.so")).exists();
 			if (haveLibUtils) { // only "armeabi-v7a" comes with "libutils.so"
-				System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libutils_armv5te.so"));
+				System.loadLibrary("utils_armv5te");
 				Log.d(TAG,"CPU_Feature="+AndroidUtils.getCpuFeatures());
 				if(NgnApplication.isCpuNeon()){
 					Log.d(TAG,"isCpuNeon()=YES");
-					System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libtinyWRAP_neon.so"));
+					System.loadLibrary("tinyWRAP_neon");
 				}
 				else{
 					Log.d(TAG,"isCpuNeon()=NO");
-					System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libtinyWRAP.so"));
+					System.loadLibrary("tinyWRAP");
 				}
 			}
 			else {
 				// "armeabi", "mips", "x86"...
-				System.load(String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libtinyWRAP.so"));
+				System.loadLibrary("tinyWRAP");
 			}
-				
+
 			// If OpenSL ES is supported and know to work on current device then used it
 			if(NgnApplication.isSLEs2KnownToWork()){
 				final String pluginPath = String.format("%s/%s", NgnEngine.LIBS_FOLDER, "libplugin_audio_opensles.so");
-				
+
 				// returned value is the number of registered add-ons (2 = 1 consumer + 1 producer)
 				if(MediaSessionMgr.registerAudioPluginFromFile(pluginPath) < 2){
 					// die if cannot load add-ons
