@@ -1,4 +1,4 @@
-This application uses [Doubango Framework](http://www.doubango.org/).
+This application uses [Doubango Framework](https://www.doubango.org/).
 <br />
 
 <font color='green' size='2'>
@@ -23,7 +23,7 @@ New features: <br />
 [3GPP IMS](http://en.wikipedia.org/wiki/IP_Multimedia_Subsystem) (IP Multimedia Subsystem) is the next generation network for delivering IP multimedia services. IMS is standardized by the 3rd Generation Partnership Project (3GPP).
 IMS services could be used over any type of network, such as [3GPP LTE](http://en.wikipedia.org/wiki/3GPP_Long_Term_Evolution), GPRS, Wireless LAN, CDMA2000 or fixed line. <br />
 
-[IMSDroid](http://code.google.com/p/imsdroid/) is the first fully featured open source 3GPP IMS Client for Android devices (1.5 and later). The main purpose of the project is to exhibit [doubango](http://doubango.org)'s features and to offer an IMS client to the open source community. [doubango](http://doubango.org) is an experimental, open source, 3GPP IMS/LTE framework for both embedded (Android, Windows Mobile, Symbian, iPhone, iPad, ...) and desktop systems (Windows XP/Vista/7, MAC OS X, Linux, ...) and is written in ANSI-C to ease portability. The framework has been carefully designed to efficiently work on embedded systems with limited memory and low computing power. <br />
+[IMSDroid](http://code.google.com/p/imsdroid/) is the first fully featured open source 3GPP IMS Client for Android devices (1.5 and later). The main purpose of the project is to exhibit [doubango](https://doubango.org)'s features and to offer an IMS client to the open source community. [doubango](https://doubango.org) is an experimental, open source, 3GPP IMS/LTE framework for both embedded (Android, Windows Mobile, Symbian, iPhone, iPad, ...) and desktop systems (Windows XP/Vista/7, MAC OS X, Linux, ...) and is written in ANSI-C to ease portability. The framework has been carefully designed to efficiently work on embedded systems with limited memory and low computing power. <br />
 As the SIP implementation follows [RFC 3261](http://www.ietf.org/rfc/rfc3261.txt) and [3GPP TS 24.229 Rel-9](http://www.3gpp.org/ftp/Specs/html-info/24229.htm) specifications, this will allow you to connect to any compliant SIP registrar. <br />
 <br />
 
@@ -122,6 +122,5 @@ Already implemented: <br />
 </li><li>6.2.5 AMR Payload Format Considerations</li></ul>
 
 <br />
-<br />
-<b>© 2010-2012 Doubango Telecom</b> <br />
+<b>© 2010-2015 Doubango Telecom</b> <br />
 <i>Inspiring the future</i>
