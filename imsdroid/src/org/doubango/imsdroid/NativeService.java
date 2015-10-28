@@ -20,6 +20,7 @@
 package org.doubango.imsdroid;
 
 import org.doubango.imsdroid.Screens.ScreenAV;
+import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnNativeService;
 import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnInviteEventArgs;

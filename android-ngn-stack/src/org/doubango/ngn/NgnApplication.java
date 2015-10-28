@@ -20,6 +20,8 @@
 
 package org.doubango.ngn;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.doubango.ngn.utils.NgnStringUtils;
@@ -30,11 +32,13 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
@@ -608,7 +612,72 @@ public class NgnApplication extends Application{
     	// return isSLEs2Supported() && !Arrays.asList(sSLEs2UnFriendlyBuildModels).contains(sBuildModel); // AcceptAllExceptIn(Array)
     	return isHovis(); //false;
     }
-    
+
+    /**
+     * http://developer.android.com/intl/ja/reference/android/os/PowerManager.html#isIgnoringBatteryOptimizations(java.lang.String)
+     * @return whether the given application package name is on the device's power whitelist. Apps can be placed on the whitelist through the settings UI invoked by ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+     */
+    public static boolean isIgnoringBatteryOptimizations() {
+        if (NgnApplication.getSDKVersion() >= 23) {
+            try {
+                final Method isIgnoringBatteryOptimizationsMth = PowerManager.class.getDeclaredMethod("isIgnoringBatteryOptimizations", String.class);
+                final Boolean ignoring = (Boolean) isIgnoringBatteryOptimizationsMth.invoke(NgnApplication.getPowerManager(), NgnApplication.getContext().getPackageName());
+                return ignoring.booleanValue();
+            } catch (NoSuchMethodException e) {
+                Log.e(TAG, e.toString());
+            } catch (IllegalAccessException e) {
+                Log.e(TAG, e.toString());
+            } catch (InvocationTargetException e) {
+                Log.e(TAG, e.toString());
+            }
+        }
+        // Before Android-M there were no Doze-StanBy feature (http://developer.android.com/intl/ja/training/monitoring-device-state/doze-standby.html)
+        return true;
+    }
+
+    /**
+     * Raises "ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS" intent
+     * @param context The context to use to raise the intent
+     * @return true if succeed; otherwise false
+     */
+    public static boolean ignoringBatteryOptimizations(Context context) {
+        if (NgnApplication.getSDKVersion() < 23) {
+            return true;
+        }
+        final Context context_ = context != null ? context : NgnApplication.getContext();
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        String ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS_ = null;
+        try {
+            ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS_ = (String)android.
+                    provider.Settings.class.getField("ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS").get(null);
+        } catch (IllegalAccessException e) {
+            Log.e(TAG, e.toString());
+            return false;
+        } catch (NoSuchFieldException e) {
+            Log.e(TAG, e.toString());
+            return false;
+        }
+        if (NgnApplication.isIgnoringBatteryOptimizations()) {
+            intent.setAction(ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS_);
+        } else {
+            final String UriString = "package:" + context_.getPackageName();
+            final Uri uriObj = Uri.parse(UriString);
+            intent.setAction(ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS_);
+            intent.setData(uriObj);
+        }
+        context_.startActivity(intent);
+        return true;
+    }
+
+    /**
+     * Raises "ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS" intent. The application context will be used to raise the intent.
+     * @return true if succeed; otherwise false
+     */
+    public static boolean ignoringBatteryOptimizations() {
+        return NgnApplication.ignoringBatteryOptimizations(null);
+    }
+
     public static boolean acquirePowerLock(){
     	if(sPowerManagerLock == null){
     		final PowerManager powerManager = getPowerManager();

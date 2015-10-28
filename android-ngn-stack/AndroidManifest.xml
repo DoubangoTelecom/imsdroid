@@ -36,6 +36,7 @@
 	<uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.RAISED_THREAD_PRIORITY"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" android:required="false" />
     
     <uses-feature android:glEsVersion="0x00020000"  android:required="false"/>
 	<uses-feature android:name="android.hardware.camera"  android:required="false"/>

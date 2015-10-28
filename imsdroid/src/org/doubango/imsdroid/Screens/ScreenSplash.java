@@ -22,6 +22,7 @@ package org.doubango.imsdroid.Screens;
 import org.doubango.imsdroid.Engine;
 import org.doubango.imsdroid.NativeService;
 import org.doubango.imsdroid.R;
+import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 
 import android.content.BroadcastReceiver;
@@ -65,6 +66,11 @@ public class ScreenSplash extends BaseScreen {
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(NativeService.ACTION_STATE_EVENT);
 	    registerReceiver(mBroadCastRecv, intentFilter);
+
+		// Doze-StandBy (Android 23): http://developer.android.com/intl/ja/training/monitoring-device-state/doze-standby.html
+		//if (!NgnApplication.isIgnoringBatteryOptimizations()) {
+		//	NgnApplication.ignoringBatteryOptimizations(this);
+		//}
 	}
 	
 	@Override
