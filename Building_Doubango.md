@@ -6,7 +6,7 @@ For the Java code, you just need to import the code into Eclipse.
 
 ## Installing Android NDK r10e ##
 Download Android NDK r9c into **/home**. This is needed only for the first time. <br />
-**IMPORTANT:** You must select the right version from https://developer.android.com/tools/sdk/ndk/index.html depending on your host system. Our host system is **CentOS 64**.
+**IMPORTANT:** You must select the right version from http://developer.android.com/intl/ja/ndk/downloads/index.html depending on your host system. Our host system is **CentOS 64**.
 ```
 yum install p7zip
 cd /home
