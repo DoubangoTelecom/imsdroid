@@ -292,7 +292,7 @@ public class NgnAVSession extends NgnInviteSession{
 
         return ret;
     }
-
+    
     /**
      * Starts video sharing session
      * @param remoteUri  the remote party uri. Could be a SIP/TEL uri, nomadic number, MSISDN number, ...
@@ -581,7 +581,7 @@ public class NgnAVSession extends NgnInviteSession{
 	public boolean setProducerFlipped(boolean flipped){
 		final MediaSessionMgr mediaMgr;
 		if((mediaMgr = super.getMediaSessionMgr()) != null){
-			return mediaMgr.producerSetInt32(twrap_media_type_t.twrap_media_video, "flip", flipped?1:0);
+			return mediaMgr.producerSetInt32(twrap_media_type_t.twrap_media_video, "flip", flipped ? 1 : 0);
 		}
 		return false;
 	}
@@ -589,7 +589,7 @@ public class NgnAVSession extends NgnInviteSession{
 	public boolean setConsumerFlipped(boolean flipped){
 		final MediaSessionMgr mediaMgr;
 		if((mediaMgr = super.getMediaSessionMgr()) != null){
-			return mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_video, "flip", flipped?1:0);
+			return mediaMgr.consumerSetInt32(twrap_media_type_t.twrap_media_video, "flip", flipped ? 1 : 0);
 		}
 		return false;
 	}
@@ -860,7 +860,21 @@ public class NgnAVSession extends NgnInviteSession{
     public boolean rejectCallTransfer(){
         return super.isActive() ? mSession.rejectTransfer() : false;
     }
-	
+
+	/**
+	 * Update the call session
+	 * @param newMediaType new media type
+	 * @return true if succeed and false otherwise.
+	 */
+	public boolean updateCall(NgnMediaType newMediaType) {
+		if (super.mMediaType == newMediaType) {
+			return true;
+		}
+		boolean ret;
+		super.mMediaType = newMediaType;
+		return makeCall(super.getRemotePartyUri());
+	}
+
 	/**
 	 * Checks whether the call is locally held held or not. You should use @ref resumeCall() to resume
 	 * the call.
