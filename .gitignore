@@ -1,0 +1,12 @@
+# Android Studio / IntelliJ IDEA 
+*.iws
+.idea/tasks.xml
+.idea/vcs.xml
+.idea/workspace.xml
+/testCall/gen
+/out
+/android-ngn-stack/gen
+/imsdroid/gen
+/myFirstApp/gen
+/testRegistration/gen
+/testT140/gen
