@@ -243,7 +243,7 @@ import android.content.Context;
  * @endcode
  * 
  * <h3>IMS Public Identity (IMPU)</h3>
- * As its name says, it’s you public visible identifier where you are willing to receive calls or any
+ * As its name says, it's you public visible identifier where you are willing to receive calls or any
  * demands. An IMPU could be either a SIP or tel URI (e.g. <i>tel:+33100000</i> or <i>sip:bob@open-ims.test</i>).
  * In IMS world, a user can have multiple IMPUs associated to its unique IMPI.<br />
  * For those using this IMS stack as basic SIP stack, the IMPU should coincide with their SIP URI (a.k.a
@@ -260,10 +260,10 @@ import android.content.Context;
  * <h3>Preferred Identity</h3>
  * As a user has multiple IMPUs, it can for each outgoing request, defines which IMPU to use by
  * setting the preferred identity. The user should check that this IPMU is not barred. An IMPU is
- * barred if it doesn’t appear in the associated URIs returned in the 200 OK REGISTER. <br />
+ * barred if it doesn't appear in the associated URIs returned in the 200 OK REGISTER. <br />
  * By default, the preferred identity is the first URI in the list of the associated identities. If the IMPU
  * used to REGISTER the user is barred, then the stack will use the default URI returned by the SCSCF. <br />
- * You should never manually set this SIP header (P-Preferred-Identity); it’s up to the stack.
+ * You should never manually set this SIP header (P-Preferred-Identity); it's up to the stack.
  * 
  * <h3>Proxy-CSCF Host address </h3>
  * The Proxy-CSCF Host is the IP address (192.168.0.1) or FQDN (doubango.org) of the SIP registrar. <br />

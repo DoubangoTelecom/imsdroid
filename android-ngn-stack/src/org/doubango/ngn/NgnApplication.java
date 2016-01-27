@@ -72,7 +72,7 @@ import android.view.WindowManager;
  * 
  * <h3>Server-side components</h3>
  * - <a href="http://code.google.com/p/openvcs/">OpenVCS</a>: OpenVCS stands for Open Source Video Conferencing Server and is used to manage Multipoint Control Units (MCU). Each MCU (a.k.a Bridge) can handle up to 64 participants
- * - <a href="http://code.google.com/p/flash2ims/">Flash2IMS</a>: Adobe® Flash® to SIP/IMS Gateway.
+ * - <a href="http://code.google.com/p/flash2ims/">Flash2IMS</a>: Adobe(c) Flash(c) to SIP/IMS Gateway.
  * 
  * <h2>Highlights</h2>
  *     

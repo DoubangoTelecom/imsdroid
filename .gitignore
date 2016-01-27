@@ -3,10 +3,18 @@
 .idea/tasks.xml
 .idea/vcs.xml
 .idea/workspace.xml
-/testCall/gen
+workspace.xml
+
+# Graddle
+local.properties
+.gradle
+gradle
+gradlew
+gradlew.bat
+
+# Others
+build
+gen
 /out
-/android-ngn-stack/gen
-/imsdroid/gen
-/myFirstApp/gen
-/testRegistration/gen
-/testT140/gen
+
+

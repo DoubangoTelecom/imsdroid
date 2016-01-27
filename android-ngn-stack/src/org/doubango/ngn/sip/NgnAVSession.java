@@ -22,6 +22,7 @@
 package org.doubango.ngn.sip;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
@@ -94,6 +95,19 @@ public class NgnAVSession extends NgnInviteSession{
 	private boolean mSpeakerOn;
 	
     private final static NgnObservableHashMap<Long, NgnAVSession> sSessions = new NgnObservableHashMap<Long, NgnAVSession>(true);
+	private static int AudioManager_MODE_IN_COMMUNICATION = AudioManager.MODE_IN_CALL;
+
+	static {
+		if (NgnApplication.getSDKVersion() >= 11) {
+			try {
+				final Field f = AudioManager.class.getDeclaredField("MODE_IN_COMMUNICATION");
+				AudioManager_MODE_IN_COMMUNICATION = f.getInt(null);
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
     
     public static NgnAVSession takeIncomingSession(NgnSipStack sipStack, CallSession session, twrap_media_type_t mediaType, SipMessage sipMessage){
         NgnMediaType media = NgnMediaType.ConvertFromNative(mediaType);
@@ -726,7 +740,7 @@ public class NgnAVSession extends NgnInviteSession{
 						break;
 					case INCALL:
 					case EARLY_MEDIA:
-						audiomanager.setMode(NgnApplication.getSDKVersion() >= 11 ? AudioManager.MODE_IN_COMMUNICATION : AudioManager.MODE_IN_CALL);
+						audiomanager.setMode(NgnApplication.getSDKVersion() >= 11 ? AudioManager_MODE_IN_COMMUNICATION : AudioManager.MODE_IN_CALL);
 						break;
 					case TERMINATED:
 					case TERMINATING:
