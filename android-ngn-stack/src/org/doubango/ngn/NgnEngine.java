@@ -278,9 +278,11 @@ public class NgnEngine {
 		MediaSessionMgr.defaultsSetOpusMaxCaptureRate(16000);// /!\IMPORTANT: only 8k and 16k will work with WebRTC AEC
 		MediaSessionMgr.defaultsSetOpusMaxPlaybackRate(16000);
 		
-		MediaSessionMgr.defaultsSetCongestionCtrlEnabled(false);
+		MediaSessionMgr.defaultsSetCongestionCtrlEnabled(true);
 		MediaSessionMgr.defaultsSetBandwidthVideoDownloadMax(-1);
 		MediaSessionMgr.defaultsSetBandwidthVideoUploadMax(-1);
+		MediaSessionMgr.defaultsSetAdaptativeVideoSizeOutEnabled(false);
+		MediaSessionMgr.defaultsSetPrefVideoSizeOutRange(tmedia_pref_video_size_t.tmedia_pref_video_size_sqcif, tmedia_pref_video_size_t.tmedia_pref_video_size_2160p);
 		
 		MediaSessionMgr.defaultsSetAudioChannels(1, 1); // (mono, mono)
 		MediaSessionMgr.defaultsSetAudioPtime(20);

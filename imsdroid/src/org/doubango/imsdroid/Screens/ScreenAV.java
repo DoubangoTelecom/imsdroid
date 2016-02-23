@@ -48,6 +48,7 @@ import org.doubango.ngn.utils.NgnGraphicsUtils;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnTimer;
 import org.doubango.ngn.utils.NgnUriUtils;
+import org.doubango.tinyWRAP.QoS;
 
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
@@ -109,10 +110,12 @@ public class ScreenAV extends BaseScreen{
 	private final NgnTimer mTimerInCall;
 	private final NgnTimer mTimerSuicide;
 	private final NgnTimer mTimerBlankPacket;
+	private final NgnTimer mTimerQoS;
 	private NgnAVSession mAVSession;
 	private boolean mIsVideoCall;
 	
 	private TextView mTvInfo;
+	private TextView mTvQoS;
 	private TextView mTvDuration;
 	
 	private AlertDialog mTransferDialog;
@@ -151,6 +154,7 @@ public class ScreenAV extends BaseScreen{
 		mTimerInCall = new NgnTimer();
 		mTimerSuicide = new NgnTimer();
 		mTimerBlankPacket = new NgnTimer();
+		mTimerQoS = new NgnTimer();
 	}
 	
 	@Override
@@ -316,8 +320,13 @@ public class ScreenAV extends BaseScreen{
 		}
 		
 		if(mAVSession != null){
-			if (mAVSession.getState() == InviteState.INCALL) {
-				mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
+			if (mAVSession.getState() == InviteState.INCALL ) {
+				if (mIsVideoCall) {
+					mTimerQoS.schedule(mTimerTaskQoS, 0, 3000);
+				}
+				else {
+					mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
+				}
 			}
 		}
 
@@ -346,6 +355,7 @@ public class ScreenAV extends BaseScreen{
        
        mTimerInCall.cancel();
        mTimerSuicide.cancel();
+		mTimerQoS.cancel();
        cancelBlankPacket();
        
        if(mWakeLock != null && mWakeLock.isHeld()){
@@ -720,7 +730,10 @@ public class ScreenAV extends BaseScreen{
 					if(mAVSession != null){
 						applyCamRotation(mAVSession.compensCamRotation(true));
 						mTimerBlankPacket.schedule(mTimerTaskBlankPacket, 0, 250);
-						if(!mIsVideoCall){
+						if(mIsVideoCall) {
+							mTimerQoS.schedule(mTimerTaskQoS, 0, 3000);
+						}
+						else {
 							mTimerInCall.schedule(mTimerTaskInCall, 0, 1000);
 						}
 					}
@@ -979,7 +992,13 @@ public class ScreenAV extends BaseScreen{
 		
 		mViewInAudioCall.findViewById(R.id.view_call_incall_audio_imageView_secure)
 			.setVisibility(mAVSession.isSecure() ? View.VISIBLE : View.INVISIBLE);
-		
+
+		if (mTvQoS != null) {
+			synchronized(mTvQoS){
+				mTvQoS = null;
+			}
+		}
+
 		mMainLayout.removeAllViews();
 		mMainLayout.addView(mViewInAudioCall);
 		mCurrentView = ViewType.ViewInCall;
@@ -992,7 +1011,7 @@ public class ScreenAV extends BaseScreen{
 			mViewLocalVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_local_video);
 			mViewRemoteVideoPreview = (FrameLayout)mViewInCallVideo.findViewById(R.id.view_call_incall_video_FrameLayout_remote_video);
 		}
-		if(mTvDuration != null){
+		if (mTvDuration != null){
 			synchronized(mTvDuration){
 		        mTvDuration = null;
 			}
@@ -1005,6 +1024,7 @@ public class ScreenAV extends BaseScreen{
 		if(viewSecure != null){
 			viewSecure.setVisibility(mAVSession.isSecure() ? View.VISIBLE : View.INVISIBLE);
 		}
+		mTvQoS = (TextView)mViewInCallVideo.findViewById(R.id.view_call_incall_video_textView_QoS);
 		
 		// Video Consumer
 		loadVideoPreview();
@@ -1107,6 +1127,36 @@ public class ScreenAV extends BaseScreen{
 							}
 							catch(Exception e){}
 						}});
+				}
+			}
+		}
+	};
+
+	private final TimerTask mTimerTaskQoS = new TimerTask(){
+		@Override
+		public void run() {
+			if(mAVSession != null && mTvQoS != null){
+				synchronized(mTvQoS){
+					final QoS qos = mAVSession.getQoSVideo();
+					if(qos != null) {
+						ScreenAV.this.runOnUiThread(new Runnable() {
+							public void run() {
+								try {
+									mTvQoS.setText(
+											"Quality: 		" + (int)(qos.getQavg() * 100) + "%\n" +
+											"Receiving:		" + qos.getBandwidthDownKbps() + "Kbps\n" +
+											"Sending:		" + qos.getBandwidthUpKbps() + "Kbps\n" +
+											"Size in:	    " + qos.getVideoInWidth() + "x" + qos.getVideoInHeight() + "\n" +
+											"Size out:		" + qos.getVideoOutWidth() +"x" + qos.getVideoOutHeight() + "\n" +
+											"Fps in:        " + qos.getVideoInAvgFps() + "\n" +
+											"Encode time:   " + qos.getVideoEncAvgTime() + "ms / frame\n" +
+											"Decode time:   " + qos.getVideoDecAvgTime() + "ms / frame\n"
+									);
+								} catch (Exception e) {
+								}
+							}
+						});
+					}
 				}
 			}
 		}

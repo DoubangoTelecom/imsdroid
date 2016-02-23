@@ -54,6 +54,7 @@ import org.doubango.tinyWRAP.CallSession;
 import org.doubango.tinyWRAP.Codec;
 import org.doubango.tinyWRAP.MediaSessionMgr;
 import org.doubango.tinyWRAP.ProxyPlugin;
+import org.doubango.tinyWRAP.QoS;
 import org.doubango.tinyWRAP.SipMessage;
 import org.doubango.tinyWRAP.SipSession;
 import org.doubango.tinyWRAP.T140Callback;
@@ -808,6 +809,15 @@ public class NgnAVSession extends NgnInviteSession{
 	public int getVideoHeightReceived() {
 		return (mVideoConsumer != null) ? mVideoConsumer.getVideoHeightReceived() : 0;
 	}
+
+	public QoS getQoSVideo()
+    {
+        final MediaSessionMgr mediaMgr;
+        if ((mediaMgr = super.getMediaSessionMgr()) != null) {
+            return mediaMgr.sessionGetQoS(twrap_media_type_t.twrap_media_video);
+        }
+        return null;
+    }
 	
 	/**
 	 * Accepts an incoming audio/video call
