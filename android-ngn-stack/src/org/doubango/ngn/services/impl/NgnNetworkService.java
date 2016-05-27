@@ -254,9 +254,7 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 			java.net.Socket socket = new java.net.Socket(ipv6 ? "ipv6.google.com" : "google.com", 80);
 			Log.d(NgnNetworkService.TAG, socket.getLocalAddress().getHostAddress());
 			return socket.getLocalAddress().getHostAddress();
-		} catch (UnknownHostException e) {
-			Log.e(NgnNetworkService.TAG, e.toString());
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Log.e(NgnNetworkService.TAG, e.toString());
 		}
 
