@@ -78,8 +78,8 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 		} catch (Exception e) {
 			Log.e(TAG, e.toString());
 		}
-
 		super.mPaused = pause;
+		Log.d(TAG, "setOnPause(" + pause + ")");
 	}
 
 	public void setOnMute(boolean mute) {
@@ -260,6 +260,7 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 			final int nSize = mAudioFrame.capacity();
 			byte silenceBuffer[] = new byte[nSize];
 			int nRead;
+			boolean paused = NgnProxyAudioProducer.super.mPaused;
 
 			if (NgnProxyAudioProducer.super.mValid) {
 				mProducer.setPushBuffer(mAudioFrame, mAudioFrame.capacity(), false);
@@ -296,30 +297,32 @@ public class NgnProxyAudioProducer extends NgnProxyPlugin {
 					}
 				}
 
-				// To avoid overrun read data even if on pause/mute we have to
-				// read
+				if (paused != NgnProxyAudioProducer.super.mPaused) {
+					if (NgnProxyAudioProducer.super.mPaused) {
+						// Android doesn't support more than one active audio record instance -> stop the paused instance
+						mAudioRecord.stop();
+					} else if (NgnProxyAudioProducer.super.mValid && mStarted) {
+						mAudioRecord.startRecording();
+					}
+					paused = NgnProxyAudioProducer.super.mPaused;
+				}
+
+				// To avoid overrun read data even if on mute we have to read
 				if ((nRead = mAudioRecord.read(mAudioFrame, nSize)) > 0) {
-					if (!NgnProxyAudioProducer.super.mPaused) {
-						if (mOnMute) { // workaround because Android's
-										// SetMicrophoneOnMute() is buggy
-							mAudioFrame.put(silenceBuffer);
-							mProducer.push(mAudioFrame, silenceBuffer.length);
-							mAudioFrame.rewind();
+					if (mOnMute) { // workaround because Android's
+									// SetMicrophoneOnMute() is buggy
+						mAudioFrame.put(silenceBuffer);
+						mProducer.push(mAudioFrame, silenceBuffer.length);
+						mAudioFrame.rewind();
+					} else {
+						if (nRead != nSize) {
+							mProducer.push(mAudioFrame, nRead);
+							Log.w(TAG, "BufferOverflow?");
 						} else {
-							if (nRead != nSize) {
-								mProducer.push(mAudioFrame, nRead);
-								Log.w(TAG, "BufferOverflow?");
-							} else {
-								mProducer.push();
-							}
+							mProducer.push();
 						}
 					}
 				}
-				
-				/*int state = mAudioRecord.getRecordingState();
-				if (state == AudioRecord.RECORDSTATE_STOPPED) {
-					Log.d(TAG, "===== RECORDSTATE_STOPPED ===== ");
-				}*/
 			}
 
 			unprepare();
