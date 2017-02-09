@@ -597,6 +597,7 @@ public class NgnProxyVideoProducer extends NgnProxyPlugin{
 			Log.d(TAG,"surfaceDestroyed()");
 			try{
 				NgnCameraProducer.releaseCamera(mCamera);
+				mCamera = null;
 			}
 			catch (Exception exception) {
 				Log.e(TAG, exception.toString());
