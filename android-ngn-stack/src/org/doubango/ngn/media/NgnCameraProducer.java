@@ -41,7 +41,7 @@ public class NgnCameraProducer {
 	private static int fps = 15;
 	private static int width = 176;
 	private static int height = 144;
-	private static SurfaceHolder holder = null;
+	private static NgnProxyVideoProducer.MyProxyVideoProducerPreview preview = null;
 	private static PreviewCallback callback = null;
 	
 	private static final int MIN_SDKVERSION_addCallbackBuffer = 7;
@@ -92,7 +92,7 @@ public class NgnCameraProducer {
 		return NgnCameraProducer.instance;
 	}
 	
-	public static Camera openCamera(int fps, int width, int height, SurfaceHolder holder, PreviewCallback callback){
+	public static Camera openCamera(int fps, int width, int height, NgnProxyVideoProducer.MyProxyVideoProducerPreview preview, PreviewCallback callback){
 		if(NgnCameraProducer.instance == null){
 			try{
 				if(NgnCameraProducer.useFrontFacingCamera){
@@ -105,7 +105,7 @@ public class NgnCameraProducer {
 				NgnCameraProducer.fps = fps;
 				NgnCameraProducer.width = width;
 				NgnCameraProducer.height = height;
-				NgnCameraProducer.holder = holder;
+				NgnCameraProducer.preview = preview;
 				NgnCameraProducer.callback = callback;
 				
 				Camera.Parameters parameters = NgnCameraProducer.instance.getParameters();
@@ -128,7 +128,7 @@ public class NgnCameraProducer {
 					Log.d(NgnCameraProducer.TAG, e.toString());
 				}
 				
-				NgnCameraProducer.instance.setPreviewDisplay(NgnCameraProducer.holder);
+				NgnCameraProducer.instance.setPreviewDisplay(NgnCameraProducer.preview.getHolder());
 				NgnCameraProducer.initializeCallbacks(NgnCameraProducer.callback);
 			}
 			catch(Exception e){
@@ -142,6 +142,9 @@ public class NgnCameraProducer {
 	public static void releaseCamera(Camera camera){
 		if(camera != null){
 			camera.stopPreview();
+			if (NgnCameraProducer.preview != null && NgnCameraProducer.preview.getCamera() == camera) {
+				NgnCameraProducer.preview.setCamera(null);
+			}
 			NgnCameraProducer.deInitializeCallbacks(camera);
 			camera.release();
 			if(camera == NgnCameraProducer.instance){
@@ -153,6 +156,9 @@ public class NgnCameraProducer {
 	public static void releaseCamera(){
 		if(NgnCameraProducer.instance != null){
 			NgnCameraProducer.instance.stopPreview();
+			if (NgnCameraProducer.preview != null && NgnCameraProducer.preview.getCamera() == NgnCameraProducer.instance) {
+				NgnCameraProducer.preview.setCamera(null);
+			}
 			NgnCameraProducer.deInitializeCallbacks();
 			NgnCameraProducer.instance.release();
 			NgnCameraProducer.instance = null;
@@ -212,14 +218,18 @@ public class NgnCameraProducer {
 	}
 	
 	public static Camera toggleCamera(){
+		final boolean previewWasUsingInstanceCamera = (NgnCameraProducer.preview != null && NgnCameraProducer.preview.getCamera() == NgnCameraProducer.instance);
 		if(NgnCameraProducer.instance != null){
 			NgnCameraProducer.useFrontFacingCamera = !NgnCameraProducer.useFrontFacingCamera;
 			NgnCameraProducer.releaseCamera();
 			NgnCameraProducer.openCamera(NgnCameraProducer.fps, 
 					NgnCameraProducer.width, 
 					NgnCameraProducer.height,
-					NgnCameraProducer.holder, 
+					NgnCameraProducer.preview,
 					NgnCameraProducer.callback);
+		}
+		if (previewWasUsingInstanceCamera) {
+			NgnCameraProducer.preview.setCamera(NgnCameraProducer.instance);
 		}
 		return NgnCameraProducer.instance;
 	}

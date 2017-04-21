@@ -59,16 +59,16 @@ public class Main extends ActivityGroup {
 	private static final int RC_SPLASH = 0;
 	
 	private Handler mHanler;
-	private final Engine mEngine;
-	private final IScreenService mScreenService;
+	private Engine mEngine;
+	private IScreenService mScreenService;
 	
 	public Main(){
 		super();
 		
 		// Sets main activity (should be done before starting services)
-		mEngine = (Engine)Engine.getInstance();
-		mEngine.setMainActivity(this);
-    	mScreenService = ((Engine)Engine.getInstance()).getScreenService();
+		//mEngine = (Engine)Engine.getInstance();
+		//mEngine.setMainActivity(this);
+    	//mScreenService = ((Engine)Engine.getInstance()).getScreenService();
 	}
 	
     /** Called when the activity is first created. */
@@ -77,6 +77,10 @@ public class Main extends ActivityGroup {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
+
+		mEngine = (Engine)Engine.getInstance();
+		mEngine.setMainActivity(this);
+		mScreenService = ((Engine)Engine.getInstance()).getScreenService();
         
         mHanler = new Handler();
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
