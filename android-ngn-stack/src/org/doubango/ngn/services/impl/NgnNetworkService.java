@@ -235,14 +235,28 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 				
 				final Iterator<Map.Entry<String, InetAddress>> it = addressMap.entrySet().iterator();
 				Map.Entry<String, InetAddress> kvp;
+				String host = null;
 			    while (it.hasNext()) {
 			    	kvp = it.next();
 			    	final InetAddress address = kvp.getValue();
-			    	if(kvp.getKey().equals(USB_INTERFACE_NAME)){
-			    		continue;
-			    	}
-				    return address.getHostAddress();
+					final String interfaceName = kvp.getKey();
+
+					if(kvp.getKey().equals(USB_INTERFACE_NAME)){
+						continue;
+					}
+					if(interfaceName.startsWith("wlan")) {
+						return address.getHostAddress();
+					} else {
+						host = address.getHostAddress();
+					}
+
+//					if(kvp.getKey().equals(USB_INTERFACE_NAME)){
+//			    		continue;
+//			    	}
+//				    return address.getHostAddress();
 			    }
+				if(host != null)
+					return host;
 				return addressMap.values().iterator().next().getHostAddress();
 			}
 		} catch (SocketException ex) {

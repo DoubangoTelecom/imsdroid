@@ -120,7 +120,11 @@ public class ScreenNatt extends BaseScreen {
 			mConfigurationService.putBoolean(NgnConfigurationEntry.NATT_USE_ICE, mCbEnableIce.isChecked());
 			mConfigurationService.putBoolean(NgnConfigurationEntry.NATT_STUN_DISCO, mRbDiscoStun.isChecked());
 			mConfigurationService.putString(NgnConfigurationEntry.NATT_STUN_SERVER, mEtStunStunHostname.getText().toString());
-			mConfigurationService.putString(NgnConfigurationEntry.NATT_STUN_PORT, mEtStunPort.getText().toString());
+			try {
+				mConfigurationService.putInt(NgnConfigurationEntry.NATT_STUN_PORT, Integer.parseInt(mEtStunPort.getText().toString()));
+			} catch(NumberFormatException e) {
+				Log.e(TAG, "stun port must be an integer");
+			}
 			mConfigurationService.putString(NgnConfigurationEntry.NATT_STUN_USERNAME, mEtStunUsername.getText().toString());
 			mConfigurationService.putString(NgnConfigurationEntry.NATT_STUN_PASSWORD, mEtStunPassword.getText().toString());
 	        
