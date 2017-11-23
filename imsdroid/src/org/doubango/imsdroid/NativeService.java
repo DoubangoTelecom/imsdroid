@@ -26,14 +26,20 @@ import org.doubango.ngn.events.NgnEventArgs;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnMessagingEventArgs;
 import org.doubango.ngn.events.NgnMsrpEventArgs;
+import org.doubango.ngn.events.NgnNetworkEventArgs;
+import org.doubango.ngn.events.NgnNetworkEventTypes;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
 import org.doubango.ngn.events.NgnRegistrationEventTypes;
 import org.doubango.ngn.media.NgnMediaType;
 import org.doubango.ngn.model.NgnHistorySMSEvent;
 import org.doubango.ngn.model.NgnHistoryEvent.StatusType;
+import org.doubango.ngn.services.INgnNetworkService;
+import org.doubango.ngn.services.INgnSipService;
 import org.doubango.ngn.sip.NgnAVSession;
 import org.doubango.ngn.sip.NgnMsrpSession;
+import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnDateTimeUtils;
+import org.doubango.ngn.utils.NgnNetworkConnection;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 
@@ -82,6 +88,41 @@ public class NativeService extends NgnNativeService {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				final String action = intent.getAction();
+
+				// Network Events
+				if (NgnNetworkEventArgs.ACTION_NETWORK_EVENT.equals(action)) {
+					final NgnNetworkEventArgs args = intent.getParcelableExtra(NgnNetworkEventArgs.EXTRA_EMBEDDED);
+					if (args == null) {
+						Log.e(TAG, "Invalid event args");
+						return;
+					}
+					final NgnNetworkEventTypes eventType = args.getEventType();
+					final INgnSipService sipService = mEngine.getSipService();
+					final INgnNetworkService networkService = mEngine.getNetworkService();
+					final NgnNetworkConnection activeConnection = sipService.getActiveConnection(); // null if user requested to stop the stack
+					final String ipversion = mEngine.getConfigurationService().getString(
+							NgnConfigurationEntry.NETWORK_IP_VERSION,
+							NgnConfigurationEntry.DEFAULT_NETWORK_IP_VERSION);
+					final NgnNetworkConnection bestConnection = networkService.getBestConnection(NgnStringUtils.equals(ipversion, "ipv6", true));
+
+					switch (eventType) {
+						case DISCONNECTED:
+						case CONNECTED:
+							Log.d(TAG, "Connection state changed: active-> "+activeConnection+"; best-> "+bestConnection+"");
+							// (activeConnection != null) -> user haven't requested to unregister (we lost registration when network goes down)
+							if (activeConnection != null) {
+								if (bestConnection != activeConnection || !sipService.isRegistered()) {
+									Log.d(TAG, "Best connection changed -> stop the stack");
+									sipService.stopStack();
+									if (bestConnection != null && bestConnection.isUp()) {
+										Log.d(TAG, "Active connection (" + activeConnection + ") is down while best connection (" + bestConnection + ") is up -> register again");
+										sipService.register(IMSDroid.getContext());
+									}
+								}
+							}
+							break;
+					}
+				}
 				
 				// Registration Events
 				if(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT.equals(action)){
@@ -259,6 +300,7 @@ public class NativeService extends NgnNativeService {
 			}
 		};
 		final IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(NgnNetworkEventArgs.ACTION_NETWORK_EVENT);
 		intentFilter.addAction(NgnRegistrationEventArgs.ACTION_REGISTRATION_EVENT);
 		intentFilter.addAction(NgnInviteEventArgs.ACTION_INVITE_EVENT);
 		intentFilter.addAction(NgnMessagingEventArgs.ACTION_MESSAGING_EVENT);

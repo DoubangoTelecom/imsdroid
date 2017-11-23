@@ -22,6 +22,7 @@ package org.doubango.ngn.services;
 import org.doubango.ngn.sip.NgnPresenceStatus;
 import org.doubango.ngn.sip.NgnSipStack;
 import org.doubango.ngn.sip.NgnSipSession.ConnectionState;
+import org.doubango.ngn.utils.NgnNetworkConnection;
 
 import android.content.Context;
 
@@ -292,6 +293,9 @@ public interface INgnSipService extends INgnBaseService {
 	 * @sa @ref register()
 	 */
     NgnSipStack getSipStack();
+
+    NgnNetworkConnection getActiveConnection();
+
     /**
      * Checks whether we are already registered or not.
      * @return

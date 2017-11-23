@@ -21,19 +21,16 @@ package org.doubango.ngn.services;
 
 import org.doubango.ngn.model.NgnAccessPoint;
 import org.doubango.ngn.services.impl.NgnNetworkService.DNS_TYPE;
+import org.doubango.ngn.utils.NgnNetworkConnection;
 import org.doubango.ngn.utils.NgnObservableList;
 
 public interface INgnNetworkService extends INgnBaseService{
+	NgnObservableList<NgnNetworkConnection> getConnections();
+	boolean setProxyCSCF(final String transport, final String IPversion, final String host, final int port);
 	String getDnsServer(DNS_TYPE type);
-	String getLocalIP(boolean ipv6);
-	boolean isScanning();
-	boolean setNetworkEnabledAndRegister();
-	boolean setNetworkEnabled(String SSID, boolean enabled, boolean force);
-	boolean setNetworkEnabled(int networkId, boolean enabled, boolean force);
-	boolean forceConnectToNetwork();
-	NgnObservableList<NgnAccessPoint> getAccessPoints();
-	int configure(NgnAccessPoint ap, String password, boolean bHex);
-	boolean scan();
+	NgnNetworkConnection getBestConnection(boolean ipv6);
+	boolean requestCellularRouteToHost(final String host, final boolean IPv6);
+	boolean bindProcessToConnection(final NgnNetworkConnection connection);
 	boolean acquire();
 	boolean release();
 }

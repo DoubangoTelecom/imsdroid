@@ -22,12 +22,15 @@ package org.doubango.ngn.services.impl;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import android.content.BroadcastReceiver;
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
 import org.doubango.ngn.events.NgnInviteEventArgs;
 import org.doubango.ngn.events.NgnInviteEventTypes;
 import org.doubango.ngn.events.NgnMessagingEventArgs;
 import org.doubango.ngn.events.NgnMessagingEventTypes;
+import org.doubango.ngn.events.NgnNetworkEventArgs;
+import org.doubango.ngn.events.NgnNetworkEventTypes;
 import org.doubango.ngn.events.NgnPublicationEventArgs;
 import org.doubango.ngn.events.NgnPublicationEventTypes;
 import org.doubango.ngn.events.NgnRegistrationEventArgs;
@@ -56,6 +59,7 @@ import org.doubango.ngn.sip.NgnSubscriptionSession.EventPackageType;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnContentType;
 import org.doubango.ngn.utils.NgnDateTimeUtils;
+import org.doubango.ngn.utils.NgnNetworkConnection;
 import org.doubango.ngn.utils.NgnStringUtils;
 import org.doubango.ngn.utils.NgnUriUtils;
 import org.doubango.tinyWRAP.CallSession;
@@ -90,6 +94,7 @@ import org.doubango.tinyWRAP.twrap_sms_type_t;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.ConditionVariable;
 import android.os.Looper;
 import android.util.Log;
@@ -103,38 +108,62 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 	private NgnSipStack mSipStack;
 	private final DDebugCallback mDebugCallback;
 	private final MySipCallback mSipCallback;
-	private final NgnSipPrefrences mPreferences;
 
 	private final INgnConfigurationService mConfigurationService;
 	private final INgnNetworkService mNetworkService;
 
+	private NgnNetworkConnection mActiveConnection;
+
 	private ConditionVariable mCondHackAoR;
+
+	private BroadcastReceiver mBroadCastRecv;
+
+	private boolean mTerminateRequested;
 
 	public NgnSipService() {
 		super();
 
 		mDebugCallback = new DDebugCallback();
 		mSipCallback = new MySipCallback(this);
-		mPreferences = new NgnSipPrefrences();
 
-		mConfigurationService = NgnEngine.getInstance()
-				.getConfigurationService();
+		mConfigurationService = NgnEngine.getInstance().getConfigurationService();
 		mNetworkService = NgnEngine.getInstance().getNetworkService();
 	}
 
 	@Override
 	public boolean start() {
 		Log.d(TAG, "starting...");
+		if (mBroadCastRecv == null) {
+			mBroadCastRecv = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					if (NgnNetworkEventArgs.ACTION_NETWORK_EVENT.equals(intent.getAction())) {
+						handleNetworkEvent(intent);
+					}
+				}
+			};
+			IntentFilter intentFilter = new IntentFilter();
+			intentFilter.addAction(NgnNetworkEventArgs.ACTION_NETWORK_EVENT);
+			NgnApplication.getContext().registerReceiver(mBroadCastRecv, intentFilter);
+		}
 		return true;
 	}
 
 	@Override
 	public boolean stop() {
 		Log.d(TAG, "stopping...");
-		if (mSipStack != null && mSipStack.getState() == STACK_STATE.STARTED) {
-			return mSipStack.stop();
+		mTerminateRequested = true;
+		boolean retBool = true;
+		if (mSipStack != null && mSipStack.isValid()) {
+			if (mSipStack.getState() == STACK_STATE.STARTED) {
+				retBool = mSipStack.stop();
+			}
 		}
-		return true;
+		if (mBroadCastRecv != null) {
+			NgnApplication.getContext().unregisterReceiver(mBroadCastRecv);
+			mBroadCastRecv = null;
+		}
+		return retBool;
 	}
 
 	@Override
@@ -153,6 +182,9 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 	public NgnSipStack getSipStack() {
 		return mSipStack;
 	}
+
+	@Override
+	public NgnNetworkConnection getActiveConnection() { return mActiveConnection; }
 
 	@Override
 	public boolean isRegistered() {
@@ -241,37 +273,37 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 	@Override
 	public boolean register(Context context) {
 		Log.d(TAG, "register()");
-		mPreferences.setRealm(mConfigurationService.getString(
-				NgnConfigurationEntry.NETWORK_REALM,
-				NgnConfigurationEntry.DEFAULT_NETWORK_REALM));
-		mPreferences.setIMPI(mConfigurationService.getString(
-				NgnConfigurationEntry.IDENTITY_IMPI,
-				NgnConfigurationEntry.DEFAULT_IDENTITY_IMPI));
-		mPreferences.setIMPU(mConfigurationService.getString(
-				NgnConfigurationEntry.IDENTITY_IMPU,
-				NgnConfigurationEntry.DEFAULT_IDENTITY_IMPU));
 
-		Log.d(TAG, String.format("realm='%s', impu='%s', impi='%s'",
-				mPreferences.getRealm(), mPreferences.getIMPU(),
-				mPreferences.getIMPI()));
+		mTerminateRequested = false;
+
+		final String realm = mConfigurationService.getString(
+				NgnConfigurationEntry.NETWORK_REALM,
+				NgnConfigurationEntry.DEFAULT_NETWORK_REALM);
+		final String impi = mConfigurationService.getString(
+				NgnConfigurationEntry.IDENTITY_IMPI,
+				NgnConfigurationEntry.DEFAULT_IDENTITY_IMPI);
+		final String impu = mConfigurationService.getString(
+				NgnConfigurationEntry.IDENTITY_IMPU,
+				NgnConfigurationEntry.DEFAULT_IDENTITY_IMPU);
+
+		Log.d(TAG, String.format("realm='%s', impu='%s', impi='%s'", realm, impu, impi));
 
 		if (mSipStack == null) {
-			mSipStack = new NgnSipStack(mSipCallback, mPreferences.getRealm(),
-					mPreferences.getIMPI(), mPreferences.getIMPU());
+			mSipStack = new NgnSipStack(mSipCallback, realm, impi, impu);
 			mSipStack.setDebugCallback(mDebugCallback);
 			SipStack.setCodecs_2(mConfigurationService.getInt(
 					NgnConfigurationEntry.MEDIA_CODECS,
 					NgnConfigurationEntry.DEFAULT_MEDIA_CODECS));
 		} else {
-			if (!mSipStack.setRealm(mPreferences.getRealm())) {
+			if (!mSipStack.setRealm(realm)) {
 				Log.e(TAG, "Failed to set realm");
 				return false;
 			}
-			if (!mSipStack.setIMPI(mPreferences.getIMPI())) {
+			if (!mSipStack.setIMPI(impi)) {
 				Log.e(TAG, "Failed to set IMPI");
 				return false;
 			}
-			if (!mSipStack.setIMPU(mPreferences.getIMPU())) {
+			if (!mSipStack.setIMPU(impu)) {
 				Log.e(TAG, "Failed to set IMPU");
 				return false;
 			}
@@ -303,7 +335,6 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 		if (mConfigurationService.getBoolean(
 				NgnConfigurationEntry.NATT_STUN_DISCO,
 				NgnConfigurationEntry.DEFAULT_NATT_STUN_DISCO)) {
-			final String realm = mPreferences.getRealm();
 			String domain = realm.substring(realm.indexOf(':') + 1);
 			int[] port = new int[1];
 			String server = mSipStack.dnsSrv(
@@ -315,67 +346,56 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 					server, port[0]));
 			mSipStack.setSTUNServer(server, port[0]);// Needed event if null
 		} else {
-			String server = mConfigurationService.getString(
+			final String server = mConfigurationService.getString(
 					NgnConfigurationEntry.NATT_STUN_SERVER,
 					NgnConfigurationEntry.DEFAULT_NATT_STUN_SERVER);
-			int port = mConfigurationService.getInt(
+			final int port = mConfigurationService.getInt(
 					NgnConfigurationEntry.NATT_STUN_PORT,
 					NgnConfigurationEntry.DEFAULT_NATT_STUN_PORT);
-			Log.d(NgnSipService.TAG, String.format(
-					"STUN2 - server=%s and port=%d", server, port));
+			Log.d(NgnSipService.TAG, String.format("STUN2 - server=%s and port=%d", server, port));
 			mSipStack.setSTUNServer(server, port);
 		}
 
 		// Set Proxy-CSCF
-		mPreferences.setPcscfHost(mConfigurationService.getString(
-				NgnConfigurationEntry.NETWORK_PCSCF_HOST, null)); // null will trigger DNS NAPTR+SRV
-		mPreferences.setPcscfPort(mConfigurationService.getInt(
+		final String pcscf_host = mConfigurationService.getString(
+				NgnConfigurationEntry.NETWORK_PCSCF_HOST, null); // null will trigger DNS NAPTR+SRV
+		final int pcscf_port = mConfigurationService.getInt(
 				NgnConfigurationEntry.NETWORK_PCSCF_PORT,
-				NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_PORT));
-		mPreferences.setTransport(mConfigurationService.getString(
+				NgnConfigurationEntry.DEFAULT_NETWORK_PCSCF_PORT);
+		final String transport = mConfigurationService.getString(
 				NgnConfigurationEntry.NETWORK_TRANSPORT,
-				NgnConfigurationEntry.DEFAULT_NETWORK_TRANSPORT));
-		mPreferences.setIPVersion(mConfigurationService.getString(
+				NgnConfigurationEntry.DEFAULT_NETWORK_TRANSPORT);
+		final String ipversion = mConfigurationService.getString(
 				NgnConfigurationEntry.NETWORK_IP_VERSION,
-				NgnConfigurationEntry.DEFAULT_NETWORK_IP_VERSION));
+				NgnConfigurationEntry.DEFAULT_NETWORK_IP_VERSION); // "ipv6", "ipv4", "ipv46", "ipv64"
 
-		Log.d(TAG,
-				String.format(
-						"pcscf-host='%s', pcscf-port='%d', transport='%s', ipversion='%s'",
-						mPreferences.getPcscfHost(),
-						mPreferences.getPcscfPort(),
-						mPreferences.getTransport(),
-						mPreferences.getIPVersion()));
+		Log.d(TAG, String.format("pcscf-host='%s', pcscf-port='%d', transport='%s', ipversion='%s'", pcscf_host, pcscf_port, transport, ipversion));
 
-		if (!mSipStack.setProxyCSCF(mPreferences.getPcscfHost(),
-				mPreferences.getPcscfPort(), mPreferences.getTransport(),
-				mPreferences.getIPVersion())) {
-			Log.e(NgnSipService.TAG, "Failed to set Proxy-CSCF parameters");
+		// Set Proxy-CSCF
+		if (!mNetworkService.setProxyCSCF(transport, ipversion, pcscf_host, pcscf_port)) {
+			Log.e(TAG, "Failed to set Proxy-CSCF parameters on network service");
+			return false;
+		}
+		if (!mSipStack.setProxyCSCF(pcscf_host, pcscf_port, transport, ipversion)) {
+			Log.e(TAG, "Failed to set Proxy-CSCF parameters on SIP stack");
 			return false;
 		}
 
-		// Set local IP (If your reusing this code on non-Android platforms
-		// (iOS, Symbian, WinPhone, ...),
-		// let Doubango retrieve the best IP address)
-		boolean ipv6 = NgnStringUtils.equals(mPreferences.getIPVersion(),
-				"ipv6", true);
-		mPreferences.setLocalIP(mNetworkService.getLocalIP(ipv6));
-		if (mPreferences.getLocalIP() == null) {
-			// if(fromNetworkService){
-			// this.preferences.localIP = ipv6 ? "::" : "10.0.2.15"; /* Probably
-			// on the emulator */
-			// }
-			// else{
-			// Log.e(TAG, "IP address is Null. Trying to start network");
-			// this.networkService.setNetworkEnabledAndRegister();
-			// return false;
-			// }
+		// Set default connection
+		final boolean ipv6 = NgnStringUtils.equals(ipversion, "ipv6", true); // "ipv46" and "ipv64" use "IPv4" as default transport
+		final NgnNetworkConnection defaultConnection = mNetworkService.getBestConnection(ipv6);
+		if (defaultConnection == null) {
+			Log.e(TAG, "Failed to find default connection");
+			return false;
 		}
-		if (!mSipStack.setLocalIP(mPreferences.getLocalIP())) {
+		Log.d(TAG, "SIP service using default connection ->" + defaultConnection);
+		// Bind process to connection
+		//mNetworkService.bindProcessToConnection(defaultConnection);
+		// Set local IP
+		if (!mSipStack.setLocalIP(defaultConnection.getLocalIP())) {
 			Log.e(TAG, "Failed to set the local IP");
 			return false;
 		}
-		Log.d(TAG, String.format("Local IP='%s'", mPreferences.getLocalIP()));
 
 		// Whether to use DNS NAPTR+SRV for the Proxy-CSCF discovery (even if
 		// the DNS requests are sent only when the stack starts,
@@ -395,8 +415,7 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 		if (mConfigurationService.getBoolean(
 				NgnConfigurationEntry.NETWORK_USE_SIGCOMP,
 				NgnConfigurationEntry.DEFAULT_NETWORK_USE_SIGCOMP)) {
-			String compId = String.format("urn:uuid:%s", UUID.randomUUID()
-					.toString());
+			String compId = String.format("urn:uuid:%s", UUID.randomUUID().toString());
 			mSipStack.setSigCompId(compId);
 		} else {
 			mSipStack.setSigCompId(null);
@@ -427,7 +446,7 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 		if (!mSipStack.start()) {
 			if (context != null
 					&& Thread.currentThread() == Looper.getMainLooper()
-							.getThread()) {
+					.getThread()) {
 				Toast.makeText(context, "Failed to start the SIP stack",
 						Toast.LENGTH_LONG).show();
 			}
@@ -435,16 +454,19 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 			return false;
 		}
 
+		// Update active connection
+		mActiveConnection = defaultConnection;
+
 		// Preference values
-		mPreferences.setXcapEnabled(mConfigurationService.getBoolean(
+		final boolean xcapEnabled = mConfigurationService.getBoolean(
 				NgnConfigurationEntry.XCAP_ENABLED,
-				NgnConfigurationEntry.DEFAULT_XCAP_ENABLED));
-		mPreferences.setPresenceEnabled(mConfigurationService.getBoolean(
+				NgnConfigurationEntry.DEFAULT_XCAP_ENABLED);
+		final boolean presenceEnabled = mConfigurationService.getBoolean(
 				NgnConfigurationEntry.RCS_USE_PRESENCE,
-				NgnConfigurationEntry.DEFAULT_RCS_USE_PRESENCE));
-		mPreferences.setMWI(mConfigurationService.getBoolean(
+				NgnConfigurationEntry.DEFAULT_RCS_USE_PRESENCE);
+		final boolean mwiEnabled = mConfigurationService.getBoolean(
 				NgnConfigurationEntry.RCS_USE_MWI,
-				NgnConfigurationEntry.DEFAULT_RCS_USE_MWI));
+				NgnConfigurationEntry.DEFAULT_RCS_USE_MWI);
 
 		// Create registration session
 		if (mRegSession == null) {
@@ -455,13 +477,13 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 
 		// Set/update From URI. For Registration ToUri should be equals to realm
 		// (done by the stack)
-		mRegSession.setFromUri(mPreferences.getIMPU());
+		mRegSession.setFromUri(impu);
 
 		/* Before registering, check if AoR hacking id enabled */
-		mPreferences.setHackAoR(mConfigurationService.getBoolean(
+		final boolean hackAoR = mConfigurationService.getBoolean(
 				NgnConfigurationEntry.NATT_HACK_AOR,
-				NgnConfigurationEntry.DEFAULT_NATT_HACK_AOR));
-		if (mPreferences.isHackAoR()) {
+				NgnConfigurationEntry.DEFAULT_NATT_HACK_AOR);
+		if (hackAoR) {
 			if (mCondHackAoR == null) {
 				mCondHackAoR = new ConditionVariable();
 			}
@@ -493,7 +515,9 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 
 	@Override
 	public boolean unRegister() {
+		Log.d(TAG, "unRegister()");
 		if (isRegistered()) {
+			mTerminateRequested = true;
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -565,6 +589,30 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 				NgnSubscriptionEventArgs.ACTION_SUBSCRIBTION_EVENT);
 		intent.putExtra(NgnSubscriptionEventArgs.EXTRA_EMBEDDED, args);
 		NgnApplication.getContext().sendBroadcast(intent);
+	}
+
+	private void handleNetworkEvent(Intent intent) {
+		final NgnNetworkEventArgs args = intent.getParcelableExtra(NgnNetworkEventArgs.EXTRA_EMBEDDED);
+		if (args == null) {
+			Log.e(TAG, "Invalid event args");
+			return;
+		}
+		final NgnNetworkEventTypes eventType = args.getEventType();
+		switch (eventType) {
+			case DISCONNECTED:
+				break;
+			case CONNECTED:
+				//if (!mTerminateRequested && !isRegistered()) {
+					//final NgnNetworkConnection bestConnection = mNetworkService.getBestConnection(
+					//		NgnStringUtils.equals(mConfigurationService.getString(
+					//				NgnConfigurationEntry.NETWORK_IP_VERSION,
+					//				NgnConfigurationEntry.DEFAULT_NETWORK_IP_VERSION), "ipv6", true));
+					//if (bestConnection != null && bestConnection.isUp()) {
+						//register();
+					//}
+				//}
+				break;
+		}
 	}
 
 	/**
@@ -1330,10 +1378,17 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 				break;
 			case tinyWRAPConstants.tsip_event_code_stack_stopped:
 				mSipService.mSipStack.setState(STACK_STATE.STOPPED);
+				if (mSipService.mTerminateRequested) {
+					mSipService.mActiveConnection = null;
+				}
+				mSipService.mNetworkService.bindProcessToConnection(null);
 				Log.d(TAG, "Stack stopped");
 				break;
 			case tinyWRAPConstants.tsip_event_code_stack_disconnected:
 				mSipService.mSipStack.setState(STACK_STATE.DISCONNECTED);
+				if (mSipService.mTerminateRequested) {
+					mSipService.mActiveConnection = null;
+				}
 				Log.d(TAG, "Stack disconnected");
 				break;
 			}
@@ -1409,6 +1464,5 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
 			}
 			return 0;
 		}
-
 	}
 }

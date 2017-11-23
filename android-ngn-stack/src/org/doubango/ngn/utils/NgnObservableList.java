@@ -28,33 +28,41 @@ import java.util.Observer;
 public class NgnObservableList<T> extends NgnObservableObject implements Observer {
 	private final List<T> mList;
 	private boolean mWatchValueChanged;
-	
+
 	public NgnObservableList(boolean watchValueChanged){
 		super();
 		mList = new ArrayList<T>();
 		if((mWatchValueChanged = watchValueChanged)){
-			
+
 		}
 	}
-	
+
 	public NgnObservableList(){
 		this(false);
 	}
-	
+
 	public List<T> getList(){
 		return mList;
 	}
-	
+
 	public List<T> filter(NgnPredicate<T> predicate) {
 		return NgnListUtils.filter(mList, predicate);
 	}
-	
+
+	public T first(NgnPredicate<T> predicate) {
+		List<T> list = NgnListUtils.filter(mList, predicate);
+		if(list.size() > 0) {
+			return list.get(0);
+		}
+		return null;
+	}
+
 	public boolean add(T object){
 		int location = mList.size();
 		this.add(location, object);
 		return true;
 	}
-	
+
 	// FIXME: refactor
 	public void add(T objects[]){
 		for(T object : objects){
@@ -65,7 +73,7 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		}
 		super.setChangedAndNotifyObservers(null);
 	}
-	
+
 	// FIXME: refactor
 	public void add(Collection<T> list){
 		for(T object : list){
@@ -76,7 +84,7 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		}
 		super.setChangedAndNotifyObservers(null);
 	}
-	
+
 	public void add(int location, T object){
 		mList.add(location, object);
 		if(mWatchValueChanged && object instanceof Observable){
@@ -84,7 +92,7 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		}
 		super.setChangedAndNotifyObservers(null);
 	}
-	
+
 	public T remove(int location){
 		T result = mList.remove(location);
 		if(result != null && result instanceof Observable){
@@ -93,7 +101,7 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		super.setChangedAndNotifyObservers(result);
 		return result;
 	}
-	
+
 	public boolean remove(T object){
 		if(object == null){
 			return false;
@@ -105,7 +113,7 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		super.setChangedAndNotifyObservers(result);
 		return result;
 	}
-	
+
 	public boolean removeAll(Collection<T> objects){
 		if(objects == null){
 			return false;
@@ -119,7 +127,7 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		super.setChangedAndNotifyObservers(result);
 		return result;
 	}
-	
+
 	public void clear(){
 		for(T object : mList){
 			if(object instanceof Observable){
@@ -129,7 +137,7 @@ public class NgnObservableList<T> extends NgnObservableObject implements Observe
 		mList.clear();
 		super.setChangedAndNotifyObservers(null);
 	}
-	
+
 	public void setWatchValueChanged(boolean watchValueChanged){
 		mWatchValueChanged = watchValueChanged;
 	}

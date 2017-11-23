@@ -19,46 +19,45 @@
 */
 package org.doubango.ngn.services.impl;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.doubango.ngn.NgnApplication;
 import org.doubango.ngn.NgnEngine;
-import org.doubango.ngn.model.NgnAccessPoint;
+import org.doubango.ngn.events.NgnNetworkEventArgs;
+import org.doubango.ngn.events.NgnNetworkEventTypes;
 import org.doubango.ngn.services.INgnNetworkService;
+import org.doubango.ngn.utils.NgnNetworkConnection;
 import org.doubango.ngn.utils.NgnConfigurationEntry;
 import org.doubango.ngn.utils.NgnObservableList;
 import org.doubango.ngn.utils.NgnStringUtils;
+import org.doubango.tinyWRAP.SipStack;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.AuthAlgorithm;
-import android.net.wifi.WifiConfiguration.GroupCipher;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.NetworkRequest;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.widget.Toast;
 
 /**@page NgnNetworkService_page Network Service
  * The network service is used to manage both WiFi and 3g/4g network connections.
@@ -69,32 +68,30 @@ import android.widget.Toast;
  */
 public class NgnNetworkService  extends NgnBaseService implements INgnNetworkService {
 	private static final String TAG = NgnNetworkService.class.getCanonicalName();
-	
-	private static final String OPENVPN_INTERFACE_NAME = "tun0";
-	@SuppressWarnings("unused")
-	private static final String WLAN_INTERFACE_NAME = "wlan0";
-	private static final String USB_INTERFACE_NAME = "usb0";
-	
 	private WifiManager mWifiManager;
 	private WifiLock mWifiLock;
+	private PowerManager.WakeLock mCellularLock;
 	private String mConnetedSSID;
-	private boolean mAcquired;
 	private boolean mStarted;
-	private boolean mScanning;
-	private final NgnObservableList<NgnAccessPoint> mAccessPoints;
+	private String mProxyCSCFHost;
+	private String mProxyCSCFIPversion;
+	private int mProxyCSCFPort;
+	private String mProxyCSCFTransport;
+	private final NgnObservableList<NgnNetworkConnection> mConnections;
 	private BroadcastReceiver mNetworkWatcher;
-	
+
 	private static int WifiManager_WIFI_MODE = WifiManager.WIFI_MODE_FULL;
 	private static int ConnectivityManager_TYPE_ETHERNET = 0x00000009;
 	private static int ConnectivityManager_TYPE_WIMAX = 0x00000006;
 	private static Method NetworkInterface_isUp;
-	
+
 	static{
 		final int sdkVersion = NgnApplication.getSDKVersion();
 		if(sdkVersion >= 9){
 			try {
 				WifiManager_WIFI_MODE = WifiManager.class.getDeclaredField("WIFI_MODE_FULL_HIGH_PERF").getInt(null);
 			} catch (Exception e) {
+				e.printStackTrace();
 				Log.e(TAG, e.toString());
 			}
 		}
@@ -102,18 +99,20 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 			try {
 				ConnectivityManager_TYPE_ETHERNET = ConnectivityManager.class.getDeclaredField("TYPE_ETHERNET").getInt(null);
 			} catch (Exception e) {
+				e.printStackTrace();
 				Log.e(TAG, e.toString());
 			}
 		}
-		
+
 		if(sdkVersion >= 8){
 			try {
 				ConnectivityManager_TYPE_WIMAX = ConnectivityManager.class.getDeclaredField("TYPE_WIMAX").getInt(null);
 			} catch (Exception e) {
+				e.printStackTrace();
 				Log.e(TAG, e.toString());
 			}
 		}
-		
+
 		// according to the documentation, NetworkInterface::isUp() is only defined starting API Level 9 but it's available on my GS1 (API Level 8)
 		// this is why we don't test sdk version
 		try{
@@ -121,57 +120,145 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 		}
 		catch (Exception e) { }
 	}
-	
+
 	public static final int[] sWifiSignalValues = new int[] {
-        0,
-        1,
-        2,
-        3,
-        4
-    };
-	
+			0,
+			1,
+			2,
+			3,
+			4
+	};
+
 	public static enum DNS_TYPE {
 		DNS_1, DNS_2, DNS_3, DNS_4
 	}
-	
+
 	public NgnNetworkService() {
 		super();
-		
-		mAccessPoints = new NgnObservableList<NgnAccessPoint>(true);
+
+		mConnections = new NgnObservableList<NgnNetworkConnection>(true);
 	}
-	
+
+	/**
+	 * Starts the network service.
+	 * @return true if it succeed, false otherwise.
+	 */
 	@Override
 	public boolean start() {
 		Log.d(TAG, "Starting...");
 		mWifiManager = (WifiManager) NgnApplication.getContext().getSystemService(Context.WIFI_SERVICE);
-		
-		if(mWifiManager == null){
+
+		if (mWifiManager == null){
 			Log.e(TAG, "WiFi manager is Null");
 			return false;
 		}
-		
+
+		mWifiManager.setWifiEnabled(true);
+
+		if (mNetworkWatcher == null){
+			IntentFilter intentNetWatcher = new IntentFilter();
+			intentNetWatcher.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+
+			mNetworkWatcher = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					if (!isInitialStickyBroadcast()) {
+						handleNetworkEvent(context, intent);
+					}
+				}
+			};
+			NgnApplication.getContext().registerReceiver(mNetworkWatcher, intentNetWatcher);
+		}
+
+		if (!loadInterfaces()) {
+			return false;
+		}
+
+		acquire();
+
 		mStarted = true;
 		return true;
 	}
 
+	/**
+	 * Stops the network service.
+	 * @return true if it succeed, false otherwise.
+	 */
 	@Override
 	public boolean stop() {
 		Log.d(TAG, "Stopping...");
-		if(!mStarted){
+		if (!mStarted){
 			Log.w(TAG, "Not started...");
 			return false;
 		}
-		
-		if(mNetworkWatcher != null){
+
+		if (mNetworkWatcher != null){
 			NgnApplication.getContext().unregisterReceiver(mNetworkWatcher);
 			mNetworkWatcher = null;
 		}
-		
+		mConnections.getList().clear();
 		release();
 		mStarted = false;
 		return true;
 	}
 
+	/**
+	 * Gets the list of active connections.
+	 * @return
+	 */
+	@Override
+	public NgnObservableList<NgnNetworkConnection> getConnections()
+	{
+		return mConnections;
+	}
+
+	/**
+	 * Sets the Proxy CSCF
+	 * @param transport
+	 * @param IPversion
+	 * @param host
+	 * @param port
+	 * @return
+	 */
+	@Override
+	public boolean setProxyCSCF(final String transport, final String IPversion, final String host, final int port)
+	{
+		final boolean use3G = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.NETWORK_USE_3G,
+				NgnConfigurationEntry.DEFAULT_NETWORK_USE_3G);
+		if (use3G) {
+			final boolean ipv6 = NgnStringUtils.equals(IPversion, "ipv6", true); // "ipv46" and "ipv64" use "IPv4" as default transport
+			// Enable cellular data for the route to P-CSCF
+			requestCellularRouteToHost(host, ipv6);
+		}
+		else {
+			Log.d(TAG, "3G not enabled, not requesting cellular route to " + host);
+		}
+
+		// Update values
+		mProxyCSCFTransport = transport;
+		mProxyCSCFIPversion = IPversion;
+		mProxyCSCFHost = host;
+		mProxyCSCFPort = port;
+
+		// Update old values with new parameters
+		synchronized (mConnections) {
+			final List<NgnNetworkConnection> connections = mConnections.getList();
+			NgnNetworkConnection connection;
+			Iterator<NgnNetworkConnection> it = connections.iterator();
+			while (it.hasNext()) {
+				connection = it.next();
+				connection.setProxyCSCF(host, port);
+				connection.setTransport(transport, IPversion);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Gets the address of the default DNS server.
+	 * @param type The type of DNS server.
+	 * @return The address of the DNS server if it succeed, null otherwise.
+	 */
 	@Override
 	public String getDnsServer(DNS_TYPE type) {
 		String dns = null;
@@ -195,253 +282,134 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 		return null;
 	}
 
+	/**
+	 * Gets the default connection.
+	 * @param ipv6 Whether to loop for IPv6 addresses only. Set this value to false to look for IPv4 addresses.
+	 * @return
+	 */
 	@Override
-	public String getLocalIP(boolean ipv6) {
-		final HashMap<String, InetAddress> addressMap = new HashMap<String, InetAddress>();
-		
-		try {
-			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
-				final NetworkInterface intf = en.nextElement();
-				
-				// http://code.google.com/p/imsdroid/issues/detail?id=398#c3
-				try{
-					if(NetworkInterface_isUp != null && !(Boolean)NetworkInterface_isUp.invoke(intf)){
-						Log.i(TAG, "interface=" + intf.getName() + " is not up");
-						continue;
-					}
-				}
-				catch(Exception e){}
-				
-				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-					InetAddress inetAddress = enumIpAddr.nextElement();
-					Log.d(NgnNetworkService.TAG, inetAddress.getHostAddress().toString());
-					if(inetAddress.isLoopbackAddress() || ((inetAddress instanceof Inet6Address) && ((Inet6Address)inetAddress).isLinkLocalAddress())){
-			    		continue;
-			    	}
-					if (((inetAddress instanceof Inet4Address) && !ipv6) || ((inetAddress instanceof Inet6Address) && ipv6)) {
-						addressMap.put(intf.getName(), inetAddress);
+	public NgnNetworkConnection getBestConnection(boolean ipv6) {
+		synchronized (mConnections) {
+			// Tunnel
+			final NgnNetworkConnection vpnConnection = mConnections.first(new NgnNetworkConnection.NgnNetworkConnectionFilterByUpAndIPv6AndNameStartsWith(true, ipv6, "tun"));
+			if (vpnConnection != null) {
+				return vpnConnection;
+			}
+			final Context context = NgnApplication.getContext();
+			final ConnectivityManager connectivityManager = NgnApplication.getConnectivityManager();
+			NetworkInfo networkInfo = null;
+			if (connectivityManager != null) {
+				networkInfo = connectivityManager.getActiveNetworkInfo();
+			}
+
+			// Wifi
+			if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+				final boolean useWifi = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.NETWORK_USE_WIFI,
+						NgnConfigurationEntry.DEFAULT_NETWORK_USE_WIFI);
+				if (useWifi) {
+					final NgnNetworkConnection wifiConnection = mConnections.first(new NgnNetworkConnection.NgnNetworkConnectionFilterByUpAndIPv6AndNameStartsWith(true, ipv6, "wlan"));
+					if (wifiConnection != null) {
+						return wifiConnection;
 					}
 				}
 			}
-			if(addressMap.size() > 0){
-				// openvpn address
-				final InetAddress openvpn = addressMap.get(OPENVPN_INTERFACE_NAME);
-				if(openvpn != null){
-					final String openvpnAddr = openvpn.getHostAddress().toString();
-					if(!NgnStringUtils.isNullOrEmpty(openvpnAddr)){
-						return openvpnAddr;
+
+			// Cellular
+			if (networkInfo != null && (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE || networkInfo.getType() == ConnectivityManager_TYPE_WIMAX)) {
+				final boolean use3G = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.NETWORK_USE_3G,
+						NgnConfigurationEntry.DEFAULT_NETWORK_USE_3G);
+				if (use3G) {
+					final NgnNetworkConnection cellularConnection = mConnections.first(new NgnNetworkConnection.NgnNetworkConnectionFilterByUpAndIPv6AndNameStartsWith(true, ipv6, "rmnet"));
+					if (cellularConnection != null) {
+						return cellularConnection;
 					}
 				}
-				
-				final Iterator<Map.Entry<String, InetAddress>> it = addressMap.entrySet().iterator();
-				Map.Entry<String, InetAddress> kvp;
-			    while (it.hasNext()) {
-			    	kvp = it.next();
-			    	final InetAddress address = kvp.getValue();
-			    	if(kvp.getKey().equals(USB_INTERFACE_NAME)){
-			    		continue;
-			    	}
-				    return address.getHostAddress();
-			    }
-				return addressMap.values().iterator().next().getHostAddress();
+				else {
+					Log.d(TAG, "Cellular network up but not enabled in user interface");
+				}
 			}
-		} catch (SocketException ex) {
-			Log.e(NgnNetworkService.TAG, ex.toString());
+
+			// Any UP connection
+			final NgnNetworkConnection upConnection = mConnections.first(new NgnNetworkConnection.NgnNetworkConnectionFilterByUpAndIPv6(true, ipv6));
+			if (upConnection != null) {
+				return upConnection;
+			}
+
+			// Any UP or DOWN connection
+			if (!mConnections.getList().isEmpty()) {
+				return mConnections.getList().get(0);
+			}
+			return null;
 		}
-
-		// Hack
-		try {
-			java.net.Socket socket = new java.net.Socket(ipv6 ? "ipv6.google.com" : "google.com", 80);
-			Log.d(NgnNetworkService.TAG, socket.getLocalAddress().getHostAddress());
-			return socket.getLocalAddress().getHostAddress();
-		} catch (Exception e) {
-			Log.e(NgnNetworkService.TAG, e.toString());
-		}
-
-		return null;
 	}
 
-	@Override
-	public boolean isScanning(){
-		return mScanning;
-	}
-	
-	@Override
-	public boolean setNetworkEnabledAndRegister() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean setNetworkEnabled(String SSID, boolean enabled, boolean force) {
-		return setNetworkEnabled(getNetworkIdBySSID(SSID), enabled, force);
-	}
-	
-	@Override
-	public boolean setNetworkEnabled(int networkId, boolean enabled, boolean force){
-		Log.d(TAG, "setNetworkEnabled(" + enabled + ")");
-		
-		if(mWifiManager == null){
-			Log.e(TAG, "WiFi manager is Null");
+	/**
+	 * Ensure that a network route exists to deliver traffic to the specified host via Cellular data.
+	 * @param host
+	 * @param IPv6
+	 * @return
+	 */
+	public boolean requestCellularRouteToHost(final String host, final boolean IPv6)
+	{
+		Log.d(TAG, "requestCellularRouteToHost("+host+")");
+		int sdkVersion = NgnApplication.getSDKVersion();
+		if (sdkVersion < 8) {
+			Log.e(TAG, "requestCellularRouteToHost not implemented for API level " + sdkVersion);
 			return false;
 		}
-		
-		final boolean useWifi = NgnEngine.getInstance().getConfigurationService().getBoolean(
-				NgnConfigurationEntry.NETWORK_USE_WIFI, NgnConfigurationEntry.DEFAULT_NETWORK_USE_WIFI);
-
-		if (useWifi) {
-			boolean ret = false;
-			if ((force || !mWifiManager.isWifiEnabled()) && enabled) {
-				Toast.makeText(NgnApplication.getContext(), "Trying to start WiFi",
-						Toast.LENGTH_SHORT).show();
-				ret = mWifiManager.setWifiEnabled(true);
-				if (ret && networkId>=0) {
-					ret = mWifiManager.enableNetwork(networkId, true);
-				}
-			} else if ((force || mWifiManager.isWifiEnabled()) && !enabled) {
-				Toast.makeText(NgnApplication.getContext(), "Trying to stop WiFi",
-						Toast.LENGTH_SHORT).show();
-				ret = mWifiManager.setWifiEnabled(false);
-				if (ret && networkId>=0) {
-					ret = mWifiManager.disableNetwork(networkId);
-				}
-			}
-			return ret;
+		if (sdkVersion < 21) {
+			return requestCellularRouteToHostApi8(host, IPv6);
 		}
-		else{
-			Log.w(TAG, "setNetworkEnabled() is called but WiFi not enabled");
-		}
-		return false;
+		return requestCellularRouteToHostApi21(host, IPv6);
 	}
 
-	@Override
-	public boolean forceConnectToNetwork() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	@Override
-	public NgnObservableList<NgnAccessPoint> getAccessPoints(){
-		return mAccessPoints;
-	}
-
-	@Override
-	public int configure(NgnAccessPoint ap, String password, boolean bHex){
-		if(ap == null){
-			Log.e(TAG, "Null AccessPoint");
-			return -1;
+	/**
+	 * Make sure all connections created by the current process will use the specified SIP network connection.
+	 * @param connection The SIP network connection to use. Null to unbind.
+	 * @return true if succeed, false otherwise.
+	 */
+	public boolean bindProcessToConnection(final NgnNetworkConnection connection)
+	{
+		if (connection != null && !connection.isUp()) {
+			Log.w(TAG, "Binding process to down connection ->" + connection);
 		}
-		else if(ap.isConfigured()){
-			Log.w(TAG, "AccessPoint already configured");
-			return -1;
-		}
-		else if(ap.getSR() == null){
-			Log.e(TAG, "Null SR");
-		}
-		else if(mWifiManager == null){
-			Log.e(TAG, "Null WifiManager");
-			return -1;
-		}
-		
-		final ScanResult sr = ap.getSR();
-		WifiConfiguration wConf = new WifiConfiguration();
-		//http://developer.android.com/reference/android/net/wifi/WifiConfiguration.html#SSID
-		wConf.SSID = "\"" + sr.SSID + "\"";
-		wConf.BSSID = sr.BSSID;
-		wConf.priority = 40;
-		String security = NgnAccessPoint.getScanResultSecurity(sr);
-		if(security == NgnAccessPoint.AP_WEP){
-			wConf.wepKeys[0] = bHex ? password : NgnStringUtils.quote(password, "\"");//hex not quoted
-            
-			wConf.wepTxKeyIndex = 0;
-            
-            wConf.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
-            wConf.allowedAuthAlgorithms.set(AuthAlgorithm.SHARED);
-
-            wConf.allowedKeyManagement.set(KeyMgmt.NONE);
-            
-            wConf.allowedGroupCiphers.set(GroupCipher.WEP40);
-            wConf.allowedGroupCiphers.set(GroupCipher.WEP104);
-		}
-		else if(security == NgnAccessPoint.AP_WPA || security == NgnAccessPoint.AP_WPA2){
-			wConf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);  
-			wConf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);  
-			wConf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);  
-			wConf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);  
-			wConf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);  
-			wConf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);  
-			wConf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);  
-			wConf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);  
-			wConf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);  
-			wConf.preSharedKey = "\"".concat("mamadoudiop").concat("\""); 
-		}
-		else if(security == NgnAccessPoint.AP_OPEN){
-			wConf.allowedKeyManagement.set(KeyMgmt.NONE);
-		}
-		return mWifiManager.addNetwork(wConf);
-	}
-	
-	@Override
-	public boolean scan(){
-		if(mWifiManager == null){
-			Log.e(TAG,"WiFi manager is Null");
+		Log.d(TAG, "bindProcessToConnection(" + connection + ")");
+		final int sdkVersion = NgnApplication.getSDKVersion();
+		if (sdkVersion < 8) {
+			Log.e(TAG, "bindProcessToConnection not implemented for API level " + sdkVersion);
 			return false;
 		}
-		
-		Toast.makeText(NgnApplication.getContext(), "Network Scanning...", Toast.LENGTH_SHORT).show();
-		
-		if(mNetworkWatcher == null){
-			IntentFilter intentNetWatcher = new IntentFilter();
-			intentNetWatcher.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-			intentNetWatcher.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-			intentNetWatcher.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-			intentNetWatcher.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-			intentNetWatcher.addAction(WifiManager.RSSI_CHANGED_ACTION);
-			mNetworkWatcher = new BroadcastReceiver() {
-				@Override
-				public void onReceive(Context context, Intent intent) {
-					handleNetworkEvent(context, intent);
-				}
-			};
-			NgnApplication.getContext().registerReceiver(mNetworkWatcher, intentNetWatcher);
+		if (sdkVersion < 21) {
+			return bindProcessToConnectionApi8(connection);
 		}
-		
-		mScanning = true;
-		if(mWifiManager.setWifiEnabled(true)){
-			return mWifiManager.reassociate();
+		if (sdkVersion < 23) {
+			return bindProcessToConnectionApi21(connection);
 		}
-		return false;
+		return bindProcessToConnectionApi23(connection);
 	}
-	
+
+	/**
+	 * Locks the network and start using it. Later, the network must be unlocked using @release.
+	 * @return true if succeed, false otherwise.
+	 * @sa release
+	 */
 	@Override
 	public boolean acquire() {
-		if (mAcquired) {
-			return true;
-		}
-		
 		Log.d(TAG, "acquireNetworkLock()");
 
-		boolean connected = false;
-		NetworkInfo networkInfo = NgnApplication.getConnectivityManager().getActiveNetworkInfo();
+		final NetworkInfo networkInfo = NgnApplication.getConnectivityManager().getActiveNetworkInfo();
 		if (networkInfo == null) {
-			Log.e(NgnNetworkService.TAG, "Failed to get Network information");
+			Log.e(TAG, "Failed to get Network information");
 			return false;
 		}
 
-		int netType = networkInfo.getType();
-		int netSubType = networkInfo.getSubtype();
+		final int netType = networkInfo.getType();
+		final int netSubType = networkInfo.getSubtype();
+		Log.d(NgnNetworkService.TAG, String.format("netType=%d and netSubType=%d", netType, netSubType));
 
-		Log.d(NgnNetworkService.TAG, String.format("netType=%d and netSubType=%d",
-				netType, netSubType));
-
-		boolean useWifi = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.NETWORK_USE_WIFI, 
-				NgnConfigurationEntry.DEFAULT_NETWORK_USE_WIFI);
-		boolean use3G = NgnEngine.getInstance().getConfigurationService().getBoolean(NgnConfigurationEntry.NETWORK_USE_3G,
-				NgnConfigurationEntry.DEFAULT_NETWORK_USE_3G);
-
-		if (useWifi && (netType == ConnectivityManager.TYPE_WIFI) && mWifiLock == null) {
+		if (mWifiLock == null && isWifiNetwork(networkInfo)) {
 			if (mWifiManager != null && mWifiManager.isWifiEnabled()) {
-				mWifiLock = mWifiManager.createWifiLock(NgnNetworkService.WifiManager_WIFI_MODE, NgnNetworkService.TAG);
+				mWifiLock = mWifiManager.createWifiLock(NgnNetworkService.WifiManager_WIFI_MODE, NgnNetworkService.TAG + "Lock_Wifi");
 				final WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
 				if (wifiInfo != null && mWifiLock != null) {
 					final DetailedState detailedState = WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState());
@@ -450,233 +418,356 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 							|| detailedState == DetailedState.OBTAINING_IPADDR) {
 						mWifiLock.acquire();
 						mConnetedSSID = wifiInfo.getSSID();
-						connected = true;
 					}
 				}
 			} else {
 				Log.d(NgnNetworkService.TAG, "WiFi not enabled");
 			}
-		} else if (use3G && (netType == ConnectivityManager.TYPE_MOBILE || netType == ConnectivityManager_TYPE_WIMAX)) {
-			if ((netSubType >= TelephonyManager.NETWORK_TYPE_UMTS)
-					|| // HACK
-					(netSubType == TelephonyManager.NETWORK_TYPE_GPRS)
-					|| (netSubType == TelephonyManager.NETWORK_TYPE_EDGE)) {
-				//Toast.makeText(WiPhone.getContext(),
-				//		"Using 2.5G (or later) network", Toast.LENGTH_SHORT)
-				//		.show();
-				connected = true;
+		} else if (mCellularLock == null && isMobileNetwork(networkInfo)) {
+			PowerManager pm = (PowerManager) NgnApplication.getContext().getSystemService(Context.POWER_SERVICE);
+			mCellularLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NgnNetworkService.TAG + "Lock_Cellular");
+			if (mCellularLock != null) {
+				mCellularLock.acquire();
 			}
 		}
-		else if (netType == ConnectivityManager_TYPE_ETHERNET) {
-			// Ethernet always accepted
-			connected = true;
+		return true;
+	}
+
+	/**
+	 * Unlocks the network and stop using it. The network must be locked first using @ref acquire.
+	 * @return true is succeed, false otherwise.
+	 * @sa acquire
+	 */
+	@Override
+	public boolean release() {
+		Log.d(TAG, "releaseNetworkLock()");
+		if (mWifiLock != null) {
+			if (mWifiLock.isHeld()){
+				mWifiLock.release();
+			}
+			mWifiLock = null;
+		}
+		if (mCellularLock != null) {
+			if (mCellularLock.isHeld()){
+				mCellularLock.release();
+			}
+			mCellularLock = null;
+		}
+		return true;
+	}
+
+	/**
+	 * Handles the network events.
+	 * @param context the context associated event.
+	 * @param intent The intent associated to the event.
+	 */
+	private void handleNetworkEvent(Context context, Intent intent){
+		final String action = intent.getAction();
+		Log.d(TAG, "NetworkService::BroadcastReceiver(" + action + ")");
+
+		if (mWifiManager == null){
+			Log.e(TAG, "Invalid state");
+			return;
 		}
 
-		if (!connected) {
-			Log.e(NgnNetworkService.TAG, "No active network");
+		// NETWORK_STATE_CHANGED_ACTION: Broadcast intent action indicating that the state of Wi-Fi connectivity has changed.
+		if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)){
+			// TODO(dmi): do not reload all, just get what changed
+			final NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+			if (networkInfo != null){
+				Log.d(TAG, "NETWORK_STATE_CHANGED_ACTION.State=" + networkInfo.getState());
+				final boolean connected = networkInfo.isConnected();
+				if(connected && mStarted) {
+					acquire();
+				}
+				loadInterfaces();
+				broadcastNetworkEvent(new NgnNetworkEventArgs(connected ? NgnNetworkEventTypes.CONNECTED : NgnNetworkEventTypes.DISCONNECTED));
+			}
+		}
+	}
+
+	private boolean loadInterfaces()
+	{
+		synchronized (mConnections) {
+			NgnNetworkConnection connection;
+			List<NgnNetworkConnection> upList = null;
+			boolean triedActivatingNetwork = false;
+
+			while (upList == null || upList.isEmpty()) {
+				try {
+					for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+						final NetworkInterface intf = en.nextElement();
+						final String name = intf.getName();
+
+						if (name.startsWith("usb")) {
+							Log.i(TAG, "interface=" + intf.getName() + " is USB and ignored");
+							continue;
+						}
+
+						connection = mConnections.first(new NgnNetworkConnection.NgnNetworkConnectionFilterByName(name));
+						if (connection != null) {
+							connection.setUp(false);
+						}
+
+						// http://code.google.com/p/imsdroid/issues/detail?id=398#c3
+						try {
+							if (NetworkInterface_isUp != null && !(Boolean) NetworkInterface_isUp.invoke(intf)) {
+								Log.i(TAG, "interface=" + name + " is not up");
+								continue;
+							}
+							Log.d(TAG, "interface=" + name + " is up");
+						} catch (Exception e) {
+						}
+
+						for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+							final InetAddress inetAddress = enumIpAddr.nextElement();
+							Log.d(NgnNetworkService.TAG, inetAddress.getHostAddress().toString());
+							if (inetAddress.isLoopbackAddress() || ((inetAddress instanceof Inet6Address) && ((Inet6Address) inetAddress).isLinkLocalAddress())) {
+								continue;
+							}
+							final String localIP = inetAddress.getHostAddress().toString();
+							if (NgnStringUtils.isNullOrEmpty(localIP)) {
+								continue;
+							}
+							connection = mConnections.first(new NgnNetworkConnection.NgnNetworkConnectionFilterByName(name));
+							if (connection == null) {
+								connection = new NgnNetworkConnection(name, mProxyCSCFTransport, mProxyCSCFIPversion);
+								mConnections.add(connection);
+								Log.d(TAG, "Add connection with name = " + name + " and address = " + localIP);
+							}
+							connection.setProxyCSCF(mProxyCSCFHost, mProxyCSCFPort);
+							connection.setIPv6(inetAddress instanceof Inet6Address);
+							connection.setUp(true);
+							connection.setLocalIP(localIP);
+						}
+					}
+				} catch (SocketException e) {
+					e.printStackTrace();
+					Log.e(TAG, e.toString());
+				}
+
+				upList = mConnections.filter(new NgnNetworkConnection.NgnNetworkConnectionFilterByUp(true));
+				if (upList.isEmpty() && !triedActivatingNetwork) {
+					for (int a = 0; a < 2; ++a) {
+						try {
+							java.net.Socket socket = new java.net.Socket((a == 0) ? "ipv6.google.com" : "google.com", 80);
+							Log.d(TAG, socket.getLocalAddress().getHostAddress());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					triedActivatingNetwork = true;
+				} else {
+					return true;
+				}
+			}
+
+			return true;
+		}
+	}
+
+	@TargetApi(8)
+	private boolean requestCellularRouteToHostApi8(String host, boolean IPv6)
+	{
+		if (IPv6) {
+			Log.e(TAG, "requestCellularRouteToHost cannot be used with IPv6 address when API level is < 21");
+			return false;
+		}
+		final ConnectivityManager connectivityManager = NgnApplication.getConnectivityManager();
+		if (connectivityManager == null) {
+			Log.e(TAG, "Failed to retrieve a connection manager");
 			return false;
 		}
 
-		mAcquired = true;
+		// Check mobile connection status
+		NetworkInfo.State state = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
+		Log.d(TAG, "TYPE_MOBILE_HIPRI network state: " + state);
+		if (state == NetworkInfo.State.CONNECTED || state == NetworkInfo.State.CONNECTING) {
+			Log.d(TAG, "TYPE_MOBILE_HIPRI network connected or connecting");
+		}
+
+		// Activate the mobile connection if not already and do nothing if already done
+		int resultInt = connectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
+		Log.d(TAG, "startUsingNetworkFeature(TYPE_MOBILE, enableHIPRI) returned " + resultInt);
+		if ( resultInt == -1) {
+			Log.e(TAG, "startUsingNetworkFeature(TYPE_MOBILE, enableHIPRI) failed");
+			return false;
+		}
+		if (resultInt == 0) {
+			Log.d(TAG, "Mobile data already activated for all hosts");
+			return true;
+		}
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try  {
+					for (int counter=0; counter<10; counter++) {
+						NetworkInfo.State checkState = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
+						if (checkState == NetworkInfo.State.CONNECTED) {
+							Log.d(TAG, "requestCellularRouteToHostApi8: Cellular network is available");
+							broadcastNetworkEvent(new NgnNetworkEventArgs(NgnNetworkEventTypes.CELLULAR_AVAILABLE));
+							return;
+						}
+						Thread.sleep(500);
+					}
+					Log.w(TAG, "TYPE_MOBILE_HIPRI: State never goes to CONNECTED");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
 		return true;
 	}
 
-	@Override
-	public boolean release() {
-		if (mWifiLock != null) {
-			if(mWifiLock.isHeld()){
-				Log.d(TAG, "releaseNetworkLock()");
-				mWifiLock.release();
-			}	
-			mWifiLock = null;
+	@TargetApi(21)
+	private boolean requestCellularRouteToHostApi21(String host, boolean IPv6)
+	{
+		final ConnectivityManager connectivityManager = NgnApplication.getConnectivityManager();
+		if (connectivityManager == null) {
+			Log.e(TAG, "Failed to retrieve a connection manager");
+			return false;
 		}
+		NetworkRequest.Builder req = new NetworkRequest.Builder();
+		req.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+		req.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+		connectivityManager.requestNetwork(req.build(), new ConnectivityManager.NetworkCallback() {
+			@Override
+			public void onAvailable(Network network) {
+				// FIXME(dmi): do not reload all
+				loadInterfaces();
+				broadcastNetworkEvent(new NgnNetworkEventArgs(NgnNetworkEventTypes.CELLULAR_AVAILABLE));
+				Log.d(TAG, "requestCellularRouteToHostApi21: Cellular network is available");
+			}
+		});
 
-		mAcquired = false;
 		return true;
 	}
-	
-	private int getNetworkIdBySSID(String SSID) {
-		synchronized(mAccessPoints){
-			final NgnAccessPoint ap = getAccessPointBySSID(SSID);
-			if(ap != null){
-				return ap.getNetworkId();
-			}
-			return -1;
-		}
-	}
 
-	@SuppressWarnings("unused")
-	private WifiConfiguration getWifiConfBySSID(String SSID) {
-		synchronized(mAccessPoints){
-			final NgnAccessPoint ap = getAccessPointBySSID(SSID);
-			if(ap != null){
-				return ap.getConf();
-			}
+	@TargetApi(21)
+	private Network findNetworkByConnectionApi21(final NgnNetworkConnection connection)
+	{
+		final ConnectivityManager connectivityManager = NgnApplication.getConnectivityManager();
+		if (connectivityManager == null) {
+			Log.e(TAG, "Failed to retrieve a connection manager");
 			return null;
 		}
-	}
-	
-	private NgnAccessPoint getAccessPointBySSID(String SSID) {
-		final List<NgnAccessPoint> accessPoints = mAccessPoints.getList();
-		for (NgnAccessPoint ap : accessPoints) {
-			String SSID1 = NgnStringUtils.unquote(ap.getSSID(), "\"");
-			String SSID2 = NgnStringUtils.unquote(SSID, "\"");
-			if (SSID1.equalsIgnoreCase(SSID2)) {
-				return ap;
+		final Network[] network = connectivityManager.getAllNetworks();
+		if (network != null && network.length > 0){
+			final String name = connection.getName();
+			for (int i = 0 ; i < network.length ; i++){
+				LinkProperties prop = connectivityManager.getLinkProperties(network[i]);
+				try {
+					final NetworkInterface iface = NetworkInterface.getByName(prop.getInterfaceName());
+					if (name.equals(iface.getName())) {
+						return network[i];
+					}
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					Log.e(TAG, e.toString());
+				}
 			}
 		}
 		return null;
 	}
-	
-	private void loadConfiguredNetworks(){
-		synchronized(mAccessPoints){
-			mAccessPoints.clear();
-			final List<WifiConfiguration> confNetworks = mWifiManager.getConfiguredNetworks();
-			for (WifiConfiguration wifiConf : confNetworks) {
-				NgnAccessPoint ap = new NgnAccessPoint(wifiConf);
-				ap.setConnected(NgnStringUtils.equals(mConnetedSSID, ap.getSSID(), false));
-				mAccessPoints.add(ap);
-			}
+
+	@TargetApi(8)
+	private boolean bindProcessToConnectionApi8(final NgnNetworkConnection connection)
+	{
+		if (connection == null) {
+			return true;
 		}
+		final String proxyHost = connection.getProxyHost();
+		final int hostAddressInt = hostnameToInt(proxyHost);
+		if (hostAddressInt == 0) {
+			Log.e(TAG, "hostnameIPv4ToInt("+proxyHost+") failed");
+			return false;
+		}
+		final ConnectivityManager connectivityManager = NgnApplication.getConnectivityManager();
+		if (connectivityManager == null) {
+			Log.e(TAG, "Failed to retrieve a connection manager");
+			return false;
+		}
+
+		return connectivityManager.requestRouteToHost(ConnectivityManager.TYPE_MOBILE_HIPRI, hostAddressInt);
 	}
-	
-	private void handleNetworkEvent(Context context, Intent intent){
-		final String action = intent.getAction();
-		Log.d(TAG, "NetworkService::BroadcastReceiver(" + action + ")");
-		
-		if(mWifiManager == null){
-			Log.e(TAG, "Invalid state");
-			return;
+
+	@TargetApi(21)
+	private boolean bindProcessToConnectionApi21(final NgnNetworkConnection connection)
+	{
+		final Network network = connection == null ? null : findNetworkByConnectionApi21(connection);
+		if (network == null && connection != null) {
+			Log.e(TAG, "Failed to find network with connection ->" + connection);
+			return false;
 		}
-		
-		if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
-			mScanning = true;
-			// load() configured networks
-			loadConfiguredNetworks();
-			// load() network results
-			synchronized(mAccessPoints){
-				List<ScanResult> scanResults = mWifiManager.getScanResults();
-				for(ScanResult sr : scanResults){
-					NgnAccessPoint ap = getAccessPointBySSID(sr.SSID);
-					if(ap == null){
-						ap = new NgnAccessPoint(sr);
-						mAccessPoints.add(ap);
-					}
-				}
-			}
-			
-			updateConnectionState();
-			mScanning = false;
+		final ConnectivityManager connectivityManager = NgnApplication.getConnectivityManager();
+		if (connectivityManager == null) {
+			Log.e(TAG, "Failed to retrieve a connection manager");
+			return false;
 		}
-		else if(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION.equals(action)){
-			final boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
-			Log.d(TAG, "SUPPLICANT_CONNECTION_CHANGE_ACTION.CONNECTED="+connected);
-			if(connected){
-				final WifiInfo wInfo = mWifiManager.getConnectionInfo();
-				if(wInfo != null){
-					if(!NgnStringUtils.equals(mConnetedSSID, wInfo.getSSID(), false)){
-						triggerSipRegistration();
-					}
-					mConnetedSSID = wInfo.getSSID();
-				}
-			}
-			updateConnectionState();
-//			synchronized(mAccessPoints){
-//				final List<AccessPoint> aps = mAccessPoints.getList();
-//				for(AccessPoint ap : aps){
-//					ap.setConnected(connected && StringUtils.equals(mConnetedSSID, ap.getSSID(), false));
-//				}
-//			}
-		}
-		else if(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION.equals(action)){
-			updateConnectionState();
-//			final SupplicantState newState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-//			if(newState != null){
-//				synchronized(mAccessPoints){
-//					final List<AccessPoint> aps = mAccessPoints.getList();
-//					final WifiInfo wInfo = mWifiManager.getConnectionInfo();
-//					if(wInfo != null){
-//						for(AccessPoint ap : aps){
-//							ap.setConnected((newState == SupplicantState.ASSOCIATED) && StringUtils.equals(wInfo.getSSID(), ap.getSSID(), false));
-//						}
-//					}
-//				}
-//			}
-		}
-		else if(WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)){
-			updateConnectionState();
-//			final boolean connected = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN)
-//				== WifiManager.WIFI_STATE_ENABLED;
-//			synchronized(mAccessPoints){
-//				final List<AccessPoint> aps = mAccessPoints.getList();
-//				final WifiInfo wInfo = mWifiManager.getConnectionInfo();
-//				if(wInfo != null){
-//					for(AccessPoint ap : aps){
-//						ap.setConnected(connected && StringUtils.equals(wInfo.getSSID(), ap.getSSID(), false));
-//					}
-//				}
-//			}
-		}
-		else if(WifiManager.RSSI_CHANGED_ACTION.equals(action)){
-			final WifiInfo wInfo = mWifiManager.getConnectionInfo();
-			if(wInfo != null){
-				final NgnAccessPoint ap = getAccessPointBySSID(wInfo.getSSID());
-				if(ap != null){
-					final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
-					ap.setLevel(WifiManager.calculateSignalLevel(newRssi,
-							sWifiSignalValues.length));
-				}
-			}
-		}
+		return connectivityManager.setProcessDefaultNetwork(network);
 	}
-	
-	private void updateConnectionState(){
-		final WifiInfo wInfo = mWifiManager.getConnectionInfo();
-		boolean bAtLeastOneConnected = false;
-		if(wInfo != null){
-			final DetailedState detailedState = WifiInfo
-				.getDetailedStateOf(wInfo.getSupplicantState());
-			boolean isConnecting = detailedState == DetailedState.CONNECTED
-			|| detailedState == DetailedState.CONNECTING
-			|| detailedState == DetailedState.OBTAINING_IPADDR;
-			synchronized(mAccessPoints){
-				final List<NgnAccessPoint> aps = mAccessPoints.getList();
-				if(wInfo != null){
-					for(NgnAccessPoint ap : aps){
-						final boolean connected = isConnecting && NgnStringUtils.equals(wInfo.getSSID(), ap.getSSID(), false);
-						ap.setConnected(connected);
-						bAtLeastOneConnected |= connected;
-					}
-				}
+
+	@TargetApi(23)
+	private boolean bindProcessToConnectionApi23(final NgnNetworkConnection connection)
+	{
+		final Network network = connection == null ? null : findNetworkByConnectionApi21(connection);
+		if (network == null && connection != null) {
+			Log.e(TAG, "Failed to find network with connection ->" + connection);
+			return false;
+		}
+		final ConnectivityManager connectivityManager = NgnApplication.getConnectivityManager();
+		if (connectivityManager == null) {
+			Log.e(TAG, "Failed to retrieve a connection manager");
+			return false;
+		}
+		return connectivityManager.bindProcessToNetwork(network);
+	}
+
+	private void broadcastNetworkEvent(NgnNetworkEventArgs args) {
+		final Intent intent = new Intent(
+				NgnNetworkEventArgs.ACTION_NETWORK_EVENT);
+		intent.putExtra(NgnNetworkEventArgs.EXTRA_EMBEDDED, args);
+		NgnApplication.getContext().sendBroadcast(intent);
+	}
+
+	private static int hostnameToInt(String hostname) {
+		InetAddress inetAddress;
+		try {
+			inetAddress = InetAddress.getByName(hostname);
+		} catch (UnknownHostException e) {
+			return -1;
+		}
+		byte[] addrBytes;
+		int addr;
+		addrBytes = inetAddress.getAddress();
+		addr = ((addrBytes[3] & 0xff) << 24)
+				| ((addrBytes[2] & 0xff) << 16)
+				| ((addrBytes[1] & 0xff) << 8 )
+				|  (addrBytes[0] & 0xff);
+		return addr;
+	}
+
+	private static boolean isWifiNetwork(final NetworkInfo networkInfo) {
+		if (networkInfo != null) {
+			return networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
+		}
+		return false;
+	}
+
+	private static boolean isMobileNetwork(final NetworkInfo networkInfo) {
+		if (networkInfo != null) {
+			final int netType = networkInfo.getType();
+			if ((netType == ConnectivityManager.TYPE_MOBILE || netType == ConnectivityManager_TYPE_WIMAX)) {
+				final int netSubType = networkInfo.getSubtype();
+				return ((netSubType >= TelephonyManager.NETWORK_TYPE_UMTS)
+						|| // HACK
+						(netSubType == TelephonyManager.NETWORK_TYPE_GPRS)
+						|| (netSubType == TelephonyManager.NETWORK_TYPE_EDGE));
 			}
 		}
-		
-		if(bAtLeastOneConnected || !NgnEngine.getInstance().getSipService().isRegistered()){
-			triggerSipRegistration();
-		}
-		
-	}
-	
-	private void triggerSipRegistration(){
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				Log.d(TAG, "Network connection chaged: restart the stack");
-//				final ISipService sipService = ServiceManager.getSipService();
-//				final ConnectionState registrationState = sipService.getRegistrationState();
-//				switch(registrationState){
-//					case NONE:
-//					case TERMINATED:
-//						sipService.register(null);
-//						break;
-//					case CONNECTING:
-//					case TERMINATING:
-//					case CONNECTED:
-//						sipService.unRegister();
-//						sipService.register(null);
-//						break;
-//				}
-//			}
-//		}).start();
+		return false;
 	}
 }
