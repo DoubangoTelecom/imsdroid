@@ -153,7 +153,8 @@ public class NgnNetworkService  extends NgnBaseService implements INgnNetworkSer
 			return false;
 		}
 
-		mWifiManager.setWifiEnabled(true);
+		// This really turn on Wifi even if AirPlane mode is activated, not what we want
+		// mWifiManager.setWifiEnabled(true);
 
 		if (mNetworkWatcher == null){
 			IntentFilter intentNetWatcher = new IntentFilter();
