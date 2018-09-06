@@ -947,6 +947,21 @@ public class NgnSipService extends NgnBaseService implements INgnSipService,
                     }  
                     break;
 
+				case tsip_i_prechecking:
+					// This means we're the server side (receiving the call)
+					// << TODO(dmi): add here some code to check whether to continue processing the call or not >>
+					if (session == null) { // must be null
+						if ((session = e.takeCallSessionOwnership()) == null){
+							Log.e(TAG,"Failed to take MSRP session ownership");
+							return -1;
+						}
+						//session.reject(); // terminate the call
+						session.accept(); // send ringing message and continue processing the call
+
+						session.delete(); // **must**
+					}
+					break;
+
                 case tsip_ao_request:
                 	// For backward compatibility keep both "RINGING" and "SIP_RESPONSE"
                     if (code == 180 && session != null){

@@ -206,7 +206,7 @@ public class NgnEngine {
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_theora, prio++);
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h263, prio++);
         SipStack.setCodecPriority(tdav_codec_id_t.tdav_codec_id_h261, prio++);
-        
+
         // Profile
         MediaSessionMgr.defaultsSetProfile(tmedia_profile_t.valueOf(configurationService.getString(
 				NgnConfigurationEntry.MEDIA_PROFILE,
