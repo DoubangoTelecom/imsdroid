@@ -3,11 +3,8 @@
       package="org.doubango.ngn"
       android:versionCode="2"
       android:versionName="2.0">
-      <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="11" />
-
 
     <application android:icon="@drawable/icon" android:name="NgnApplication" android:label="@string/app_name">
-	<string name="doubango_revision">1309</string>
 	<service android:name="NgnNativeService"/>
 	
     </application>

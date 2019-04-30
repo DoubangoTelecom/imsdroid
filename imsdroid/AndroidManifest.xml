@@ -3,7 +3,6 @@
       xmlns:tools="http://schemas.android.com/tools"
       package="org.doubango.imsdroid"
       android:versionCode="588" android:versionName="2.586.1328">
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="11" />
 
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:persistent="true" android:name="org.doubango.ngn.NgnApplication">
     	<service android:name=".NativeService"></service>
