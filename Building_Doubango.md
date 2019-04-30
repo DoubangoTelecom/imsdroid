@@ -65,9 +65,19 @@ for **ARMv7-a with NEON**:
 ./configure --host=arm-linux-androideabi --with-android-cpu=armv7-a-neon --prefix=/home/doubango/output/android/armv7-a-neon
 make && make install
 ```
+for **ARM64**:
+```
+./configure --host=aarch64-linux-android --with-android-cpu=arm64 --prefix=/home/doubango/output/android/arm64
+make && make install
+```
 for **x86**:
 ```
 ./configure --host=i686-linux-android --with-android-cpu=x86 --prefix=/home/doubango/output/android/x86
+make && make install
+```
+for **x86_64**:
+```
+./configure --host=x86_64-linux-android --with-android-cpu=x64 --prefix=/home/doubango/output/android/x64
 make && make install
 ```
 To get more info about all available options:
