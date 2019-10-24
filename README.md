@@ -1,11 +1,6 @@
 This application uses [Doubango Framework](https://www.doubango.org/).
-<br />
 
-<font color='green' size='2'>
-<strong>IMSDroid v2.x preview is now available for developers</strong><br />
-The source code is under <strong>branches/2.0</strong> and depends and <strong>doubango v2.x</strong><br />
-<br />
-New features: <br />
+New features in v2.0: <br />
 - The SIP/IMS Stack is 7 times faster<br />
 - Full HD (1080p) video<br />
 - NAT Traversal using ICE<br />
